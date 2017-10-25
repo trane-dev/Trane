@@ -20,8 +20,8 @@ class ColumnOperation(Operation):
 	#instance variables:
 	#column names
 	#X relevant data (dataframe)
-	def __init__(self, column_names):
-
+	def __init__(self, all_column_names, columns_to_operate_over):
+		
 
 class FilterOperation(Operation):
 	#instance variables:

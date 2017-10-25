@@ -1,7 +1,7 @@
 from Operation import Operation
 import pandas as pd
 from SubOperation import SubOperation
-class ColumnOperation(Operation):
+class MultiRowOperation(Operation):
 	
 	#COLUMN OPERATION TO BE APPLIED TO ALL COLUMNS FOR ALL ENTITIES
 

@@ -1,6 +1,7 @@
 from Operation import Operation
 import pandas as pd
 from SubOperation import SubOperation
+
 class RowOperation(Operation):
 	
 	def identity(val):

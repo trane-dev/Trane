@@ -3,7 +3,7 @@ import pandas as pd
 from SubOperation import SubOperation
 class MultiRowOperation(Operation):
 	
-	#COLUMN OPERATION TO BE APPLIED TO ALL COLUMNS FOR ALL ENTITIES
+	#MULTIROW OPERATION TO BE APPLIED TO ALL COLUMNS FOR ALL ENTITIES
 
 	"""
 	Args:
@@ -16,3 +16,4 @@ class MultiRowOperation(Operation):
 	    None
 	"""
 	def __init__(self, column_names_to_sub_operation):
+		

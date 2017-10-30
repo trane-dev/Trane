@@ -29,10 +29,12 @@ class TransformationOperation(Operation):
 					new_row[column] = diff
 				output_df = output_df.append(new_row, ignore_index = True)
 		return output_df
-	possible_ag_opps = {
+	
+	possible_operations = {
 		"IDENTITY" : identity,
 		"DIFF": diff
 	}
+
 
 	"""
 	Args:
@@ -48,6 +50,8 @@ class TransformationOperation(Operation):
 	def execute(self, dataset):
 		return self.transformation_operation(dataset)
 
+	def __str__(self):
+		return "Transformation Operation"
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
 # df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}

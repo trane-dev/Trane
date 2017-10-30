@@ -10,9 +10,9 @@ class AggregationOperation(Operation):
 		return dataframe.tail(n = 1)
 	def first(dataframe):
 		return dataframe.head(n = 1)
-	possible_ag_opps = {
-		"LAST" : last,
-		"FIRST": first
+	possible_operations = {
+		"last" : last,
+		"first": first
 	}
 
 	"""
@@ -31,6 +31,8 @@ class AggregationOperation(Operation):
 	def execute(self, dataset):
 		return self.multi_row_operation(dataset)
 
+	def __str__(self):
+		return "Aggregation Operation"
 
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])

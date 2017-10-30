@@ -23,7 +23,6 @@ class TransformationOperation(Operation):
 				for column in column_names:
 					if type(current_row[column]) is not str:
 						diff = current_row[column] - previous_row[column]
-						print diff
 					else:
 						diff = current_row[column] + ' - ' + previous_row[column] #String Concat
 					new_row[column] = diff
@@ -31,8 +30,8 @@ class TransformationOperation(Operation):
 		return output_df
 	
 	possible_operations = {
-		"IDENTITY" : identity,
-		"DIFF": diff
+		"identity" : identity,
+		"diff": diff
 	}
 
 
@@ -44,18 +43,18 @@ class TransformationOperation(Operation):
 	Raises:
 	    None
 	"""
-	def __init__(self, transformation_operation):
-		self.transformation_operation = transformation_operation
+	def __init__(self, transformation_operation_name):
+		self.transformation_operation = TransformationOperation.possible_operations[transformation_operation_name]
 	
 	def execute(self, dataset):
 		return self.transformation_operation(dataset)
 
 	def __str__(self):
 		return "Transformation Operation"
+
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
 # df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}
-# trans_op = TransformationOperation(TransformationOperation.possible_ag_opps["DIFF"])
-# print df
+# trans_op = TransformationOperation("DIFF")
 # print trans_op.execute(df)
-# print df
+

@@ -21,8 +21,9 @@ class RowOperation(Operation):
 	Raises:
 	    None
 	"""
-	def __init__(self, operation_columns_to_sub_operation):		
-		self.operation_columns_to_sub_operation = operation_columns_to_sub_operation
+	def __init__(self, column_name, sub_operation_name):		
+		self.column_name = column_name
+		self.sub_operation = RowOperation.possible_operations[sub_operation_name]
 
 	def is_valid_operation(self, operation):
 		if operation not in operation_types.keys():
@@ -40,16 +41,10 @@ class RowOperation(Operation):
 	    None
 	"""
 	def execute(self, dataset):
-		output_df = pd.DataFrame(columns = self.operation_columns_to_sub_operation.keys())
-		for idx, row in dataset.iterrows():
-			new_row = {}
-			for column_name, sub_operation_name in self.operation_columns_to_sub_operation.iteritems():
-				row_value = row[column_name]
-				sub_operation = self.possible_operations[sub_operation_name]
-				new_row[column_name] = sub_operation.execute(row_value)
 
+		output_df = dataset.copy()
+		output_df[self.column_name] = output_df[self.column_name].apply(self.sub_operation.execute)
 
-			output_df.loc[idx] = new_row
 		return output_df
 
 	def __str__(self):
@@ -57,7 +52,7 @@ class RowOperation(Operation):
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
 # df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}
-# row_op = RowOperation({"age":"Identity", "name":"Identity"})
+# row_op = RowOperation("age", "identity")
 # print row_op.execute(df)
 
 

@@ -9,7 +9,6 @@ class TransformationOperation(Operation):
 	def identity(dataframe):
 		return dataframe
 	
-
 	def diff(dataframe):
 		output_df = pd.DataFrame(columns = list(dataframe))
 		column_names = list(dataframe)
@@ -50,7 +49,7 @@ class TransformationOperation(Operation):
 		return self.transformation_operation(dataset)
 
 	def __str__(self):
-		return "Transformation Operation"
+		return "Transformation operation (" + self.transformation_operation_name + ")"
 
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])

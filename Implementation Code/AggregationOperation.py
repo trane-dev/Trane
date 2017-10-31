@@ -6,13 +6,23 @@ class AggregationOperation(Operation):
 	#MULTIROW OPERATION TO BE APPLIED TO ALL COLUMNS FOR ALL ENTITIES
 	#AGGREGATES ALL ROWS INTO A SINGLE ROW
 
+	#Aggregation operation functions operate on the entire dataframe
 	def last(dataframe):
-		return dataframe.tail(n = 1)
+		df = dataframe.copy()
+		return df.tail(n = 1)
 	def first(dataframe):
-		return dataframe.head(n = 1)
+		df = dataframe.copy()
+		return df.head(n = 1)
+	def last_minus_first(dataframe):
+		df = dataframe.copy()
+		last = last(df)
+		first = first(df)
+		return last - first
+
 	possible_operations = {
 		"last" : last,
-		"first": first
+		"first": first,
+		"last minus first" : last_minus_first
 	}
 
 	"""
@@ -32,7 +42,7 @@ class AggregationOperation(Operation):
 		return self.aggregation_operation(dataset)
 
 	def __str__(self):
-		return "Aggregation Operation"
+		return "Aggregation operation (" + self.aggregation_operation_name + ")"
 
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])

@@ -7,23 +7,23 @@ class FilterOperation(Operation):
 	#A Filter takes in as input a dataset. The filter then applies functions and compares them to thresholds
 	#	If true that row remains, otherwise the row is removed. The output is the filtered dataset.
 
+	def equals(val, param):
+		return val == param
+	def not_equals(val, param):
+		return val != param
+	def less_than(val, param):
+		return val < param
+	def greater_than(val, param):
+		return val > param
 
-	def greater(value, param):
-		return value > param
-	#TODO DEFINE POSSIBLE PARAMETER VALUES HERE
-	gt_params = [76]
-	gt = SubOperation("greater than", greater)
+	param_placeholder = 1 #TODO UPDATE WITH A FUNCTION TO PROGRAMATICALLY
+		#SPECIFY WHAT THE PARAMS FOR EACH FUNCTION WILL BE
 	
-	def lesser(value, param):
-		return value < param
-		
-	lt_params = [100, 88]
-	#TODO DEFINE POSSIBLE PARAMETER VALUES HERE
-	lt = SubOperation("less than", lesser)
-
 	possible_operations = {
-	"greater than" : (gt, gt_params),
-	"less than" : (lt, lt_params)
+	"equals" : SubOperation("equals", equals, param_placeholder),
+	"not equals" : SubOperation("not equals", not_equals, param_placeholder),
+	"less than" : SubOperation("less than", less_than, param_placeholder),
+	"greater than" : SubOperation("greater than", greater_than, param_placeholder)
 	}
 
 	"""
@@ -35,9 +35,8 @@ class FilterOperation(Operation):
 	    None
 	"""
 	def __init__(self, column_name, sub_operation_name):
-		self.filter_suboperation, params = FilterOperation.possible_operations[sub_operation_name]
+		self.filter_suboperation = FilterOperation.possible_operations[sub_operation_name]
 		self.column_name = column_name
-		self.filter_suboperation.set_params(params)
 
 	def execute(self, dataset):
 		output_df = dataset.copy()
@@ -53,10 +52,13 @@ class FilterOperation(Operation):
 		return output_df
 	
 	def __str__(self):
-		return "Filter Operation"
+		return "Filter operation (" + self.sub_operation_name + ")"
 
 #TEST ----
-# gt_filter = FilterOperation("height", "greater than")
-# df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
-# df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}
-# print gt_filter.execute(df)
+gt_filter = FilterOperation("height", "greater than")
+df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
+df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}
+print gt_filter.execute(df)
+
+
+

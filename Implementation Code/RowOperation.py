@@ -59,18 +59,16 @@ class RowOperation(Operation):
 	    None
 	"""
 	def execute(self, dataset):
-
 		output_df = dataset.copy()
 		output_df[self.column_name] = output_df[self.column_name].apply(self.sub_operation.execute)
-
 		return output_df
 
 	def __str__(self):
-		return "Row operation with " + self.sub_operation_name + " function applied"
+		return "Row operation (" + self.sub_operation_name + ")"
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
 # df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}
-# row_op = RowOperation("age", "identity")
+# row_op = RowOperation("height", "exponentiate")
 # print row_op.execute(df)
 
 

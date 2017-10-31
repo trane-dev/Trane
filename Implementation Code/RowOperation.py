@@ -6,9 +6,27 @@ class RowOperation(Operation):
 	
 	def identity(val):
 		return val
-	
+	def equals(val, param):
+		return val == param
+	def not_equals(val, param):
+		return val != param
+	def less_than(val, param):
+		return val < param
+	def greater_than(val, param):
+		return val > param
+	def exponentiate(val, param):
+		return val ** param
+
+	param_placeholder = 1 #TODO UPDATE WITH A FUNCTION TO PROGRAMATICALLY
+		#SPECIFY WHAT THE PARAMS FOR EACH FUNCTION WILL BE
+
 	possible_operations = {
-	"identity" : SubOperation("identity", identity)
+	"identity" : SubOperation("identity", identity, param_placeholder),
+	"equals" : SubOperation("equals", equals, param_placeholder),
+	"not equals" : SubOperation("not equals", not_equals, param_placeholder),
+	"less than" : SubOperation("less than", less_than, param_placeholder),
+	"greater than" : SubOperation("greater than", greater_than, param_placeholder),
+	"exponentiate" : SubOperation("exponentiate", exponentiate, param_placeholder)
 	}
 	
 	"""
@@ -48,7 +66,7 @@ class RowOperation(Operation):
 		return output_df
 
 	def __str__(self):
-		return "Row Operation"
+		return "Row operation with " + self.sub_operation_name + " function applied"
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
 # df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}

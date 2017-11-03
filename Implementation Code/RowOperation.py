@@ -40,6 +40,7 @@ class RowOperation(Operation):
 	    None
 	"""
 	def __init__(self, column_name, sub_operation_name):		
+		self.sub_operation_name = sub_operation_name
 		self.column_name = column_name
 		self.sub_operation = RowOperation.possible_operations[sub_operation_name]
 

@@ -43,6 +43,7 @@ class TransformationOperation(Operation):
 	    None
 	"""
 	def __init__(self, transformation_operation_name):
+		self.transformation_operation_name = transformation_operation_name
 		self.transformation_operation = TransformationOperation.possible_operations[transformation_operation_name]
 	
 	def execute(self, dataset):

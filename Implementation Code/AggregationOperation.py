@@ -36,6 +36,7 @@ class AggregationOperation(Operation):
 	    None
 	"""
 	def __init__(self, aggregation_operation_name):
+		self.aggregation_operation_name = aggregation_operation_name
 		self.aggregation_operation = AggregationOperation.possible_operations[aggregation_operation_name]
 
 	def execute(self, dataset):

@@ -12,12 +12,12 @@ class PredictionProblem:
 	Raises:
 	    None
 	"""
-	def __init__(self, Operations):
-		self.Operations = Operations
+	def __init__(self, operations):
+		self.operations = operations
 
 	def execute(self, dataframe):
 		output = dataframe.copy()
-		for operation in self.Operations:
+		for operation in self.operations:
 			print "output: \n" + str(output)
 			output = operation.execute(output)
 		return output
@@ -30,7 +30,13 @@ class PredictionProblem:
 	    None
 	"""
 	def __str__(self):
-		return ''.join([" " + str(operation) for operation in self.Operations])
+		description = ""
+		last_op_idx = len(self.operations) - 1
+		for idx, operation in enumerate(self.operations):
+			description += str(operation)
+			if idx != last_op_idx:
+				description += "->"
+		return description
 
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])

@@ -3,10 +3,17 @@ import pandas as pd
 from SubOperation import SubOperation
 class FilterOperation(Operation):
 	
-	#FILTER OPERATION CLASS
-	#A Filter takes in as input a dataset. The filter then applies functions and compares them to thresholds
-	#	If true that row remains, otherwise the row is removed. The output is the filtered dataset.
+	"""
+	A Filter takes in as input a dataset. The filter then applies functions and compares them to thresholds
+	If true that row remains, otherwise the row is removed. The output is the filtered dataset.
+	"""
 
+	"""
+	Classwide methods that act as possible FilterOperations.
+	There are two steps involved in adding a new method.
+	1. Create a new function.
+	2. Create a new mapping in the dictionary with the function inside the SubOperation class.
+	"""
 	def equals(val, param):
 		return val == param
 	def not_equals(val, param):
@@ -28,11 +35,11 @@ class FilterOperation(Operation):
 
 	"""
 	Args:
-		
+		column_name (String): The column within each row to check with the filter. 
+		sub_operation_name (String): The name of the SubOperation to perform. Chosen from the 
+			values in the possible_operations dictionary.
 	Returns:
 		None
-	Raises:
-	    None
 	"""
 	def __init__(self, column_name, sub_operation_name):
 		self.sub_operation_name = sub_operation_name

@@ -3,10 +3,21 @@ import pandas as pd
 from SubOperation import SubOperation
 class AggregationOperation(Operation):
 	
-	#MULTIROW OPERATION TO BE APPLIED TO ALL COLUMNS FOR ALL ENTITIES
-	#AGGREGATES ALL ROWS INTO A SINGLE ROW
+	"""
+	Aggregation Operations are operations that take many rows and aggregate them
+	into a single value.
+	Transformation operations are similar to Aggregation operations, except that transformation operations must
+	return a dataframe with more than 2 rows and an aggregation operaton must return a single row.
+	"""
 
-	#Aggregation operation functions operate on the entire dataframe
+	"""
+	Classwide methods:
+	These are the aggregation operations possible under the Aggregation Operation class.
+	Methods can be added here under 2 constraints.
+	1. Create a function with the dataframe as input and return a new dataframe.
+	2. Add the function to the dictionary of possible operations.
+	"""
+	
 	def last(dataframe):
 		df = dataframe.copy()
 		return df.tail(n = 1)
@@ -28,12 +39,9 @@ class AggregationOperation(Operation):
 	"""
 	Args:
 		Takes as input a single aggregation operation to perform from the dictionary
-		of possible aggregation operations defined above. (TODO Find a good way 
-		to define the dictionaries location)
+		of possible aggregation operations defined above.
 	Returns:
 		None
-	Raises:
-	    None
 	"""
 	def __init__(self, aggregation_operation_name):
 		self.aggregation_operation_name = aggregation_operation_name

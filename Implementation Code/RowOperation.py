@@ -4,6 +4,18 @@ from SubOperation import SubOperation
 
 class RowOperation(Operation):
 	
+
+	"""
+	A Row Operation takes in as input a dataset. The row operation then applies some value to all rows 
+	for a specific column within the dataframe.
+	"""
+
+	"""
+	Classwide methods that act as possible RowOperations.
+	There are two steps involved in adding a new method.
+	1. Create a new function.
+	2. Create a new mapping in the dictionary with the function inside the SubOperation class.
+	"""
 	def identity(val):
 		return val
 	def equals(val, param):

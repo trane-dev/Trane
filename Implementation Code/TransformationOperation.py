@@ -3,9 +3,20 @@ import pandas as pd
 from SubOperation import SubOperation
 class TransformationOperation(Operation):
 	
-	#MULTIROW OPERATION TO BE APPLIED TO ALL COLUMNS FOR ALL ENTITIES
-	#TRANFORMS ALL ROWS INTO A SINGLE ROW
+	"""
+	Transformation operations take in a dataset and output a new dataset with fewer rows, but no less than 2.
+	Transformation operations are similar to Aggregation operations, except that transformation operations must
+	return a dataframe with more than 2 rows and an aggregation operaton must return a single row.
+	"""
 
+
+	"""
+	Classwide methods:
+	These are the Transformation operations possible under the Transformation Operation class.
+	Methods can be added here under 2 constraints.
+	1. Create a function with the dataframe as input and return a new dataframe.
+	2. Add the function to the dictionary of possible operations.
+	"""
 	def identity(dataframe):
 		return dataframe
 	
@@ -36,7 +47,8 @@ class TransformationOperation(Operation):
 
 	"""
 	Args:
-		
+		transformation_operation_name (String): The correpsonding operation to apply to the data based
+			on the operations available in possible_operations dict defined above.
 	Returns:
 		None
 	Raises:

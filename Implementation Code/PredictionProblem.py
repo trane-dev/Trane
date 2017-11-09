@@ -12,11 +12,18 @@ class PredictionProblem:
 	Args:
 		(List) Operations: a list of operations (class Operation) that define the
 			order in which operations should take place.
+		(String) label_generating_column: the column of interest. This column
+			will be solely used for performing operations against.
+		(String) entity_id_column: the column with entity id's.
+		(String) time_column: the name of the column containing time information.
 	Returns:
 		None
 	"""
-	def __init__(self, operations):
+	def __init__(self, operations, label_generating_column, entity_id_column, time_column):
 		self.operations = operations
+		self.label_generating_column = label_generating_column
+		self.entity_id_column = entity_id_column
+		self.time_column = time_column
 
 	"""
 	This function executes all the operations on the dataframe and returns the output. The output
@@ -31,7 +38,7 @@ class PredictionProblem:
 	def execute(self, dataframe):
 		output = dataframe.copy()
 		for operation in self.operations:
-			print "output: \n" + str(output)
+			# print "output: \n" + str(output)
 			output = operation.execute(output)
 		return output
 	"""
@@ -50,25 +57,39 @@ class PredictionProblem:
 		return description
 
 	"""
-	This function generates the cutoff times for each entity id.
+	This function generates the cutoff times for each entity id and puts the dictionary in the
+		prediction problem (self).
+	Current implementation is simple. The cutoff time is halfway through the observed
+		time period for each entity.
 	Args:
 		(Pandas DataFrame): the dataframe containing the data we wish to analyze.)
 	Returns:
 		(Dict): Entity Id to Cutoff time mapping. 
 	"""
 	def determine_cutoff_time(self, dataframe):
-		initial_time = 
-		end_time = 
-		cutoff = to be determined. some interesting tunable combination using end_time and initial_time
-		return a entity id cutoff_time mapping
+		unique_entity_ids = set(dataframe[self.entity_id_column])
+		entity_id_to_cutoff_time = {}
+		for entity_id in unique_entity_ids:
+			df_entity_id = dataframe[dataframe[self.entity_id_column] == entity_id]
+			first_time_observed = df_entity_id[self.time_column].min()
+			last_time_observed = df_entity_id[self.time_column].max()
+			total_time = last_time_observed - first_time_observed
+			cutoff_time = first_time_observed + total_time/2.
+			entity_id_to_cutoff_time[entity_id] = cutoff_time
+		
+		self.entity_id_to_cutoff_time = entity_id_to_cutoff_time
+
+# df = pd.read_csv('../../test_datasets/synthetic_taxi_data.csv')
+# prediction_problem = PredictionProblem([], 'fare', 'taxi_id', 'time')
+# print prediction_problem.determine_cutoff_time(df)
 
 
 
 
-#SMALL TEST
-# df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
-# df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}
-# row_op = RowOperation("age", "identity")
-# agg_op = AggregationOperation("first")
-# pred_problem = PredictionProblem([row_op, agg_op])
-# print pred_problem.execute(df)
+
+
+
+
+
+
+

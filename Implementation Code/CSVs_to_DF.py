@@ -15,6 +15,7 @@ def csv_to_df(csv_file_paths, header = True):
 	   dataframes = [pd.read_csv(file_path) for file_path in csv_file_paths]
 	
     return dataframes
+
 """
 Args:
     (List)dataframes: A list of the dataframes to combine and denormalize

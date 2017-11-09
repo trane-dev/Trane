@@ -1,6 +1,6 @@
 from Operation import Operation
 import pandas as pd
-from SubOperation import SubOperation
+import AggregationOperationModule as ag
 class AggregationOperation(Operation):
 	
 	"""
@@ -11,32 +11,6 @@ class AggregationOperation(Operation):
 	"""
 
 	"""
-	Classwide methods:
-	These are the aggregation operations possible under the Aggregation Operation class.
-	Methods can be added here under 2 constraints.
-	1. Create a function with the dataframe as input and return a new dataframe.
-	2. Add the function to the dictionary of possible operations.
-	"""
-	
-	def last(dataframe):
-		df = dataframe.copy()
-		return df.tail(n = 1)
-	def first(dataframe):
-		df = dataframe.copy()
-		return df.head(n = 1)
-	def last_minus_first(dataframe):
-		df = dataframe.copy()
-		last = last(df)
-		first = first(df)
-		return last - first
-
-	possible_operations = {
-		"last" : last,
-		"first": first,
-		"last minus first" : last_minus_first
-	}
-
-	"""
 	Args:
 		Takes as input a single aggregation operation to perform from the dictionary
 		of possible aggregation operations defined above.
@@ -45,7 +19,7 @@ class AggregationOperation(Operation):
 	"""
 	def __init__(self, aggregation_operation_name):
 		self.aggregation_operation_name = aggregation_operation_name
-		self.aggregation_operation = AggregationOperation.possible_operations[aggregation_operation_name]
+		self.aggregation_operation = ag.possible_operations[aggregation_operation_name]
 
 	def execute(self, dataset):
 		return self.aggregation_operation(dataset)
@@ -56,5 +30,5 @@ class AggregationOperation(Operation):
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
 # df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}
-# agg_op = AggregationOperation("first")
+# agg_op = AggregationOperation("last")
 # print agg_op.execute(df)

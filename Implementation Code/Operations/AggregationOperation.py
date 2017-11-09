@@ -2,7 +2,6 @@ from Operation import Operation
 import pandas as pd
 import AggregationOperationModule as ag
 class AggregationOperation(Operation):
-	
 	"""
 	Aggregation Operations are operations that take many rows and aggregate them
 	into a single value.

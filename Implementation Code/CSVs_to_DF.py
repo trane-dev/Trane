@@ -7,8 +7,6 @@ Args:
     (Boolean)header: are there headers to the data columns?
 Returns:
     (List[dataframe])dataframes: A list of dataframes converted from the csv's, in the same order they were input
-Raises:
-    None
 """
 def csv_to_df(csv_file_paths, header = True):
     if not header:
@@ -22,8 +20,6 @@ Args:
     (List)dataframes: A list of the dataframes to combine and denormalize
 Returns:
     Dataframe: a single de-normalized dataframe structured from all the input dataframes.
-Raises:
-    None
 """
 def denormalize_dataframes(dataframes):
     merged_df = reduce((lambda left_frame, right_frame: pd.merge(left_frame, right_frame, how = 'outer')), dataframes)

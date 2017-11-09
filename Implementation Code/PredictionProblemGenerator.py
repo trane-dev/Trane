@@ -5,6 +5,10 @@ from RowOperation import RowOperation
 from TransformationOperation import TransformationOperation
 from FilterOperation import FilterOperation
 
+import AggregationOperationModule as ag
+import RowOperationModule as ro
+import TransformationOperationModule as tr
+import FilterOperationModule as fi
 class PredictionProblemGenerator:
 
 	#OPERATION TYPE:
@@ -42,11 +46,11 @@ class PredictionProblemGenerator:
 	"""	
 	#possible_operations for each class is a dictionary mapping a string name to an Operation of that class.
 	def generate(self):
-		possible_row_operation_names = RowOperation.possible_operations.keys()
-		possible_filter_operation_names = FilterOperation.possible_operations.keys()
+		possible_row_operation_names = ro.possible_operations.keys()
+		possible_filter_operation_names = fi.possible_operations.keys()
 		
-		possible_aggregation_operation_names = AggregationOperation.possible_operations.keys()
-		possible_transformation_operation_names = TransformationOperation.possible_operations.keys()
+		possible_aggregation_operation_names = ag.possible_operations.keys()
+		possible_transformation_operation_names = tr.possible_operations.keys()
 
 		column_to_operate_over = self.label_generating_column
 		prediction_problems = []
@@ -58,7 +62,7 @@ class PredictionProblemGenerator:
 						# for column_to_operate_over in column_names: #TODO DECIDE HOW TO ITERATE OVER COLUMN NAMES
 							
 						aggregation_operation = AggregationOperation(aggregation_operation_name)
-						transformation_operation = TransformationOperation(transformation_operation_name)
+						transformation_operation = TransformationOperation(column_to_operate_over, transformation_operation_name)
 						
 						row_operation = RowOperation(column_to_operate_over, row_operation_name)
 						filter_operation = FilterOperation(column_to_operate_over, filter_operation_name)
@@ -76,6 +80,6 @@ class PredictionProblemGenerator:
 df = pd.read_csv('../../test_datasets/synthetic_taxi_data.csv')
 gen = PredictionProblemGenerator(df, "fare", "taxi_id", "time")
 pred_problems = gen.generate()
-print pred_problems[0]
-print pred_problems[0].execute(df)
+print pred_problems[25]
+print pred_problems[25].execute(df)
 # print len([str(pred_problem) for pred_problem in pred_problems])

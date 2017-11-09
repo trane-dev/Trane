@@ -1,6 +1,4 @@
 import pandas as pd
-from RowOperation import RowOperation
-from AggregationOperation import AggregationOperation
 class PredictionProblem:
 
 	"""
@@ -37,6 +35,7 @@ class PredictionProblem:
 	"""
 	def execute(self, dataframe):
 		output = dataframe.copy()
+		output = output[[self.label_generating_column]]
 		for operation in self.operations:
 			# print "output: \n" + str(output)
 			output = operation.execute(output)
@@ -81,7 +80,7 @@ class PredictionProblem:
 
 # df = pd.read_csv('../../test_datasets/synthetic_taxi_data.csv')
 # prediction_problem = PredictionProblem([], 'fare', 'taxi_id', 'time')
-# print prediction_problem.determine_cutoff_time(df)
+# prediction_problem.determine_cutoff_time(df)
 
 
 

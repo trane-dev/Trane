@@ -63,15 +63,12 @@ class PredictionProblemGenerator:
 							
 						aggregation_operation = AggregationOperation(aggregation_operation_name)
 						transformation_operation = TransformationOperation(column_to_operate_over, transformation_operation_name)
-						
 						row_operation = RowOperation(column_to_operate_over, row_operation_name)
 						filter_operation = FilterOperation(column_to_operate_over, filter_operation_name)
 	
 						prediction_problem = PredictionProblem([filter_operation, row_operation, transformation_operation, aggregation_operation],
-							self.label_generating_column, self.entity_id_column, self.time_column)
-						
-						prediction_problem.determine_cutoff_time(self.dataframe)
-						
+							self.label_generating_column, self.entity_id_column, self.time_column, self.dataframe)
+												
 						prediction_problems.append(prediction_problem)
 
 		return prediction_problems

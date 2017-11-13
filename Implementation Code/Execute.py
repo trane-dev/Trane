@@ -14,3 +14,4 @@ prediction_problem_generator = PredictionProblemGenerator(DATAFRAME,
 
 prediction_problems = prediction_problem_generator.generate()
 
+# print str(prediction_problems[0])

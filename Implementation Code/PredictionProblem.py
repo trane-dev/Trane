@@ -17,12 +17,13 @@ class PredictionProblem:
 	Returns:
 		None
 	"""
-	def __init__(self, operations, label_generating_column, entity_id_column, time_column):
+	def __init__(self, operations, label_generating_column, entity_id_column, time_column, dataframe = None):
 		self.operations = operations
 		self.label_generating_column = label_generating_column
 		self.entity_id_column = entity_id_column
 		self.time_column = time_column
-
+		if dataframe is not None:
+			self.entity_id_to_cutoff_time = self.determine_cutoff_time(dataframe)
 	"""
 	This function executes all the operations on the dataframe and returns the output. The output
 	should be structured as a single label/value per the Trane documentation.
@@ -37,7 +38,6 @@ class PredictionProblem:
 		output = dataframe.copy()
 		output = output[[self.label_generating_column]]
 		for operation in self.operations:
-			# print "output: \n" + str(output)
 			output = operation.execute(output)
 		return output
 	"""
@@ -76,7 +76,7 @@ class PredictionProblem:
 			cutoff_time = first_time_observed + total_time/2.
 			entity_id_to_cutoff_time[entity_id] = cutoff_time
 		
-		self.entity_id_to_cutoff_time = entity_id_to_cutoff_time
+		return entity_id_to_cutoff_time
 
 # df = pd.read_csv('../../test_datasets/synthetic_taxi_data.csv')
 # prediction_problem = PredictionProblem([], 'fare', 'taxi_id', 'time')

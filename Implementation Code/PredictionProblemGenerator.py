@@ -76,10 +76,11 @@ class PredictionProblemGenerator:
 
 		return prediction_problems
 
-
-df = pd.read_csv('../../test_datasets/synthetic_taxi_data.csv')
-gen = PredictionProblemGenerator(df, "fare", "taxi_id", "time")
-pred_problems = gen.generate()
-print pred_problems[25]
-print pred_problems[25].execute(df)
-# print len([str(pred_problem) for pred_problem in pred_problems])
+if __name__ == '__main__':
+	df = pd.read_csv('../../test_datasets/synthetic_taxi_data.csv')
+	gen = PredictionProblemGenerator(df, "fare", "taxi_id", "time")
+	pred_problems = gen.generate()
+	print [str(pred_problem) for pred_problem in pred_problems][0]
+	# print pred_problems[25]
+	# print pred_problems[25].execute(df)
+	# print len([str(pred_problem) for pred_problem in pred_problems])

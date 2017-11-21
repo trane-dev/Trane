@@ -10,17 +10,9 @@ import RowOperationModule as ro
 import TransformationOperationModule as tr
 import FilterOperationModule as fi
 class PredictionProblemGenerator:
-
-	#OPERATION TYPE:
-	#POSSIBLE OPERATIONS WITHIN THAT CLASS
-	#E.G. ROW OPERATION: IDENTITY, GREATER THAN, 
-	#	AGGREGATION OPERATION: LAST, FIRST
-	#	TRANSFORMATION OPERATION : DIFF
-
 	
 	"""
 	Args:
-		(Pandas Dataframe) dataframe: The dataset to be operated upon.
 		(String) label_generating_column: the column of interest. This column
 			will be solely used for performing operations against.
 		(String) entity_id_column: the column with entity id's.
@@ -28,8 +20,7 @@ class PredictionProblemGenerator:
 	Returns:
 		None
 	"""
-	def __init__(self, dataframe, label_generating_column, entity_id_column, time_column):
-		self.dataframe = dataframe
+	def __init__(self, label_generating_column, entity_id_column, time_column):
 		self.label_generating_column = label_generating_column
 		self.entity_id_column = entity_id_column
 		self.time_column = time_column
@@ -67,8 +58,8 @@ class PredictionProblemGenerator:
 						filter_operation = FilterOperation(column_to_operate_over, filter_operation_name)
 	
 						prediction_problem = PredictionProblem([filter_operation, row_operation, transformation_operation, aggregation_operation],
-							self.label_generating_column, self.entity_id_column, self.time_column, self.dataframe)
-												
+							self.label_generating_column, self.entity_id_column, self.time_column)				
+						
 						prediction_problems.append(prediction_problem)
 
 		return prediction_problems

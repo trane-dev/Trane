@@ -56,6 +56,15 @@ class PredictionProblem:
 		return description
 
 	"""
+	A method to get all unique entity id's.
+	Args:
+		None
+	Returns:
+		(Set) A set of unique entity id's
+	"""
+	def get_entity_ids(self):
+		return set(dataframe[self.entity_id_column])
+	"""
 	This function generates the cutoff times for each entity id and puts the dictionary in the
 		prediction problem (self).
 	Current implementation is simple. The cutoff time is halfway through the observed
@@ -66,7 +75,7 @@ class PredictionProblem:
 		(Dict): Entity Id to Cutoff time mapping. 
 	"""
 	def determine_cutoff_time(self, dataframe):
-		unique_entity_ids = set(dataframe[self.entity_id_column])
+		unique_entity_ids = self.get_entity_ids()
 		entity_id_to_cutoff_time = {}
 		for entity_id in unique_entity_ids:
 			df_entity_id = dataframe[dataframe[self.entity_id_column] == entity_id]
@@ -77,15 +86,23 @@ class PredictionProblem:
 			entity_id_to_cutoff_time[entity_id] = cutoff_time
 		
 		return entity_id_to_cutoff_time
+	
+	"""
+	A method to set the cutoff time for all entity id's.
+	Args:
+		(??): A global cutoff_time
+	Returns:
+		None
+	"""
+	def set_global_cutoff_time(self, global_cutoff_time):
+		unique_entity_ids = self.get_entity_ids()
+		entity_id_to_cutoff_time = {}
+		for entity_id in unique_entity_ids:
+			entity_id_to_cutoff_time[entity_id] = global_cutoff_time
+		self.entity_id_to_cutoff_time = entity_id_to_cutoff_time
 
-# df = pd.read_csv('../../test_datasets/synthetic_taxi_data.csv')
-# prediction_problem = PredictionProblem([], 'fare', 'taxi_id', 'time')
-# prediction_problem.determine_cutoff_time(df)
-
-
-
-
-
+	def get_entity_id_to_cutoff_time(self):
+		return self.entity_id_to_cutoff_time
 
 
 

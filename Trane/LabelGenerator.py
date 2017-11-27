@@ -1,8 +1,8 @@
 class LabelGenerator():
-	
+
 	def __init__(self, prediction_problems):
 		self.prediction_problems = prediction_problems
-	
+
 	"""Generate the labels and cutoff times for each entity.
 	Args:
 		(Dict (Entity_Id -> Dataframe)): Entity Id to relevant data of that entity mapping
@@ -15,7 +15,7 @@ class LabelGenerator():
 		prediction_problem_to_entity_id_to_results = {}
 		#Nested Dictionary structure:
 		#{Pred_Problem -> {Entity_Id: Results, Entity_Id2: Results2...} Pred_Problem2 -> {..} ... }
-		
+
 		for prediction_problem in prediction_problems:
 			#entity_id_to_results = {entity_id:(label, cutoff_time), entity_id:(label, cutoff_time)...}
 			entity_id_to_results = {}

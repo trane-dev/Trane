@@ -1,3 +1,2 @@
 class Operation:
 	pass
-	

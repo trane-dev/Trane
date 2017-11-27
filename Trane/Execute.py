@@ -17,5 +17,5 @@ prediction_problem_generator = PredictionProblemGenerator(LABEL_GENERATING_COLUM
 
 prediction_problems = prediction_problem_generator.generate()
 
-print len(prediction_problems)
-# print str(prediction_problems[0])
+print(len(prediction_problems))
+# print(str(prediction_problems[0]))

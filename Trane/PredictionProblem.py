@@ -3,9 +3,9 @@ class PredictionProblem:
 
 	"""
 	Prediction Problem is made up of a list of Operations. The list of operations delineate
-	the order the operations will be applied in. 
+	the order the operations will be applied in.
 	"""
-	
+
 	"""
 	Args:
 		(List) Operations: a list of operations (class Operation) that define the
@@ -44,7 +44,7 @@ class PredictionProblem:
 	Args:
 		None
 	Returns:
-		A natural language text describing the prediction problem. 
+		A natural language text describing the prediction problem.
 	"""
 	def __str__(self):
 		description = ""
@@ -72,7 +72,7 @@ class PredictionProblem:
 	Args:
 		(Pandas DataFrame): the dataframe containing the data we wish to analyze.)
 	Returns:
-		(Dict): Entity Id to Cutoff time mapping. 
+		(Dict): Entity Id to Cutoff time mapping.
 	"""
 	def determine_cutoff_time(self, dataframe):
 		unique_entity_ids = self.get_entity_ids()
@@ -84,9 +84,9 @@ class PredictionProblem:
 			total_time = last_time_observed - first_time_observed
 			cutoff_time = first_time_observed + total_time/2.
 			entity_id_to_cutoff_time[entity_id] = cutoff_time
-		
+
 		return entity_id_to_cutoff_time
-	
+
 	"""
 	A method to set the cutoff time for all entity id's.
 	Args:
@@ -103,9 +103,3 @@ class PredictionProblem:
 
 	def get_entity_id_to_cutoff_time(self):
 		return self.entity_id_to_cutoff_time
-
-
-
-
-
-

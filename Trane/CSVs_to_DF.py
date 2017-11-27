@@ -10,10 +10,10 @@ Returns:
 """
 def csv_to_df(csv_file_paths, header = True):
     if not header:
-        dataframes = [pd.read_csv(file_path, header = None) for file_path in csv_file_paths]    
+        dataframes = [pd.read_csv(file_path, header = None) for file_path in csv_file_paths]
     else:
 	   dataframes = [pd.read_csv(file_path) for file_path in csv_file_paths]
-	
+
     return dataframes
 
 """
@@ -31,4 +31,3 @@ def denormalize_dataframes(dataframes):
 
 dfs = csv_to_df(['walmart_data/stores.csv', 'walmart_data/features.csv'])
 denormalize_dataframes(dfs)
-	

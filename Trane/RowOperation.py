@@ -3,16 +3,16 @@ import pandas as pd
 from SubOperation import SubOperation
 import RowOperationModule as ro
 class RowOperation(Operation):
-	
+
 
 	"""
-	A Row Operation takes in as input a dataset. The row operation then applies some value to all rows 
+	A Row Operation takes in as input a dataset. The row operation then applies some value to all rows
 	for a specific column within the dataframe.
 	"""
 
 	"""
 	Args:
-	    (Dict) operation_columns_to_sub_operation: Keys are the subset of all columns that 
+	    (Dict) operation_columns_to_sub_operation: Keys are the subset of all columns that
 	    	will be operated on by an operator. Values are the operation to be applied for
 	    	the column. Operations are of type SubOperation that take as input the value they need.
 	Returns:
@@ -20,14 +20,14 @@ class RowOperation(Operation):
 	Raises:
 	    None
 	"""
-	def __init__(self, column_name, sub_operation_name):		
+	def __init__(self, column_name, sub_operation_name):
 		self.sub_operation_name = sub_operation_name
 		self.column_name = column_name
 		self.sub_operation = ro.possible_operations[sub_operation_name]
 
 	def is_valid_operation(self, operation):
 		if operation not in operation_types.keys():
-			raise Exception("Unkown operation: {}".format(operation)) 
+			raise Exception("Unkown operation: {}".format(operation))
 
 	def get_possible_operations(self):
 		return "The possible operations are : {}".format(operation_types.keys())
@@ -52,15 +52,3 @@ class RowOperation(Operation):
 # df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}
 # row_op = RowOperation("height", "exponentiate")
 # print row_op.execute(df)
-
-
-
-
-
-
-
-
-
-
-
-

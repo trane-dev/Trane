@@ -14,7 +14,7 @@ class SubOperation:
 		self.function = function
 		self.set_params(hyper_parameters)
 		self.check_rep()
-	
+
 	def set_params(self, hyper_parameters):
 		if type(hyper_parameters) is list:
 			self.hyper_parameters = hyper_parameters

@@ -1,4 +1,6 @@
 from SubOperation import SubOperation
+from TableMeta import TableMeta as tm
+
 """
 Module functions that act as possible RowOperations.
 There are two steps involved in adding a new method.
@@ -28,4 +30,13 @@ possible_operations = {
 "less than" : SubOperation("less than", less_than, param_placeholder),
 "greater than" : SubOperation("greater than", greater_than, param_placeholder),
 "exponentiate" : SubOperation("exponentiate", exponentiate, param_placeholder)
+}
+
+operation_io_types = {
+	"identity" : [(tm.TYPE_VALUE, tm.TYPE_VALUE), (tm.TYPE_BOOL, tm.TYPE_BOOL)],
+	"equals": [(tm.TYPE_VALUE, tm.TYPE_BOOL)],
+	"not equals": [(tm.TYPE_VALUE, tm.TYPE_BOOL)],
+	"less than": [(tm.TYPE_VALUE, tm.TYPE_BOOL)],
+	"greater than": [(tm.TYPE_VALUE, tm.TYPE_BOOL)],
+	"exponentiate": [(tm.TYPE_VALUE, tm.TYPE_VALUE)]
 }

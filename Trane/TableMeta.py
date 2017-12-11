@@ -7,7 +7,8 @@ class TableMeta(object):
     TYPE_TIME = 'time'
     TYPE_VALUE = 'value'
     TYPE_CATEGORY = 'category'
-    TYPES = [TYPE_IDENTIFIER, TYPE_TEXT, TYPE_TIME, TYPE_VALUE, TYPE_CATEGORY]
+    TYPE_BOOL = 'boolean'
+    TYPES = [TYPE_IDENTIFIER, TYPE_TEXT, TYPE_TIME, TYPE_VALUE, TYPE_CATEGORY, TYPE_BOOL]
     
     def __init__(self, table_meta):
         table_meta = [(item['name'], item)for item in table_meta]

@@ -1,3 +1,5 @@
+from TableMeta import TableMeta as tm
+
 """
 Module functions:
 These are the Transformation operations possible under the Transformation Operation class.
@@ -17,4 +19,9 @@ def diff(dataframe, column_name):
 possible_operations = {
 	"identity" : identity,
 	"diff": diff
+}
+
+operation_io_types = {
+	"identity" : [(tm.TYPE_VALUE, tm.TYPE_VALUE), (tm.TYPE_BOOL, tm.TYPE_BOOL)],
+	"diff": [(tm.TYPE_VALUE, tm.TYPE_VALUE)]
 }

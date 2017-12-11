@@ -1,4 +1,6 @@
 from SubOperation import SubOperation
+from TableMeta import TableMeta as tm
+
 """
 Module functions that act as possible FilterOperations.
 There are two steps involved in adding a new method.
@@ -22,4 +24,11 @@ possible_operations = {
 "not equals" : SubOperation("not equals", not_equals, param_placeholder),
 "less than" : SubOperation("less than", less_than, param_placeholder),
 "greater than" : SubOperation("greater than", greater_than, param_placeholder)
+}
+
+operation_io_types = {
+	"equals": [(tm.TYPE_VALUE, tm.TYPE_BOOL)],
+	"not equals": [(tm.TYPE_VALUE, tm.TYPE_BOOL)],
+	"less than": [(tm.TYPE_VALUE, tm.TYPE_BOOL)],
+	"greater than": [(tm.TYPE_VALUE, tm.TYPE_BOOL)]
 }

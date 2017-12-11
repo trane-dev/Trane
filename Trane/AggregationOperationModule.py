@@ -1,4 +1,5 @@
 import pandas as pd
+from TableMeta import TableMeta as tm
 """
 Module functions:
 These are the aggregation operations possible under the Aggregation Operation class.
@@ -29,4 +30,12 @@ possible_operations = {
 	"last minus first" : last_minus_first,
 	"count": count,
 	"sum": sumup
+}
+
+operation_io_types = {
+	"last": [(tm.TYPE_VALUE, tm.TYPE_VALUE)],
+	"first": [(tm.TYPE_VALUE, tm.TYPE_VALUE)],
+	"last minus first": [(tm.TYPE_VALUE, tm.TYPE_VALUE)],
+	"count": [(tm.TYPE_VALUE, tm.TYPE_VALUE), (tm.TYPE_BOOL, tm.TYPE_VALUE)],
+	"sum": [(tm.TYPE_VALUE, tm.TYPE_VALUE)]
 }

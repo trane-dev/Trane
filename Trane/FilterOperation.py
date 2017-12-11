@@ -36,7 +36,7 @@ class FilterOperation(Operation):
 		return output_df
 
 	def __str__(self):
-		return "Filter operation (" + self.sub_operation_name + ")"
+		return "Filter operation (" + self.column_name + " " + self.sub_operation_name + ")"
 
 #TEST ----
 # gt_filter = FilterOperation("height", "greater than")

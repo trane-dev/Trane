@@ -46,7 +46,7 @@ class RowOperation(Operation):
 		return output_df
 
 	def __str__(self):
-		return "Row operation (" + self.sub_operation_name + ")"
+		return "Row operation (" + self.column_name + " " + self.sub_operation_name + ")"
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
 # df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}

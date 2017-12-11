@@ -18,9 +18,15 @@ def last_minus_first(dataframe):
 	first_row = first(df)
 	new_df = pd.concat([first_row, last_row])
 	return new_df.diff().dropna()
+def count(dataframe):
+	raise NotImplementedException
+def sumup(dataframe):
+	raise NotImplementedException
 
 possible_operations = {
 	"last" : last,
 	"first": first,
-	"last minus first" : last_minus_first
+	"last minus first" : last_minus_first,
+	"count": count,
+	"sum": sumup
 }

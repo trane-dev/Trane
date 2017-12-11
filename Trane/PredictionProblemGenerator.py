@@ -79,8 +79,10 @@ class PredictionProblemGenerator:
 								for column_to_operate_over  in self.label_generating_columns:
 									for column_to_filter_over in self.table_meta.get_columns():
 
-										aggregation_operation = AggregationOperation(aggregation_operation_name)
-										transformation_operation = TransformationOperation(column_to_operate_over, transformation_operation_name)
+										aggregation_operation = AggregationOperation(
+											column_to_operate_over, aggregation_operation_name)
+										transformation_operation = TransformationOperation(
+											column_to_operate_over, transformation_operation_name)
 										row_operation = RowOperation(column_to_operate_over, row_operation_name)
 										filter_operation = FilterOperation(column_to_operate_over, filter_operation_name)
 

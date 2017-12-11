@@ -37,7 +37,7 @@ class TransformationOperation(Operation):
 			return False
 
 	def __str__(self):
-		return "Transformation operation (" + self.transformation_operation_name + ")"
+		return "Transformation operation (" + self.column_name + " " + self.transformation_operation_name + ")"
 
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])

@@ -16,15 +16,16 @@ class AggregationOperation(Operation):
 	Returns:
 		None
 	"""
-	def __init__(self, aggregation_operation_name):
+	def __init__(self, column_name, aggregation_operation_name):
 		self.aggregation_operation_name = aggregation_operation_name
 		self.aggregation_operation = ag.possible_operations[aggregation_operation_name]
+		self.column_name = column_name
 
 	def execute(self, dataset):
 		return self.aggregation_operation(dataset)
 
 	def __str__(self):
-		return "Aggregation operation (" + self.aggregation_operation_name + ")"
+		return "Aggregation operation (" + self.column_name + " " + self.aggregation_operation_name + ")"
 
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])

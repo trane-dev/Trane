@@ -24,6 +24,15 @@ class TransformationOperation(Operation):
 		self.transformation_operation = tr.possible_operations[transformation_operation_name]
 		self.column_name = column_name
 
+	def preprocess(self, table_meta):
+		self.input_meta = table_meta.copy()
+		dtype = self.input_meta.get_type(self.column_name)
+		for itype, otype in tr.operation_io_types[self.transformation_operation_name]:
+			if dtype == itype:
+				table_meta.set_type(self.column_name, otype)
+				return table_meta
+		return None
+
 	def execute(self, dataset):
 		if self.operation_requires_column_name():
 			return self.transformation_operation(dataset, self.column_name)

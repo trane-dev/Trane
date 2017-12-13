@@ -17,13 +17,24 @@ class PredictionProblem:
 	Returns:
 		None
 	"""
-	def __init__(self, operations, label_generating_column, entity_id_column, time_column, dataframe = None):
+	def __init__(self, table_meta, operations, label_generating_column, entity_id_column, time_column, dataframe=None):
+		self.table_meta = table_meta
 		self.operations = operations
 		self.label_generating_column = label_generating_column
 		self.entity_id_column = entity_id_column
 		self.time_column = time_column
 		if dataframe is not None:
 			self.entity_id_to_cutoff_time = self.determine_cutoff_time(dataframe)
+		
+		self.valid = True
+		temp_meta = self.table_meta.copy()
+		for op in operations:
+			temp_meta = op.preprocess(temp_meta)
+			if not temp_meta:
+				self.valid = False
+				break
+		
+		
 	"""
 	This function executes all the operations on the dataframe and returns the output. The output
 	should be structured as a single label/value per the Trane documentation.

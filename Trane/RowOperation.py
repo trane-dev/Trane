@@ -25,6 +25,15 @@ class RowOperation(Operation):
 		self.column_name = column_name
 		self.sub_operation = ro.possible_operations[sub_operation_name]
 
+	def preprocess(self, table_meta):
+		self.input_meta = table_meta.copy()
+		dtype = self.input_meta.get_type(self.column_name)
+		for itype, otype in ro.operation_io_types[self.sub_operation_name]:
+			if dtype == itype:
+				table_meta.set_type(self.column_name, otype)
+				return table_meta
+		return None
+
 	def is_valid_operation(self, operation):
 		if operation not in operation_types.keys():
 			raise Exception("Unkown operation: {}".format(operation))

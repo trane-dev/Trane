@@ -22,6 +22,15 @@ class FilterOperation(Operation):
 		self.filter_suboperation = fo.possible_operations[sub_operation_name]
 		self.column_name = column_name
 
+	def preprocess(self, table_meta):
+		self.input_meta = table_meta.copy()
+		dtype = self.input_meta.get_type(self.column_name)
+		for itype, otype in fo.operation_io_types[self.sub_operation_name]:
+			if dtype == itype:
+				table_meta.set_type(self.column_name, otype)
+				return table_meta
+		return None
+
 	def execute(self, dataset):
 		output_df = dataset.copy()
 		drop_indices = []

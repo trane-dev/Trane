@@ -27,8 +27,8 @@ possible_operations = {
 }
 
 operation_io_types = {
-	"equals": [(tm.TYPE_VALUE, tm.TYPE_BOOL)],
-	"not equals": [(tm.TYPE_VALUE, tm.TYPE_BOOL)],
-	"less than": [(tm.TYPE_VALUE, tm.TYPE_BOOL)],
-	"greater than": [(tm.TYPE_VALUE, tm.TYPE_BOOL)]
+	"equals": [(tm.TYPE_VALUE, tm.TYPE_VALUE)],
+	"not equals": [(tm.TYPE_VALUE, tm.TYPE_VALUE)],
+	"less than": [(tm.TYPE_VALUE, tm.TYPE_VALUE)],
+	"greater than": [(tm.TYPE_VALUE, tm.TYPE_VALUE)]
 }

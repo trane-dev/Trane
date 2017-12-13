@@ -1,3 +1,5 @@
+import copy
+
 class TableMeta(object):
     """
     
@@ -11,13 +13,17 @@ class TableMeta(object):
     TYPES = [TYPE_IDENTIFIER, TYPE_TEXT, TYPE_TIME, TYPE_VALUE, TYPE_CATEGORY, TYPE_BOOL]
     
     def __init__(self, table_meta):
-        table_meta = [(item['name'], item)for item in table_meta]
+        table_meta = [(item['name'], item) for item in table_meta]
         self.table_meta = dict(table_meta)
         
     def get_type(self, column_name):
         return self.table_meta[column_name]['type']
     
+    def set_type(self, column_name, dtype):
+        self.table_meta[column_name]['type'] = dtype
+    
     def get_columns(self):
         return self.table_meta.keys()
         
-        
+    def copy(self):
+        return copy.deepcopy(self)

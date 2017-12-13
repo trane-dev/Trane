@@ -86,9 +86,12 @@ class PredictionProblemGenerator:
 										row_operation = RowOperation(column_to_operate_over, row_operation_name)
 										filter_operation = FilterOperation(column_to_operate_over, filter_operation_name)
 
-										prediction_problem = PredictionProblem([filter_operation, row_operation, transformation_operation, aggregation_operation],
-										column_to_operate_over, entity_id_column, time_column)
-
+										prediction_problem = PredictionProblem(self.table_meta.copy(),
+											[filter_operation, row_operation, 
+											transformation_operation, aggregation_operation],
+											column_to_operate_over, entity_id_column, time_column)
+										if not prediction_problem.valid:
+											continue
 										yield prediction_problem
 
 if __name__ == '__main__':

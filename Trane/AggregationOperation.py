@@ -21,6 +21,15 @@ class AggregationOperation(Operation):
 		self.aggregation_operation = ag.possible_operations[aggregation_operation_name]
 		self.column_name = column_name
 
+	def preprocess(self, table_meta):
+		self.input_meta = table_meta.copy()
+		dtype = self.input_meta.get_type(self.column_name)
+		for itype, otype in ag.operation_io_types[self.aggregation_operation_name]:
+			if dtype == itype:
+				table_meta.set_type(self.column_name, otype)
+				return table_meta
+		return None
+	
 	def execute(self, dataset):
 		return self.aggregation_operation(dataset)
 

@@ -27,6 +27,8 @@ class FilterOperation(Operation):
 		dtype = self.input_meta.get_type(self.column_name)
 		for itype, otype in fo.operation_io_types[self.sub_operation_name]:
 			if dtype == itype:
+				self.itype = itype
+				self.otype = otype
 				table_meta.set_type(self.column_name, otype)
 				return table_meta
 		return None
@@ -47,6 +49,8 @@ class FilterOperation(Operation):
 	def __str__(self):
 		return "Filter operation (" + self.column_name + " " + self.sub_operation_name + ")"
 
+	def generate_nl_description(self):
+		return "with %s %s ___" % (self.column_name, self.sub_operation_name)
 #TEST ----
 # gt_filter = FilterOperation("height", "greater than")
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])

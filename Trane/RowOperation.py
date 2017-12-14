@@ -2,6 +2,7 @@ from Operation import Operation
 import pandas as pd
 from SubOperation import SubOperation
 import RowOperationModule as ro
+from TableMeta import TableMeta
 class RowOperation(Operation):
 
 
@@ -30,6 +31,8 @@ class RowOperation(Operation):
 		dtype = self.input_meta.get_type(self.column_name)
 		for itype, otype in ro.operation_io_types[self.sub_operation_name]:
 			if dtype == itype:
+				self.itype = itype
+				self.otype = otype
 				table_meta.set_type(self.column_name, otype)
 				return table_meta
 		return None
@@ -56,6 +59,13 @@ class RowOperation(Operation):
 
 	def __str__(self):
 		return "Row operation (" + self.column_name + " " + self.sub_operation_name + ")"
+		
+	def generate_nl_description(self):
+		if self.otype == TableMeta.TYPE_BOOL:
+			return "records which %s %s ___" % (self.column_name, self.sub_operation_name)
+		if self.sub_operation_name == "identity":
+			return self.column_name
+		return "the %s of %s" % (self.sub_operation_name, self.column_name) 
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
 # df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}

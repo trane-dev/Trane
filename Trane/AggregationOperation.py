@@ -1,6 +1,8 @@
 from Operation import Operation
 import pandas as pd
 import AggregationOperationModule as ag
+from TableMeta import TableMeta
+
 class AggregationOperation(Operation):
 	"""
 	Aggregation Operations are operations that take many rows and aggregate them
@@ -26,6 +28,8 @@ class AggregationOperation(Operation):
 		dtype = self.input_meta.get_type(self.column_name)
 		for itype, otype in ag.operation_io_types[self.aggregation_operation_name]:
 			if dtype == itype:
+				self.itype = itype
+				self.otype = otype
 				table_meta.set_type(self.column_name, otype)
 				return table_meta
 		return None
@@ -35,6 +39,13 @@ class AggregationOperation(Operation):
 
 	def __str__(self):
 		return "Aggregation operation (" + self.column_name + " " + self.aggregation_operation_name + ")"
+	
+	def generate_nl_description(self):
+		if self.aggregation_operation_name == 'count':
+			return "the number of"
+		if self.aggregation_operation_name == 'sum' and self.itype == TableMeta.TYPE_BOOL:
+			return "the number of"
+		return "the %s of" % self.aggregation_operation_name
 
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])

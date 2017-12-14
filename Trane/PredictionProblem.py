@@ -114,3 +114,8 @@ class PredictionProblem:
 
 	def get_entity_id_to_cutoff_time(self):
 		return self.entity_id_to_cutoff_time
+		
+	def generate_nl_description(self):
+		return "For each %s, predict %s %s %s %s" % (self.entity_id_column, 
+				self.operations[3].generate_nl_description(), self.operations[2].generate_nl_description(), 
+				self.operations[1].generate_nl_description(), self.operations[0].generate_nl_description())

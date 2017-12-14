@@ -104,6 +104,7 @@ if __name__ == '__main__':
 	cnt = 0
 	for problem in gen.generate():
 		print(str(problem))
+		print(problem.generate_nl_description())
 		cnt += 1
 	logging.info("Generate %d problems." % cnt)
 	

@@ -50,6 +50,8 @@ class FilterOperation(Operation):
 		return "Filter operation (" + self.column_name + " " + self.sub_operation_name + ")"
 
 	def generate_nl_description(self):
+		if self.sub_operation_name == 'all':
+			return ""
 		return "with %s %s ___" % (self.column_name, self.sub_operation_name)
 #TEST ----
 # gt_filter = FilterOperation("height", "greater than")

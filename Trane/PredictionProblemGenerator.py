@@ -84,7 +84,7 @@ class PredictionProblemGenerator:
 										transformation_operation = TransformationOperation(
 											column_to_operate_over, transformation_operation_name)
 										row_operation = RowOperation(column_to_operate_over, row_operation_name)
-										filter_operation = FilterOperation(column_to_operate_over, filter_operation_name)
+										filter_operation = FilterOperation(column_to_filter_over, filter_operation_name)
 
 										prediction_problem = PredictionProblem(self.table_meta.copy(),
 											[filter_operation, row_operation, 
@@ -101,8 +101,11 @@ if __name__ == '__main__':
 	table_meta = open('../../test_datasets/taxi_meta.json').read()
 	table_meta = json.loads(table_meta)
 	gen = PredictionProblemGenerator(table_meta, entity_id_column='taxi_id')
+	cnt = 0
 	for problem in gen.generate():
 		print(str(problem))
+		cnt += 1
+	logging.info("Generate %d problems." % cnt)
 	
 	# pred_problems = gen.generate()
 	# print([str(pred_problem) for pred_problem in pred_problems][0])

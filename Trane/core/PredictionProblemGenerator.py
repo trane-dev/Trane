@@ -1,15 +1,15 @@
 import json
-from PredictionProblem import PredictionProblem
-from AggregationOperation import AggregationOperation
-from RowOperation import RowOperation
-from TransformationOperation import TransformationOperation
-from FilterOperation import FilterOperation
-from TableMeta import TableMeta
+from .PredictionProblem import PredictionProblem
+from ..ops.AggregationOperation import AggregationOperation
+from ..ops.RowOperation import RowOperation
+from ..ops.TransformationOperation import TransformationOperation
+from ..ops.FilterOperation import FilterOperation
+from ..utils.TableMeta import TableMeta
 
-import AggregationOperationModule as ag
-import RowOperationModule as ro
-import TransformationOperationModule as tr
-import FilterOperationModule as fi
+from ..ops import AggregationOperationModule as ag
+from ..ops import RowOperationModule as ro
+from ..ops import TransformationOperationModule as tr
+from ..ops import FilterOperationModule as fi
 
 import logging
 

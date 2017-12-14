@@ -1,4 +1,4 @@
-from TableMeta import TableMeta as tm
+from ..utils.TableMeta import TableMeta as tm
 
 """
 Module functions:

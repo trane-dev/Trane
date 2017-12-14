@@ -1,7 +1,7 @@
-from Operation import Operation
+from .Operation import Operation
 import pandas as pd
-import AggregationOperationModule as ag
-from TableMeta import TableMeta
+from . import AggregationOperationModule as ag
+from ..utils.TableMeta import TableMeta
 
 class AggregationOperation(Operation):
 	"""

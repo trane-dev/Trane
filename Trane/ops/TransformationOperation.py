@@ -1,7 +1,7 @@
-from Operation import Operation
+from .Operation import Operation
 import pandas as pd
-from SubOperation import SubOperation
-import TransformationOperationModule as tr
+from .SubOperation import SubOperation
+from . import TransformationOperationModule as tr
 class TransformationOperation(Operation):
 
 	"""

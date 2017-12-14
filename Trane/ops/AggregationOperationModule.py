@@ -1,5 +1,5 @@
 import pandas as pd
-from TableMeta import TableMeta as tm
+from ..utils.TableMeta import TableMeta as tm
 """
 Module functions:
 These are the aggregation operations possible under the Aggregation Operation class.

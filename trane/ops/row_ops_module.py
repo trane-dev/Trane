@@ -1,5 +1,5 @@
-from .SubOperation import SubOperation
-from ..utils.TableMeta import TableMeta as tm
+from .subops import SubOperation
+from ..utils.table_meta import TableMeta as tm
 
 """
 Module functions that act as possible RowOperations.

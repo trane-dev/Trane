@@ -1,8 +1,8 @@
-from .Operation import Operation
+from .ops import Operation
 import pandas as pd
-from .SubOperation import SubOperation
-from . import RowOperationModule as ro
-from ..utils.TableMeta import TableMeta
+from .subops import SubOperation
+from . import row_ops_module as ro
+from ..utils.table_meta import TableMeta
 class RowOperation(Operation):
 
 

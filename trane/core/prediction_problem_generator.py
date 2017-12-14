@@ -1,15 +1,15 @@
 import json
-from .PredictionProblem import PredictionProblem
-from ..ops.AggregationOperation import AggregationOperation
-from ..ops.RowOperation import RowOperation
-from ..ops.TransformationOperation import TransformationOperation
-from ..ops.FilterOperation import FilterOperation
-from ..utils.TableMeta import TableMeta
+from .prediction_problem import PredictionProblem
+from ..ops.aggregation_ops import AggregationOperation
+from ..ops.row_ops import RowOperation
+from ..ops.transformation_ops import TransformationOperation
+from ..ops.filter_ops import FilterOperation
+from ..utils.table_meta import TableMeta
 
-from ..ops import AggregationOperationModule as ag
-from ..ops import RowOperationModule as ro
-from ..ops import TransformationOperationModule as tr
-from ..ops import FilterOperationModule as fi
+from ..ops import aggregation_ops_module as ag
+from ..ops import row_ops_module as ro
+from ..ops import transformation_ops_module as tr
+from ..ops import filter_ops_module as fi
 
 import logging
 

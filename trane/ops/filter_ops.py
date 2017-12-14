@@ -1,7 +1,7 @@
-from .Operation import Operation
+from .ops import Operation
 import pandas as pd
-from .SubOperation import SubOperation
-from . import FilterOperationModule as fo
+from .subops import SubOperation
+from . import filter_ops_module as fo
 class FilterOperation(Operation):
 
 	"""

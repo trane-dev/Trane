@@ -1,7 +1,7 @@
 import sys
 sys.dont_write_bytecode = True
 import pandas as pd
-from Trane.core.PredictionProblemGenerator import PredictionProblemGenerator
+from trane.core.prediction_problem_generator import PredictionProblemGenerator
 import logging
 import json
 

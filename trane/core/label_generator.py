@@ -1,3 +1,5 @@
+import json
+
 class LabelGenerator():
 
 	def __init__(self, prediction_problems):
@@ -42,3 +44,12 @@ class LabelGenerator():
 	def set_global_cutoff_time_for_all_prediction_problems(self, global_cutoff_time):
 		for prediction_problem in self.prediction_problems:
 			prediction_problem.set_global_cutoff_time(global_cutoff_time)
+
+	def to_json(self):
+		return json.dumps(
+			{'problems': [json.loads(item.to_json()) for item in self.prediction_problems]
+			})
+	
+	def from_json(json_data):
+		data = json.loads(json_data)
+		probs = [PredictionProblem.from_json(json.dumps(item)) for item in data['problems']]

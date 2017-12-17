@@ -1,4 +1,5 @@
 import copy
+import json
 
 class TableMeta(object):
     """
@@ -15,7 +16,7 @@ class TableMeta(object):
     def __init__(self, table_meta):
         table_meta = [(item['name'], item) for item in table_meta]
         self.table_meta = dict(table_meta)
-        
+            
     def get_type(self, column_name):
         return self.table_meta[column_name]['type']
     
@@ -27,3 +28,9 @@ class TableMeta(object):
         
     def copy(self):
         return copy.deepcopy(self)
+
+    def to_json(self):
+        return json.dumps(list(self.table_meta.values()))
+
+    def from_json(json_data):
+        return TableMeta(json.loads(json_data))

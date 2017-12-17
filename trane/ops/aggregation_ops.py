@@ -2,6 +2,7 @@ from .ops import Operation
 import pandas as pd
 from . import aggregation_ops_module as ag
 from ..utils.table_meta import TableMeta
+import json
 
 class AggregationOperation(Operation):
 	"""
@@ -46,6 +47,16 @@ class AggregationOperation(Operation):
 		if self.aggregation_operation_name == 'sum' and self.itype == TableMeta.TYPE_BOOL:
 			return "the number of"
 		return "the %s of" % self.aggregation_operation_name
+
+	def to_json(self):
+		return json.dumps(
+		{"type": "aggregation",
+		"aggregation_operation_name": self.aggregation_operation_name,
+		"column_name": self.column_name})
+		
+	def from_json(json_data):
+		data = json.loads(json_data)
+		TransformationOperation(data['columnn_name'], data['aggregation_operation_name'])
 
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])

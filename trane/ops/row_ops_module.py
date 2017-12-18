@@ -7,17 +7,22 @@ There are two steps involved in adding a new method.
 1. Create a new function.
 2. Create a new mapping in the dictionary with the function inside the SubOperation class.
 """
-def identity(val):
+def identity(df, **kwargs):
 	return val
-def equals(val, param):
+
+def equals(df, **kwargs):
 	return val == param
-def not_equals(val, param):
+
+def not_equals(df, **kargs):
 	return val != param
-def less_than(val, param):
+
+def less_than(df, **kargs):
 	return val < param
-def greater_than(val, param):
+
+def greater_than(df, **kargs):
 	return val > param
-def exponentiate(val, param):
+
+def exponentiate(df, **kargs):
 	return val ** param
 
 param_placeholder = 1 #TODO UPDATE WITH A FUNCTION TO PROGRAMATICALLY
@@ -39,4 +44,13 @@ operation_io_types = {
 	"less than": [(tm.TYPE_VALUE, tm.TYPE_BOOL)],
 	"greater than": [(tm.TYPE_VALUE, tm.TYPE_BOOL)],
 	"exponentiate": [(tm.TYPE_VALUE, tm.TYPE_VALUE)]
+}
+
+operation_params = {
+	"identity": [],
+	"equals": ["threshold"],
+	"not equals": ["threshold"],
+	"less than": ["threshold"],
+	"greater than": ["threshold"],
+	"exponentiate": []
 }

@@ -7,10 +7,10 @@ Methods can be added here under 2 constraints.
 1. Create a function with the dataframe as input and return a new dataframe.
 2. Add the function to the dictionary of possible operations.
 """
-def identity(dataframe):
+def identity(df, **kwargs):
 	return dataframe
 
-def diff(dataframe, column_name):
+def diff(df, **kwargs):
 	df = dataframe.copy()
 	df[column_name] = df[column_name].diff()
 	df = df.dropna()
@@ -24,4 +24,9 @@ possible_operations = {
 operation_io_types = {
 	"identity" : [(tm.TYPE_VALUE, tm.TYPE_VALUE), (tm.TYPE_BOOL, tm.TYPE_BOOL)],
 	"diff": [(tm.TYPE_VALUE, tm.TYPE_VALUE)]
+}
+
+operation_params = {
+	"identity": [],
+	"diff": []
 }

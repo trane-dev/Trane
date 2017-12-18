@@ -1,4 +1,6 @@
 import pandas as pd
+import json
+
 class PredictionProblem:
 
 	"""
@@ -119,3 +121,33 @@ class PredictionProblem:
 		return "For each %s, predict %s %s %s %s" % (self.entity_id_column, 
 				self.operations[3].generate_nl_description(), self.operations[2].generate_nl_description(), 
 				self.operations[1].generate_nl_description(), self.operations[0].generate_nl_description())
+
+	def to_json(self):
+		return json.dumps(
+		{"table_meta": json.loads(self.table_meta.to_json()),
+		"operations": [json.loads(op.to_json()) for op in self.operations],
+		"label_generating_column": self.label_generating_column,
+		"entity_id_column": self.entity_id_column,
+		"time_column":self.time_column
+		}
+		)
+		
+	def from_json(json_data):
+		data = json_data.loads(json_data)
+		table_meta = TableMeta.from_json(json.dumps(data['table_meta']))
+		def to_op(data):
+			if data['type'] == "aggregation":
+				return AggregationOperation.from_json(json.dumps(data))
+			elif data['type'] == 'filter':
+				return FilterOperation.from_json(json.dumps(data))
+			elif data['type'] == 'row':
+				return RowOperation.from_json(json.dumps(data))
+			elif data['type'] == 'transformation':
+				return TransformationOperation.from_json(json.dumps(data))
+		operations = [to_op(item) for item in data['operations']] 
+		label_generating_column = data['label_generating_column']
+		entity_id_column = data['entity_id_column']
+		time_column = data['time_column']
+		return PredictionProblem(table_meta, operations, label_generating_column, entity_id_column, time_column)
+	
+		

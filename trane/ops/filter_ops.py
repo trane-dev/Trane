@@ -2,6 +2,8 @@ from .ops import Operation
 import pandas as pd
 from .subops import SubOperation
 from . import filter_ops_module as fo
+import json
+
 class FilterOperation(Operation):
 
 	"""
@@ -53,6 +55,17 @@ class FilterOperation(Operation):
 		if self.sub_operation_name == 'all':
 			return ""
 		return "with %s %s ___" % (self.column_name, self.sub_operation_name)
+
+	def to_json(self):
+		return json.dumps(
+		{"type": "filter",
+		"sub_operation_name": self.sub_operation_name,
+		"column_name": self.column_name})
+		
+	def from_json(json_data):
+		data = json.loads(json_data)
+		TransformationOperation(data['columnn_name'], data['sub_operation_name'])
+
 #TEST ----
 # gt_filter = FilterOperation("height", "greater than")
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])

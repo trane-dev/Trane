@@ -3,6 +3,8 @@ import pandas as pd
 from .subops import SubOperation
 from . import row_ops_module as ro
 from ..utils.table_meta import TableMeta
+import json
+
 class RowOperation(Operation):
 
 
@@ -66,6 +68,18 @@ class RowOperation(Operation):
 		if self.sub_operation_name == "identity":
 			return self.column_name
 		return "the %s of %s" % (self.sub_operation_name, self.column_name) 
+
+	def to_json(self):
+		return json.dumps(
+		{"type": "row",
+		"sub_operation_name": self.sub_operation_name,
+		"column_name": self.column_name})
+		
+	def from_json(json_data):
+		data = json.loads(json_data)
+		TransformationOperation(data['columnn_name'], data['sub_operation_name'])
+
+
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
 # df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}

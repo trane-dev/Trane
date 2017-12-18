@@ -2,6 +2,8 @@ from .ops import Operation
 import pandas as pd
 from .subops import SubOperation
 from . import transformation_ops_module as tr
+import json
+
 class TransformationOperation(Operation):
 
 	"""
@@ -54,6 +56,17 @@ class TransformationOperation(Operation):
 		if self.transformation_operation_name == "diff":
 			return "the differences between"
 		return ""
+		
+	def to_json(self):
+		return json.dumps(
+		{"type": "transformation",
+		"transformation_operation_name": self.transformation_operation_name,
+		"column_name": self.column_name})
+		
+	def from_json(json_data):
+		data = json.loads(json_data)
+		TransformationOperation(data['columnn_name'], data['transformation_operation_name'])
+		
 #SMALL TEST
 # df = pd.DataFrame([[74, 200, 22, "Alex"],[71, 140, 19, "Shea"], [75, 170, 20, "Abby"]], columns = ['height', 'weight', 'age', 'name'])
 # df.loc[3] = {"height":78, "name":"Future Alex", "weight":105, "age":25}

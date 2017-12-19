@@ -2,7 +2,7 @@ import sys
 sys.dont_write_bytecode = True
 import pandas as pd
 from trane.core.prediction_problem_generator import PredictionProblemGenerator
-from trane.core.label_generator import LabelGenerator
+# from trane.core.label_generator import LabelGenerator
 import logging
 import json
 
@@ -19,14 +19,14 @@ if __name__ == '__main__':
 		print(str(problem))
 		print(problem.generate_nl_description())
 		cnt += 1
-		if cnt > 5:
-			break
+		# if cnt > 5:
+		# 	break
 		lst.append(problem)
 	logging.info("Generate %d problems." % cnt)
 
-	label_gen = LabelGenerator(lst[:5])
-	jsonstr = label_gen.to_json()
-	print(jsonstr)
+	# label_gen = LabelGenerator(lst[:5])
+	# jsonstr = label_gen.to_json()
+	# print(jsonstr)
 	
 # DATAFRAME = pd.read_csv('../../test_datasets/synthetic_taxi_data.csv')
 # 

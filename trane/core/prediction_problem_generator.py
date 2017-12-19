@@ -1,15 +1,7 @@
 import json
 from .prediction_problem import PredictionProblem
-from ..ops.aggregation_ops import AggregationOperation
-from ..ops.row_ops import RowOperation
-from ..ops.transformation_ops import TransformationOperation
-from ..ops.filter_ops import FilterOperation
+from ..ops import aggregation_ops, row_ops, transformation_ops, filter_ops
 from ..utils.table_meta import TableMeta
-
-from ..ops import aggregation_ops_module as ag
-from ..ops import row_ops_module as ro
-from ..ops import transformation_ops_module as tr
-from ..ops import filter_ops_module as fi
 
 import logging
 
@@ -62,37 +54,41 @@ class PredictionProblemGenerator:
 	"""
 	#possible_operations for each class is a dictionary mapping a string name to an Operation of that class.
 	def generate(self):
-		possible_row_operation_names = ro.possible_operations.keys()
-		possible_filter_operation_names = fi.possible_operations.keys()
+		#NOTE tricks for less indents
+		def iter_over_ops():
+			for aggregation_op_name in aggregation_ops.AGGREGATION_OPS:
+				for transformation_op_name in transformation_ops.TRANSFORMATION_OPS:
+					for row_op_name in row_ops.ROW_OPS:
+						for filter_op_name in filter_ops.FILTER_OPS:
+							yield aggregation_op_name, transformation_op_name, \
+								row_op_name, filter_op_name							
+		def iter_over_column():
+			for entity_id_column in self.entity_id_columns:
+				for time_column in self.time_columns:
+					for operate_column in self.label_generating_columns:
+						for filter_column in self.table_meta.get_columns():
+							yield entity_id_column, time_column, \
+								operate_column, filter_column
 
-		possible_aggregation_operation_names = ag.possible_operations.keys()
-		possible_transformation_operation_names = tr.possible_operations.keys()
 
-		prediction_problems = []
-		
-		for entity_id_column in self.entity_id_columns:
-			for time_column in self.time_columns:
-				for aggregation_operation_name in possible_aggregation_operation_names:
-					for transformation_operation_name in possible_transformation_operation_names:
-						for row_operation_name in possible_row_operation_names:
-							for filter_operation_name in possible_filter_operation_names:
-								for column_to_operate_over  in self.label_generating_columns:
-									for column_to_filter_over in self.table_meta.get_columns():
+		for ops in iter_over_ops():
+			for columns in iter_over_column():
+				aggregation_op_name, transformation_op_name, \
+					row_op_name, filter_op_name = ops
+				entity_id_column, time_column, \
+					operate_column, filter_column = columns
+					
+				aggregation_op_obj = getattr(aggregation_ops, aggregation_op_name)(operate_column)	
+				transformation_op_obj = getattr(transformation_ops, transformation_op_name)(operate_column)
+				row_op_obj = getattr(row_ops, row_op_name)(operate_column)
+				filter_op_obj = getattr(filter_ops, filter_op_name)(filter_column)
 
-										aggregation_operation = AggregationOperation(
-											column_to_operate_over, aggregation_operation_name)
-										transformation_operation = TransformationOperation(
-											column_to_operate_over, transformation_operation_name)
-										row_operation = RowOperation(column_to_operate_over, row_operation_name)
-										filter_operation = FilterOperation(column_to_filter_over, filter_operation_name)
-
-										prediction_problem = PredictionProblem(self.table_meta.copy(),
-											[filter_operation, row_operation, 
-											transformation_operation, aggregation_operation],
-											column_to_operate_over, entity_id_column, time_column)
-										if not prediction_problem.valid:
-											continue
-										yield prediction_problem
+				prediction_problem = PredictionProblem(self.table_meta,
+					[filter_op_obj, row_op_obj, transformation_op_obj, aggregation_op_obj],
+					operate_column, entity_id_column, time_column)
+				if not prediction_problem.valid:
+					continue
+				yield prediction_problem
 
 if __name__ == '__main__':
 	logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', 

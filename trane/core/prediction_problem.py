@@ -20,7 +20,7 @@ class PredictionProblem:
 		None
 	"""
 	def __init__(self, table_meta, operations, label_generating_column, entity_id_column, time_column, dataframe=None):
-		self.table_meta = table_meta
+		self.table_meta = table_meta.copy()
 		self.operations = operations
 		self.label_generating_column = label_generating_column
 		self.entity_id_column = entity_id_column
@@ -118,9 +118,9 @@ class PredictionProblem:
 		return self.entity_id_to_cutoff_time
 		
 	def generate_nl_description(self):
-		return "For each %s, predict %s %s %s %s" % (self.entity_id_column, 
-				self.operations[3].generate_nl_description(), self.operations[2].generate_nl_description(), 
-				self.operations[1].generate_nl_description(), self.operations[0].generate_nl_description())
+		return "For each %s,%s predict%s%s%s." % (self.entity_id_column, 
+				self.operations[0].generate_nl_description(), self.operations[3].generate_nl_description(), 
+				self.operations[2].generate_nl_description(), self.operations[1].generate_nl_description())
 
 	def to_json(self):
 		return json.dumps(

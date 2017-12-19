@@ -1,4 +1,5 @@
 import json
+from .prediction_problem import PredictionProblem
 
 class LabelGenerator():
 

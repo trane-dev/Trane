@@ -3,6 +3,7 @@ from .op_base import OpBase
 
 AGGREGATION_OPS = ["FirstAggregationOp", "LastAggregationOp", "FMLAggregationOp",
     "CountAggregationOp", "SumAggregationOp"]
+__all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
 
 class AggregationOpBase(OpBase):
     pass

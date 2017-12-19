@@ -3,6 +3,7 @@ from .op_base import OpBase
 
 ROW_OPS = ["IdentityRowOp", "EqRowOp", "NeqRowOp", "GreaterRowOp",
     "LessRowOp", "ExpRowOp"]
+__all__ = ["RowOpBase", "ROW_OPS"] + ROW_OPS
 
 class RowOpBase(OpBase):
     pass

@@ -1,3 +1,5 @@
+import json
+
 class OpBase(object):
     """docstring for OpBase."""
     
@@ -30,11 +32,4 @@ class OpBase(object):
         return "%s(%s)" % (type(self).__name__, self.column_name)
 
     def generate_nl_description(self):
-        raise NotImplementedError
-
-    @staticmethod
-    def from_json(self):
-        raise NotImplementedError
-
-    def to_json():
         raise NotImplementedError

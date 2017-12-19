@@ -3,10 +3,11 @@ from .op_base import OpBase
 
 FILTER_OPS = ["AllFilterOp", "EqFilterOp", "NeqFilterOp", 
     "GreaterFilterOp", "LessFilterOp"]
+__all__ = ["FilterOpBase", "FILTER_OPS"] + FILTER_OPS
 
 class FilterOpBase(OpBase):
     pass
-    
+
 class AllFilterOp(FilterOpBase):
     PARAMS = [{}, {}]
     IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE), (TM.TYPE_BOOL, TM.TYPE_BOOL)]

@@ -1,8 +1,8 @@
 from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
 
-AGGREGATION_OPS = ["FirstAggregationOp", "CountAggregationOp", "SumAggregationOp"]
-    #"LastAggregationOp", "FMLAggregationOp"]
+AGGREGATION_OPS = ["FirstAggregationOp", "CountAggregationOp", "SumAggregationOp",\
+    "LastAggregationOp", "LMFAggregationOp"]
 __all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
 
 class AggregationOpBase(OpBase):
@@ -28,13 +28,13 @@ class LastAggregationOp(AggregationOpBase):
             return " whether the last"
         return " the last"
 
-class FMLAggregationOp(AggregationOpBase):
+class LMFAggregationOp(AggregationOpBase):
     PARAMS = [{}]
     IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE)]
     def execute(self, dataframe):
         last = dataframe.tail(1)
         first = dataframe.head(1)
-        last.at[last.index[0], self.column_name] -= first.at(first.index[0], self.column_name)
+        last.at[last.index[0], self.column_name] -= first.at[first.index[0], self.column_name]
         return last
     def generate_nl_description(self):
         return " the last minus first"

@@ -21,14 +21,12 @@ class PredictionProblem:
 	Returns:
 		None
 	"""
-	def __init__(self, table_meta, operations, label_generating_column, entity_id_column, time_column, dataframe=None):
+	def __init__(self, table_meta, operations, label_generating_column, entity_id_column, time_column):
 		self.table_meta = table_meta.copy()
 		self.operations = operations
 		self.label_generating_column = label_generating_column
 		self.entity_id_column = entity_id_column
 		self.time_column = time_column
-		if dataframe is not None:
-			self.entity_id_to_cutoff_time = self.determine_cutoff_time(dataframe)
 		
 		self.valid = True
 		temp_meta = self.table_meta.copy()
@@ -37,7 +35,6 @@ class PredictionProblem:
 			if not temp_meta:
 				self.valid = False
 				break
-		
 		
 	"""
 	This function executes all the operations on the dataframe and returns the output. The output
@@ -50,10 +47,17 @@ class PredictionProblem:
 		(Boolean/Float): The Label/Value of the prediction problem's formulation when applied to the data.
 	"""
 	def execute(self, dataframe):
-		output = dataframe.copy()
-		output = output[[self.label_generating_column]]
+		df_groupby = dataframe.copy().groupby(self.entity_id_column)
+		outputs = [df_groupby.get_group(key) for key in df_groupby.groups.keys()]
 		for operation in self.operations:
-			output = operation.execute(output)
+			for i in range(len(outputs)):
+				if outputs[i].shape[0] > 0:
+					outputs[i] = operation.execute(outputs[i])
+					if outputs[i] is None:
+						print(str(operation))
+						assert 0
+		output = pd.concat(outputs)
+		output = output[[self.entity_id_column, self.label_generating_column]]
 		return output
 	"""
 	Args:

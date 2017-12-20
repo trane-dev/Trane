@@ -15,17 +15,19 @@ class OpBase(object):
 
     def preprocess(self, table_meta):
         self.itype = table_meta.get_type(self.column_name)
-        for itype, otype in self.IOTYPES:
+        for idx, (itype, otype) in enumerate(self.IOTYPES):
             if self.itype == itype:
                 self.otype = otype
                 table_meta.set_type(self.column_name, otype)
+                for param, ptype in self.PARAMS[idx].items():
+                    self.param_values[param] = 0
                 return table_meta
         return None
 
-    def __call__(self, data_frame):
-        return self.execute(data_frame)
+    def __call__(self, dataframe):
+        return self.execute(dataframe)
 
-    def execute(self, data_frame):
+    def execute(self, dataframe):
         raise NotImplementedError
 
     def __str__(self):

@@ -5,6 +5,7 @@ from trane.core.prediction_problem_generator import PredictionProblemGenerator
 from trane.core.label_generator import LabelGenerator
 import logging
 import json
+import numpy as np
 
 if __name__ == '__main__':
 	logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', 
@@ -16,20 +17,19 @@ if __name__ == '__main__':
 	cnt = 0
 	lst = []
 	for problem in gen.generate():
-		# print(str(problem))
-		# print(problem.generate_nl_description())
 		lst.append(problem)
 		cnt += 1
-		if cnt == 5:
-			break
 
 	logging.info("Generate %d problems." % cnt)
 
-	label_gen = LabelGenerator(lst[:5])
+	label_gen = LabelGenerator(np.random.choice(lst, 5))
 	jsonstr = label_gen.to_json()
-	label_gen = LabelGenerator.from_json(jsonstr)
+	with open("tasks.json", "w") as f:
+		print(jsonstr, file=f)
+	# dataframe = pd.read_csv('../test_datasets/synthetic_taxi_data.csv')
+	# results = label_gen.execute(dataframe)
+	# print(results[0][1])
 	
-# DATAFRAME = pd.read_csv('../../test_datasets/synthetic_taxi_data.csv')
 # 
 # #inputs to the generator
 # LABEL_GENERATING_COLUMN_NAME = "fare"

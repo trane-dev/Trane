@@ -1,8 +1,8 @@
 from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
 
-AGGREGATION_OPS = ["FirstAggregationOp", "LastAggregationOp", "FMLAggregationOp",
-    "CountAggregationOp", "SumAggregationOp"]
+AGGREGATION_OPS = ["FirstAggregationOp", "CountAggregationOp", "SumAggregationOp"]
+    #"LastAggregationOp", "FMLAggregationOp"]
 __all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
 
 class AggregationOpBase(OpBase):
@@ -11,8 +11,8 @@ class AggregationOpBase(OpBase):
 class FirstAggregationOp(AggregationOpBase):
     PARAMS = [{}, {}]
     IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE), (TM.TYPE_BOOL, TM.TYPE_BOOL)]
-    def execute(self, data_frame):
-        pass
+    def execute(self, dataframe):
+        return dataframe.head(1)
     def generate_nl_description(self):
         if self.itype == TM.TYPE_BOOL:
             return " whether the next"
@@ -21,8 +21,8 @@ class FirstAggregationOp(AggregationOpBase):
 class LastAggregationOp(AggregationOpBase):
     PARAMS = [{}, {}]
     IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE), (TM.TYPE_BOOL, TM.TYPE_BOOL)]
-    def execute(self, data_frame):
-        pass
+    def execute(self, dataframe):
+        return dataframe.tail(1)
     def generate_nl_description(self):
         if self.itype == TM.TYPE_BOOL:
             return " whether the last"
@@ -31,16 +31,21 @@ class LastAggregationOp(AggregationOpBase):
 class FMLAggregationOp(AggregationOpBase):
     PARAMS = [{}]
     IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE)]
-    def execute(self, data_frame):
-        pass
+    def execute(self, dataframe):
+        last = dataframe.tail(1)
+        first = dataframe.head(1)
+        last.at[last.index[0], self.column_name] -= first.at(first.index[0], self.column_name)
+        return last
     def generate_nl_description(self):
         return " the last minus first"
 
 class CountAggregationOp(AggregationOpBase):
     PARAMS = [{}, {}]
     IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE), (TM.TYPE_BOOL, TM.TYPE_VALUE)]
-    def execute(self, data_frame):
-        pass
+    def execute(self, dataframe):
+        first = dataframe.head(1)
+        first.at[first.index[0], self.column_name] = dataframe.shape[0]
+        return first
     def generate_nl_description(self):
         if self.itype == TM.TYPE_BOOL:
             return " the number of records whose"
@@ -49,7 +54,9 @@ class CountAggregationOp(AggregationOpBase):
 class SumAggregationOp(AggregationOpBase):
     PARAMS = [{}]
     IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE)]
-    def execute(self, data_frame):
-        pass
+    def execute(self, dataframe):
+        first = dataframe.head(1)
+        first.at[first.index[0], self.column_name] = dataframe[self.column_name].sum()
+        return first
     def generate_nl_description(self):
         return " the total value of"

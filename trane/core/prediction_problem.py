@@ -3,6 +3,8 @@ import json
 from ..utils.table_meta import TableMeta
 from ..ops import op_saver
 
+__all__ = ['PredictionProblem']
+
 class PredictionProblem:
 
 	"""

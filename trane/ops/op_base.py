@@ -1,5 +1,7 @@
 import json
 
+__all__ = ['OpBase']
+
 class OpBase(object):
     """docstring for OpBase."""
     

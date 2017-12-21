@@ -1,8 +1,7 @@
 import sys
 sys.dont_write_bytecode = True
 import pandas as pd
-from trane.core.prediction_problem_generator import PredictionProblemGenerator
-from trane.core.label_generator import LabelGenerator
+import trane
 import logging
 import json
 import numpy as np
@@ -15,7 +14,7 @@ if __name__ == '__main__':
 	table_meta = open('../test_datasets/donations_meta.json').read()
 	table_meta = json.loads(table_meta)
 	# gen = PredictionProblemGenerator(table_meta, entity_id_column='taxi_id')
-	gen = PredictionProblemGenerator(table_meta, entity_id_column='projectid')
+	gen = trane.PredictionProblemGenerator(table_meta, entity_id_column='projectid')
 	
 	cnt = 0
 	lst = []
@@ -25,7 +24,7 @@ if __name__ == '__main__':
 
 	logging.info("Generate %d problems." % cnt)
 
-	label_gen = LabelGenerator(np.random.choice(lst, 5))
+	label_gen = trane.LabelGenerator(np.random.choice(lst, 5))
 	jsonstr = label_gen.to_json()
 	with open("tasks.json", "w") as f:
 		print(jsonstr, file=f)

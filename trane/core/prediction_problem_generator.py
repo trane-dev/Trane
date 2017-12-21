@@ -5,6 +5,8 @@ from ..utils.table_meta import TableMeta
 
 import logging
 
+__all__ = ['PredictionProblemGenerator']
+
 class PredictionProblemGenerator:
 
 	"""

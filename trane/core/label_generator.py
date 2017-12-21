@@ -1,6 +1,8 @@
 import json
 from .prediction_problem import PredictionProblem
 
+__all__ = ['LabelGenerator']
+
 class LabelGenerator():
 
 	def __init__(self, prediction_problems):

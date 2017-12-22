@@ -29,6 +29,7 @@ class PredictionProblem:
         self.label_generating_column = label_generating_column
         self.entity_id_column = entity_id_column
         self.time_column = time_column
+        self.cutoff_time = 0
         
         self.valid = True
         temp_meta = self.table_meta.copy()
@@ -49,7 +50,9 @@ class PredictionProblem:
         Returns:
             (Boolean/Float): The Label/Value of the prediction problem's formulation when applied to the data.
         """
-        df_groupby = dataframe.copy().groupby(self.entity_id_column)
+        dataframe = dataframe.copy()
+        dataframe = dataframe[dataframe[self.time_column] > self.cutoff_time]
+        df_groupby = dataframe.groupby(self.entity_id_column)
         outputs = [df_groupby.get_group(key) for key in df_groupby.groups.keys()]
         for operation in self.operations:
             for i in range(len(outputs)):
@@ -58,8 +61,10 @@ class PredictionProblem:
                     if outputs[i] is None:
                         print(str(operation))
                         assert 0
+        for item in outputs:
+            item["trane_cutoff"] = self.cutoff_time
         output = pd.concat(outputs)
-        output = output[[self.entity_id_column, self.label_generating_column]]
+        output = output[[self.entity_id_column, "trane_cutoff", self.label_generating_column]]
         return output
     
     def __str__(self):
@@ -110,7 +115,7 @@ class PredictionProblem:
 
         return entity_id_to_cutoff_time
 
-    def set_global_cutoff_time(self, global_cutoff_time):
+    def set_cutoff_time(self, cutoff_time):
         """
         A method to set the cutoff time for all entity id's.
         Args:
@@ -118,11 +123,7 @@ class PredictionProblem:
         Returns:
             None
         """
-        unique_entity_ids = self.get_entity_ids()
-        entity_id_to_cutoff_time = {}
-        for entity_id in unique_entity_ids:
-            entity_id_to_cutoff_time[entity_id] = global_cutoff_time
-        self.entity_id_to_cutoff_time = entity_id_to_cutoff_time
+        self.cutoff_time = cutoff_time
 
     def get_entity_id_to_cutoff_time(self):
         return self.entity_id_to_cutoff_time

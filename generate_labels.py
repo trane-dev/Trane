@@ -12,8 +12,8 @@ if __name__ == '__main__':
     
     jsonstr = open("tasks_pretty.json").read()
     label_gen = trane.LabelGenerator.from_json(jsonstr)
-    # dataframe = pd.read_csv('../test_datasets/synthetic_taxi_data.csv')
-    dataframe = pd.read_csv('../test_datasets/donations_sample.csv')
+    dataframe = pd.read_csv('../test_datasets/synthetic_taxi_data.csv')
+    # dataframe = pd.read_csv('../test_datasets/donations_sample.csv')
     results = label_gen.execute(dataframe)
     for prob, label in results:
         print(str(prob))

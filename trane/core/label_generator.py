@@ -32,7 +32,7 @@ class LabelGenerator():
 
         return results
 
-    def set_global_cutoff_time_for_all_prediction_problems(self, global_cutoff_time):
+    def set_cutoff_time(self, global_cutoff_time):
         """
         A method to set the cutoff time for all prediction problems.
         Args:
@@ -41,7 +41,7 @@ class LabelGenerator():
             None
         """
         for prediction_problem in self.prediction_problems:
-            prediction_problem.set_global_cutoff_time(global_cutoff_time)
+            prediction_problem.set_cutoff_time(global_cutoff_time)
 
     def to_json(self):
         """

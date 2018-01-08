@@ -2,6 +2,7 @@ import pandas as pd
 import json
 from ..utils.table_meta import TableMeta
 from ..ops import op_saver
+from dateutil import parser
 
 __all__ = ['PredictionProblem']
 
@@ -51,7 +52,11 @@ class PredictionProblem:
             (Boolean/Float): The Label/Value of the prediction problem's formulation when applied to the data.
         """
         dataframe = dataframe.copy()
-        dataframe = dataframe[dataframe[self.time_column] > self.cutoff_time]
+        if type(self.cutoff_time) == str:
+            cutoff = [parser.parse(item) > parser.parse(self.cutoff_time) for item in dataframe[self.time_column]]
+            dataframe = dataframe[cutoff]
+        else:
+            dataframe = dataframe[dataframe[self.time_column] > self.cutoff_time]
         df_groupby = dataframe.groupby(self.entity_id_column)
         outputs = [df_groupby.get_group(key) for key in df_groupby.groups.keys()]
         for operation in self.operations:

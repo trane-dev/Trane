@@ -62,6 +62,7 @@ We use `pytest` to automaticly collecting unit testings and `pytest-cov` to meas
 ```
 
 # TODO
+- Need an easier way to add customize operations. Currently, external plugin operations are not allowed. The bottleneck is we need to maintain a list of operations so that we can save, load, and iterate over operations. It's not easy to add an external operation into operation list. 
 - Currently, all operations are in-place operations. The aggregation ops simply take a record, change the value in the column and return. May not be a good design.
 - API for setting thresholds. 
 - Some NotImplementedError.

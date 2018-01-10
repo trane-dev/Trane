@@ -13,7 +13,7 @@ A software package that takes any dataset as input and generates prediction prob
 numpy
 pandas
 
-#Ops
+# Ops
 - FilterOp
     - IdentityFilterOp
     - GreaterFilterOp
@@ -53,6 +53,13 @@ bash run.sh
 - Then use `json.tool` to prettify output as `tasks_pretty.json`.
 - We can edit thresholds in `tasks_pretty.json`. (omitted in `run.sh`, default is 0.)
 - Run `generate_labels.py` and print task/desciption/label on screen.
+
+# Unit Testing
+We use `pytest` to automaticly collecting unit testings and `pytest-cov` to measure the coverage of unit testing. The application code are in `Trane/trane/`. The unit testing code are in `Trane/tests/`. To run all unit testings, change directory to `Trane` and execute
+
+```
+> pytest --cov=trane tests
+```
 
 # TODO
 - Currently, all operations are in-place operations. The aggregation ops simply take a record, change the value in the column and return. May not be a good design.

@@ -5,7 +5,7 @@ __all__ = ['TableMeta']
 
 class TableMeta(object):
     """
-    Meta data of a database table. 
+    Meta data of a database table. Defines column name and column data type of a database. 
     """
     TYPE_IDENTIFIER = 'identifier'
     TYPE_TEXT = 'text'

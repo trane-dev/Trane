@@ -6,7 +6,7 @@ __all__ = ['LabelGenerator']
 
 class LabelGenerator():
     """
-    Generate labels of prediction problems using a given dateset.
+    Apply prediction problems on a dataframe. (deprecated)
     """
 
     def __init__(self, prediction_problems):

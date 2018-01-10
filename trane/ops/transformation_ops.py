@@ -5,6 +5,9 @@ TRANSFORMATION_OPS = ["IdentityTransformationOp", "DiffTransformationOp"]
 __all__ = ["TransformationOpBase", "TRANSFORMATION_OPS"] + TRANSFORMATION_OPS
 
 class TransformationOpBase(OpBase):
+    """
+    super class for all Transformation Operations. (deprecated)
+    """
     pass
 
 class IdentityTransformationOp(TransformationOpBase):

@@ -1,3 +1,8 @@
+# Apply prediction problems in PROBLEM_OUTPUT on dataframe DATA.
+# Results are printed to stdout.
+# Usage:
+#   python3 generate_labels.py config_file
+
 import sys
 sys.dont_write_bytecode = True
 import pandas as pd

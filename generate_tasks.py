@@ -1,3 +1,9 @@
+# Generate all possible prediction problems which are compatable with data types
+# decribed in table meta. Randomly select NUM_OUTPUT prediction problems and save
+# them in PROBLEM_OUTPUT.
+# Usage:
+#   python3 generate_tasks.py config_file
+
 import sys
 sys.dont_write_bytecode = True
 import pandas as pd

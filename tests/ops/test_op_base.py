@@ -4,7 +4,7 @@ import pytest
 
 class FakeOp(OpBase):
     PARAMS = [{'param': TM.TYPE_VALUE}, {'param': TM.TYPE_TEXT}]
-    IOTYPES = [{TM.TYPE_VALUE, TM.TYPE_BOOL}, {TM.TYPE_TEXT, TM.TYPE_BOOL}]
+    IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_BOOL), (TM.TYPE_TEXT, TM.TYPE_BOOL)]
 
 def test_op_base_init():
     op = FakeOp('col')

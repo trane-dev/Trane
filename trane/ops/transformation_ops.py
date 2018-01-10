@@ -23,9 +23,9 @@ class DiffTransformationOp(TransformationOpBase):
     IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE)]
     def execute(self, dataframe):
         index = dataframe.index
-        dataframe.at[index[0], self.column_name] = 0
-        for i in range(1, len(index)):
+        for i in range(len(index) - 1, 0, -1):
             dataframe.at[index[i], self.column_name] -= dataframe.at[index[i-1], self.column_name]
+        dataframe.at[index[0], self.column_name] = 0
         return dataframe
     def generate_nl_description(self):
         return " the fluctuation of"

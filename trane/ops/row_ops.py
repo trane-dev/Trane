@@ -41,7 +41,7 @@ class GreaterRowOp(RowOpBase):
     PARAMS = [{"threshold": TM.TYPE_VALUE}]
     IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_BOOL)]
     def execute(self, dataframe):
-        dataframe[self.column_name].apply(lambda x: x > self.param_values["threshold"])
+        dataframe[self.column_name] = dataframe[self.column_name].apply(lambda x: x > self.param_values["threshold"])
         return dataframe
     def generate_nl_description(self):
         return " %s is greater than ____" % self.column_name

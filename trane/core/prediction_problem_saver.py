@@ -2,7 +2,10 @@ from .prediction_problem import PredictionProblem
 from ..utils.table_meta import TableMeta
 import json
 
-def to_json(prediction_problems, table_meta, entity_id_column, label_generating_column, time_column):
+__all__ = ["prediction_problems_to_json", "prediction_problems_from_json"]
+
+def prediction_problems_to_json(prediction_problems, table_meta, 
+    entity_id_column, label_generating_column, time_column):
     """
     Convert a list of prediction problems into a json str.
     args:
@@ -23,7 +26,7 @@ def to_json(prediction_problems, table_meta, entity_id_column, label_generating_
         "time_column": time_column
     })
     
-def from_json(json_data):
+def prediction_problems_from_json(json_data):
     """
     Convert json into a list of prediction problems and extra information.
     args:
@@ -38,7 +41,7 @@ def from_json(json_data):
     data = json.loads(json_data)
     prediction_problems = data['prediction_problems']
     prediction_problems = [PredictionProblem.from_json(json.dumps(prob)) for prob in prediction_problems]
-    table_meta = TableMeta.from_json(json.dumps(data['tabel_meta']))
+    table_meta = TableMeta.from_json(json.dumps(data['table_meta']))
     entity_id_column = data['entity_id_column']
     label_generating_column = data['label_generating_column']
     time_column = data['time_column']

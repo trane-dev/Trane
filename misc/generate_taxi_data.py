@@ -74,21 +74,3 @@ def generate_data():
 	
 df = generate_data()
 df.to_csv("synthetic_taxi_data.csv", index = False)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

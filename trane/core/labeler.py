@@ -1,10 +1,10 @@
 import json
 from .prediction_problem import PredictionProblem
-from .prediction_problem_saver import from_json
+from .prediction_problem_saver import *
 
-__all__ = ['Labeller']
+__all__ = ['Labeler']
 
-class Labeller():
+class Labeler():
 
     def __init__(self):
         pass
@@ -22,19 +22,19 @@ class Labeller():
         Args:
         """
         with open(json_prediction_problems_filename) as f:
-            prediction_problems, entity_id_column, label_generating_column, time_column= from_json(f.read())
+            prediction_problems, table_meta, entity_id_column, label_generating_column, time_column = \
+                prediction_problems_from_json(f.read())
         
-        entity_id_to_labels_and_cutoffs_list = []
-        for problem in prediction_problems:
-            entity_id_to_labels_and_cutoffs = {}
-            for entity in entity_to_data_and_cutoff_dict:
-                entity_data, entity_cutoff = entity_to_data_and_cutoff_dict[entity]
-                entity_labels = []
-                for prediction_problem in prediction_problems:
-                    entity_label_for_this_prediction_problem = prediction_problem.execute(entity_data)
-                    entity_labels.append(entity_label_for_this_prediction_problem)
+        entity_id_to_labels_and_cutoffs = {}
+        for entity in entity_to_data_and_cutoff_dict:
+            entity_data, entity_cutoff = entity_to_data_and_cutoff_dict[entity]
+            entity_labels = []
+            for prediction_problem in prediction_problems:
+                execution_result = prediction_problem.execute(entity_data, time_column, entity_cutoff)
+                assert len(execution_result) == 1
+                execution_result = execution_result[label_generating_column].values[0]
+                entity_labels.append(execution_result)
 
-                entity_id_to_labels_and_cutoffs[entity] = (entity_labels, entity_cutoff)
-            entity_id_to_labels_and_cutoffs_list.append(entity_id_to_labels_and_cutoffs)
+            entity_id_to_labels_and_cutoffs[entity] = (entity_labels, entity_cutoff)
 
-        return entity_id_to_labels_and_cutoffs_list
+        return entity_id_to_labels_and_cutoffs

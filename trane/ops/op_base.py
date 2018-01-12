@@ -69,6 +69,3 @@ class OpBase(object):
 
     def __str__(self):
         return "%s(%s)" % (type(self).__name__, self.column_name)
-
-    def generate_nl_description(self):
-        raise NotImplementedError

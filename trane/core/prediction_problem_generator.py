@@ -65,7 +65,6 @@ class PredictionProblemGenerator:
 
                 prediction_problem = PredictionProblem(
                     [filter_op_obj, row_op_obj, transformation_op_obj, aggregation_op_obj])
-                prediction_problem.preprocess(table_meta)
-                if not prediction_problem.valid:
+                if not prediction_problem.op_type_check(self.table_meta):
                     continue
                 yield prediction_problem

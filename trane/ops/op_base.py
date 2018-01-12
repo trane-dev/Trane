@@ -37,7 +37,7 @@ class OpBase(object):
         assert(self.PARAMS and self.IOTYPES), type(self).__name__
         assert(len(self.PARAMS) == len(self.IOTYPES)), type(self).__name__
 
-    def preprocess(self, table_meta):
+    def op_type_check(self, table_meta):
         """
         Data type check for the operation. 
         Operations may change the data type of a column, eg. int -> bool. 

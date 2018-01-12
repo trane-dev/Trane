@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 from ..utils.table_meta import TableMeta
-from ..ops import op_saver
+from ..ops.op_saver import *
 from dateutil import parser
 
 __all__ = ['PredictionProblem']
@@ -26,8 +26,16 @@ class PredictionProblem:
             None
         """
         self.operations = operations
-        
-    def execute(self, dataframe):
+
+    def op_type_check(self, table_meta):
+        temp_meta = table_meta.copy()
+        for op in self.operations:
+            temp_meta = op.op_type_check(temp_meta)
+            if not temp_meta:
+                return False
+        return True
+
+    def execute(self, dataframe, time_column, cutoff_time):
         """
         This function executes all the operations on the dataframe and returns the output. The output
         should be structured as a single label/value per the Trane documentation.
@@ -39,25 +47,11 @@ class PredictionProblem:
             (Boolean/Float): The Label/Value of the prediction problem's formulation when applied to the data.
         """
         dataframe = dataframe.copy()
-        if type(self.cutoff_time) == str:
-            cutoff = [parser.parse(item) > parser.parse(self.cutoff_time) for item in dataframe[self.time_column]]
-            dataframe = dataframe[cutoff]
-        else:
-            dataframe = dataframe[dataframe[self.time_column] > self.cutoff_time]
-        df_groupby = dataframe.groupby(self.entity_id_column)
-        outputs = [df_groupby.get_group(key) for key in df_groupby.groups.keys()]
+        dataframe = dataframe[dataframe[time_column] > cutoff_time]
+        
         for operation in self.operations:
-            for i in range(len(outputs)):
-                if outputs[i].shape[0] > 0:
-                    outputs[i] = operation.execute(outputs[i])
-                    if outputs[i] is None:
-                        print(str(operation))
-                        assert 0
-        for item in outputs:
-            item["trane_cutoff"] = self.cutoff_time
-        output = pd.concat(outputs)
-        output = output[[self.entity_id_column, "trane_cutoff", self.label_generating_column]]
-        return output
+            dataframe = operation.execute(dataframe)
+        return dataframe
     
     def __str__(self):
         """
@@ -76,11 +70,11 @@ class PredictionProblem:
         
     def to_json(self):
         return json.dumps(
-            {"operations": [json.loads(op_saver.to_json(op)) for op in self.operations]})
+            {"operations": [json.loads(op_to_json(op)) for op in self.operations]})
         
     def from_json(json_data):
         data = json.loads(json_data)
-        operations = [op_saver.from_json(json.dumps(item)) for item in data['operations']] 
+        operations = [op_from_json(json.dumps(item)) for item in data['operations']] 
         return PredictionProblem(operations)
     
         

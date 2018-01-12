@@ -5,9 +5,9 @@ from .row_ops import *
 from .transformation_ops import *
 import json
 
-__all__ = ["to_json", "from_json"]
+__all__ = ["op_to_json", "op_from_json"]
 
-def to_json(op):
+def op_to_json(op):
     """
     Convert a operation object to a json string. 
     args:
@@ -23,7 +23,7 @@ def to_json(op):
         "param_values": op.param_values
     })
 
-def from_json(json_data):
+def op_from_json(json_data):
     """
     Convert a operation json string to a operation object.
     args:

@@ -16,10 +16,6 @@ class IdentityRowOp(RowOpBase):
     IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE)]
     def execute(self, dataframe):
         return dataframe
-    def generate_nl_description(self):
-        if self.itype == TM.TYPE_BOOL:
-            return ""
-        return " %s" % self.column_name
 
 class EqRowOp(RowOpBase):
     PARAMS = [{"threshold": TM.TYPE_VALUE}]
@@ -27,8 +23,6 @@ class EqRowOp(RowOpBase):
     def execute(self, dataframe):
         dataframe[self.column_name] = dataframe[self.column_name].apply(lambda x: x == self.param_values["threshold"])
         return dataframe
-    def generate_nl_description(self):
-        return " %s equals to ____" % self.column_name
 
 class NeqRowOp(RowOpBase):
     PARAMS = [{"threshold": TM.TYPE_VALUE}]
@@ -36,8 +30,6 @@ class NeqRowOp(RowOpBase):
     def execute(self, dataframe):
         dataframe[self.column_name] = dataframe[self.column_name].apply(lambda x: x != self.param_values["threshold"])
         return dataframe
-    def generate_nl_description(self):
-        return " %s does not equal to ____" % self.column_name
 
 class GreaterRowOp(RowOpBase):
     PARAMS = [{"threshold": TM.TYPE_VALUE}]
@@ -45,8 +37,6 @@ class GreaterRowOp(RowOpBase):
     def execute(self, dataframe):
         dataframe[self.column_name] = dataframe[self.column_name].apply(lambda x: x > self.param_values["threshold"])
         return dataframe
-    def generate_nl_description(self):
-        return " %s is greater than ____" % self.column_name
 
 class LessRowOp(RowOpBase):
     PARAMS = [{"threshold": TM.TYPE_VALUE}]
@@ -54,8 +44,6 @@ class LessRowOp(RowOpBase):
     def execute(self, dataframe):
         dataframe[self.column_name] = dataframe[self.column_name].apply(lambda x: x < self.param_values["threshold"])
         return dataframe
-    def generate_nl_description(self):
-        return " %s is less than ____" % self.column_name
 
 class ExpRowOp(RowOpBase):
     PARAMS = [{"threshold": TM.TYPE_VALUE}]
@@ -63,5 +51,3 @@ class ExpRowOp(RowOpBase):
     def execute(self, dataframe):
         dataframe[self.column_name] = dataframe[self.column_name].apply(lambda x: np.exp(x))
         return dataframe
-    def generate_nl_description(self):
-        return " the exponentiate of %s" % self.column_name

@@ -15,8 +15,6 @@ class IdentityTransformationOp(TransformationOpBase):
     IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE), (TM.TYPE_BOOL, TM.TYPE_BOOL)]
     def execute(self, dataframe):
         return dataframe
-    def generate_nl_description(self):
-        return ""
 
 class DiffTransformationOp(TransformationOpBase):
     PARAMS = [{}]
@@ -27,5 +25,3 @@ class DiffTransformationOp(TransformationOpBase):
             dataframe.at[index[i], self.column_name] -= dataframe.at[index[i-1], self.column_name]
         dataframe.at[index[0], self.column_name] = 0
         return dataframe
-    def generate_nl_description(self):
-        return " the fluctuation of"

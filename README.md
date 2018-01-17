@@ -61,35 +61,27 @@ The workflow of using trane on a database is as follow.
     - LastAggregationOp
     - LMFAggregationOp
 
-## Usage
-The directory structure is
-
-```
-|-Trane
-| |-trane
-| | |-...
-| |-generate_labels.py
-| |-generate_tasks.py
-| |-run.sh
-|-test_datasets
-| |-donations_meta.json
-| |-donations_sample.csv
-```
-Run the example by
-
-```
-> bash run.sh
-```
-- It executes `generate_tasks.py` which generates prediction problems and randomly saves 5 problems to `tasks.json`.
-- We can edit thresholds in `tasks.json`. (omitted in `run.sh`, default is 0.)
-- Run `generate_labels.py` and print task/desciption/label on screen.
-
 ## Unit Testing
 We use `pytest` to automatically collecting unit testings and `pytest-cov` to measure the coverage of unit testing. The application code is in `Trane/trane/`. The unit testing code is in `Trane/tests/`. To run all unit testings, change directory to `Trane` and execute
 
 ```
 > pytest --cov=trane tests
 ```
+
+
+## Setup/Install
+### Clone from Git
+```
+> git clone https://github.com/HDI-Project/Trane.git
+```
+### Run pip install
+```
+> pip3 install Trane/
+```
+
+## Quick Usage
+We have [a tutorial notebook here](https://github.com/HDI-Project/Trane/blob/master/Tutorial.ipynb).
+
 
 ## TODO
 - Need an easier way to add customize operations. Currently, external plugin operations are not allowed. The bottleneck is we need to maintain a list of operations so that we can save, load, and iterate over operations. It's not easy to add an external operation into operation list. 

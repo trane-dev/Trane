@@ -19,7 +19,7 @@ def df_group_by_entity_id(dataframe, entity_id_column_name):
         entity_id_to_df[entity_id] = relevant_data
     return entity_id_to_df
 
-def csv_to_df(csv_file_paths, header = True):
+def csv_to_df(csv_file_paths, output_filename = None, header = True):
     """
     Args:
         (List)csv_file_paths: A list of the paths to the csv files you want to load
@@ -33,5 +33,6 @@ def csv_to_df(csv_file_paths, header = True):
        dataframes = [pd.read_csv(file_path) for file_path in csv_file_paths]
 
     merged_df = reduce((lambda left_frame, right_frame: pd.merge(left_frame, right_frame, how = 'outer')), dataframes)
-    merged_df.to_csv('merged_df.csv')
+    if output_filename != None:
+        merged_df.to_csv(output_filename)
     return merged_df

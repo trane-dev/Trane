@@ -5,33 +5,33 @@ import numpy as np
 
 ALL_OPS = AGGREGATION_OPS + FILTER_OPS + ROW_OPS + TRANSFORMATION_OPS
 
-def test_save_load_before_preprocess():
+def test_save_load_before_op_type_check():
     """
-    Randomly select 10 operations, check to_json and from_json work properly before preprocess
+    Randomly select 10 operations, check op_to_json and op_from_json work properly before op_type_check
     """
     for i in range(10):
         op_type = np.random.choice(ALL_OPS)
         op = globals()[op_type]('col')
-        op_json = to_json(op)
+        op_json = op_to_json(op)
         assert type(op_json) == str
-        op2 = from_json(op_json)
+        op2 = op_from_json(op_json)
         assert type(op2) == globals()[op_type]
         assert op2.column_name == 'col'
         assert op2.itype is None and op2.otype is None
         assert type(op2.param_values) == dict and len(op2.param_values) == 0
 
-def test_save_load_after_preprocess():
+def test_save_load_after_op_type_check():
     """
-    Randomly select 10 operations, check to_json and from_json work properly after preprocess
+    Randomly select 10 operations, check op_to_json and op_from_json work properly after op_type_check
     """
     for i in range(10):
         meta = TM([{'name': 'col', 'type': TM.TYPE_VALUE}])
         op_type = np.random.choice(ALL_OPS)
         op = globals()[op_type]('col')
-        op.preprocess(meta)
-        op_json = to_json(op)
+        op.op_type_check(meta)
+        op_json = op_to_json(op)
         assert type(op_json) == str
-        op2 = from_json(op_json)
+        op2 = op_from_json(op_json)
         assert type(op2) == globals()[op_type]
         assert op2.column_name == 'col'
         assert op2.itype == TM.TYPE_VALUE and op2.otype == op.otype

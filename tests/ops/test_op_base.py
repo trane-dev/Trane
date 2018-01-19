@@ -22,35 +22,35 @@ def test_op_base_init():
     with pytest.raises(NotImplementedError):
         op(None)
 
-def test_preprocess_with_correct_type1():
+def test_op_type_check_with_correct_type1():
     """
     With input type TYPE_VALUE, check if itype and otype are correct.
     """
     meta = TM([{'name': 'col', 'type': TM.TYPE_VALUE}])
     op = FakeOp('col')
-    meta2 = op.preprocess(meta)
+    meta2 = op.op_type_check(meta)
     assert meta2 == meta
     assert meta.get_type('col') == TM.TYPE_BOOL
     assert op.itype == TM.TYPE_VALUE and op.otype == TM.TYPE_BOOL
 
-def test_preprocess_with_correct_type2():    
+def test_op_type_check_with_correct_type2():    
     """
     With input type TYPE_TEXT, check if itype and otype are correct.
     """
     meta = TM([{'name': 'col', 'type': TM.TYPE_TEXT}])
     op = FakeOp('col')
-    meta2 = op.preprocess(meta)
+    meta2 = op.op_type_check(meta)
     assert meta2 == meta
     assert meta.get_type('col') == TM.TYPE_BOOL
     assert op.itype == TM.TYPE_TEXT and op.otype == TM.TYPE_BOOL    
     
-def test_preprocess_with_wrong_type():
+def test_op_type_check_with_wrong_type():
     """
-    with input type TYPE_IDENTIFIER, check if None is returned by preprocess.
+    with input type TYPE_IDENTIFIER, check if None is returned by op_type_check.
     """
     meta = TM([{'name': 'col', 'type': TM.TYPE_IDENTIFIER}])
     op = FakeOp('col')
-    meta2 = op.preprocess(meta)
+    meta2 = op.op_type_check(meta)
     assert meta2 is None
     assert meta.get_type('col') == TM.TYPE_IDENTIFIER
     assert op.itype is TM.TYPE_IDENTIFIER and op.otype is None

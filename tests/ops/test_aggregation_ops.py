@@ -7,28 +7,28 @@ meta = TM([{'name': 'col', 'type': TM.TYPE_VALUE}])
 
 def test_first_aggregation_op_input_value():
     op = FirstAggregationOp('col')
-    op.preprocess(meta)
+    op.op_type_check(meta)
     output = op(df.copy())
     assert len(output) == 1
     assert output.values[0, 0] == 1
     
 def test_last_aggregation_op_input_value():
     op = LastAggregationOp('col')
-    op.preprocess(meta)
+    op.op_type_check(meta)
     output = op(df.copy())
     assert len(output) == 1
     assert output.values[0, 0] == 5
     
 def test_lmf_aggregation_op_input_value():
     op = LMFAggregationOp('col')
-    op.preprocess(meta)
+    op.op_type_check(meta)
     output = op(df.copy())
     assert len(output) == 1
     assert output.values[0, 0] == 4
     
 def test_count_aggregation_op_input_value():
     op = CountAggregationOp('col')
-    op.preprocess(meta)
+    op.op_type_check(meta)
     output = op(df.copy())
     assert len(output) == 1
     assert output.values[0, 0] == 5
@@ -36,7 +36,7 @@ def test_count_aggregation_op_input_value():
     
 def test_sum_aggregation_op_input_value():
     op = SumAggregationOp('col')
-    op.preprocess(meta)
+    op.op_type_check(meta)
     output = op(df.copy())
     assert len(output) == 1
     assert output.values[0, 0] == 15

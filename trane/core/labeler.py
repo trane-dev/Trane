@@ -18,9 +18,6 @@ class Labeler():
             (Dict): A mapping from entity id to an tuple of ([labels (one for every prediction problem)], cutoff_time)
         """
     def execute(self, entity_to_data_and_cutoff_dict, json_prediction_problems_filename):
-        """Generate the labels for each entity.
-        Args:
-        """
         with open(json_prediction_problems_filename) as f:
             prediction_problems, table_meta, entity_id_column, label_generating_column, time_column = \
                 prediction_problems_from_json(f.read())

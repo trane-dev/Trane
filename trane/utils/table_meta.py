@@ -4,9 +4,7 @@ import json
 __all__ = ['TableMeta']
 
 class TableMeta(object):
-    """
-    Meta data of a database table. Defines column name and column data type of a database. 
-    """
+    """Meta data of a database table. Defines column name and column data type of a database. """
     SUPERTYPE = {}
     # categorical
     TYPE_CATEGORY = 'categorical'
@@ -30,10 +28,10 @@ class TableMeta(object):
     TYPES = [TYPE_CATEGORY, TYPE_BOOL, TYPE_ORDERED, TYPE_TEXT, TYPE_INTEGER, TYPE_FLOAT, TYPE_TIME, TYPE_IDENTIFIER]
     
     def __init__(self, table_meta):
-        """
-        args:
+        """args:
             table_meta: a dict describe meta data of a database.
                 https://hdi-project.github.io/MetaData.json/index
+
         """
         self.table_meta = table_meta.copy()
         self.all_columns = {}
@@ -47,23 +45,27 @@ class TableMeta(object):
 
             
     def get_type(self, column_name):
-        """
-        Get the type of a column.
+        """Get the type of a column.
+        
         args:
             column_name: str
+        
         returns:
             str: column type
+        
         """
         return self.all_columns[column_name]['type']
     
     def set_type(self, column_name, dtype):
-        """
-        Change the type of a column.
+        """Change the type of a column.
+        
         args:
             column_name: str
             dtype: str in TYPES
+        
         returns:
             None
+        
         """
         self.all_columns[column_name]['type'] = dtype
         column_data = self.all_columns[column_name]
@@ -83,35 +85,40 @@ class TableMeta(object):
             self.table_meta['tables'][column_data['table_id']]['fields'][column_data['field_id']]['type'] = dtype
     
     def get_columns(self):
-        """
-        Get all the column names.
+        """Get all the column names.
+        
         returns:
             list of str: column names
+        
         """
         return self.all_columns.keys()
         
     def copy(self):
-        """
-        Make a deep copy of self.
+        """Make a deep copy of self.
+        
         returns:
             TableMeta: a copy
+        
         """
         return copy.deepcopy(self)
 
     def to_json(self):
-        """
-        Convert to json str
+        """Convert to json str
+        
         returns:
             str: json str of self
+        
         """
         return json.dumps(self.table_meta)
 
     def from_json(json_data):
-        """
-        Load from json str.
+        """Load from json str.
+        
         args:
             json_data: json str
+        
         returns:
             TableMeta
+
         """
         return TableMeta(json.loads(json_data))

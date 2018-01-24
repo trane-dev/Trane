@@ -6,9 +6,7 @@ ROW_OPS = ["IdentityRowOp", "GreaterRowOp", "EqRowOp", "NeqRowOp", "LessRowOp", 
 __all__ = ["RowOpBase", "ROW_OPS"] + ROW_OPS
 
 class RowOpBase(OpBase):
-    """
-    super class for all Row Operations. (deprecated)
-    """
+    """super class for all Row Operations. (deprecated)"""
     pass
 
 class IdentityRowOp(RowOpBase):

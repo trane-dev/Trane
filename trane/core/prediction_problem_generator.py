@@ -8,9 +8,9 @@ import logging
 __all__ = ['PredictionProblemGenerator']
 
 class PredictionProblemGenerator:
-    """
-    Automatically generate prediction problems with a sequence of 
+    """Automatically generate prediction problems with a sequence of 
     fileter, row, transformation and aggregation operations.
+
     """
     def __init__(self, table_meta, entity_id_column, label_generating_column, time_column):
         """
@@ -39,10 +39,11 @@ class PredictionProblemGenerator:
         logging.info("Time [%s]" % self.time_column)
 
     def generate(self):
-        """
-        Generate prediction problems.
+        """Generate prediction problems.
+        
         yeilds:
             PredictionProblem
+        
         """
         #NOTE tricks for less indents
         def iter_over_ops():

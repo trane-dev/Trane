@@ -5,9 +5,7 @@ FILTER_OPS = ["AllFilterOp", "GreaterFilterOp", "EqFilterOp", "NeqFilterOp", "Le
 __all__ = ["FilterOpBase", "FILTER_OPS"] + FILTER_OPS
 
 class FilterOpBase(OpBase):
-    """
-    super class for all Filter Operations. (deprecated)
-    """
+    """super class for all Filter Operations. (deprecated)"""
     pass
 
 class AllFilterOp(FilterOpBase):

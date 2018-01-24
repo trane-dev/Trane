@@ -6,9 +6,7 @@ AGGREGATION_OPS = ["FirstAggregationOp", "CountAggregationOp", "SumAggregationOp
 __all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
 
 class AggregationOpBase(OpBase):
-    """
-    super class for all Aggregation Operations. (deprecated)
-    """
+    """super class for all Aggregation Operations. (deprecated)"""
     pass
 
 class FirstAggregationOp(AggregationOpBase):

@@ -31,7 +31,7 @@ class PredictionProblemGenerator:
             return column_name
         
         self.entity_id_column = check_column_type(entity_id_column, TableMeta.TYPE_IDENTIFIER)
-        self.label_generating_column = check_column_type(label_generating_column, TableMeta.TYPE_VALUE)
+        self.label_generating_column = check_column_type(label_generating_column, TableMeta.TYPE_FLOAT)
         self.time_column = check_column_type(time_column, TableMeta.TYPE_TIME)
         
         logging.info("Generate labels on [%s]" % self.label_generating_column)

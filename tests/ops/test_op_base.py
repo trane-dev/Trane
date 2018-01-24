@@ -7,8 +7,8 @@ class FakeOp(OpBase):
     Make a fake operation for testing. 
     It has PARAMS and IOTYPES, but execute is not implemented
     """
-    PARAMS = [{'param': TM.TYPE_VALUE}, {'param': TM.TYPE_TEXT}]
-    IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_BOOL), (TM.TYPE_TEXT, TM.TYPE_BOOL)]
+    PARAMS = [{'param': TM.TYPE_FLOAT}, {'param': TM.TYPE_TEXT}]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_BOOL), (TM.TYPE_TEXT, TM.TYPE_BOOL)]
 
 def test_op_base_init():
     """
@@ -24,20 +24,26 @@ def test_op_base_init():
 
 def test_op_type_check_with_correct_type1():
     """
-    With input type TYPE_VALUE, check if itype and otype are correct.
+    With input type TYPE_FLOAT, check if itype and otype are correct.
     """
-    meta = TM([{'name': 'col', 'type': TM.TYPE_VALUE}])
+    meta = TM({
+        "tables": [
+            {"fields": [{'name': 'col', 'type': TM.SUPERTYPE[TM.TYPE_FLOAT], 'subtype': TM.TYPE_FLOAT}]}
+        ]})
     op = FakeOp('col')
     meta2 = op.op_type_check(meta)
     assert meta2 == meta
     assert meta.get_type('col') == TM.TYPE_BOOL
-    assert op.itype == TM.TYPE_VALUE and op.otype == TM.TYPE_BOOL
+    assert op.itype == TM.TYPE_FLOAT and op.otype == TM.TYPE_BOOL
 
 def test_op_type_check_with_correct_type2():    
     """
     With input type TYPE_TEXT, check if itype and otype are correct.
     """
-    meta = TM([{'name': 'col', 'type': TM.TYPE_TEXT}])
+    meta = TM({
+        "tables": [
+            {"fields": [{'name': 'col', 'type': TM.TYPE_TEXT}]}
+        ]})
     op = FakeOp('col')
     meta2 = op.op_type_check(meta)
     assert meta2 == meta
@@ -48,7 +54,10 @@ def test_op_type_check_with_wrong_type():
     """
     with input type TYPE_IDENTIFIER, check if None is returned by op_type_check.
     """
-    meta = TM([{'name': 'col', 'type': TM.TYPE_IDENTIFIER}])
+    meta = TM({
+        "tables": [
+            {"fields": [{'name': 'col', 'type': TM.TYPE_IDENTIFIER}]}
+        ]})
     op = FakeOp('col')
     meta2 = op.op_type_check(meta)
     assert meta2 is None

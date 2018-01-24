@@ -7,22 +7,44 @@ class TableMeta(object):
     """
     Meta data of a database table. Defines column name and column data type of a database. 
     """
-    TYPE_IDENTIFIER = 'identifier'
-    TYPE_TEXT = 'text'
-    TYPE_TIME = 'time'
-    TYPE_VALUE = 'value'
-    TYPE_CATEGORY = 'category'
+    SUPERTYPE = {}
+    # categorical
+    TYPE_CATEGORY = 'categorical'
     TYPE_BOOL = 'boolean'
-    TYPES = [TYPE_IDENTIFIER, TYPE_TEXT, TYPE_TIME, TYPE_VALUE, TYPE_CATEGORY, TYPE_BOOL]
+    TYPE_ORDERED = 'ordered'
+    SUPERTYPE['categorical'] = 'categorical'
+    SUPERTYPE['boolean'] = 'categorical'
+    SUPERTYPE['ordered'] = 'categorical'    
+    # text
+    TYPE_TEXT = 'text'
+    # number
+    TYPE_INTEGER = 'integer'
+    TYPE_FLOAT = 'float'
+    SUPERTYPE['integer'] = 'number'
+    SUPERTYPE['float'] = 'number'
+    # datetime
+    TYPE_TIME = 'datetime'
+    # id
+    TYPE_IDENTIFIER = 'id'
+    
+    TYPES = [TYPE_CATEGORY, TYPE_BOOL, TYPE_ORDERED, TYPE_TEXT, TYPE_INTEGER, TYPE_FLOAT, TYPE_TIME, TYPE_IDENTIFIER]
     
     def __init__(self, table_meta):
         """
         args:
-            table_meta: a list of dict. each dict describe a column. the dict includes 'name' and 'type'.
-            [{'name': 'col1', 'type': 'value'}, ...]
+            table_meta: a dict describe meta data of a database.
+                https://hdi-project.github.io/MetaData.json/index
         """
-        table_meta = [(item['name'], item) for item in table_meta]
-        self.table_meta = dict(table_meta)
+        self.table_meta = table_meta.copy()
+        self.all_columns = {}
+        for table_id, table in enumerate(self.table_meta['tables']):
+            for field_id, field in enumerate(table['fields']):
+                self.all_columns[field['name']] = {
+                    'table_id': table_id,
+                    'field_id': field_id,
+                    'type': field['subtype'] if 'subtype' in field else field['type']
+                }
+
             
     def get_type(self, column_name):
         """
@@ -32,7 +54,7 @@ class TableMeta(object):
         returns:
             str: column type
         """
-        return self.table_meta[column_name]['type']
+        return self.all_columns[column_name]['type']
     
     def set_type(self, column_name, dtype):
         """
@@ -43,7 +65,22 @@ class TableMeta(object):
         returns:
             None
         """
-        self.table_meta[column_name]['type'] = dtype
+        self.all_columns[column_name]['type'] = dtype
+        column_data = self.all_columns[column_name]
+        
+        # TODO Remove the hierarchical structure of Types.
+        try:
+            del self.table_meta['tables'][column_data['table_id']]['fields'][column_data['field_id']]['type']
+            del self.table_meta['tables'][column_data['table_id']]['fields'][column_data['field_id']]['subtype']
+        except:
+            pass
+        if dtype in TableMeta.SUPERTYPE:
+            self.table_meta['tables'][column_data['table_id']]['fields'][column_data['field_id']]['type'] = \
+                TableMeta.SUPERTYPE[dtype]
+            self.table_meta['tables'][column_data['table_id']]['fields'][column_data['field_id']]['subtype'] = \
+                dtype
+        else:
+            self.table_meta['tables'][column_data['table_id']]['fields'][column_data['field_id']]['type'] = dtype
     
     def get_columns(self):
         """
@@ -51,7 +88,7 @@ class TableMeta(object):
         returns:
             list of str: column names
         """
-        return self.table_meta.keys()
+        return self.all_columns.keys()
         
     def copy(self):
         """
@@ -67,7 +104,7 @@ class TableMeta(object):
         returns:
             str: json str of self
         """
-        return json.dumps(list(self.table_meta.values()))
+        return json.dumps(self.table_meta)
 
     def from_json(json_data):
         """

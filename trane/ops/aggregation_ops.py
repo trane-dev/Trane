@@ -13,19 +13,19 @@ class AggregationOpBase(OpBase):
 
 class FirstAggregationOp(AggregationOpBase):
     PARAMS = [{}, {}]
-    IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE), (TM.TYPE_BOOL, TM.TYPE_BOOL)]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_BOOL)]
     def execute(self, dataframe):
         return dataframe.head(1)
 
 class LastAggregationOp(AggregationOpBase):
     PARAMS = [{}, {}]
-    IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE), (TM.TYPE_BOOL, TM.TYPE_BOOL)]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_BOOL)]
     def execute(self, dataframe):
         return dataframe.tail(1)
 
 class LMFAggregationOp(AggregationOpBase):
     PARAMS = [{}]
-    IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE)]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
     def execute(self, dataframe):
         last = dataframe.tail(1)
         first = dataframe.head(1)
@@ -34,7 +34,7 @@ class LMFAggregationOp(AggregationOpBase):
 
 class CountAggregationOp(AggregationOpBase):
     PARAMS = [{}, {}]
-    IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE), (TM.TYPE_BOOL, TM.TYPE_VALUE)]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_FLOAT)]
     def execute(self, dataframe):
         first = dataframe.head(1)
         first.at[first.index[0], self.column_name] = dataframe.shape[0]
@@ -42,7 +42,7 @@ class CountAggregationOp(AggregationOpBase):
 
 class SumAggregationOp(AggregationOpBase):
     PARAMS = [{}]
-    IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE)]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
     def execute(self, dataframe):
         first = dataframe.head(1)
         first.at[first.index[0], self.column_name] = dataframe[self.column_name].sum()

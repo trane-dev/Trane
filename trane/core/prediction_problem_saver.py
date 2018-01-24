@@ -6,8 +6,8 @@ __all__ = ["prediction_problems_to_json_file", "prediction_problems_from_json_fi
 
 def prediction_problems_to_json_file(prediction_problems, table_meta, 
     entity_id_column, label_generating_column, time_column, filename):
-    """
-    Convert a list of prediction problems to a JSON representation and store it in a file named filename.
+    """Convert a list of prediction problems to a JSON representation and store it in a file named filename.
+
     args:
         prediction_problems: a list of PredictionProblem
         table_meta: TableMeta
@@ -15,8 +15,10 @@ def prediction_problems_to_json_file(prediction_problems, table_meta,
         label_generating_column: str
         time_column: str
         filename: str, ending in .json
+
     returns:
         None
+
     """
     prediction_problems_json = [prob.to_json() for prob in prediction_problems]
 
@@ -32,16 +34,18 @@ def prediction_problems_to_json_file(prediction_problems, table_meta,
         json.dump(json.loads(json_str), f, indent=4, separators=(',', ': '))
     
 def prediction_problems_from_json_file(filename):
-    """
-    Read json data from a file and convert it to a list of prediction problems and extra information.
+    """Read json data from a file and convert it to a list of prediction problems and extra information.
+
     args:
         filename: a string, ending in .json
+
     returns:
         list of PredictionProblem
         TableMeta: tablemeta
         str: entity_id_column
         str: label_generating_column
         str: time_column
+
     """
     with open(filename) as f:
         json_data = f.read()

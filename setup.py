@@ -6,6 +6,4 @@ setup(name='trane',
       url='https://github.com/HDI-Project/Trane',
       author='DAI',
       author_email='',
-      license='MIT',
-      packages=['trane'],
-      zip_safe=False)
+      license='MIT')

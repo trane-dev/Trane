@@ -54,9 +54,9 @@ jobs:
             ls venv
             echo ls venv/bin:
             ls venv/bin
-            echo ls venv/bin/pip3.6
-            ls venv/bin/pip3.6
-            python3 -m pytest
+            echo ls usr/local/bin:
+            ls usr/local/bin
+            python3 -m py.test
 
 
       - store_artifacts:

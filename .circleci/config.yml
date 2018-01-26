@@ -54,10 +54,11 @@ jobs:
             ls venv
             echo ls venv/bin:
             ls venv/bin
-            echo ls venv/bin:
+            echo ls venv/bin/pytest:
             ls venv/bin/pytest
             echo pwd:
             pwd
+            python3 venv/bin/pytest
             
 
 

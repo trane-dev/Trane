@@ -27,12 +27,12 @@ class PredictionProblemGenerator:
         self.table_meta = table_meta
         
         def check_column_type(column_name, data_type):
-            assert(self.table_meta.get_type(column_name) == data_type)
+            assert(self.table_meta.get_type(column_name) in data_type)
             return column_name
         
-        self.entity_id_column = check_column_type(entity_id_column, TableMeta.TYPE_IDENTIFIER)
-        self.label_generating_column = check_column_type(label_generating_column, TableMeta.TYPE_FLOAT)
-        self.time_column = check_column_type(time_column, TableMeta.TYPE_TIME)
+        self.entity_id_column = check_column_type(entity_id_column, [TableMeta.TYPE_IDENTIFIER])
+        self.label_generating_column = check_column_type(label_generating_column, [TableMeta.TYPE_FLOAT])
+        self.time_column = check_column_type(time_column, [TableMeta.TYPE_TIME, TableMeta.TYPE_INTEGER])
         
         logging.info("Generate labels on [%s]" % self.label_generating_column)
         logging.info("Entites [%s]" % self.entity_id_column)

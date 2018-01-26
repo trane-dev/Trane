@@ -59,6 +59,7 @@ jobs:
             echo pwd:
             pwd
             python3 util.py
+            python -m pytest
             python3 -m pytest
             
 

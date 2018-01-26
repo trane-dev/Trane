@@ -58,6 +58,7 @@ jobs:
             ls venv/bin/pytest
             echo pwd:
             pwd
+            python3 util.py
             python3 -m pytest
             
 

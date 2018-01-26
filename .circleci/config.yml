@@ -49,6 +49,8 @@ jobs:
           name: run tests
           command: |
             ls
+            ls venv
+            
 
       - store_artifacts:
           path: test-reports

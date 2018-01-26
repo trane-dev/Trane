@@ -58,7 +58,7 @@ jobs:
             ls venv/bin/pytest
             echo pwd:
             pwd
-            python3 -m venv/bin/pytest
+            python3 -m pytest
             
 
 

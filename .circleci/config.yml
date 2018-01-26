@@ -54,8 +54,8 @@ jobs:
             ls venv
             echo ls venv/bin:
             ls venv/bin
-            echo ls usr/local/bin:
-            ls usr/local/bin
+            echo pwd:
+            pwd
             python3 -m py.test
 
 

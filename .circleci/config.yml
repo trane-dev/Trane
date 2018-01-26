@@ -48,7 +48,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            python3 trane/core/labeler.py
+            python3 tests/core/test_prediction_problem.py
 
       - store_artifacts:
           path: test-reports

@@ -5,4 +5,5 @@ pytest>=3.3.2
 pytest-cov>=2.5.1
 py>=1.5.2
 pluggy>=0.6.0
+python>=3.6.1
 

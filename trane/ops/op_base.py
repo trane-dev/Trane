@@ -72,3 +72,14 @@ class OpBase(object):
 
     def __str__(self):
         return "%s(%s)" % (type(self).__name__, self.column_name)
+    
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(self, other.__class__):
+            return self.__dict__ == other.__dict__
+        return False
+
+
+
+
+

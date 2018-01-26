@@ -122,3 +122,9 @@ class TableMeta(object):
 
         """
         return TableMeta(json.loads(json_data))
+
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(self, other.__class__):
+            return self.__dict__ == other.__dict__
+        return False

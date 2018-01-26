@@ -16,13 +16,12 @@ Function: execute()
 Function: to_json and from_json()
 
 """
-
-json_str = '[{"name": "vendor_id", "type": "identifier"}, {"name": "taxi_id", "type": "identifier"}, {"name": "trip_id", "type": "time"}, {"name": "distance", "type": "value"}, {"name": "duration", "type": "value"}, {"name": "fare", "type": "value"}, {"name": "num_passengers", "type": "value"}]'
 dataframe = pd.DataFrame([(0, 0, 0, 5.32, 19.7, 53.89, 1), 
 							(0, 0, 1, 1.08, 6.78, 18.89, 2),
 							(0, 0, 2, 4.69, 14.11, 41.35, 4)], 
 							columns = ["vendor_id", "taxi_id", "trip_id", "distance", "duration", "fare", "num_passengers"])
 
+json_str = '{ "path": "", "tables": [ { "path": "synthetic_taxi_data.csv", "name": "taxi_data", "fields": [ {"name": "vendor_id", "type": "id"}, {"name": "taxi_id", "type": "id"}, {"name": "trip_id", "type": "datetime"}, {"name": "distance", "type": "number", "subtype": "float"}, {"name": "duration", "type": "number", "subtype": "float"}, {"name": "fare", "type": "number", "subtype": "float"}, {"name": "num_passengers", "type": "number", "subtype": "float"} ] } ]}'
 def test_op_type_check():
 	label_generating_column = "fare"
 	table_meta = TableMeta.from_json(json_str)
@@ -82,7 +81,7 @@ def test_equality():
 
 	assert(prediction_problem_clone == prediction_problem)
 
-test_execute()
+test_op_type_check()
 
 
 

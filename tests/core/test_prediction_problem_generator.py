@@ -16,7 +16,7 @@ from trane.ops.filter_ops import *
 from trane.ops.transformation_ops import *
 from trane.ops.aggregation_ops import *
 
-meta_json_str = '[{"name": "vendor_id", "type": "identifier"}, {"name": "taxi_id", "type": "identifier"}, {"name": "trip_id", "type": "time"}, {"name": "distance", "type": "value"}, {"name": "duration", "type": "value"}, {"name": "fare", "type": "value"}, {"name": "num_passengers", "type": "value"}]'
+meta_json_str = '{ "path": "", "tables": [ { "path": "synthetic_taxi_data.csv", "name": "taxi_data", "fields": [ {"name": "vendor_id", "type": "id"}, {"name": "taxi_id", "type": "id"}, {"name": "trip_id", "type": "datetime"}, {"name": "distance", "type": "number", "subtype": "float"}, {"name": "duration", "type": "number", "subtype": "float"}, {"name": "fare", "type": "number", "subtype": "float"}, {"name": "num_passengers", "type": "number", "subtype": "float"} ] } ]}'
 
 def test_number_of_problems_generated():
 	table_meta = TableMeta.from_json(meta_json_str)

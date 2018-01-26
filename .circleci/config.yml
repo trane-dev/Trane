@@ -48,8 +48,8 @@ jobs:
       - run:
           name: run tests
           command: |
-            echo pytest -V:
-            pytest -V
+            echo pytest --version:
+            pytest --version
             echo ls:
             ls
             echo ls venv:

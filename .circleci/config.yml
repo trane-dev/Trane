@@ -50,7 +50,9 @@ jobs:
           command: |
             ls
             ls venv
-            
+            ls venv/bin
+            python3 -m pytest
+
 
       - store_artifacts:
           path: test-reports

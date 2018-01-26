@@ -81,4 +81,8 @@ class PredictionProblem:
         operations = [op_from_json(json.dumps(item)) for item in data['operations']] 
         return PredictionProblem(operations)
     
-        
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(self, other.__class__):
+            return self.__dict__ == other.__dict__
+        return False

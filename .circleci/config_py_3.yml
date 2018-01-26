@@ -32,8 +32,8 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip3 install pytest
             pip3 install -r requirements.txt
+            pip3.6 install pytest
 
       - save_cache:
           paths:
@@ -48,7 +48,19 @@ jobs:
       - run:
           name: run tests
           command: |
-            python3 -m pytest
+            echo ls:
+            ls
+            echo ls venv:
+            ls venv
+            echo ls venv/bin:
+            ls venv/bin
+            echo ls venv/bin/pytest:
+            ls venv/bin/pytest
+            echo pwd:
+            pwd
+            python3 -m venv/bin/pytest
+            
+
 
       - store_artifacts:
           path: test-reports

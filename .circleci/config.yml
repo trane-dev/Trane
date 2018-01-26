@@ -49,7 +49,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            python3 -m pytest
+            py.test --cov=trane tests/
             
 
 

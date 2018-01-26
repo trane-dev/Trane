@@ -48,8 +48,6 @@ jobs:
       - run:
           name: run tests
           command: |
-            echo py.test:
-            py.test
             echo pytest --version:
             pytest --version
             echo ls:

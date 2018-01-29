@@ -1,5 +1,5 @@
-import sys
-sys.path.insert(0, '/Users/Alexander/Documents/Trane__HDI_REPO/')
+# import sys
+# sys.path.insert(0, '/Users/Alexander/Documents/Trane__HDI_REPO/')
 
 """TESTING STRATEGY
 Function: generate(self)
@@ -16,10 +16,10 @@ from trane.ops.filter_ops import *
 from trane.ops.transformation_ops import *
 from trane.ops.aggregation_ops import *
 
+meta_json_str = '{ "path": "", "tables": [ { "path": "synthetic_taxi_data.csv", "name": "taxi_data", "fields": [ {"name": "vendor_id", "type": "id"}, {"name": "taxi_id", "type": "id"}, {"name": "trip_id", "type": "datetime"}, {"name": "distance", "type": "number", "subtype": "float"}, {"name": "duration", "type": "number", "subtype": "float"}, {"name": "fare", "type": "number", "subtype": "float"}, {"name": "num_passengers", "type": "number", "subtype": "float"} ] } ]}'
+
 def test_number_of_problems_generated():
-	table_meta_filename = "test_data/taxi_meta.json"
-	json_str = open(table_meta_filename).read()
-	table_meta = TableMeta.from_json(json_str)
+	table_meta = TableMeta.from_json(meta_json_str)
 	entity_id_column = "taxi_id"
 	label_generating_column = "fare"
 	time_column = "trip_id"
@@ -34,9 +34,7 @@ def test_number_of_problems_generated():
 
 
 def test_generated_types():
-	table_meta_filename = "test_data/taxi_meta.json"
-	json_str = open(table_meta_filename).read()
-	table_meta = TableMeta.from_json(json_str)
+	table_meta = TableMeta.from_json(meta_json_str)
 	entity_id_column = "taxi_id"
 	label_generating_column = "fare"
 	time_column = "trip_id"
@@ -51,9 +49,7 @@ def test_generated_types():
 		assert(type(found) is expected)
 		
 def test_order_of_operations():
-	table_meta_filename = "test_data/taxi_meta.json"
-	json_str = open(table_meta_filename).read()
-	table_meta = TableMeta.from_json(json_str)
+	table_meta = TableMeta.from_json(meta_json_str)
 	entity_id_column = "taxi_id"
 	label_generating_column = "fare"
 	time_column = "trip_id"

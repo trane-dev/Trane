@@ -5,11 +5,12 @@
 class CutoffTimeBase:
 	def __init__(self):
 		pass
-	"""
-	Args:
+	"""Args:
 		entity_to_data_dict(Dict): mapping from entities to their data
+	
 	Returns:
 		entity_to_data_and_cutoff_dict(Dict): mapping from entities to a tuple of data and cutoff time
+
 	"""
 	def generate_cutoffs(self, entity_to_data_dict):
 		entity_to_data_and_cutoff_dict = {}

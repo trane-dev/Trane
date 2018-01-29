@@ -9,15 +9,16 @@ class Labeler():
     def __init__(self):
         pass
     
-    """
-    Loads the data located at the file address: json_data.
+    def execute(self, entity_to_data_and_cutoff_dict, json_prediction_problems_filename):
+        """Loads the data located at the file address: json_data.
+        
         Args:
             entity_to_data_and_cutoff_dict: A dictionary mapping the entity id to a tuple of (data, cutoff_time)
             json_prediction_problems_filename: filename where the prediction problems are stored in a JSON format
+        
         Returns:
             (Dict): A mapping from entity id to an tuple of ([labels (one for every prediction problem)], cutoff_time)
         """
-    def execute(self, entity_to_data_and_cutoff_dict, json_prediction_problems_filename):
         # with open(json_prediction_problems_filename) as f:
         #     prediction_problems, table_meta, entity_id_column, label_generating_column, time_column = \
         #         prediction_problems_from_json(f.read())

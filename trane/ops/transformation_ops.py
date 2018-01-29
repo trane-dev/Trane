@@ -5,20 +5,18 @@ TRANSFORMATION_OPS = ["IdentityTransformationOp", "DiffTransformationOp"]
 __all__ = ["TransformationOpBase", "TRANSFORMATION_OPS"] + TRANSFORMATION_OPS
 
 class TransformationOpBase(OpBase):
-    """
-    super class for all Transformation Operations. (deprecated)
-    """
+    """super class for all Transformation Operations. (deprecated)"""
     pass
 
 class IdentityTransformationOp(TransformationOpBase):
     PARAMS = [{}, {}]
-    IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE), (TM.TYPE_BOOL, TM.TYPE_BOOL)]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_BOOL)]
     def execute(self, dataframe):
         return dataframe
 
 class DiffTransformationOp(TransformationOpBase):
     PARAMS = [{}]
-    IOTYPES = [(TM.TYPE_VALUE, TM.TYPE_VALUE)]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
     def execute(self, dataframe):
         index = dataframe.index
         for i in range(len(index) - 1, 0, -1):

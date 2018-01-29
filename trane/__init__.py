@@ -1,5 +1,5 @@
-from trane.libinfo import __version__
+from .libinfo import __version__
 
-from trane.core import *
-from trane.utils import *
-from trane import ops
+from .core import *
+from .utils import *
+from . import ops

@@ -1,5 +1,5 @@
-import sys
-sys.path.insert(0, '/Users/Alexander/Documents/Trane__HDI_REPO/')
+# import sys
+# sys.path.insert(0, '/Users/Alexander/Documents/Trane__HDI_REPO/')
 from trane.core.labeler import *
 import trane
 from trane.core.prediction_problem import PredictionProblem
@@ -10,6 +10,8 @@ from trane.ops.aggregation_ops import *
 from trane.utils.table_meta import TableMeta
 from trane.core.prediction_problem_saver import *
 import json
+import pandas as pd
+import os
 
 """TESTING STRATEGY:
 Function: execute()
@@ -17,17 +19,20 @@ Function: execute()
 2. Ensure output dimensions are the correct shapes.
 3. Ensure all other values are un-changed (entity_id and cutoff_time)
 """
+
+meta_json_str = '{ "path": "", "tables": [ { "path": "synthetic_taxi_data.csv", "name": "taxi_data", "fields": [ {"name": "vendor_id", "type": "id"}, {"name": "taxi_id", "type": "id"}, {"name": "trip_id", "type": "datetime"}, {"name": "distance", "type": "number", "subtype": "float"}, {"name": "duration", "type": "number", "subtype": "float"}, {"name": "fare", "type": "number", "subtype": "float"}, {"name": "num_passengers", "type": "number", "subtype": "float"} ] } ]}'
+dataframe = pd.DataFrame([(0, 0, 0, 5.32, 19.7, 53.89, 1), 
+							(0, 0, 1, 1.08, 6.78, 18.89, 2),
+							(0, 0, 2, 4.69, 14.11, 41.35, 4)], 
+							columns = ["vendor_id", "taxi_id", "trip_id", "distance", "duration", "fare", "num_passengers"])
 def test_labeler_apply():
 	entity_id_column = "taxi_id"
 	time_column = "trip_id"
 	label_generating_column = "fare"
-	table_meta_filename = "test_data/taxi_meta.json"
-	json_str = open(table_meta_filename).read()
-	table_meta = TableMeta.from_json(json_str)
+	table_meta = TableMeta.from_json(meta_json_str)
 	labeler = Labeler()
-	multiple_csv = ["test_data/synthetic_taxi_data.csv"]
-	denormalized_dataframe = trane.csv_to_df(multiple_csv)
-	entity_to_data_dict = trane.df_group_by_entity_id(denormalized_dataframe, entity_id_column)
+	df = dataframe
+	entity_to_data_dict = trane.df_group_by_entity_id(df, entity_id_column)
 	entity_id_to_data_and_cutoff_dict = trane.FixedCutoffTimes().generate_cutoffs(entity_to_data_dict)
 
 
@@ -36,13 +41,15 @@ def test_labeler_apply():
 											IdentityTransformationOp(label_generating_column),
 											LastAggregationOp(label_generating_column)])
 	
-	filename = "test_data/prediction_problem.json"
+	filename = "prediction_problem.json"
 
 	prediction_problems_to_json_file([prediction_problem], table_meta, entity_id_column, label_generating_column, time_column, filename)
 
 	input_ = entity_id_to_data_and_cutoff_dict
 	expected = {0: ([41.35], 0)}
 	found = labeler.execute(entity_id_to_data_and_cutoff_dict, filename)
+
+	os.remove(filename)
 
 	assert(expected == found)
 

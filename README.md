@@ -1,11 +1,11 @@
 # Trane
-Trane is a software package for automatically generating prediction problems and generating labels for supervised learning. 
+Trane is a software package for automatically generating prediction problems and generating labels for supervised learning. Trane is a system designed to advance the automation of the machine learning problem solving pipeline.
 
 ## Prediction Problems
-In data science, people usually have a few records of an entity and want to predict what will happen to that entity in the future. 
+In data science, people usually have a few records of an entity and want to predict what will happen to that entity in the future. Trane is designed to generate time-related prediction problems. Trane transforms data meta information into lists of relevant prediction problems and cutoff times. Prediction problems are structured in a formal language described in Operations below. Cutoff times are defined as the last time in the data used for training the classifier. Data after the cutoff time is used for evaluating the classifiers accuracy. Cutoff times are necessary to prevent the classifier from training to test data.
 
 ### Example
-A bank may want to predict how many transactions greater than $100 will a client make in the next year. Assume we have all the transaction records for each client from 2015 to 2017. We want to build a machine learning method to do the prediction problem. Here is an example database.
+A bank wants to predict how many transactions over 100$ a customer will make in the next year. Assume we have all the transaction records for each client from 2015 to 2017. We want to build a machine learning method to solve the prediction problem. Here is the example database.
 
 |User_id|Time|Transaction_id|Amount|
 |:--:|:--:|:--:|:--:|
@@ -17,7 +17,7 @@ A bank may want to predict how many transactions greater than $100 will a client
 | u1 | 2017 | 1-2017-2 | 20 |
 | u2 | 2017 | 2-2017-1 | 10 |
 
-We first separate it by entityies Here the entity is user_id. Take user u1 for example, We have
+First, we seperate the data by entity. Here the entity is user_id. User u1 for example, has
 
 |User_id|Time|Transaction_id|Amount|
 |:--:|:--:|:--:|:--:|
@@ -27,21 +27,21 @@ We first separate it by entityies Here the entity is user_id. Take user u1 for e
 | u1 | 2017 | 1-2017-1 | 1000|
 | u1 | 2017 | 1-2017-2 | 20 |
 
-We need a **cutoff time** equals 2016. We use data from 2015 to 2016 as features (first 3 records) and we use data in 2017 (last 2 records) to generate labels. We apply a filter operation and an aggregation operation on the last 2 records and we can get a tuple (entity=u1, cutoff=2016, label=1). Similarly, we have (entity=u2, cutoff=2016, label=0). These tuples as well as the training data a fed to automatical machine learning tools such as featuretools to learn a machine learning model. 
+Let's consider a **cutoff time** equal to 2016. The data from 2015-2016 will be used as training data in the machine learning model. Data after 2016, that is data from 2016-2017 will be used to evaluate the trained model. Trane outputs a tuple of (entity, cutoff, label) for each prediction problem. A prediction problem is applied to entity data to generate the label. The data from Trane can be fed directly into Feature Tools to perform feature engineering.
 
 ### Prediction Problem Generation
-As shown in the example, a prediction problem is a sequence of operations applied to a database as well as a cutoff time. Labels are a list of (entity, cutoff, label) tuples. 
+As shown in the example, a prediction problem is a sequence of operations applied to data as well as a cutoff time.
 
-In trane, we generate prediction problems with four operations (FilterOp, RowOp, TransformationOp, AggregationOp). FilterOp is applied on filter\_column, RowOp, TransformationOp and AggregationOp are applied on label\_generating\_column
+In Trane, we generate prediction problems with four operations: Filter Operations, Row Operations, Transformation Operations and Aggregation Operations. Filter operations are applied on the filter\_column. Row, Transformation and Aggregation Operations are applied on the label\_generating\_column.
 
 ## Workflow
 
-The workflow of using trane on a database is as follow.
+The workflow of using Trane on a database is as follows:
 
-- Data scientist write a `meta.json` describing columns and data types in the new database.
-- `PredictionProblemGenerator` reads the meta data and generate possible prediction problems and save them in `problems.json`.
-- Data scientist can change parameters in `problems.json`.
-- The `labeler` applies prediction problems in `problems.json` on a real database `data.csv`
+- Data scientist writes a `meta.json` describing columns and data types in the new database.
+- `PredictionProblemGenerator` reads the meta data and generates possible prediction problems. The prediction problems are saved to `problems.json`.
+- The data scientist can change parameters to the prediction problems in `problems.json`.
+- The `labeler` applies prediction problems in `problems.json` to the database `data.csv`
 
 
 ## Built-in Operations
@@ -62,7 +62,7 @@ The workflow of using trane on a database is as follow.
     - LMFAggregationOp
 
 ## Unit Testing
-We use `pytest` to automatically collecting unit testings and `pytest-cov` to measure the coverage of unit testing. The application code is in `Trane/trane/`. The unit testing code is in `Trane/tests/`. To run all unit testings, change directory to `Trane` and execute
+We use `pytest` to automatically collecting unit testings and `pytest-cov` to measure the coverage of unit testing. The application code is in `Trane/trane/`. The unit testing code is in `Trane/tests/`. To run all unit testing, change directory to `Trane` and execute
 
 ```
 > pytest --cov=trane tests

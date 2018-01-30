@@ -31,8 +31,11 @@ class Labeler():
             entity_labels = []
             for prediction_problem in prediction_problems:
                 execution_result = prediction_problem.execute(entity_data, time_column, entity_cutoff)
-                assert len(execution_result) == 1
-                execution_result = execution_result[label_generating_column].values[0]
+                assert len(execution_result) <= 1
+                if len(execution_result) == 1:
+                    execution_result = execution_result[label_generating_column].values[0]
+                else:
+                    execution_result = None
                 entity_labels.append(execution_result)
 
             entity_id_to_labels_and_cutoffs[entity] = (entity_labels, entity_cutoff)

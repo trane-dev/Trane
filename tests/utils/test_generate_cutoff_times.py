@@ -3,7 +3,7 @@ from pandas import DataFrame
 
 
 def test_fixed_cutoff_time():
-    cutoff_strategy = FixedCutoffTimes()
+    cutoff_strategy = ConstantIntegerCutoffTimes(0)
     data = {
         'entity1': DataFrame({'col1': [1, 2, 3]}),
         'entity2': DataFrame({'col1': [4, 5, 6]})

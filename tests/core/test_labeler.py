@@ -33,7 +33,7 @@ def test_labeler_apply():
 	labeler = Labeler()
 	df = dataframe
 	entity_to_data_dict = trane.df_group_by_entity_id(df, entity_id_column)
-	entity_id_to_data_and_cutoff_dict = trane.FixedCutoffTimes().generate_cutoffs(entity_to_data_dict)
+	entity_id_to_data_and_cutoff_dict = trane.ConstantIntegerCutoffTimes(0).generate_cutoffs(entity_to_data_dict)
 
 
 	prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
@@ -62,19 +62,3 @@ def test_labeler_apply():
 		input_cutoff_time = input_[entity_id][1]
 		output_cutoff_time = found[entity_id][1]
 		assert(input_cutoff_time == output_cutoff_time)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
 from functools import reduce
+from datetime import datetime
+from .table_meta import TableMeta as TM
 
-__all__ = ['df_group_by_entity_id', 'csv_to_df']
+__all__ = ['df_group_by_entity_id', 'csv_to_df', 'parse_data']
 
 def df_group_by_entity_id(dataframe, entity_id_column_name):
     """Convert a dataframe with an entity_id column to a dictionary mapping entity id's to their relevant data.
@@ -40,3 +42,21 @@ def csv_to_df(csv_filenames, output_filename = None, header = True):
     if output_filename != None:
         merged_df.to_csv(output_filename)
     return merged_df
+
+def parse_data(dataframe, table_meta):
+    """convert column from str to correct object
+    
+    Args:
+        (DataFrame)data_frame
+        (TableMeta)table_meta
+        
+    Returns:
+        Dataframe
+    """
+    
+    columns = table_meta.get_columns()
+    for column in columns:
+        if table_meta.get_type(column) == TM.TYPE_TIME:
+            dataframe[column] = dataframe[column].apply(
+                lambda x: datetime.strptime(x, table_meta.get_property(column, "format")))
+    return dataframe

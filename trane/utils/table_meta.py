@@ -40,7 +40,8 @@ class TableMeta(object):
                 self.all_columns[field['name']] = {
                     'table_id': table_id,
                     'field_id': field_id,
-                    'type': field['subtype'] if 'subtype' in field else field['type']
+                    'type': field['subtype'] if 'subtype' in field else field['type'],
+                    'properties': field['properties'] if 'properties' in field else None
                 }
 
             
@@ -83,6 +84,12 @@ class TableMeta(object):
                 dtype
         else:
             self.table_meta['tables'][column_data['table_id']]['fields'][column_data['field_id']]['type'] = dtype
+    
+    def get_property(self, column_name, property_name):
+        """Get column property.
+    
+        """
+        return self.all_columns[column_name]['properties'][property_name]
     
     def get_columns(self):
         """Get all the column names.

@@ -2,6 +2,8 @@
 #Each cutoff strategy will be it's own class. 
 #The only function that should change across classes is apply_cutoff_strategy()
 
+__all__ = ["CutoffTimeBase", "ConstantDatetimeCutoffTime", "ConstantIntegerCutoffTimes"]
+
 class CutoffTimeBase:
 	def __init__(self):
 		pass
@@ -21,14 +23,18 @@ class CutoffTimeBase:
 			entity_to_data_and_cutoff_dict[entity] = (entity_data, entity_cutoff)
 		return entity_to_data_and_cutoff_dict
 
-class FixedCutoffTimes(CutoffTimeBase):
+class ConstantIntegerCutoffTimes(CutoffTimeBase):
+	def __init__(self, integer_cutoff):
+		assert isinstance(integer_cutoff, int)
+		self.integer_cutoff = integer_cutoff
+		
 	def apply_cutoff_strategy(self, entity_data):
-		#Here is where a user defines their cutoff strategy. In this class example
-		#we return a constant cutoff time. 
-		return 0
+		return self.integer_cutoff
 
-class VariableCutoffTime(CutoffTimeBase):
+class ConstantDatetimeCutoffTime(CutoffTimeBase):
+	def __init__(self, datetime_cutoff):
+		assert isinstance
+		self.datetime_cutoff = datetime_cutoff
+		
 	def apply_cutoff_strategy(self, entity_data):
-		#Here is where a user defines their cutoff strategy. This class is an example
-		# of using the entity_data to influence the cutoff time.
-		return 0 + entity_data 
+		return self.datetime_cutoff

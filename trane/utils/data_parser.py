@@ -17,12 +17,10 @@ def df_group_by_entity_id(dataframe, entity_id_column_name):
         (Dict): Mapping from entity id's to a dataframe containing only that entity id's data.
     
     """
-    entity_ids = set(dataframe[entity_id_column_name])
-    entity_id_to_df = {}
-    for entity_id in entity_ids:
-        relevant_data = dataframe.loc[dataframe[entity_id_column_name] == entity_id]
-        entity_id_to_df[entity_id] = relevant_data
-    return entity_id_to_df
+    df_groupby = dataframe.groupby(entity_id_column_name)
+    entities = df_groupby.groups.keys()
+    entity_id_to_df = [(key, df_groupby.get_group(key)) for key in entities]
+    return dict(entity_id_to_df)
 
 def csv_to_df(csv_filenames, output_filename = None, header = True):
     """Args:

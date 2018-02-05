@@ -36,7 +36,7 @@ def generate_nl_description(
     """
     
     def description(prob):
-        return "For each {col}, predict{dataop_des},{filter_des},{cutoff_des}.".format(
+        return "For each {col}, predict{dataop_des}{filter_des}{cutoff_des}.".format(
             col=entity_id_column,
             dataop_des=dataop_description(prob),
             filter_des=filter_description(prob),
@@ -97,9 +97,9 @@ def generate_nl_description(
                 
     def cutoff_description(prob):
         if isinstance(cutoff_strategy, ConstantIntegerCutoffTimes):
-            return " after {col} {cutoff}".format(col=time_column, cutoff=cutoff_strategy.integer_cutoff)
+            return ", after {col} {cutoff}".format(col=time_column, cutoff=cutoff_strategy.integer_cutoff)
         elif isinstance(cutoff_strategy, ConstantDatetimeCutoffTimes):
-            return " after {col} {cutoff}".format(col=time_column, cutoff=cutoff_strategy.datetime_cutoff)
+            return ", after {col} {cutoff}".format(col=time_column, cutoff=cutoff_strategy.datetime_cutoff)
         else:
             raise " (unknown cutoff time)"
     
@@ -113,7 +113,7 @@ def generate_nl_description(
         filter_op = prob.operations[0]
         if isinstance(filter_op, AllFilterOp):
             return ""
-        return " with {col} {op} {threshold}".format(
+        return ", with {col} {op} {threshold}".format(
             col=filter_op.column_name, 
             op=filter_op_str_dict[type(filter_op)],
             threshold=filter_op.param_values['threshold'])

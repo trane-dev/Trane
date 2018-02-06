@@ -31,7 +31,8 @@ class PredictionProblemGenerator:
             return column_name
         
         self.entity_id_column = check_column_type(entity_id_column, TableMeta.TYPE_IDENTIFIER)
-        self.label_generating_column = check_column_type(label_generating_column, TableMeta.TYPE_FLOAT)
+        # self.label_generating_column = check_column_type(label_generating_column, TableMeta.TYPE_FLOAT)
+        self.label_generating_column = label_generating_column
         self.time_column = check_column_type(time_column, TableMeta.TYPE_TIME)
         
         logging.info("Generate labels on [%s]" % self.label_generating_column)
@@ -55,17 +56,18 @@ class PredictionProblemGenerator:
                                 row_op_name, filter_op_name
 
         for ops in iter_over_ops():
-            for filter_column in self.table_meta.get_columns():
-                aggregation_op_name, transformation_op_name, \
-                    row_op_name, filter_op_name = ops
-                    
-                aggregation_op_obj = getattr(aggregation_ops, aggregation_op_name)(self.label_generating_column)    
-                transformation_op_obj = getattr(transformation_ops, transformation_op_name)(self.label_generating_column)
-                row_op_obj = getattr(row_ops, row_op_name)(self.label_generating_column)
-                filter_op_obj = getattr(filter_ops, filter_op_name)(filter_column)
+            # for filter_column in self.table_meta.get_columns():
+            aggregation_op_name, transformation_op_name, \
+                row_op_name, filter_op_name = ops
+            
+            filter_column = "filter_column"
+            aggregation_op_obj = getattr(aggregation_ops, aggregation_op_name)(self.label_generating_column)    
+            transformation_op_obj = getattr(transformation_ops, transformation_op_name)(self.label_generating_column)
+            row_op_obj = getattr(row_ops, row_op_name)(self.label_generating_column)
+            filter_op_obj = getattr(filter_ops, filter_op_name)(filter_column)
 
-                prediction_problem = PredictionProblem(
-                    [filter_op_obj, row_op_obj, transformation_op_obj, aggregation_op_obj])
-                if not prediction_problem.op_type_check(self.table_meta):
-                    continue
-                yield prediction_problem
+            prediction_problem = PredictionProblem(
+                [filter_op_obj, row_op_obj, transformation_op_obj, aggregation_op_obj])
+            # if not prediction_problem.op_type_check(self.table_meta):
+            #     continue
+            yield prediction_problem

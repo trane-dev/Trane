@@ -27,7 +27,7 @@ def test_number_of_problems_generated():
 	generator = ppg.generate()
 
 	
-	expected = 640 #THIS NUMBER WILL CHANGE IF MORE OPERATIONS ARE ADDED
+	expected = 450 #THIS NUMBER WILL CHANGE IF MORE OPERATIONS ARE ADDED
 	found = len(list(generator))
 
 	assert(expected == found)

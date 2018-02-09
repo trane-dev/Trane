@@ -35,6 +35,10 @@ class PredictionProblem:
             if not temp_meta:
                 return False
         return True
+    
+    def set_thresholds(self, table_meta):
+        for op in self.operations:
+            op.set_thresholds(table_meta)
 
     def execute(self, dataframe, time_column, cutoff_time):
         """This function executes all the operations on the dataframe and returns the output. The output

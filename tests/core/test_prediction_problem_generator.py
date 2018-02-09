@@ -23,7 +23,8 @@ def test_number_of_problems_generated():
 	entity_id_column = "taxi_id"
 	label_generating_column = "fare"
 	time_column = "trip_id"
-	ppg = PredictionProblemGenerator(table_meta, entity_id_column, label_generating_column, time_column)
+	filter_column = "taxi_id"
+	ppg = PredictionProblemGenerator(table_meta, entity_id_column, label_generating_column, time_column, filter_column)
 	generator = ppg.generate()
 
 	
@@ -38,7 +39,8 @@ def test_generated_types():
 	entity_id_column = "taxi_id"
 	label_generating_column = "fare"
 	time_column = "trip_id"
-	ppg = PredictionProblemGenerator(table_meta, entity_id_column, label_generating_column, time_column)
+	filter_column = "taxi_id"
+	ppg = PredictionProblemGenerator(table_meta, entity_id_column, label_generating_column, time_column, filter_column)
 	generator = ppg.generate()	
 
 	expected = PredictionProblem
@@ -53,7 +55,8 @@ def test_order_of_operations():
 	entity_id_column = "taxi_id"
 	label_generating_column = "fare"
 	time_column = "trip_id"
-	ppg = PredictionProblemGenerator(table_meta, entity_id_column, label_generating_column, time_column)
+	filter_column = "taxi_id"
+	ppg = PredictionProblemGenerator(table_meta, entity_id_column, label_generating_column, time_column, filter_column)
 	generator = ppg.generate()	
 
 	problems = [prob for prob in generator]

@@ -59,11 +59,16 @@ class OpBase(object):
                 self.otype = otype
                 table_meta.set_type(self.column_name, otype)
                 # NOTE when preprocessing, we set default param_values.
-                for param, ptype in self.PARAMS[idx].items():
-                    self.param_values[param] = 0
+                # for param, ptype in self.PARAMS[idx].items():
+                #     self.param_values[param] = 0
                 return table_meta
         return None
 
+    def set_thresholds(self, table_meta):
+        for idx, (itype, otype) in enumerate(self.IOTYPES):
+            for param, ptype in self.PARAMS[idx].items():
+                    self.param_values[param] = 0
+        
     def __call__(self, dataframe):
         return self.execute(dataframe)
 

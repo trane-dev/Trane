@@ -12,7 +12,7 @@ class PredictionProblemGenerator:
     fileter, row, transformation and aggregation operations.
 
     """
-    def __init__(self, table_meta, entity_id_column, label_generating_column, time_column):
+    def __init__(self, table_meta, entity_id_column, label_generating_column, time_column, filter_column):
         """
         Args:
             label_generating_column: column to operate over. 
@@ -26,17 +26,19 @@ class PredictionProblemGenerator:
         assert isinstance(table_meta, TableMeta)
         self.table_meta = table_meta
         
-        def check_column_type(column_name, data_type):
-            assert(self.table_meta.get_type(column_name) in data_type)
-            return column_name
+        assert(self.table_meta.get_type(entity_id_column) in [TableMeta.TYPE_IDENTIFIER])
+        assert(self.table_meta.get_type(label_generating_column) in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER])
+        assert(self.table_meta.get_type(time_column) in [TableMeta.TYPE_TIME, TableMeta.TYPE_INTEGER])
         
-        self.entity_id_column = check_column_type(entity_id_column, [TableMeta.TYPE_IDENTIFIER])
-        self.label_generating_column = check_column_type(label_generating_column, [TableMeta.TYPE_FLOAT])
-        self.time_column = check_column_type(time_column, [TableMeta.TYPE_TIME, TableMeta.TYPE_INTEGER])
-        
+        self.entity_id_column = entity_id_column
+        self.label_generating_column = label_generating_column
+        self.time_column = time_column
+        self.filter_column = filter_column
+
         logging.info("Generate labels on [%s]" % self.label_generating_column)
         logging.info("Entites [%s]" % self.entity_id_column)
         logging.info("Time [%s]" % self.time_column)
+        logging.info("Filter Column [%s]" % self.filter_column)
 
     def generate(self):
         """Generate prediction problems.
@@ -45,7 +47,6 @@ class PredictionProblemGenerator:
             PredictionProblem
         
         """
-        #NOTE tricks for less indents
         def iter_over_ops():
             for aggregation_op_name in aggregation_ops.AGGREGATION_OPS:
                 for transformation_op_name in transformation_ops.TRANSFORMATION_OPS:
@@ -59,14 +60,16 @@ class PredictionProblemGenerator:
             aggregation_op_name, transformation_op_name, \
                 row_op_name, filter_op_name = ops
             
-            filter_column = "filter_column"
             aggregation_op_obj = getattr(aggregation_ops, aggregation_op_name)(self.label_generating_column)    
             transformation_op_obj = getattr(transformation_ops, transformation_op_name)(self.label_generating_column)
             row_op_obj = getattr(row_ops, row_op_name)(self.label_generating_column)
-            filter_op_obj = getattr(filter_ops, filter_op_name)(filter_column)
+            filter_op_obj = getattr(filter_ops, filter_op_name)(self.filter_column)
 
             prediction_problem = PredictionProblem(
                 [filter_op_obj, row_op_obj, transformation_op_obj, aggregation_op_obj])
+            
+            prediction_problem.set_thresholds(self.table_meta)
             # if not prediction_problem.op_type_check(self.table_meta):
             #     continue
+
             yield prediction_problem

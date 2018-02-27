@@ -27,7 +27,7 @@ class PredictionProblemGenerator:
         self.table_meta = table_meta
         
         assert(self.table_meta.get_type(entity_id_column) in [TableMeta.TYPE_IDENTIFIER])
-        assert(self.table_meta.get_type(label_generating_column) in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER])
+        assert(self.table_meta.get_type(label_generating_column) in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER, TableMeta.TYPE_CATEGORY])
         assert(self.table_meta.get_type(time_column) in [TableMeta.TYPE_TIME, TableMeta.TYPE_INTEGER])
         
         self.entity_id_column = entity_id_column

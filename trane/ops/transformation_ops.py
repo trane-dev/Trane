@@ -43,7 +43,7 @@ class ObjectFrequencyTransformationOp(TransformationOpBase):
         assert(num_rows_to_drop >= 0)
         if num_rows_to_drop == 0:
             return dataframe
-        print(dataframe[:-num_rows_to_drop])
+        
         return dataframe[:-num_rows_to_drop]
 
 

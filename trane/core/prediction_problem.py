@@ -4,6 +4,9 @@ from ..utils.table_meta import TableMeta
 from ..ops.op_saver import *
 from dateutil import parser
 
+import logging, sys
+logging.basicConfig(filename = 'prediction_problem.log', level=logging.DEBUG)
+
 __all__ = ['PredictionProblem']
 
 class PredictionProblem:
@@ -53,10 +56,16 @@ class PredictionProblem:
             (Boolean/Float): The Label/Value of the prediction problem's formulation when applied to the data.
         
         """
+        logging.info("Beginning execute method inside of class PredictionProblem")
+        
         dataframe = dataframe.copy()
         dataframe = dataframe[dataframe[time_column] > cutoff_time]
         
         for operation in self.operations:
+            logging.info("Dataframe state prior to executing operation: {} is : {}".format(operation, dataframe))
+            logging.info("Dataframe length: {}".format(len(dataframe)))
+            if len(dataframe) == 0:
+                return dataframe
             dataframe = operation.execute(dataframe)
         return dataframe
     

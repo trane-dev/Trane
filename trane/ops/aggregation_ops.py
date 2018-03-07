@@ -1,5 +1,9 @@
 from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
+import logging, sys
+import numpy
+
+logging.basicConfig(filename = 'aggregation_ops.log', level=logging.DEBUG)
 
 AGGREGATION_OPS = ["FirstAggregationOp", "CountAggregationOp", "SumAggregationOp",\
     "LastAggregationOp", "LMFAggregationOp"]
@@ -27,7 +31,12 @@ class LMFAggregationOp(AggregationOpBase):
     def execute(self, dataframe):
         last = dataframe.tail(1)
         first = dataframe.head(1)
-        last.at[last.index[0], self.column_name] -= first.at[first.index[0], self.column_name]
+
+        logging.info("Beginning execution of LMF AggregationOp")
+        logging.info("last: {}".format(last))
+        logging.info("first: {}".format(first))
+        logging.info("dataframe: {}".format(dataframe))
+        last.at[last.index[0], self.column_name] -= first.at[first.index[0], self.column_name].astype(numpy.float32)
         return last
 
 class CountAggregationOp(AggregationOpBase):
@@ -42,6 +51,8 @@ class SumAggregationOp(AggregationOpBase):
     PARAMS = [{}]
     IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
     def execute(self, dataframe):
+        logging.info("Beginning execution of SumAggregationOp")
+        logging.info("dataframe: {}".format(dataframe))
         first = dataframe.head(1)
         first.at[first.index[0], self.column_name] = dataframe[self.column_name].sum()
         return first

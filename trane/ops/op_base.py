@@ -1,5 +1,5 @@
 import json
-
+from ..utils.table_meta import TableMeta as TM
 __all__ = ['OpBase']
 
 class OpBase(object):
@@ -36,7 +36,7 @@ class OpBase(object):
         self.itype = self.otype = None
         self.param_values = {}
         assert(self.PARAMS and self.IOTYPES), type(self).__name__
-        assert(len(self.PARAMS) == len(self.IOTYPES)), type(self).__name__
+        # assert(len(self.PARAMS) == len(self.IOTYPES)), type(self).__name__
 
     def op_type_check(self, table_meta):
         """Data type check for the operation. 
@@ -65,9 +65,13 @@ class OpBase(object):
         return None
 
     def set_thresholds(self, table_meta):
-        for idx, (itype, otype) in enumerate(self.IOTYPES):
-            for param, ptype in self.PARAMS[idx].items():
-                    self.param_values[param] = 0
+        # for idx, (itype, otype) in enumerate(self.IOTYPES):
+        for param_entry in self.PARAMS:
+            for param, ptype in param_entry.items():
+            #Default values until we can better come up with thresholds.
+                self.param_values[param] = 0
+                    
+
         
     def __call__(self, dataframe):
         return self.execute(dataframe)

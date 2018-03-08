@@ -11,41 +11,44 @@ class RowOpBase(OpBase):
 
 class IdentityRowOp(RowOpBase):
     PARAMS = [{}]
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY), (TM.TYPE_BOOL, TM.TYPE_BOOL),
+                (TM.TYPE_ORDERED, TM.TYPE_ORDERED), (TM.TYPE_TEXT, TM.TYPE_TEXT),
+                (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
+                (TM.TYPE_TIME, TM.TYPE_TIME), (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
     def execute(self, dataframe):
         return dataframe
 
 class EqRowOp(RowOpBase):
-    PARAMS = [{"threshold": TM.TYPE_FLOAT}]
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_BOOL)]
+    PARAMS = [{"threshold": TM.TYPE_INTEGER}]
+    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER, TM.TYPE_BOOL), (TM.TYPE_FLOAT, TM.TYPE_BOOL)]
     def execute(self, dataframe):
         dataframe[self.column_name] = dataframe[self.column_name].apply(lambda x: x == self.param_values["threshold"])
         return dataframe
 
 class NeqRowOp(RowOpBase):
-    PARAMS = [{"threshold": TM.TYPE_FLOAT}]
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_BOOL)]
+    PARAMS = [{"threshold": TM.TYPE_INTEGER}]
+    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER, TM.TYPE_BOOL), (TM.TYPE_FLOAT, TM.TYPE_BOOL)]
     def execute(self, dataframe):
         dataframe[self.column_name] = dataframe[self.column_name].apply(lambda x: x != self.param_values["threshold"])
         return dataframe
 
 class GreaterRowOp(RowOpBase):
-    PARAMS = [{"threshold": TM.TYPE_FLOAT}]
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_BOOL)]
+    PARAMS = [{"threshold": TM.TYPE_INTEGER}]
+    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER, TM.TYPE_BOOL), (TM.TYPE_FLOAT, TM.TYPE_BOOL)]
     def execute(self, dataframe):
         dataframe[self.column_name] = dataframe[self.column_name].apply(lambda x: x > self.param_values["threshold"])
         return dataframe
 
 class LessRowOp(RowOpBase):
-    PARAMS = [{"threshold": TM.TYPE_FLOAT}]
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_BOOL)]
+    PARAMS = [{"threshold": TM.TYPE_INTEGER}]
+    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER, TM.TYPE_BOOL), (TM.TYPE_FLOAT, TM.TYPE_BOOL)]
     def execute(self, dataframe):
         dataframe[self.column_name] = dataframe[self.column_name].apply(lambda x: x < self.param_values["threshold"])
         return dataframe
 
 class ExpRowOp(RowOpBase):
-    PARAMS = [{"threshold": TM.TYPE_FLOAT}]
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    PARAMS = [{"threshold": TM.TYPE_INTEGER}]
+    IOTYPES = [(TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
     def execute(self, dataframe):
         dataframe[self.column_name] = dataframe[self.column_name].apply(lambda x: np.exp(x))
         return dataframe

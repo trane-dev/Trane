@@ -10,14 +10,17 @@ class TransformationOpBase(OpBase):
     pass
 
 class IdentityTransformationOp(TransformationOpBase):
-    PARAMS = [{}, {}]
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_BOOL)]
+    PARAMS = [{}]
+    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY), (TM.TYPE_BOOL, TM.TYPE_BOOL),
+                (TM.TYPE_ORDERED, TM.TYPE_ORDERED), (TM.TYPE_TEXT, TM.TYPE_TEXT),
+                (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
+                (TM.TYPE_TIME, TM.TYPE_TIME), (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
     def execute(self, dataframe):
         return dataframe
 
 class DiffTransformationOp(TransformationOpBase):
     PARAMS = [{}]
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_INTEGER, TM.TYPE_INTEGER)]
     def execute(self, dataframe):
         index = dataframe.index
         for i in range(len(index) - 1, 0, -1):
@@ -27,7 +30,10 @@ class DiffTransformationOp(TransformationOpBase):
 
 class ObjectFrequencyTransformationOp(TransformationOpBase):
     PARAMS = [{}]
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_INTEGER), (TM.TYPE_BOOL, TM.TYPE_INTEGER),
+                (TM.TYPE_ORDERED, TM.TYPE_INTEGER), (TM.TYPE_TEXT, TM.TYPE_INTEGER),
+                (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_INTEGER),
+                (TM.TYPE_TIME, TM.TYPE_INTEGER), (TM.TYPE_IDENTIFIER, TM.TYPE_INTEGER)]
     def execute(self, dataframe):
         objects = dataframe.copy()[self.column_name].unique()
         objects_to_frequency = {}    

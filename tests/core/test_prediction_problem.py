@@ -35,7 +35,7 @@ def test_op_type_check():
 	prediction_problem_incorrect_types = PredictionProblem([AllFilterOp(label_generating_column),
 											IdentityRowOp(label_generating_column),
 											IdentityTransformationOp(label_generating_column),
-											LastAggregationOp(label_generating_column)])
+											LMFAggregationOp(label_generating_column)])
 	
 	assert(prediction_problem_correct_types.op_type_check(table_meta))
 	assert(not prediction_problem_incorrect_types.op_type_check(table_meta))

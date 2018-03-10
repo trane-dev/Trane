@@ -57,17 +57,24 @@ class PredictionProblem:
         
         """
         logging.info("Beginning execute method inside of class PredictionProblem")
-        
-        dataframe = dataframe.copy()
-        dataframe = dataframe[dataframe[time_column] > cutoff_time]
+        dataframe_precutoff_time = dataframe[dataframe[time_column] < cutoff_time]
+        dataframe_all_data = dataframe #dataframe[dataframe[time_column] >= cutoff_time]
         
         for operation in self.operations:
-            logging.info("Dataframe state prior to executing operation: {} is : {}".format(operation, dataframe))
-            logging.info("Dataframe length: {}".format(len(dataframe)))
-            if len(dataframe) == 0:
-                return dataframe
-            dataframe = operation.execute(dataframe)
-        return dataframe
+            continue_executing_on_precutoff_df = True
+            continue_executing_on_all_data_df = True
+            
+            if len(dataframe_precutoff_time) == 0:
+                continue_executing_on_precutoff_df = False
+            if len(dataframe_all_data) == 0:
+                continue_executing_on_all_data_df = False
+            
+            if continue_executing_on_precutoff_df:
+                dataframe_precutoff_time = operation.execute(dataframe_precutoff_time)
+            if continue_executing_on_all_data_df:
+                dataframe_all_data = operation.execute(dataframe_all_data)
+
+        return dataframe_precutoff_time, dataframe_all_data
     
     def __str__(self):
         """Args:

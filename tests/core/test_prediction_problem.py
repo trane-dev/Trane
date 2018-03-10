@@ -54,7 +54,8 @@ def test_execute():
 											LastAggregationOp(label_generating_column)])
 
 	expected = 41.35
-	found = list(prediction_problem.execute(df, time_column, cutoff_time)[label_generating_column])[0]
+	precutoff_time, all_data = prediction_problem.execute(df, time_column, cutoff_time)
+	found = precutoff_time[label_generating_column].iloc[0]
 	assert(expected == found)
 
 def test_to_and_from_json():

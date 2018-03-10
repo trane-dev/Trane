@@ -3,7 +3,7 @@ from .op_base import OpBase
 import logging, sys
 import numpy
 
-logging.basicConfig(filename = 'aggregation_ops.log', level=logging.DEBUG)
+logging.basicConfig(filename = 'log.log', level=logging.DEBUG)
 
 AGGREGATION_OPS = ["FirstAggregationOp", "CountAggregationOp", "SumAggregationOp",\
     "LastAggregationOp", "LMFAggregationOp"]
@@ -42,7 +42,7 @@ class LMFAggregationOp(AggregationOpBase):
         logging.info("last: {}".format(last))
         logging.info("first: {}".format(first))
         logging.info("dataframe: {}".format(dataframe))
-        last.at[last.index[0], self.column_name] -= first.at[first.index[0], self.column_name].astype(numpy.float32)
+        last.at[last.index[0], self.column_name] -= first.at[first.index[0], self.column_name]
         return last
 
 class CountAggregationOp(AggregationOpBase):

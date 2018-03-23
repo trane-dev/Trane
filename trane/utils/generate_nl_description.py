@@ -4,12 +4,13 @@ from .generate_cutoff_times import *
 
 __all__ = ['generate_nl_description']
 
+
 def generate_nl_description(
-    problems, meta, entity_id_column, label_generating_column, 
-    time_column, cutoff_strategy):
+        problems, meta, entity_id_column, label_generating_column,
+        time_column, cutoff_strategy):
     """This function generates natural language description
     for prediction problems.
-    
+
     description := For each [entity_id_column], predict 
         [dataop_description] [cutoff_description] [filter_decription]
 
@@ -22,19 +23,19 @@ def generate_nl_description(
     filter_description := 
         [empty] if AllFilterOp
         with [filter_column] [op] (threshold)
-    
+
     Args:
         problems: list of PredictionProblem
         meta: TableMeta
         entity_id_column: str
         label_generating_column: str
         time_column:str
-        
+
     Returns:
         list of str: natural language descriptions
-    
+
     """
-    
+
     def description(prob):
         return "For each {col}, predict{dataop_des}{filter_des}{cutoff_des}.".format(
             col=entity_id_column,
@@ -42,17 +43,17 @@ def generate_nl_description(
             filter_des=filter_description(prob),
             cutoff_des=cutoff_description(prob)
         )
-        
+
     def dataop_description(prob):
         row_op = prob.operations[1]
         trans_op = prob.operations[2]
         agg_op = prob.operations[3]
-        
-        def rowop_description():            
+
+        def rowop_description():
             row_op_str_dict = {
-                GreaterRowOp: "greater than", 
-                EqRowOp: "equal to", 
-                NeqRowOp: "not equal to", 
+                GreaterRowOp: "greater than",
+                EqRowOp: "equal to",
+                NeqRowOp: "not equal to",
                 LessRowOp: "less than"
             }
             if isinstance(row_op, IdentityRowOp):
@@ -64,17 +65,17 @@ def generate_nl_description(
                     col=row_op.column_name, op=row_op_str_dict[type(row_op)],
                     threshold=row_op.param_values['threshold'])
             return " (unknown row op)"
-        
+
         def transop_description():
             if isinstance(trans_op, IdentityTransformationOp):
                 return ""
             if isinstance(trans_op, DiffTransformationOp):
                 return " the fluctuation of"
-        
+
         def aggop_description():
             agg_op_str_dict = {
-                FirstAggregationOp: "the first", 
-                LastAggregationOp: "the last", 
+                FirstAggregationOp: "the first",
+                LastAggregationOp: "the last",
                 CountAggregationOp: "the number of",
                 SumAggregationOp: "the sum of",
                 LMFAggregationOp: "the last minus first"
@@ -94,7 +95,7 @@ def generate_nl_description(
                 trans_op=transop_description(),
                 row_op=rowop_description()
             )
-                
+
     def cutoff_description(prob):
         if isinstance(cutoff_strategy, ConstantIntegerCutoffTimes):
             return ", after {col} {cutoff}".format(col=time_column, cutoff=cutoff_strategy.integer_cutoff)
@@ -102,21 +103,21 @@ def generate_nl_description(
             return ", after {col} {cutoff}".format(col=time_column, cutoff=cutoff_strategy.datetime_cutoff)
         else:
             raise " (unknown cutoff time)"
-    
+
     def filter_description(prob):
         filter_op_str_dict = {
-            GreaterFilterOp: "greater than", 
-            EqFilterOp: "equal to", 
-            NeqFilterOp: "not equal to", 
+            GreaterFilterOp: "greater than",
+            EqFilterOp: "equal to",
+            NeqFilterOp: "not equal to",
             LessFilterOp: "less than"
         }
         filter_op = prob.operations[0]
         if isinstance(filter_op, AllFilterOp):
             return ""
         return ", with {col} {op} {threshold}".format(
-            col=filter_op.column_name, 
+            col=filter_op.column_name,
             op=filter_op_str_dict[type(filter_op)],
             threshold=filter_op.param_values['threshold'])
-    
+
     ret = [description(prob) for prob in problems]
-    return ret    
+    return ret

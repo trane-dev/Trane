@@ -16,36 +16,32 @@ import os
 """
 json_str = '{ "path": "", "tables": [ { "path": "synthetic_taxi_data.csv", "name": "taxi_data", "fields": [ {"name": "vendor_id", "type": "id"}, {"name": "taxi_id", "type": "id"}, {"name": "trip_id", "type": "datetime"}, {"name": "distance", "type": "number", "subtype": "float"}, {"name": "duration", "type": "number", "subtype": "float"}, {"name": "fare", "type": "number", "subtype": "float"}, {"name": "num_passengers", "type": "number", "subtype": "float"} ] } ]}'
 
+
 def test_write_then_read():
-	table_meta = TableMeta.from_json(json_str)
-	entity_id_column = "taxi_id"
-	time_column = "trip_id"
-	label_generating_column = "fare"
-	prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
-											IdentityRowOp(label_generating_column),
-											IdentityTransformationOp(label_generating_column),
-											LastAggregationOp(label_generating_column)])
-	filename = "prediction_problem.json"
+    table_meta = TableMeta.from_json(json_str)
+    entity_id_column = "taxi_id"
+    time_column = "trip_id"
+    label_generating_column = "fare"
+    prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
+                                            IdentityRowOp(
+                                                label_generating_column),
+                                            IdentityTransformationOp(
+                                                label_generating_column),
+                                            LastAggregationOp(label_generating_column)])
+    filename = "prediction_problem.json"
 
-	prediction_problems_to_json_file([prediction_problem], table_meta, entity_id_column, 
-		label_generating_column, time_column, filename)
+    prediction_problems_to_json_file([prediction_problem], table_meta, entity_id_column,
+                                     label_generating_column, time_column, filename)
 
-	prediction_problems_from_json, table_meta_from_json, entity_id_column_from_json, \
-	label_generating_column_from_json, time_column_from_json = prediction_problems_from_json_file(filename)
-	prediction_problem_from_json = prediction_problems_from_json[0]
-	
-	os.remove(filename)
+    prediction_problems_from_json, table_meta_from_json, entity_id_column_from_json, \
+        label_generating_column_from_json, time_column_from_json = prediction_problems_from_json_file(
+            filename)
+    prediction_problem_from_json = prediction_problems_from_json[0]
 
-	assert(prediction_problem == prediction_problem_from_json)
-	assert(entity_id_column == entity_id_column_from_json)
-	assert(time_column == time_column_from_json)
-	assert(label_generating_column == label_generating_column_from_json)
-	assert(table_meta == table_meta_from_json)
-	
+    os.remove(filename)
 
-
-
-
-
-
-
+    assert(prediction_problem == prediction_problem_from_json)
+    assert(entity_id_column == entity_id_column_from_json)
+    assert(time_column == time_column_from_json)
+    assert(label_generating_column == label_generating_column_from_json)
+    assert(table_meta == table_meta_from_json)

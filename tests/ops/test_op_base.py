@@ -4,6 +4,7 @@ from trane.ops.row_ops import *
 from trane.ops.transformation_ops import *
 import pytest
 
+
 class FakeOp(OpBase):
     """
     Make a fake operation for testing. 
@@ -11,6 +12,7 @@ class FakeOp(OpBase):
     """
     PARAMS = [{'param': TM.TYPE_FLOAT}, {'param': TM.TYPE_TEXT}]
     IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_BOOL), (TM.TYPE_TEXT, TM.TYPE_BOOL)]
+
 
 def test_op_base_init():
     """
@@ -24,13 +26,15 @@ def test_op_base_init():
     with pytest.raises(NotImplementedError):
         op(None)
 
+
 def test_op_type_check_with_correct_type1():
     """
     With input type TYPE_FLOAT, check if itype and otype are correct.
     """
     meta = TM({
         "tables": [
-            {"fields": [{'name': 'col', 'type': TM.SUPERTYPE[TM.TYPE_FLOAT], 'subtype': TM.TYPE_FLOAT}]}
+            {"fields": [{'name': 'col', 'type': TM.SUPERTYPE[
+                TM.TYPE_FLOAT], 'subtype': TM.TYPE_FLOAT}]}
         ]})
     op = FakeOp('col')
     meta2 = op.op_type_check(meta)
@@ -38,7 +42,8 @@ def test_op_type_check_with_correct_type1():
     assert meta.get_type('col') == TM.TYPE_BOOL
     assert op.itype == TM.TYPE_FLOAT and op.otype == TM.TYPE_BOOL
 
-def test_op_type_check_with_correct_type2():    
+
+def test_op_type_check_with_correct_type2():
     """
     With input type TYPE_TEXT, check if itype and otype are correct.
     """
@@ -50,8 +55,9 @@ def test_op_type_check_with_correct_type2():
     meta2 = op.op_type_check(meta)
     assert meta2 == meta
     assert meta.get_type('col') == TM.TYPE_BOOL
-    assert op.itype == TM.TYPE_TEXT and op.otype == TM.TYPE_BOOL    
-    
+    assert op.itype == TM.TYPE_TEXT and op.otype == TM.TYPE_BOOL
+
+
 def test_op_type_check_with_wrong_type():
     """
     with input type TYPE_IDENTIFIER, check if None is returned by op_type_check.
@@ -65,7 +71,8 @@ def test_op_type_check_with_wrong_type():
     assert meta2 is None
     assert meta.get_type('col') == TM.TYPE_IDENTIFIER
     assert op.itype is TM.TYPE_IDENTIFIER and op.otype is None
-    
+
+
 def test_op_equality():
     column_name = "test"
     id_row_op = IdentityRowOp(column_name)

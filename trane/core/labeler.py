@@ -3,6 +3,7 @@ from .prediction_problem import PredictionProblem
 from .prediction_problem_saver import *
 import pandas as pd
 __all__ = ['Labeler']
+import logging
 
 class Labeler():
 
@@ -38,6 +39,7 @@ class Labeler():
                 assert len(df_pre_cutoff_time_result) <= 1
                 assert len(df_all_data_result) <= 1
                 
+                logging.info("df_pre_cutoff_time_result: \n {}".format(df_pre_cutoff_time_result))
                 if len(df_pre_cutoff_time_result) == 1:
                     label_precutoff_time = df_pre_cutoff_time_result[label_generating_column].values[0]
                 else:

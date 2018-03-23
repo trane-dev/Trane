@@ -5,6 +5,7 @@ import numpy as np
 
 ALL_OPS = AGGREGATION_OPS + FILTER_OPS + ROW_OPS + TRANSFORMATION_OPS
 
+
 def test_save_load_before_op_type_check():
     """
     Randomly select 10 operations, check op_to_json and op_from_json work properly before op_type_check
@@ -20,6 +21,7 @@ def test_save_load_before_op_type_check():
         assert op2.itype is None and op2.otype is None
         assert type(op2.param_values) == dict and len(op2.param_values) == 0
 
+
 def test_save_load_after_op_type_check():
     """
     Randomly select 10 operations, check op_to_json and op_from_json work properly after op_type_check
@@ -27,7 +29,8 @@ def test_save_load_after_op_type_check():
     for i in range(10):
         meta = TM({
             "tables": [
-                {"fields": [{'name': 'col', 'type': TM.SUPERTYPE[TM.TYPE_FLOAT], 'subtype': TM.TYPE_FLOAT}]}
+                {"fields": [{'name': 'col', 'type': TM.SUPERTYPE[
+                    TM.TYPE_FLOAT], 'subtype': TM.TYPE_FLOAT}]}
             ]})
         op_type = np.random.choice(ALL_OPS)
         op = globals()[op_type]('col')

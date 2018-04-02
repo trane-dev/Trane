@@ -12,7 +12,7 @@ class FilterOpBase(OpBase):
 
 
 class AllFilterOp(FilterOpBase):
-    PARAMS = [{}, {}]
+    PARAMS = [{}]
     IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY), (TM.TYPE_BOOL, TM.TYPE_BOOL),
                (TM.TYPE_ORDERED, TM.TYPE_ORDERED), (TM.TYPE_TEXT, TM.TYPE_TEXT),
                (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),

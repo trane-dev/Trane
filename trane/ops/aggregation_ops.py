@@ -16,7 +16,7 @@ class AggregationOpBase(OpBase):
 
 
 class FirstAggregationOp(AggregationOpBase):
-    PARAMS = [{}, {}]
+    PARAMS = [{}]
     IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY), (TM.TYPE_BOOL, TM.TYPE_BOOL),
                (TM.TYPE_ORDERED, TM.TYPE_ORDERED), (TM.TYPE_TEXT, TM.TYPE_TEXT),
                (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
@@ -27,7 +27,7 @@ class FirstAggregationOp(AggregationOpBase):
 
 
 class LastAggregationOp(AggregationOpBase):
-    PARAMS = [{}, {}]
+    PARAMS = [{}]
     IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY), (TM.TYPE_BOOL, TM.TYPE_BOOL),
                (TM.TYPE_ORDERED, TM.TYPE_ORDERED), (TM.TYPE_TEXT, TM.TYPE_TEXT),
                (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
@@ -61,7 +61,7 @@ class LMFAggregationOp(AggregationOpBase):
 
 
 class CountAggregationOp(AggregationOpBase):
-    PARAMS = [{}, {}]
+    PARAMS = [{}]
     IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_FLOAT),
                (TM.TYPE_ORDERED, TM.TYPE_FLOAT), (TM.TYPE_TEXT, TM.TYPE_FLOAT),
                (TM.TYPE_INTEGER, TM.TYPE_FLOAT), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),

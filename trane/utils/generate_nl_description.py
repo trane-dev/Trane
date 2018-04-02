@@ -80,9 +80,9 @@ def generate_nl_description(
                 SumAggregationOp: "the sum of",
                 LMFAggregationOp: "the last minus first"
             }
-            if agg_op.itype == TM.TYPE_BOOL and isinstance(agg_op, SumAggregationOp):
+            if agg_op.input_type == TM.TYPE_BOOL and isinstance(agg_op, SumAggregationOp):
                 return " the number of records whose"
-            if agg_op.itype == TM.TYPE_BOOL:
+            if agg_op.input_type == TM.TYPE_BOOL:
                 return " whether the {op}"
             if type(agg_op) in agg_op_str_dict:
                 return " " + agg_op_str_dict[type(agg_op)]
@@ -97,10 +97,8 @@ def generate_nl_description(
             )
 
     def cutoff_description(prob):
-        if isinstance(cutoff_strategy, ConstantIntegerCutoffTimes):
-            return ", after {col} {cutoff}".format(col=time_column, cutoff=cutoff_strategy.integer_cutoff)
-        elif isinstance(cutoff_strategy, ConstantDatetimeCutoffTimes):
-            return ", after {col} {cutoff}".format(col=time_column, cutoff=cutoff_strategy.datetime_cutoff)
+        if isinstance(cutoff_strategy, ConstantCutoffTime):
+            return ", after {col} {cutoff}".format(col=time_column, cutoff=cutoff_strategy.label_cutoff)
         else:
             raise " (unknown cutoff time)"
 

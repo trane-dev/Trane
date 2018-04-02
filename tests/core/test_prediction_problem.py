@@ -93,6 +93,21 @@ def test_to_and_from_json():
 
     assert(prediction_problem == prediction_problem_from_json)
 
+def test_to_and_from_json_with_order_of_types():
+    label_generating_column = "fare"
+    prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
+                                            IdentityRowOp(
+                                                label_generating_column),
+                                            IdentityTransformationOp(
+                                                label_generating_column),
+                                            LastAggregationOp(label_generating_column)])
+    prediction_problem.filter_column_order_of_types = [TableMeta.TYPE_INTEGER]
+    prediction_problem.label_generating_column_order_of_types = \
+        [TableMeta.TYPE_INTEGER, TableMeta.TYPE_BOOL, TableMeta.TYPE_CATEGORY]
+    json_str = prediction_problem.to_json()
+    prediction_problem_from_json = PredictionProblem.from_json(json_str)
+
+    assert(prediction_problem == prediction_problem_from_json)
 
 def test_equality():
     label_generating_column = "fare"

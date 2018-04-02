@@ -107,13 +107,18 @@ class PredictionProblem:
 
 	def to_json(self):
 		return json.dumps(
-			{"operations": [json.loads(op_to_json(op)) for op in self.operations]})
+			{"operations": [json.loads(op_to_json(op)) for op in self.operations],
+			"filter_column_order_of_types": self.filter_column_order_of_types,
+			"label_generating_column_order_of_types": self.label_generating_column_order_of_types})
 
 	def from_json(json_data):
 		data = json.loads(json_data)
 		operations = [op_from_json(json.dumps(item))
 					  for item in data['operations']]
-		return PredictionProblem(operations)
+		problem = PredictionProblem(operations)
+		problem.filter_column_order_of_types = data['filter_column_order_of_types']
+		problem.label_generating_column_order_of_types = data['label_generating_column_order_of_types']
+		return problem
 
 	def __eq__(self, other):
 		"""Overrides the default implementation"""

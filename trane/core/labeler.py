@@ -5,7 +5,6 @@ import pandas as pd
 __all__ = ['Labeler']
 import logging
 
-
 class Labeler():
 
     def __init__(self):
@@ -27,16 +26,17 @@ class Labeler():
         prediction_problems, table_meta, entity_id_column, label_generating_column, time_column = \
             prediction_problems_from_json_file(
                 json_prediction_problems_filename)
-
         dfs = []
         columns = [entity_id_column, 'problem_label_excluding_data_post_cutoff_time',
                    'problem_label_all_data', 'cutoff_time']
         for prediction_problem in prediction_problems:
             df_rows = []
+            logging.debug("In Labeller and beginning exuection of problem: {} \n".format(prediction_problem))
             for entity in entity_to_data_and_cutoff_dict:
                 df_row = []
                 entity_data, entity_cutoff = entity_to_data_and_cutoff_dict[
                     entity]
+                
                 df_pre_cutoff_time_result, df_all_data_result = prediction_problem.execute(
                     entity_data, time_column, entity_cutoff)
 

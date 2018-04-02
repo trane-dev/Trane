@@ -10,7 +10,7 @@ meta = TM({
             TM.TYPE_FLOAT], 'subtype': TM.TYPE_FLOAT}]}
     ]})
 
-ObjectFrequencyTransformationOp('hi')
+# ObjectFrequencyTransformationOp('hi')
 
 
 def test_identity_transformation_op_input_value():
@@ -28,17 +28,21 @@ def test_diff_transformation_op_input_value():
 
 
 def test_ObjectFrequencyTransformationOp():
-    df = DataFrame([(1, 100, 1.0), (2, 70, 1.0), (3, 100, 1.0),
-                    (4, 70, 1.0), (5, 70, 1.0)], columns=["id", "height", 'count'])
+    df = DataFrame([(1, 100), (2, 70), (3, 100),
+                    (4, 70), (5, 70)], columns=["id", "height"])
     op = ObjectFrequencyTransformationOp('height')
     op2 = ObjectFrequencyTransformationOp('id')
 
     output = op(df.copy())
     output2 = op2(df.copy())
 
-    expected = DataFrame([(1, 100, 2.0), (2, 70, 3.0)],
-                         columns=["id", "height", 'count'])
-    expected2 = df
+    expected = DataFrame([(1, 2), (2, 3)],
+                         columns=["id", "height"])
+    expected2 = DataFrame([(1, 100), (1, 70), (1, 100),
+                    (1, 70), (1, 70)], columns=["id", "height"])
+
+    print(output2)
+    print(expected2)
 
     assert(output.equals(expected))
     assert(output2.equals(expected2))

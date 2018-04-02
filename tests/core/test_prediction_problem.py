@@ -53,7 +53,7 @@ def test_execute():
     df = dataframe
 
     time_column = "trip_id"
-    cutoff_time = 0
+    cutoff_time = 100
 
     prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
                                             IdentityRowOp(
@@ -65,6 +65,7 @@ def test_execute():
     expected = 41.35
     precutoff_time, all_data = prediction_problem.execute(
         df, time_column, cutoff_time)
+        
     found = precutoff_time[label_generating_column].iloc[0]
     assert(expected == found)
 

@@ -25,10 +25,11 @@ json_str = '{ "path": "", "tables": [ { "path": "synthetic_taxi_data.csv", "name
 
 
 def test_op_type_check():
+    filter_column = "fare"
     label_generating_column = "fare"
     table_meta = TableMeta.from_json(json_str)
 
-    prediction_problem_correct_types = PredictionProblem([AllFilterOp(label_generating_column),
+    prediction_problem_correct_types = PredictionProblem([AllFilterOp(filter_column),
                                                           IdentityRowOp(
                                                               label_generating_column),
                                                           IdentityTransformationOp(
@@ -36,15 +37,24 @@ def test_op_type_check():
                                                           LastAggregationOp(label_generating_column)])
 
     label_generating_column = "vendor_id"
-    prediction_problem_incorrect_types = PredictionProblem([AllFilterOp(label_generating_column),
+    prediction_problem_incorrect_types = PredictionProblem([AllFilterOp(filter_column),
                                                             IdentityRowOp(
                                                                 label_generating_column),
                                                             IdentityTransformationOp(
                                                                 label_generating_column),
                                                             LMFAggregationOp(label_generating_column)])
 
-    assert(prediction_problem_correct_types.op_type_check(table_meta))
-    assert(not prediction_problem_incorrect_types.op_type_check(table_meta))
+    (correct_is_valid, filter_column_types_A, label_generating_column_types_A) = prediction_problem_correct_types.is_valid_prediction_problem(table_meta, filter_column, "fare")
+    (incorrect_is_valid, filter_column_types_B, label_generating_column_types_B) = prediction_problem_incorrect_types.is_valid_prediction_problem(table_meta, filter_column, label_generating_column)
+
+    assert(filter_column_types_A == ['float', 'float'])
+    assert(label_generating_column_types_A == ['float', 'float', 'float', 'float'])
+    
+    assert(filter_column_types_B == None)
+    assert(label_generating_column_types_B == None)
+
+    assert(correct_is_valid)
+    assert(not incorrect_is_valid)
 
 
 def test_execute():

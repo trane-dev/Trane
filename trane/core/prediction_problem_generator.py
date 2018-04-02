@@ -3,10 +3,10 @@ from .prediction_problem import PredictionProblem
 from ..ops import aggregation_ops, row_ops, transformation_ops, filter_ops
 from ..utils.table_meta import TableMeta
 
-import logging
 
 __all__ = ['PredictionProblemGenerator']
 
+import logging
 
 class PredictionProblemGenerator:
     """Automatically generate prediction problems with a sequence of 
@@ -29,7 +29,8 @@ class PredictionProblemGenerator:
         self.table_meta = table_meta
 
         assert(self.table_meta.get_type(entity_id_column)
-               in [TableMeta.TYPE_IDENTIFIER])
+               in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
+                    TableMeta.TYPE_CATEGORY])
         assert(self.table_meta.get_type(label_generating_column)
                in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER])
         assert(self.table_meta.get_type(time_column) in [
@@ -39,11 +40,6 @@ class PredictionProblemGenerator:
         self.label_generating_column = label_generating_column
         self.time_column = time_column
         self.filter_column = filter_column
-
-        logging.info("Generate labels on [%s]" % self.label_generating_column)
-        logging.info("Entites [%s]" % self.entity_id_column)
-        logging.info("Time [%s]" % self.time_column)
-        logging.info("Filter Column [%s]" % self.filter_column)
 
     def generate(self):
         """Generate prediction problems.
@@ -81,5 +77,7 @@ class PredictionProblemGenerator:
 
             if not prediction_problem.op_type_check(self.table_meta):
                 continue
-
+            
+            logging.debug("Prediction Problem Generated: {} \n".format(prediction_problem))
+            
             yield prediction_problem

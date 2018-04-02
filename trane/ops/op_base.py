@@ -2,6 +2,8 @@ import json
 from ..utils.table_meta import TableMeta as TM
 __all__ = ['OpBase']
 
+import logging
+
 
 class OpBase(object):
     """Super class of all operations. 
@@ -36,7 +38,7 @@ class OpBase(object):
         self.column_name = column_name
         self.itype = self.otype = None
         self.param_values = {}
-        assert(self.PARAMS and self.IOTYPES), type(self).__name__
+        # assert(self.PARAMS and self.IOTYPES), type(self).__name__
         # assert(len(self.PARAMS) == len(self.IOTYPES)), type(self).__name__
 
     def op_type_check(self, table_meta):
@@ -59,9 +61,6 @@ class OpBase(object):
             if self.itype == itype:
                 self.otype = otype
                 table_meta.set_type(self.column_name, otype)
-                # NOTE when preprocessing, we set default param_values.
-                # for param, ptype in self.PARAMS[idx].items():
-                #     self.param_values[param] = 0
                 return table_meta
         return None
 

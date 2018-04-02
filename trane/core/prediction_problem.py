@@ -4,9 +4,8 @@ from ..utils.table_meta import TableMeta
 from ..ops.op_saver import *
 from dateutil import parser
 
-import logging
 import sys
-logging.basicConfig(filename='prediction_problem.log', level=logging.DEBUG)
+import logging
 
 __all__ = ['PredictionProblem']
 
@@ -58,19 +57,20 @@ class PredictionProblem:
             (Boolean/Float): The Label/Value of the prediction problem's formulation when applied to the data.
 
         """
-        logging.info(
-            "Beginning execute method inside of class PredictionProblem")
         dataframe_precutoff_time = dataframe[
             dataframe[time_column] < cutoff_time]
-        # dataframe[dataframe[time_column] >= cutoff_time]
         dataframe_all_data = dataframe
 
+        # logging.debug("Dataframe before any execution: {}".format(dataframe_all_data))
+
         for operation in self.operations:
+
             continue_executing_on_precutoff_df = True
             continue_executing_on_all_data_df = True
 
             if len(dataframe_precutoff_time) == 0:
                 continue_executing_on_precutoff_df = False
+
             if len(dataframe_all_data) == 0:
                 continue_executing_on_all_data_df = False
 
@@ -78,7 +78,11 @@ class PredictionProblem:
                 dataframe_precutoff_time = operation.execute(
                     dataframe_precutoff_time)
             if continue_executing_on_all_data_df:
+                # logging.debug("Before execution of operation: {}, the data in the column of interest is: \n {} \n".format(operation, dataframe_all_data[operation.column_name]))
+
                 dataframe_all_data = operation.execute(dataframe_all_data)
+                
+                # logging.debug("After execution of operation: {}, the data in the column of interest is: \n {} \n".format(operation, dataframe_all_data[operation.column_name]))
 
         return dataframe_precutoff_time, dataframe_all_data
 

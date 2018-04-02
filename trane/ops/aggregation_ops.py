@@ -1,14 +1,13 @@
 from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
-import logging
 import sys
 import numpy
-
-logging.basicConfig(filename='log.log', level=logging.DEBUG)
 
 AGGREGATION_OPS = ["FirstAggregationOp", "CountAggregationOp", "SumAggregationOp",
                    "LastAggregationOp", "LMFAggregationOp"]
 __all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
+
+import logging
 
 
 class AggregationOpBase(OpBase):
@@ -41,16 +40,21 @@ class LastAggregationOp(AggregationOpBase):
 class LMFAggregationOp(AggregationOpBase):
     PARAMS = [{}]
     IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-               (TM.TYPE_INTEGER, TM.TYPE_INTEGER)]
+               (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
+
+        #HACKY FIX
+        dataframe[self.column_name] = dataframe[self.column_name].astype(numpy.float32)
+
         last = dataframe.tail(1)
         first = dataframe.head(1)
 
-        logging.info("Beginning execution of LMF AggregationOp")
-        logging.info("last: {}".format(last))
-        logging.info("first: {}".format(first))
-        logging.info("dataframe: {}".format(dataframe))
+        logging.debug("Beginning exuection of LMFAggregationOp")
+        logging.info('Last Value: {}\n'.format(last.at[last.index[0],
+                                                       self.column_name]))
+        logging.info('First Value: {}\n'.format(first.at[first.index[0],
+                                                        self.column_name]))
         last.at[last.index[0],
                 self.column_name] -= first.at[first.index[0], self.column_name]
         return last
@@ -75,8 +79,6 @@ class SumAggregationOp(AggregationOpBase):
                (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
-        logging.info("Beginning execution of SumAggregationOp")
-        logging.info("dataframe: {}".format(dataframe))
         first = dataframe.head(1)
         first.at[first.index[0], self.column_name] = dataframe[
             self.column_name].sum()

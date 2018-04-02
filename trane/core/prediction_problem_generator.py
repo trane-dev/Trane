@@ -41,7 +41,7 @@ class PredictionProblemGenerator:
         self.time_column = time_column
         self.filter_column = filter_column
 
-    def generate(self):
+    def generate(self, dataframe):
         """Generate prediction problems.
 
         yeilds:

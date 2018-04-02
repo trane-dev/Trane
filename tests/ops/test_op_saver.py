@@ -18,7 +18,7 @@ def test_save_load_before_op_type_check():
         op2 = op_from_json(op_json)
         assert type(op2) == globals()[op_type]
         assert op2.column_name == 'col'
-        assert op2.itype is None and op2.otype is None
+        assert op2.input_type is None and op2.output_type is None
         assert type(op2.param_values) == dict and len(op2.param_values) == 0
 
 
@@ -40,5 +40,5 @@ def test_save_load_after_op_type_check():
         op2 = op_from_json(op_json)
         assert type(op2) == globals()[op_type]
         assert op2.column_name == 'col'
-        assert op2.itype == TM.TYPE_FLOAT and op2.otype == op.otype
+        assert op2.input_type == TM.TYPE_FLOAT and op2.output_type == op.output_type
         assert type(op2.param_values) == dict

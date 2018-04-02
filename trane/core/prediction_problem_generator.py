@@ -8,45 +8,24 @@ __all__ = ['PredictionProblemGenerator']
 
 import logging
 
-class PredictionProblemGenerator:
-    """Automatically generate prediction problems with a sequence of 
-    fileter, row, transformation and aggregation operations.
 
-    """
+class PredictionProblemGenerator:
 
     def __init__(self, table_meta, entity_id_column, label_generating_column, time_column, filter_column):
-        """
-        Args:
-            label_generating_column: column to operate over. 
-            entity_id_column: the column with entity id's. 
-            time_column: the name of the column containing time information. 
-        Returns:
-            None
-        """
-        if isinstance(table_meta, list):
-            table_meta = TableMeta(table_meta)
-        assert isinstance(table_meta, TableMeta)
+
         self.table_meta = table_meta
-
-        assert(self.table_meta.get_type(entity_id_column)
-               in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
-                    TableMeta.TYPE_CATEGORY])
-        assert(self.table_meta.get_type(label_generating_column)
-               in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER])
-        assert(self.table_meta.get_type(time_column) in [
-               TableMeta.TYPE_TIME, TableMeta.TYPE_INTEGER])
-
         self.entity_id_column = entity_id_column
         self.label_generating_column = label_generating_column
         self.time_column = time_column
         self.filter_column = filter_column
 
+        self.ensure_valid_inputs()
+
     def generate(self):
         """Generate prediction problems.
 
-        yeilds:
+        yields:
             PredictionProblem
-
         """
         def iter_over_ops():
             for aggregation_op_name in aggregation_ops.AGGREGATION_OPS:
@@ -75,9 +54,22 @@ class PredictionProblemGenerator:
 
             prediction_problem.set_thresholds(self.table_meta)
 
-            if not prediction_problem.op_type_check(self.table_meta):
+            (is_valid_prediction_problem, filter_column_order_of_types, label_generating_column_order_of_types) = prediction_problem.is_valid_prediction_problem(
+                self.table_meta, self.filter_column, self.label_generating_column)
+
+            if not is_valid_prediction_problem:
                 continue
-            
-            logging.debug("Prediction Problem Generated: {} \n".format(prediction_problem))
+
+            logging.debug(
+                "Prediction Problem Generated: {} \n".format(prediction_problem))
             
             yield prediction_problem
+
+    def ensure_valid_inputs(self):
+        assert(self.table_meta.get_type(self.entity_id_column)
+               in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
+                   TableMeta.TYPE_CATEGORY])
+        assert(self.table_meta.get_type(self.label_generating_column)
+               in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER])
+        assert(self.table_meta.get_type(self.time_column)
+               in [TableMeta.TYPE_TIME, TableMeta.TYPE_INTEGER])

@@ -74,7 +74,7 @@ def test_execute():
 
     expected = 41.35
     precutoff_time, all_data = prediction_problem.execute(
-        df, time_column, cutoff_time)
+        df, time_column, cutoff_time, ['float', 'float'], ['float', 'float', 'float', 'float'])
         
     found = precutoff_time[label_generating_column].iloc[0]
     assert(expected == found)

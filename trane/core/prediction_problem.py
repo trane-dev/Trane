@@ -3,7 +3,7 @@ import json
 from ..utils.table_meta import TableMeta
 from ..ops.op_saver import *
 from dateutil import parser
-
+import numpy as np
 import sys
 import logging
 
@@ -38,7 +38,6 @@ class PredictionProblem:
 			temp_meta = op.op_type_check(temp_meta)
 			if not temp_meta:
 				return False, None, None
-			print("temp_meta.get_type(label_generating_column): {}".format(temp_meta.get_type(label_generating_column)))
 			label_generating_column_order_of_types.append(temp_meta.get_type(label_generating_column))
 		
 		self.filter_column_order_of_types = filter_column_order_of_types
@@ -50,7 +49,8 @@ class PredictionProblem:
 		for op in self.operations:
 			op.set_thresholds(table_meta)
 
-	def execute(self, dataframe, time_column, cutoff_time):
+	def execute(self, dataframe, time_column, label_cutoff_time, 
+		filter_column_order_of_types, label_generating_column_order_of_types):
 		"""This function executes all the operations on the dataframe and returns the output. The output
 			should be structured as a single label/value per the Trane documentation.
 			See paper: "What would a data scientist ask? Automatically formulating and solving predicton
@@ -66,10 +66,17 @@ class PredictionProblem:
 		dataframe = dataframe.sort_values(by = time_column)
 
 		precutoff_time_execution_result = dataframe[
-			dataframe[time_column] < cutoff_time]
+			dataframe[time_column] < label_cutoff_time]
 		all_time_execution_result = dataframe
 
-		for operation in self.operations:
+		for idx, operation in enumerate(self.operations):
+
+			single_piece_of_data = dataframe.get_value(0, operation.column_name)
+			
+			if idx == 0:
+			  check_type(filter_column_order_of_types[idx], single_piece_of_data)
+			elif idx > 0:
+			  check_type(label_generating_column_order_of_types[idx - 1], single_piece_of_data)
 
 			continue_executing_on_precutoff_df = True
 			continue_executing_on_all_data_df = True
@@ -83,9 +90,14 @@ class PredictionProblem:
 			if continue_executing_on_precutoff_df:
 				precutoff_time_execution_result = operation.execute(
 					precutoff_time_execution_result)
+			
 			if continue_executing_on_all_data_df:
 				all_time_execution_result = operation.execute(all_time_execution_result)
-				
+			
+			if idx == 0:
+			  check_type(filter_column_order_of_types[idx + 1], single_piece_of_data)
+			elif idx > 0:
+			  check_type(label_generating_column_order_of_types[idx], single_piece_of_data)
 
 		return precutoff_time_execution_result, all_time_execution_result
 
@@ -125,3 +137,41 @@ class PredictionProblem:
 		if isinstance(self, other.__class__):
 			return self.__dict__ == other.__dict__
 		return False
+
+def check_type(expected_type, actual_data):
+    
+    if expected_type == TableMeta.TYPE_CATEGORY:
+        allowed_types = [bool, int, str, float]
+        assert(type(actual_data) in allowed_types)
+
+    elif expected_type == TableMeta.TYPE_BOOL:
+        allowed_types = [bool]
+        assert(type(actual_data) in allowed_types)        
+    
+    elif expected_type == TableMeta.TYPE_ORDERED:
+        allowed_types = [bool, int, str, float]
+        assert(type(actual_data) in allowed_types)
+    
+    elif expected_type == TableMeta.TYPE_TEXT:
+        allowed_types = [str]           
+        assert(type(actual_data) in allowed_types)
+    
+    elif expected_type == TableMeta.TYPE_INTEGER:
+        allowed_types = [int]
+        assert(type(actual_data) in allowed_types)
+
+    elif expected_type == TableMeta.TYPE_FLOAT:
+        allowed_types = [float, np.float64]
+        print("ACTUAL DATA TYPE: {}".format(type(actual_data)))
+        assert(type(actual_data) in allowed_types)
+
+    elif expected_type == TableMeta.TYPE_TIME:
+        allowed_types = [bool, int, str, float]
+        assert(type(actual_data) in allowed_types)
+
+    elif expected_type == TableMeta.TYPE_IDENTIFIER:
+        allowed_types = [int, str, float]
+        assert(type(actual_data) in allowed_types)
+    
+    else:
+        logging.critical('Check_type function received an unexpected type.')

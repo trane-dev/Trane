@@ -63,6 +63,8 @@ class PredictionProblemGenerator:
             logging.debug(
                 "Prediction Problem Generated: {} \n".format(prediction_problem))
             
+            logging.debug(
+                "Prediction problem filter column types: {}\n".format(filter_column_order_of_types))
             yield prediction_problem
 
     def ensure_valid_inputs(self):

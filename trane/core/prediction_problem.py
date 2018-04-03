@@ -3,11 +3,8 @@ import json
 from ..utils.table_meta import TableMeta
 from ..ops.op_saver import *
 from dateutil import parser
-<<<<<<< HEAD
 from collections import Counter
-=======
 import numpy as np
->>>>>>> Dev
 import sys
 import logging
 from scipy import stats
@@ -51,35 +48,35 @@ class PredictionProblem:
 
 		return (True, filter_column_order_of_types, label_generating_column_order_of_types)
 
-    def set_hyper_parameters(self, hyper_parameters):
-        for idx, op in enumerate(self.operations):
-            hyper_parameter = hyper_parameters[idx]
-            op.set_hyper_parameter(hyper_parameter)
+	def set_hyper_parameters(self, hyper_parameters):
+		for idx, op in enumerate(self.operations):
+			hyper_parameter = hyper_parameters[idx]
+			op.set_hyper_parameter(hyper_parameter)
 
-    def generate_and_set_hyper_parameters(self, dataframe, label_generating_column, filter_column):
-        hyper_parameters = []
-                
+	def generate_and_set_hyper_parameters(self, dataframe, label_generating_column, filter_column):
+		hyper_parameters = []
+				
 
-        FRACTION_OF_DATA_TARGET = 0.8
-        column_data = dataframe[filter_column]
-        unique_filter_values = set(column_data)
-        hyper_parameters.append(
-            select_by_remaining(
-                FRACTION_OF_DATA_TARGET, unique_filter_values, 
-                dataframe, self.operations[0]
-                )
-        )
-        
-        for operation in self.operations[1:]:
-            column_data = dataframe[label_generating_column]
-            unique_parameter_values = set(column_data)
-            hyper_parameters.append(
-                select_by_diversity(
-                    unique_parameter_values, dataframe, operation, label_generating_column)
-                )
-        
-        self.set_hyper_parameters(hyper_parameters)
-        return hyper_parameters
+		FRACTION_OF_DATA_TARGET = 0.8
+		column_data = dataframe[filter_column]
+		unique_filter_values = set(column_data)
+		hyper_parameters.append(
+			select_by_remaining(
+				FRACTION_OF_DATA_TARGET, unique_filter_values, 
+				dataframe, self.operations[0]
+				)
+		)
+		
+		for operation in self.operations[1:]:
+			column_data = dataframe[label_generating_column]
+			unique_parameter_values = set(column_data)
+			hyper_parameters.append(
+				select_by_diversity(
+					unique_parameter_values, dataframe, operation, label_generating_column)
+				)
+		
+		self.set_hyper_parameters(hyper_parameters)
+		return hyper_parameters
 
 	def execute(self, dataframe, time_column, label_cutoff_time, 
 		filter_column_order_of_types, label_generating_column_order_of_types):
@@ -103,7 +100,7 @@ class PredictionProblem:
 
 		for idx, operation in enumerate(self.operations):
 
-			single_piece_of_data = dataframe.get_value(0, operation.column_name)
+			single_piece_of_data = dataframe.at[0, operation.column_name]
 			
 			if idx == 0:
 			  check_type(filter_column_order_of_types[idx], single_piece_of_data)
@@ -169,86 +166,86 @@ class PredictionProblem:
 		if isinstance(self, other.__class__):
 			return self.__dict__ == other.__dict__
 		return False
-    def select_by_remaining(fraction_of_data_target, unique_filter_values, dataframe, operation):
-        if len(operation.REQUIRED_PARAMETERS) == 0:
-            return None
-        else:
-            best = 1
-            best_filter_value = 0
-            for unique_filter_value in unique_filter_values:
-                total = len(dataframe)
-                
-                operation.set_hyper_parameter(unique_filter_value)
-                
-                filtered_df = operation.execute(dataframe)
-                count = len(filtered_df)
+def select_by_remaining(fraction_of_data_target, unique_filter_values, dataframe, operation):
+	if len(operation.REQUIRED_PARAMETERS) == 0:
+		return None
+	else:
+		best = 1
+		best_filter_value = 0
+		for unique_filter_value in unique_filter_values:
+			total = len(dataframe)
+			
+			operation.set_hyper_parameter(unique_filter_value)
+			
+			filtered_df = operation.execute(dataframe)
+			count = len(filtered_df)
 
-                fraction_of_data_left = count / total
-                
-                score = abs(fraction_of_data_left - fraction_of_data_target)
-                if score < best:
-                    best = score
-                    best_filter_value = unique_filter_value
-            return best_filter_value
+			fraction_of_data_left = count / total
+			
+			score = abs(fraction_of_data_left - fraction_of_data_target)
+			if score < best:
+				best = score
+				best_filter_value = unique_filter_value
+		return best_filter_value
 
-    def select_by_diversity(unique_parameter_values, dataframe, operation, label_generating_column):
-        if len(operation.REQUIRED_PARAMETERS) == 0:
-            return None
-        else:
-            best = 0
-            best_parameter_value = 0
-            for unique_parameter_value in unique_parameter_values:
-                
-                operation.set_hyper_parameter(unique_parameter_value)
+def select_by_diversity(unique_parameter_values, dataframe, operation, label_generating_column):
+	if len(operation.REQUIRED_PARAMETERS) == 0:
+		return None
+	else:
+		best = 0
+		best_parameter_value = 0
+		for unique_parameter_value in unique_parameter_values:
+			
+			operation.set_hyper_parameter(unique_parameter_value)
 
-                resulting_df = operation.execute(dataframe)
-                entropy = entropy_of_a_list(list(resulting_df[label_generating_column]))
-                if entropy > best:
-                    best = entropy
-                    best_parameter_value = unique_parameter_value
-            return best_parameter_value
+			resulting_df = operation.execute(dataframe)
+			entropy = entropy_of_a_list(list(resulting_df[label_generating_column]))
+			if entropy > best:
+				best = entropy
+				best_parameter_value = unique_parameter_value
+		return best_parameter_value
 
 def entropy_of_a_list(values):
-    counts = Counter(values).values()
-    total = float(sum(counts))
-    probabilities = [val/total for val in counts]
-    entropy = stats.entropy(probabilities)
-    return entropy
+	counts = Counter(values).values()
+	total = float(sum(counts))
+	probabilities = [val/total for val in counts]
+	entropy = stats.entropy(probabilities)
+	return entropy
 
 def check_type(expected_type, actual_data):
-    
-    if expected_type == TableMeta.TYPE_CATEGORY:
-        allowed_types = [bool, int, str, float]
-        assert(type(actual_data) in allowed_types)
+	
+	if expected_type == TableMeta.TYPE_CATEGORY:
+		allowed_types = [bool, int, str, float]
+		assert(type(actual_data) in allowed_types)
 
-    elif expected_type == TableMeta.TYPE_BOOL:
-        allowed_types = [bool]
-        assert(type(actual_data) in allowed_types)        
-    
-    elif expected_type == TableMeta.TYPE_ORDERED:
-        allowed_types = [bool, int, str, float]
-        assert(type(actual_data) in allowed_types)
-    
-    elif expected_type == TableMeta.TYPE_TEXT:
-        allowed_types = [str]           
-        assert(type(actual_data) in allowed_types)
-    
-    elif expected_type == TableMeta.TYPE_INTEGER:
-        allowed_types = [int]
-        assert(type(actual_data) in allowed_types)
+	elif expected_type == TableMeta.TYPE_BOOL:
+		allowed_types = [bool]
+		assert(type(actual_data) in allowed_types)        
+	
+	elif expected_type == TableMeta.TYPE_ORDERED:
+		allowed_types = [bool, int, str, float]
+		assert(type(actual_data) in allowed_types)
+	
+	elif expected_type == TableMeta.TYPE_TEXT:
+		allowed_types = [str]           
+		assert(type(actual_data) in allowed_types)
+	
+	elif expected_type == TableMeta.TYPE_INTEGER:
+		allowed_types = [int]
+		assert(type(actual_data) in allowed_types)
 
-    elif expected_type == TableMeta.TYPE_FLOAT:
-        allowed_types = [float, np.float64]
-        print("ACTUAL DATA TYPE: {}".format(type(actual_data)))
-        assert(type(actual_data) in allowed_types)
+	elif expected_type == TableMeta.TYPE_FLOAT:
+		allowed_types = [float, np.float64]
+		print("ACTUAL DATA TYPE: {}".format(type(actual_data)))
+		assert(type(actual_data) in allowed_types)
 
-    elif expected_type == TableMeta.TYPE_TIME:
-        allowed_types = [bool, int, str, float]
-        assert(type(actual_data) in allowed_types)
+	elif expected_type == TableMeta.TYPE_TIME:
+		allowed_types = [bool, int, str, float]
+		assert(type(actual_data) in allowed_types)
 
-    elif expected_type == TableMeta.TYPE_IDENTIFIER:
-        allowed_types = [int, str, float]
-        assert(type(actual_data) in allowed_types)
-    
-    else:
-        logging.critical('Check_type function received an unexpected type.')
+	elif expected_type == TableMeta.TYPE_IDENTIFIER:
+		allowed_types = [int, str, float]
+		assert(type(actual_data) in allowed_types)
+	
+	else:
+		logging.critical('Check_type function received an unexpected type.')

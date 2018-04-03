@@ -41,63 +41,35 @@ class PredictionProblem:
                 return False
         return True
 
-    def set_thresholds(self, table_meta):
-        for op in self.operations:
-            op.set_thresholds(table_meta)
+    def set_hyper_parameters(self, hyper_parameters):
+        for idx, op in enumerate(self.operations):
+        	hyper_parameter = hyper_parameters[idx]
+        	op.set_hyper_parameter(hyper_parameter)
 
-    def generate_hyper_parameters(self, dataframe, entity_id_column, label_generating_column, filter_column, time_column):
-        params = []
-        
+    def generate_and_set_hyper_parameters(self, dataframe, label_generating_column, filter_column):
+        hyper_parameters = []
+                
+
         FRACTION_OF_DATA_TARGET = 0.8
         column_data = dataframe[filter_column]
         unique_filter_values = set(column_data)
-        params.append(
+        hyper_parameters.append(
             select_by_remaining(
                 FRACTION_OF_DATA_TARGET, unique_filter_values, 
-                column_data, self.operations[0]
+                dataframe, self.operations[0]
                 )
         )
-
+        
         for operation in self.operations[1:]:
             column_data = dataframe[label_generating_column]
             unique_parameter_values = set(column_data)
-            params.append(
+            hyper_parameters.append(
                 select_by_diversity(
-                    unique_parameter_values, column_data, operation)
+                    unique_parameter_values, dataframe, operation, label_generating_column)
                 )
-        return params
-
-
-    def select_by_remaining(fraction_of_data_target, unique_filter_values, column_data, operation):
-        best = 1
-        best_filter_value = 0
-        for unique_filter_value in unique_filter_values:
-            total = len(column_data)
-            count = column_data.apply(operation.execute).sum()
-            fraction_of_data_left = count / total
-
-            score = abs(fraction_of_data_left - fraction_of_data_target)
-            if score < best:
-                best = score
-                best_filter_value = unique_filter_value
-        return best_filter_value
-
-    def select_by_diversity(unique_parameter_values, column_data, operation):
-        best = 0
-        best_parameter_value = 0
-        for unique_parameter_value in unique_parameter_values:
-            entropy = entropy(column_data.apply(operation.execute))
-            if entropy > best:
-                best = entropy
-                best_parameter_value = unique_parameter_value
-        return best_parameter_value
-
-    def entropy_of_a_list(values):
-        counts = Counter(values).values()
-        total = float(sum(counts))
-        probabilities = [val/total for val in counts]
-        entropy = stats.entropy(probabilities)
-        return entropy
+        
+        self.set_hyper_parameters(hyper_parameters)
+        return hyper_parameters
 
     def execute(self, dataframe, time_column, cutoff_time):
         """This function executes all the operations on the dataframe and returns the output. The output
@@ -116,7 +88,6 @@ class PredictionProblem:
             dataframe[time_column] < cutoff_time]
         dataframe_all_data = dataframe
 
-        # logging.debug("Dataframe before any execution: {}".format(dataframe_all_data))
 
         for operation in self.operations:
 
@@ -133,11 +104,8 @@ class PredictionProblem:
                 dataframe_precutoff_time = operation.execute(
                     dataframe_precutoff_time)
             if continue_executing_on_all_data_df:
-                # logging.debug("Before execution of operation: {}, the data in the column of interest is: \n {} \n".format(operation, dataframe_all_data[operation.column_name]))
-
                 dataframe_all_data = operation.execute(dataframe_all_data)
 
-                # logging.debug("After execution of operation: {}, the data in the column of interest is: \n {} \n".format(operation, dataframe_all_data[operation.column_name]))
 
         return dataframe_precutoff_time, dataframe_all_data
 
@@ -172,3 +140,49 @@ class PredictionProblem:
         if isinstance(self, other.__class__):
             return self.__dict__ == other.__dict__
         return False
+
+def select_by_remaining(fraction_of_data_target, unique_filter_values, dataframe, operation):
+    if len(operation.REQUIRED_PARAMETERS) == 0:
+    	return None
+    else:
+        best = 1
+        best_filter_value = 0
+        for unique_filter_value in unique_filter_values:
+            total = len(dataframe)
+            
+            operation.set_hyper_parameter(unique_filter_value)
+            
+            filtered_df = operation.execute(dataframe)
+            count = len(filtered_df)
+
+            fraction_of_data_left = count / total
+            
+            score = abs(fraction_of_data_left - fraction_of_data_target)
+            if score < best:
+                best = score
+                best_filter_value = unique_filter_value
+        return best_filter_value
+
+def select_by_diversity(unique_parameter_values, dataframe, operation, label_generating_column):
+    if len(operation.REQUIRED_PARAMETERS) == 0:
+    	return None
+    else:
+        best = 0
+        best_parameter_value = 0
+        for unique_parameter_value in unique_parameter_values:
+            
+            operation.set_hyper_parameter(unique_parameter_value)
+
+            resulting_df = operation.execute(dataframe)
+            entropy = entropy_of_a_list(list(resulting_df[label_generating_column]))
+            if entropy > best:
+                best = entropy
+                best_parameter_value = unique_parameter_value
+        return best_parameter_value
+
+def entropy_of_a_list(values):
+    counts = Counter(values).values()
+    total = float(sum(counts))
+    probabilities = [val/total for val in counts]
+    entropy = stats.entropy(probabilities)
+    return entropy

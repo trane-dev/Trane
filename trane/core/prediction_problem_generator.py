@@ -73,11 +73,13 @@ class PredictionProblemGenerator:
             prediction_problem = PredictionProblem(
                 [filter_op_obj, row_op_obj, transformation_op_obj, aggregation_op_obj])
 
-            prediction_problem.set_thresholds(self.table_meta)
+
+            hyper_parameters = prediction_problem.generate_and_set_hyper_parameters(dataframe, 
+                                                                self.label_generating_column, 
+                                                                self.filter_column)
 
             if not prediction_problem.op_type_check(self.table_meta):
                 continue
             
-            logging.debug("Prediction Problem Generated: {} \n".format(prediction_problem))
             
             yield prediction_problem

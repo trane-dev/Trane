@@ -16,33 +16,36 @@ class AggregationOpBase(OpBase):
 
 
 class FirstAggregationOp(AggregationOpBase):
-    PARAMS = [{}]
+    REQUIRED_PARAMETERS = []
     IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY), (TM.TYPE_BOOL, TM.TYPE_BOOL),
                (TM.TYPE_ORDERED, TM.TYPE_ORDERED), (TM.TYPE_TEXT, TM.TYPE_TEXT),
                (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
                (TM.TYPE_TIME, TM.TYPE_TIME), (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
 
     def execute(self, dataframe):
+        dataframe = dataframe.copy()
         return dataframe.head(1)
 
 
 class LastAggregationOp(AggregationOpBase):
-    PARAMS = [{}]
+    REQUIRED_PARAMETERS = []
     IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY), (TM.TYPE_BOOL, TM.TYPE_BOOL),
                (TM.TYPE_ORDERED, TM.TYPE_ORDERED), (TM.TYPE_TEXT, TM.TYPE_TEXT),
                (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
                (TM.TYPE_TIME, TM.TYPE_TIME), (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
 
     def execute(self, dataframe):
+        dataframe = dataframe.copy()
         return dataframe.tail(1)
 
 
 class LMFAggregationOp(AggregationOpBase):
-    PARAMS = [{}]
+    REQUIRED_PARAMETERS = []
     IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
                (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
+        dataframe = dataframe.copy()
 
         #HACKY FIX
         dataframe[self.column_name] = dataframe[self.column_name].astype(numpy.float32)
@@ -61,24 +64,26 @@ class LMFAggregationOp(AggregationOpBase):
 
 
 class CountAggregationOp(AggregationOpBase):
-    PARAMS = [{}]
+    REQUIRED_PARAMETERS = []
     IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_FLOAT),
                (TM.TYPE_ORDERED, TM.TYPE_FLOAT), (TM.TYPE_TEXT, TM.TYPE_FLOAT),
                (TM.TYPE_INTEGER, TM.TYPE_FLOAT), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
                (TM.TYPE_TIME, TM.TYPE_FLOAT), (TM.TYPE_IDENTIFIER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
+        dataframe = dataframe.copy()
         first = dataframe.head(1)
         first.at[first.index[0], self.column_name] = dataframe.shape[0]
         return first
 
 
 class SumAggregationOp(AggregationOpBase):
-    PARAMS = [{}]
+    REQUIRED_PARAMETERS = []
     IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_FLOAT),
                (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
+        dataframe = dataframe.copy()
         first = dataframe.head(1)
         first.at[first.index[0], self.column_name] = dataframe[
             self.column_name].sum()

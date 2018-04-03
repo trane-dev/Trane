@@ -14,7 +14,7 @@ class TransformationOpBase(OpBase):
 
 
 class IdentityTransformationOp(TransformationOpBase):
-    PARAMS = [{}]
+    REQUIRED_PARAMETERS = []
     IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY), (TM.TYPE_BOOL, TM.TYPE_BOOL),
                (TM.TYPE_ORDERED, TM.TYPE_ORDERED), (TM.TYPE_TEXT, TM.TYPE_TEXT),
                (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
@@ -25,11 +25,12 @@ class IdentityTransformationOp(TransformationOpBase):
 
 
 class DiffTransformationOp(TransformationOpBase):
-    PARAMS = [{}]
+    REQUIRED_PARAMETERS = []
     IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
                (TM.TYPE_INTEGER, TM.TYPE_INTEGER)]
 
     def execute(self, dataframe):
+        dataframe = dataframe.copy()
 
         #HACKY FIX
         dataframe[self.column_name] = dataframe[self.column_name].astype(numpy.float32)
@@ -43,13 +44,14 @@ class DiffTransformationOp(TransformationOpBase):
 
 
 class ObjectFrequencyTransformationOp(TransformationOpBase):
-    PARAMS = [{}]
+    REQUIRED_PARAMETERS = []
     IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_INTEGER), (TM.TYPE_BOOL, TM.TYPE_INTEGER),
                (TM.TYPE_ORDERED, TM.TYPE_INTEGER), (TM.TYPE_TEXT, TM.TYPE_INTEGER),
                (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_INTEGER),
                (TM.TYPE_TIME, TM.TYPE_INTEGER), (TM.TYPE_IDENTIFIER, TM.TYPE_INTEGER)]
 
     def execute(self, dataframe):
+        dataframe = dataframe.copy()
         objects = dataframe.copy()[self.column_name].unique()
         objects_to_frequency = {}
         for obj in objects:

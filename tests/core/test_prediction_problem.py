@@ -72,26 +72,36 @@ def test_hyper_parameter_generation_2():
 	assert(op2_hyper_parameter['threshold'] == 4)	
 
 def test_op_type_check():
-	label_generating_column = "fare"
-	table_meta = TableMeta.from_json(json_str)
+    filter_column = "fare"
+    label_generating_column = "fare"
+    table_meta = TableMeta.from_json(json_str)
 
-	prediction_problem_correct_types = PredictionProblem([AllFilterOp(label_generating_column),
-														  IdentityRowOp(
-															  label_generating_column),
-														  IdentityTransformationOp(
-															  label_generating_column),
-														  LastAggregationOp(label_generating_column)])
+    prediction_problem_correct_types = PredictionProblem([AllFilterOp(filter_column),
+                                                          IdentityRowOp(
+                                                              label_generating_column),
+                                                          IdentityTransformationOp(
+                                                              label_generating_column),
+                                                          LastAggregationOp(label_generating_column)])
 
-	label_generating_column = "vendor_id"
-	prediction_problem_incorrect_types = PredictionProblem([AllFilterOp(label_generating_column),
-															IdentityRowOp(
-																label_generating_column),
-															IdentityTransformationOp(
-																label_generating_column),
-															LMFAggregationOp(label_generating_column)])
+    label_generating_column = "vendor_id"
+    prediction_problem_incorrect_types = PredictionProblem([AllFilterOp(filter_column),
+                                                            IdentityRowOp(
+                                                                label_generating_column),
+                                                            IdentityTransformationOp(
+                                                                label_generating_column),
+                                                            LMFAggregationOp(label_generating_column)])
 
-	assert(prediction_problem_correct_types.op_type_check(table_meta))
-	assert(not prediction_problem_incorrect_types.op_type_check(table_meta))
+    (correct_is_valid, filter_column_types_A, label_generating_column_types_A) = prediction_problem_correct_types.is_valid_prediction_problem(table_meta, filter_column, "fare")
+    (incorrect_is_valid, filter_column_types_B, label_generating_column_types_B) = prediction_problem_incorrect_types.is_valid_prediction_problem(table_meta, filter_column, label_generating_column)
+
+    assert(filter_column_types_A == ['float', 'float'])
+    assert(label_generating_column_types_A == ['float', 'float', 'float', 'float'])
+    
+    assert(filter_column_types_B == None)
+    assert(label_generating_column_types_B == None)
+
+    assert(correct_is_valid)
+    assert(not incorrect_is_valid)
 
 
 def test_execute():
@@ -109,12 +119,13 @@ def test_execute():
 												label_generating_column),
 											LastAggregationOp(label_generating_column)])
 
-	expected = 41.35
-	precutoff_time, all_data = prediction_problem.execute(
-		df, time_column, cutoff_time)
-		
-	found = precutoff_time[label_generating_column].iloc[0]
-	assert(expected == found)
+
+    expected = 41.35
+    precutoff_time, all_data = prediction_problem.execute(
+        df, time_column, cutoff_time, ['float', 'float'], ['float', 'float', 'float', 'float'])
+        
+    found = precutoff_time[label_generating_column].iloc[0]
+    assert(expected == found)
 
 
 def test_to_and_from_json():
@@ -130,6 +141,21 @@ def test_to_and_from_json():
 
 	assert(prediction_problem == prediction_problem_from_json)
 
+def test_to_and_from_json_with_order_of_types():
+    label_generating_column = "fare"
+    prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
+                                            IdentityRowOp(
+                                                label_generating_column),
+                                            IdentityTransformationOp(
+                                                label_generating_column),
+                                            LastAggregationOp(label_generating_column)])
+    prediction_problem.filter_column_order_of_types = [TableMeta.TYPE_INTEGER]
+    prediction_problem.label_generating_column_order_of_types = \
+        [TableMeta.TYPE_INTEGER, TableMeta.TYPE_BOOL, TableMeta.TYPE_CATEGORY]
+    json_str = prediction_problem.to_json()
+    prediction_problem_from_json = PredictionProblem.from_json(json_str)
+
+    assert(prediction_problem == prediction_problem_from_json)
 
 def test_equality():
 	label_generating_column = "fare"

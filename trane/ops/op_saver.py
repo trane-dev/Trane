@@ -22,7 +22,7 @@ def op_to_json(op):
         "OpType": op.__class__.__bases__[-1].__name__,
         "SubopType": type(op).__name__,
         "column_name": op.column_name,
-        "iotype": (op.itype, op.otype),
+        "iotype": (op.input_type, op.output_type),
         "param_values": op.param_values
     })
 
@@ -39,6 +39,6 @@ def op_from_json(json_data):
     """
     data = json.loads(json_data)
     op = globals()[data['SubopType']](data['column_name'])
-    op.itype, op.otype = data['iotype']
+    op.input_type, op.output_type = data['iotype']
     op.param_values = data['param_values']
     return op

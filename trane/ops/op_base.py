@@ -19,7 +19,7 @@ class OpBase(object):
         For example the REQUIRED_PARAMETERS of `greater` is
         [\{threshold: int\}, \{threshold: str\}, ...]
 
-    itype and otype are the actual input and output type.
+    input_type and otype are the actual input and output type.
         param_values is a dict of parameter name and value.
 
     """
@@ -36,10 +36,8 @@ class OpBase(object):
 
         """
         self.column_name = column_name
-        self.itype = self.otype = None
+        self.input_type = self.output_type = None
         self.param_values = {}
-        # assert(self.REQUIRED_PARAMETERS and self.IOTYPES), type(self).__name__
-        # assert(len(self.REQUIRED_PARAMETERS) == len(self.IOTYPES)), type(self).__name__
 
     def op_type_check(self, table_meta):
         """Data type check for the operation. 
@@ -56,11 +54,11 @@ class OpBase(object):
             TableMeta: table meta after this operation. None if not compatable.
 
         """
-        self.itype = table_meta.get_type(self.column_name)
-        for idx, (itype, otype) in enumerate(self.IOTYPES):
-            if self.itype == itype:
-                self.otype = otype
-                table_meta.set_type(self.column_name, otype)
+        self.input_type = table_meta.get_type(self.column_name)
+        for idx, (input_type, output_type) in enumerate(self.IOTYPES):
+            if self.input_type == input_type:
+                self.output_type = output_type
+                table_meta.set_type(self.column_name, output_type)
                 return table_meta
         return None
 
@@ -69,6 +67,7 @@ class OpBase(object):
         for parameter_requirement in self.REQUIRED_PARAMETERS:
             for parameter_name, parameter_type in parameter_requirement.items():
                 self.param_values[parameter_name] = hyper_parameter
+
 
     def __call__(self, dataframe):
         return self.execute(dataframe)

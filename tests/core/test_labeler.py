@@ -31,12 +31,13 @@ def test_labeler_apply():
     entity_id_column = "taxi_id"
     time_column = "trip_id"
     label_generating_column = "fare"
+    filter_column = "fare"
     table_meta = TableMeta.from_json(meta_json_str)
     labeler = Labeler()
     df = dataframe
     entity_to_data_dict = trane.df_group_by_entity_id(df, entity_id_column)
-    entity_id_to_data_and_cutoff_dict = trane.ConstantIntegerCutoffTimes(
-        0).generate_cutoffs(entity_to_data_dict)
+    entity_id_to_data_and_cutoff_dict = trane.ConstantCutoffTime(
+        0, 0).generate_cutoffs(entity_to_data_dict)
 
     prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
                                             IdentityRowOp(
@@ -45,6 +46,9 @@ def test_labeler_apply():
                                                 label_generating_column),
                                             LastAggregationOp(label_generating_column)])
 
+    (is_valid_prediction_problem, filter_column_order_of_types, label_generating_column_order_of_types) = prediction_problem.is_valid_prediction_problem(
+                table_meta, filter_column, label_generating_column)
+    
     filename = "prediction_problem.json"
 
     prediction_problems_to_json_file(
@@ -54,6 +58,4 @@ def test_labeler_apply():
     expected = pd.DataFrame([[0, 41.35, 0]], columns=[
                             entity_id_column, 'problem_label', 'cutoff_time'])
     found = labeler.execute(entity_id_to_data_and_cutoff_dict, filename)
-
-    print("FOUND: {}".format(found))
     os.remove(filename)

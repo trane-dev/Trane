@@ -20,8 +20,8 @@ def test_op_base_init():
     Check if NotImplementedError is raised.
     """
     op = FakeOp('col')
-    assert op.itype is None
-    assert op.otype is None
+    assert op.input_type is None
+    assert op.output_type is None
     assert type(op.param_values) == dict
     with pytest.raises(NotImplementedError):
         op(None)
@@ -29,7 +29,7 @@ def test_op_base_init():
 
 def test_op_type_check_with_correct_type1():
     """
-    With input type TYPE_FLOAT, check if itype and otype are correct.
+    With input type TYPE_FLOAT, check if input_type and output_type are correct.
     """
     meta = TM({
         "tables": [
@@ -40,12 +40,12 @@ def test_op_type_check_with_correct_type1():
     meta2 = op.op_type_check(meta)
     assert meta2 == meta
     assert meta.get_type('col') == TM.TYPE_BOOL
-    assert op.itype == TM.TYPE_FLOAT and op.otype == TM.TYPE_BOOL
+    assert op.input_type == TM.TYPE_FLOAT and op.output_type == TM.TYPE_BOOL
 
 
 def test_op_type_check_with_correct_type2():
     """
-    With input type TYPE_TEXT, check if itype and otype are correct.
+    With input type TYPE_TEXT, check if input_type and output_type are correct.
     """
     meta = TM({
         "tables": [
@@ -55,7 +55,7 @@ def test_op_type_check_with_correct_type2():
     meta2 = op.op_type_check(meta)
     assert meta2 == meta
     assert meta.get_type('col') == TM.TYPE_BOOL
-    assert op.itype == TM.TYPE_TEXT and op.otype == TM.TYPE_BOOL
+    assert op.input_type == TM.TYPE_TEXT and op.output_type == TM.TYPE_BOOL
 
 
 def test_op_type_check_with_wrong_type():
@@ -70,7 +70,7 @@ def test_op_type_check_with_wrong_type():
     meta2 = op.op_type_check(meta)
     assert meta2 is None
     assert meta.get_type('col') == TM.TYPE_IDENTIFIER
-    assert op.itype is TM.TYPE_IDENTIFIER and op.otype is None
+    assert op.input_type is TM.TYPE_IDENTIFIER and op.output_type is None
 
 
 def test_op_equality():

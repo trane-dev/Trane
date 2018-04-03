@@ -57,12 +57,3 @@ def test_labeler_apply():
 
     print("FOUND: {}".format(found))
     os.remove(filename)
-
-    # assert(expected.equals(found))
-    # assert(len(expected) == len(found))
-    # assert(len(input_) == len(found))
-    # assert(found.shape[1] == 3)
-    # for entity_id in input_:
-    # 	input_cutoff_time = input_[entity_id][1]
-    # 	output_cutoff_time = found.iloc[0]['cutoff_time']
-    # 	assert(input_cutoff_time == output_cutoff_time)

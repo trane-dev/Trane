@@ -7,16 +7,16 @@ import logging
 
 class OpBase(object):
     """Super class of all operations. 
-        All operations should have PARAMS and IOTYPES.
+        All operations should have REQUIRED_PARAMETERS and IOTYPES.
 
     IOTYPES is a list of possible input and output type pairs.
         For example `greater` can operate on int and str and output bool.
         [(int, bool), (str, bool), ...]
 
-    PARAMS is a list of parameter and type dicts. 
-        PARAMS have the same length as IOTYPES.
+    REQUIRED_PARAMETERS is a list of parameter and type dicts. 
+        REQUIRED_PARAMETERS have the same length as IOTYPES.
         With different input types, parameters may have different types. 
-        For example the PARAMS of `greater` is
+        For example the REQUIRED_PARAMETERS of `greater` is
         [\{threshold: int\}, \{threshold: str\}, ...]
 
     itype and otype are the actual input and output type.
@@ -24,12 +24,12 @@ class OpBase(object):
 
     """
 
-    PARAMS = None
+    REQUIRED_PARAMETERS = None
     IOTYPES = None
 
     def __init__(self, column_name):
         """Initalization of all operations. Subclasses shouldn't have their own init.
-            This function checks whether PARAMS and IOTYPES are defined and compatable. 
+            This function checks whether REQUIRED_PARAMETERS and IOTYPES are defined and compatable. 
 
         args:
             column_name: the column this operation is applied on. 
@@ -38,8 +38,8 @@ class OpBase(object):
         self.column_name = column_name
         self.itype = self.otype = None
         self.param_values = {}
-        # assert(self.PARAMS and self.IOTYPES), type(self).__name__
-        # assert(len(self.PARAMS) == len(self.IOTYPES)), type(self).__name__
+        # assert(self.REQUIRED_PARAMETERS and self.IOTYPES), type(self).__name__
+        # assert(len(self.REQUIRED_PARAMETERS) == len(self.IOTYPES)), type(self).__name__
 
     def op_type_check(self, table_meta):
         """Data type check for the operation. 
@@ -64,12 +64,11 @@ class OpBase(object):
                 return table_meta
         return None
 
-    def set_thresholds(self, table_meta):
+    def set_hyper_parameter(self, hyper_parameter):
         # for idx, (itype, otype) in enumerate(self.IOTYPES):
-        for param_entry in self.PARAMS:
-            for param, ptype in param_entry.items():
-                # Default values until we can better come up with thresholds.
-                self.param_values[param] = 0
+        for parameter_requirement in self.REQUIRED_PARAMETERS:
+            for parameter_name, parameter_type in parameter_requirement.items():
+                self.param_values[parameter_name] = hyper_parameter
 
     def __call__(self, dataframe):
         return self.execute(dataframe)

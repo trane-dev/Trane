@@ -19,7 +19,7 @@ def test_save_load_before_op_type_check():
         assert type(op2) == globals()[op_type]
         assert op2.column_name == 'col'
         assert op2.input_type is None and op2.output_type is None
-        assert type(op2.param_values) == dict and len(op2.param_values) == 0
+        assert type(op2.hyper_parameter_settings) == dict and len(op2.hyper_parameter_settings) == 0
 
 
 def test_save_load_after_op_type_check():
@@ -41,4 +41,4 @@ def test_save_load_after_op_type_check():
         assert type(op2) == globals()[op_type]
         assert op2.column_name == 'col'
         assert op2.input_type == TM.TYPE_FLOAT and op2.output_type == op.output_type
-        assert type(op2.param_values) == dict
+        assert type(op2.hyper_parameter_settings) == dict

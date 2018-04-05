@@ -63,7 +63,7 @@ def generate_nl_description(
             if type(row_op) in row_op_str_dict:
                 return " {col} is {op} {threshold}".format(
                     col=row_op.column_name, op=row_op_str_dict[type(row_op)],
-                    threshold=row_op.param_values['threshold'])
+                    threshold=row_op.hyper_parameter_settings['threshold'])
             return " (unknown row op)"
 
         def transop_description():
@@ -115,7 +115,7 @@ def generate_nl_description(
         return ", with {col} {op} {threshold}".format(
             col=filter_op.column_name,
             op=filter_op_str_dict[type(filter_op)],
-            threshold=filter_op.param_values['threshold'])
+            threshold=filter_op.hyper_parameter_settings['threshold'])
 
     ret = [description(prob) for prob in problems]
     return ret

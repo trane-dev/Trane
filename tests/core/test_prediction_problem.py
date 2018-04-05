@@ -37,15 +37,40 @@ def test_hyper_parameter_generation():
 															  label_generating_column),
 														  LastAggregationOp(label_generating_column)])
 	prediction_problem.generate_and_set_hyper_parameters(dataframe, 
-									label_generating_column, filter_column)
+									label_generating_column, filter_column, {})
 
-	op1_hyper_parameter = prediction_problem.operations[0].param_values
-	op2_hyper_parameter = prediction_problem.operations[1].param_values
-	op3_hyper_parameter = prediction_problem.operations[2].param_values
-	op4_hyper_parameter = prediction_problem.operations[3].param_values
+	op1_hyper_parameter = prediction_problem.operations[0].hyper_parameter_settings
+	op2_hyper_parameter = prediction_problem.operations[1].hyper_parameter_settings
+	op3_hyper_parameter = prediction_problem.operations[2].hyper_parameter_settings
+	op4_hyper_parameter = prediction_problem.operations[3].hyper_parameter_settings
 
 	assert(op1_hyper_parameter['threshold'] == 0)
 	assert(op2_hyper_parameter['threshold'] == 41.35)
+
+def test_hyper_parameter_generation_hashing():
+	label_generating_column = "fare"
+	filter_column = "taxi_id"
+	ops = [GreaterFilterOp(filter_column),
+	GreaterRowOp(label_generating_column),
+	IdentityTransformationOp(label_generating_column),
+	LastAggregationOp(label_generating_column)]
+
+	prediction_problem = PredictionProblem(ops)
+	hyper_parameter_settings_memo_table = {}
+	hyper_parameter_settings_memo_table[(ops[0], filter_column)] = 20
+	hyper_parameter_settings_memo_table[(ops[1], label_generating_column)] = 61.35
+
+	prediction_problem.generate_and_set_hyper_parameters(dataframe, 
+									label_generating_column, filter_column,
+									hyper_parameter_settings_memo_table)
+
+	op1_hyper_parameter = prediction_problem.operations[0].hyper_parameter_settings
+	op2_hyper_parameter = prediction_problem.operations[1].hyper_parameter_settings
+	op3_hyper_parameter = prediction_problem.operations[2].hyper_parameter_settings
+	op4_hyper_parameter = prediction_problem.operations[3].hyper_parameter_settings
+
+	assert(op1_hyper_parameter['threshold'] == 20)
+	assert(op2_hyper_parameter['threshold'] == 61.35)
 
 
 def test_hyper_parameter_generation_2():
@@ -59,12 +84,12 @@ def test_hyper_parameter_generation_2():
 															  label_generating_column),
 														  LastAggregationOp(label_generating_column)])
 	prediction_problem.generate_and_set_hyper_parameters(dataframe2, 
-									label_generating_column, filter_column)
+									label_generating_column, filter_column, {})
 
-	op1_hyper_parameter = prediction_problem.operations[0].param_values
-	op2_hyper_parameter = prediction_problem.operations[1].param_values
-	op3_hyper_parameter = prediction_problem.operations[2].param_values
-	op4_hyper_parameter = prediction_problem.operations[3].param_values
+	op1_hyper_parameter = prediction_problem.operations[0].hyper_parameter_settings
+	op2_hyper_parameter = prediction_problem.operations[1].hyper_parameter_settings
+	op3_hyper_parameter = prediction_problem.operations[2].hyper_parameter_settings
+	op4_hyper_parameter = prediction_problem.operations[3].hyper_parameter_settings
 
 	print(op1_hyper_parameter)
 	print(op2_hyper_parameter)

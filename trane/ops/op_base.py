@@ -20,7 +20,7 @@ class OpBase(object):
         [\{threshold: int\}, \{threshold: str\}, ...]
 
     input_type and otype are the actual input and output type.
-        param_values is a dict of parameter name and value.
+        hyper_parameter_settings is a dict of parameter name and value.
 
     """
 
@@ -37,7 +37,7 @@ class OpBase(object):
         """
         self.column_name = column_name
         self.input_type = self.output_type = None
-        self.param_values = {}
+        self.hyper_parameter_settings = {}
 
     def op_type_check(self, table_meta):
         """Data type check for the operation. 
@@ -66,7 +66,7 @@ class OpBase(object):
         # for idx, (itype, otype) in enumerate(self.IOTYPES):
         for parameter_requirement in self.REQUIRED_PARAMETERS:
             for parameter_name, parameter_type in parameter_requirement.items():
-                self.param_values[parameter_name] = hyper_parameter
+                self.hyper_parameter_settings[parameter_name] = hyper_parameter
 
 
     def __call__(self, dataframe):
@@ -74,6 +74,9 @@ class OpBase(object):
 
     def execute(self, dataframe):
         raise NotImplementedError
+
+    def __hash__(self):
+        return hash((type(self).__name__, self.column_name))
 
     def __str__(self):
         return "%s(%s)" % (type(self).__name__, self.column_name)

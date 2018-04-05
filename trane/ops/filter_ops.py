@@ -29,7 +29,7 @@ class EqFilterOp(FilterOpBase):
 
 	def execute(self, dataframe):
 		dataframe = dataframe.copy()
-		return dataframe[dataframe[self.column_name] == self.param_values["threshold"]]
+		return dataframe[dataframe[self.column_name] == self.hyper_parameter_settings["threshold"]]
 
 
 class NeqFilterOp(FilterOpBase):
@@ -39,7 +39,7 @@ class NeqFilterOp(FilterOpBase):
 
 	def execute(self, dataframe):
 		dataframe = dataframe.copy()
-		return dataframe[dataframe[self.column_name] != self.param_values["threshold"]]
+		return dataframe[dataframe[self.column_name] != self.hyper_parameter_settings["threshold"]]
 
 
 class GreaterFilterOp(FilterOpBase):
@@ -49,7 +49,7 @@ class GreaterFilterOp(FilterOpBase):
 
 	def execute(self, dataframe):
 		dataframe = dataframe.copy()
-		return dataframe[dataframe[self.column_name] > self.param_values["threshold"]]
+		return dataframe[dataframe[self.column_name] > self.hyper_parameter_settings["threshold"]]
 
 
 class LessFilterOp(FilterOpBase):
@@ -59,4 +59,4 @@ class LessFilterOp(FilterOpBase):
 
 	def execute(self, dataframe):
 		dataframe = dataframe.copy()
-		return dataframe[dataframe[self.column_name] < self.param_values["threshold"]]
+		return dataframe[dataframe[self.column_name] < self.hyper_parameter_settings["threshold"]]

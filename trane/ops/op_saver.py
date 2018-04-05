@@ -23,7 +23,7 @@ def op_to_json(op):
         "SubopType": type(op).__name__,
         "column_name": op.column_name,
         "iotype": (op.input_type, op.output_type),
-        "param_values": op.param_values
+        "hyper_parameter_settings": op.hyper_parameter_settings
     })
 
 
@@ -40,5 +40,5 @@ def op_from_json(json_data):
     data = json.loads(json_data)
     op = globals()[data['SubopType']](data['column_name'])
     op.input_type, op.output_type = data['iotype']
-    op.param_values = data['param_values']
+    op.hyper_parameter_settings = data['hyper_parameter_settings']
     return op

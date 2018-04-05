@@ -31,7 +31,7 @@ class EqRowOp(RowOpBase):
 	def execute(self, dataframe):
 		dataframe = dataframe.copy()
 		dataframe[self.column_name] = dataframe[self.column_name].apply(
-			lambda x: x == self.param_values["threshold"])
+			lambda x: x == self.hyper_parameter_settings["threshold"])
 		return dataframe
 
 
@@ -43,7 +43,7 @@ class NeqRowOp(RowOpBase):
 	def execute(self, dataframe):
 		dataframe = dataframe.copy()
 		dataframe[self.column_name] = dataframe[self.column_name].apply(
-			lambda x: x != self.param_values["threshold"])
+			lambda x: x != self.hyper_parameter_settings["threshold"])
 		return dataframe
 
 
@@ -55,7 +55,7 @@ class GreaterRowOp(RowOpBase):
 	def execute(self, dataframe):
 		dataframe = dataframe.copy()
 		dataframe[self.column_name] = dataframe[self.column_name].apply(
-			lambda x: x > self.param_values["threshold"])
+			lambda x: x > self.hyper_parameter_settings["threshold"])
 		return dataframe
 
 
@@ -67,7 +67,7 @@ class LessRowOp(RowOpBase):
 	def execute(self, dataframe):
 		dataframe = dataframe.copy()
 		dataframe[self.column_name] = dataframe[self.column_name].apply(
-			lambda x: x < self.param_values["threshold"])
+			lambda x: x < self.hyper_parameter_settings["threshold"])
 		return dataframe
 
 

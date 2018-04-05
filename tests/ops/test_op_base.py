@@ -22,7 +22,7 @@ def test_op_base_init():
     op = FakeOp('col')
     assert op.input_type is None
     assert op.output_type is None
-    assert type(op.param_values) == dict
+    assert type(op.hyper_parameter_settings) == dict
     with pytest.raises(NotImplementedError):
         op(None)
 

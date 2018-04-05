@@ -53,28 +53,38 @@ class PredictionProblem:
 			hyper_parameter = hyper_parameters[idx]
 			op.set_hyper_parameter(hyper_parameter)
 
-	def generate_and_set_hyper_parameters(self, dataframe, label_generating_column, filter_column):
+	def generate_and_set_hyper_parameters(self, dataframe, label_generating_column, filter_column,
+											hyper_parameter_memo_table):
 		hyper_parameters = []
-				
+		
 
 		FRACTION_OF_DATA_TARGET = 0.8
 		column_data = dataframe[filter_column]
 		unique_filter_values = set(column_data)
-		hyper_parameters.append(
-			select_by_remaining(
-				FRACTION_OF_DATA_TARGET, unique_filter_values, 
-				dataframe, self.operations[0]
-				)
-		)
+		operation = self.operations[0]
+		if (operation, filter_column) in hyper_parameter_memo_table:
+			value = hyper_parameter_memo_table[(operation, filter_column)]
+		else:
+			value = select_by_remaining(
+					FRACTION_OF_DATA_TARGET, unique_filter_values, 
+					dataframe, operation
+					)
+			hyper_parameter_memo_table[(operation, filter_column)] = value
+		
+		hyper_parameters.append(value)
 		
 		for operation in self.operations[1:]:
-			column_data = dataframe[label_generating_column]
-			unique_parameter_values = set(column_data)
-			hyper_parameters.append(
-				select_by_diversity(
-					unique_parameter_values, dataframe, operation, label_generating_column)
-				)
-		
+			if (operation, label_generating_column) in hyper_parameter_memo_table:
+				value = hyper_parameter_memo_table[(operation, label_generating_column)]
+			else:
+				column_data = dataframe[label_generating_column]
+				unique_parameter_values = set(column_data)
+				value = select_by_diversity(unique_parameter_values, 
+						dataframe, operation, label_generating_column)
+				hyper_parameter_memo_table[(operation, label_generating_column)] = value
+			
+			hyper_parameters.append(value)
+					
 		self.set_hyper_parameters(hyper_parameters)
 		return hyper_parameters
 

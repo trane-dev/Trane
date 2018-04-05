@@ -28,7 +28,7 @@ def test_number_of_problems_generated():
     filter_column = "taxi_id"
     ppg = PredictionProblemGenerator(
         table_meta, entity_id_column, label_generating_column, time_column, filter_column)
-    generator = ppg.generate(dataframe)
+    generator = ppg.generator(dataframe)
 
     expected = 66  # THIS NUMBER WILL CHANGE IF MORE OPERATIONS ARE ADDED OR DECREASE BASED ON TYPE CHECKING
     found = len(list(generator))
@@ -44,7 +44,7 @@ def test_generated_types():
     filter_column = "taxi_id"
     ppg = PredictionProblemGenerator(
         table_meta, entity_id_column, label_generating_column, time_column, filter_column)
-    generator = ppg.generate(dataframe)
+    generator = ppg.generator(dataframe)
 
     expected = PredictionProblem
     problems = [prob for prob in generator]
@@ -64,7 +64,7 @@ def test_order_of_operations():
         table_meta, entity_id_column, label_generating_column, time_column, filter_column)
     
     logging.debug("Dataframe in test_prediction_problem_generator.py: \n{}\n".format(dataframe))
-    generator = ppg.generate(dataframe)
+    generator = ppg.generator(dataframe)
 
     problems = [prob for prob in generator]
 

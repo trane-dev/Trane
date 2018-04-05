@@ -18,12 +18,12 @@ class PredictionProblemGenerator:
         self.label_generating_column = label_generating_column
         self.time_column = time_column
         self.filter_column = filter_column
-
+        self.hyper_parameter_memo_table = {}
         self.ensure_valid_inputs()
 
-    def generate(self, dataframe):
+    def generator(self, dataframe):
         """Generate prediction problems.
-
+        
         yields:
             PredictionProblem
         """
@@ -49,16 +49,20 @@ class PredictionProblemGenerator:
             filter_op_obj = getattr(
                 filter_ops, filter_op_name)(self.filter_column)
 
-            prediction_problem = PredictionProblem(
-                [filter_op_obj, row_op_obj, transformation_op_obj, aggregation_op_obj])
-
+            operations = [filter_op_obj, row_op_obj, transformation_op_obj, aggregation_op_obj]
+            
+            prediction_problem = PredictionProblem(operations)
 
             hyper_parameters = prediction_problem.generate_and_set_hyper_parameters(dataframe, 
                                                                 self.label_generating_column, 
-                                                                self.filter_column)
+                                                                self.filter_column,
+                                                                self.hyper_parameter_memo_table)
+            
 
-            (is_valid_prediction_problem, filter_column_order_of_types, label_generating_column_order_of_types) = prediction_problem.is_valid_prediction_problem(
-                self.table_meta, self.filter_column, self.label_generating_column)
+            (is_valid_prediction_problem, filter_column_order_of_types, label_generating_column_order_of_types) = \
+                            prediction_problem.is_valid_prediction_problem(
+                                        self.table_meta, self.filter_column, 
+                                        self.label_generating_column)
 
             if not is_valid_prediction_problem:
                 continue

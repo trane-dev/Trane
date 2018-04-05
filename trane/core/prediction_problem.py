@@ -62,26 +62,28 @@ class PredictionProblem:
 		column_data = dataframe[filter_column]
 		unique_filter_values = set(column_data)
 		operation = self.operations[0]
-		if (operation, filter_column) in hyper_parameter_memo_table:
-			value = hyper_parameter_memo_table[(operation, filter_column)]
+		operation_hash = hash(operation)
+		if operation_hash in hyper_parameter_memo_table:	
+			value = hyper_parameter_memo_table[operation_hash]
 		else:
 			value = select_by_remaining(
 					FRACTION_OF_DATA_TARGET, unique_filter_values, 
 					dataframe, operation
 					)
-			hyper_parameter_memo_table[(operation, filter_column)] = value
+			hyper_parameter_memo_table[operation_hash] = value
 		
 		hyper_parameters.append(value)
 		
 		for operation in self.operations[1:]:
-			if (operation, label_generating_column) in hyper_parameter_memo_table:
-				value = hyper_parameter_memo_table[(operation, label_generating_column)]
+			operation_hash = hash(operation)
+			if operation_hash in hyper_parameter_memo_table:
+				value = hyper_parameter_memo_table[operation_hash]
 			else:
 				column_data = dataframe[label_generating_column]
 				unique_parameter_values = set(column_data)
 				value = select_by_diversity(unique_parameter_values, 
 						dataframe, operation, label_generating_column)
-				hyper_parameter_memo_table[(operation, label_generating_column)] = value
+				hyper_parameter_memo_table[operation_hash] = value
 			
 			hyper_parameters.append(value)
 					

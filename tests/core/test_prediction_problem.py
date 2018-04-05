@@ -57,8 +57,8 @@ def test_hyper_parameter_generation_hashing():
 
 	prediction_problem = PredictionProblem(ops)
 	hyper_parameter_settings_memo_table = {}
-	hyper_parameter_settings_memo_table[(ops[0], filter_column)] = 20
-	hyper_parameter_settings_memo_table[(ops[1], label_generating_column)] = 61.35
+	hyper_parameter_settings_memo_table[hash(ops[0])] = 20
+	hyper_parameter_settings_memo_table[hash(ops[1])] = 61.35
 
 	prediction_problem.generate_and_set_hyper_parameters(dataframe, 
 									label_generating_column, filter_column,
@@ -72,6 +72,19 @@ def test_hyper_parameter_generation_hashing():
 	assert(op1_hyper_parameter['threshold'] == 20)
 	assert(op2_hyper_parameter['threshold'] == 61.35)
 
+def test_hashing_collisions():
+	col1 = "a"
+	col2 = "b"
+	op1 = GreaterFilterOp(col1)
+	op2 = GreaterFilterOp(col2)
+	op3 = GreaterFilterOp(col1)
+
+	op1_hash = hash(op1)
+	op2_hash = hash(op2)
+	op3_hash = hash(op3)
+
+	assert(op1_hash != op2_hash)
+	assert(op1_hash == op3_hash)
 
 def test_hyper_parameter_generation_2():
 	label_generating_column = "c1"

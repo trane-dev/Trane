@@ -32,7 +32,6 @@ def test_number_of_problems_generated():
 
     expected = 66  # THIS NUMBER WILL CHANGE IF MORE OPERATIONS ARE ADDED OR DECREASE BASED ON TYPE CHECKING
     found = len(list(generator))
-
     assert(expected == found)
 
 

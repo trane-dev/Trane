@@ -53,19 +53,22 @@ class PredictionProblemGenerator:
             
             prediction_problem = PredictionProblem(operations)
 
-            hyper_parameters = prediction_problem.generate_and_set_hyper_parameters(dataframe, 
+            (is_valid_prediction_problem, filter_column_order_of_types, label_generating_column_order_of_types) = \
+                            prediction_problem.is_valid_prediction_problem(
+                                        self.table_meta, self.filter_column, 
+                                        self.label_generating_column)
+            if not is_valid_prediction_problem:
+                continue
+
+            prediction_problem.generate_and_set_hyper_parameters(dataframe, 
                                                                 self.label_generating_column, 
                                                                 self.filter_column,
                                                                 self.hyper_parameter_memo_table)
             
 
-            (is_valid_prediction_problem, filter_column_order_of_types, label_generating_column_order_of_types) = \
-                            prediction_problem.is_valid_prediction_problem(
-                                        self.table_meta, self.filter_column, 
-                                        self.label_generating_column)
+            
 
-            if not is_valid_prediction_problem:
-                continue
+            
 
             logging.debug(
                 "Prediction Problem Generated: {} \n".format(prediction_problem))

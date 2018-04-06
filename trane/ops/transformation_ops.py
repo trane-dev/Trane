@@ -33,7 +33,7 @@ class DiffTransformationOp(TransformationOpBase):
         dataframe = dataframe.copy()
 
         #HACKY FIX
-        dataframe[self.column_name] = dataframe[self.column_name].astype(numpy.float32)
+        # dataframe[self.column_name] = dataframe[self.column_name].astype(numpy.float32)
 
         index = dataframe.index
         for i in range(len(index) - 1, 0, -1):
@@ -62,6 +62,8 @@ class ObjectFrequencyTransformationOp(TransformationOpBase):
 
         for idx, obj in enumerate(objects):
             dataframe.at[idx, self.column_name] = objects_to_frequency[obj]
+
+        dataframe[self.column_name] = dataframe[self.column_name].astype(int)
 
         num_rows_to_drop = len(dataframe) - len(objects_to_frequency)
         assert(num_rows_to_drop >= 0)

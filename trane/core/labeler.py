@@ -29,22 +29,24 @@ class Labeler():
             for entity in entity_to_data_and_cutoff_dict:
 
                 df_row = []
-                entity_data, training_cutoff, label_cutoff = entity_to_data_and_cutoff_dict[
-                    entity]
-                df_pre_cutoff_time_result, df_all_data_result = prediction_problem.execute(
-                    entity_data, time_column, label_cutoff,
-                    prediction_problem.filter_column_order_of_types,
-                    prediction_problem.label_generating_column_order_of_types)
+                entity_data, training_cutoff, label_cutoff = entity_to_data_and_cutoff_dict[entity]
 
-                if len(df_pre_cutoff_time_result) == 1:
-                    label_precutoff_time = df_pre_cutoff_time_result[
-                        label_generating_column].values[0]
+                df_pre_label_cutoff_time_result, df_all_data_result = prediction_problem.execute(
+                                                                    entity_data, time_column, label_cutoff,
+                                                                    prediction_problem.filter_column_order_of_types,
+                                                                    prediction_problem.label_generating_column_order_of_types)
+
+                if len(df_pre_label_cutoff_time_result) == 1:
+                    label_precutoff_time = df_pre_label_cutoff_time_result[label_generating_column].values[0]
                 else:
+                    logging.warning("Received output from prediction problem \
+                                    execution on pre-label cutoff data with more than one result.")
                     label_precutoff_time = None
                 if len(df_all_data_result) == 1:
-                    label_postcutoff_time = df_all_data_result[
-                        label_generating_column].values[0]
+                    label_postcutoff_time = df_all_data_result[label_generating_column].values[0]
                 else:
+                    logging.warning("Received output from prediction problem execution \
+                                     on all data with more than one result.")
                     label_postcutoff_time = None
 
                 df_row = [entity, label_precutoff_time,

@@ -1,6 +1,7 @@
 from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
 import numpy as np
+import logging
 
 ROW_OPS = ["IdentityRowOp", "GreaterRowOp",
 		   "EqRowOp", "NeqRowOp", "LessRowOp", "ExpRowOp"]
@@ -73,7 +74,7 @@ class LessRowOp(RowOpBase):
 
 class ExpRowOp(RowOpBase):
 	REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-	IOTYPES = [(TM.TYPE_INTEGER, TM.TYPE_INTEGER),
+	IOTYPES = [(TM.TYPE_INTEGER, TM.TYPE_FLOAT),
 			   (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
 
 	def execute(self, dataframe):

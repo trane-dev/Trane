@@ -52,12 +52,6 @@ class LMFAggregationOp(AggregationOpBase):
 
         last = dataframe.tail(1)
         first = dataframe.head(1)
-
-        logging.debug("Beginning exuection of LMFAggregationOp")
-        logging.info('Last Value: {}\n'.format(last.at[last.index[0],
-                                                       self.column_name]))
-        logging.info('First Value: {}\n'.format(first.at[first.index[0],
-                                                        self.column_name]))
         last.at[last.index[0],
                 self.column_name] -= first.at[first.index[0], self.column_name]
         return last
@@ -65,16 +59,16 @@ class LMFAggregationOp(AggregationOpBase):
 
 class CountAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_FLOAT),
-               (TM.TYPE_ORDERED, TM.TYPE_FLOAT), (TM.TYPE_TEXT, TM.TYPE_FLOAT),
-               (TM.TYPE_INTEGER, TM.TYPE_FLOAT), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-               (TM.TYPE_TIME, TM.TYPE_FLOAT), (TM.TYPE_IDENTIFIER, TM.TYPE_FLOAT)]
+    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_INTEGER), (TM.TYPE_BOOL, TM.TYPE_INTEGER),
+               (TM.TYPE_ORDERED, TM.TYPE_INTEGER), (TM.TYPE_TEXT, TM.TYPE_INTEGER),
+               (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_INTEGER),
+               (TM.TYPE_TIME, TM.TYPE_INTEGER), (TM.TYPE_IDENTIFIER, TM.TYPE_INTEGER)]
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()
-        first = dataframe.head(1)
-        first.at[first.index[0], self.column_name] = dataframe.shape[0]
-        return first
+        head = dataframe.head(1)
+        head[self.column_name] = int(dataframe.shape[0])
+        return head
 
 
 class SumAggregationOp(AggregationOpBase):
@@ -84,7 +78,6 @@ class SumAggregationOp(AggregationOpBase):
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()
-        first = dataframe.head(1)
-        first.at[first.index[0], self.column_name] = dataframe[
-            self.column_name].sum()
-        return first
+        head = dataframe.head(1)
+        head[self.column_name] = float(dataframe[self.column_name].sum())
+        return head

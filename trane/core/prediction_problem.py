@@ -105,42 +105,48 @@ class PredictionProblem:
 
 		"""
 		dataframe = dataframe.sort_values(by = time_column)
+		dataframe = dataframe.copy()
 
-		precutoff_time_execution_result = dataframe[
+		pre_label_cutoff_time_execution_result = dataframe[
 			dataframe[time_column] < label_cutoff_time]
-		all_time_execution_result = dataframe
+		all_data_execution_result = dataframe
+
+		continue_executing_on_precutoff_df = True
+		continue_executing_on_all_data_df = True
 
 		for idx, operation in enumerate(self.operations):
-
-			single_piece_of_data = dataframe.at[0, operation.column_name]
 			
-			if idx == 0:
-			  check_type(filter_column_order_of_types[idx], single_piece_of_data)
-			elif idx > 0:
-			  check_type(label_generating_column_order_of_types[idx - 1], single_piece_of_data)
+			logging.debug("Beginning execution of operation: {}".format(operation))
 
-			continue_executing_on_precutoff_df = True
-			continue_executing_on_all_data_df = True
-
-			if len(precutoff_time_execution_result) == 0:
+			if len(pre_label_cutoff_time_execution_result) == 0:
 				continue_executing_on_precutoff_df = False
 
-			if len(all_time_execution_result) == 0:
+			if len(all_data_execution_result) == 0:
 				continue_executing_on_all_data_df = False
 
-			if continue_executing_on_precutoff_df:
-				precutoff_time_execution_result = operation.execute(
-					precutoff_time_execution_result)
-			
-			if continue_executing_on_all_data_df:
-				all_time_execution_result = operation.execute(all_time_execution_result)
-			
-			if idx == 0:
-			  check_type(filter_column_order_of_types[idx + 1], single_piece_of_data)
-			elif idx > 0:
-			  check_type(label_generating_column_order_of_types[idx], single_piece_of_data)
 
-		return precutoff_time_execution_result, all_time_execution_result
+			if continue_executing_on_all_data_df:
+				single_piece_of_data = all_data_execution_result.iloc[0][operation.column_name]
+				
+				if idx == 0:
+				  check_type(filter_column_order_of_types[idx], single_piece_of_data)
+				elif idx > 0:
+				  check_type(label_generating_column_order_of_types[idx - 1], single_piece_of_data)
+
+				all_data_execution_result = operation.execute(all_data_execution_result)
+
+				single_piece_of_data = all_data_execution_result.iloc[0][operation.column_name]
+
+				if idx == 0:
+				  check_type(filter_column_order_of_types[idx + 1], single_piece_of_data)
+				elif idx > 0:
+				  check_type(label_generating_column_order_of_types[idx], single_piece_of_data)
+
+			if continue_executing_on_precutoff_df:
+				pre_label_cutoff_time_execution_result = operation.execute(
+					pre_label_cutoff_time_execution_result)
+
+		return pre_label_cutoff_time_execution_result, all_data_execution_result
 
 	def __str__(self):
 		"""Args:
@@ -225,13 +231,14 @@ def entropy_of_a_list(values):
 	return entropy
 
 def check_type(expected_type, actual_data):
+	logging.debug("Beginning check type. Expected type is: {}, Actual data is: {}, Actual type is: {}".format(expected_type, actual_data, type(actual_data)))
 	
 	if expected_type == TableMeta.TYPE_CATEGORY:
 		allowed_types = [bool, int, str, float]
 		assert(type(actual_data) in allowed_types)
 
 	elif expected_type == TableMeta.TYPE_BOOL:
-		allowed_types = [bool]
+		allowed_types = [bool, np.bool_]
 		assert(type(actual_data) in allowed_types)        
 	
 	elif expected_type == TableMeta.TYPE_ORDERED:
@@ -243,12 +250,11 @@ def check_type(expected_type, actual_data):
 		assert(type(actual_data) in allowed_types)
 	
 	elif expected_type == TableMeta.TYPE_INTEGER:
-		allowed_types = [int]
+		allowed_types = [int, np.int64]
 		assert(type(actual_data) in allowed_types)
 
 	elif expected_type == TableMeta.TYPE_FLOAT:
-		allowed_types = [float, np.float64]
-		print("ACTUAL DATA TYPE: {}".format(type(actual_data)))
+		allowed_types = [float, np.float64, np.float32]
 		assert(type(actual_data) in allowed_types)
 
 	elif expected_type == TableMeta.TYPE_TIME:

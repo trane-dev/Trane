@@ -37,7 +37,7 @@ def test_labeler_apply():
     df = dataframe
     entity_to_data_dict = trane.df_group_by_entity_id(df, entity_id_column)
     entity_id_to_data_and_cutoff_dict = trane.ConstantCutoffTime(
-        0, 0).generate_cutoffs(entity_to_data_dict)
+        0, 0).generate_cutoffs(entity_to_data_dict, time_column)
 
     prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
                                             IdentityRowOp(

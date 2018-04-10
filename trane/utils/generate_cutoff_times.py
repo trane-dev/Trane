@@ -5,7 +5,7 @@
 
 import numpy as np
 
-__all__ = ["CutoffTimeBase", "ConstantCutoffTime", "DynamicCutoffTime", "PeriodCutoffTime"]
+__all__ = ["CutoffTimeBase", "ConstantCutoffTime", "DynamicCutoffTime"]
 
 
 class CutoffTimeBase:

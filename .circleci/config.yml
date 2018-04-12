@@ -3,6 +3,10 @@
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
 version: 2
+
+machine:
+  post:
+    - pyenv global 3.4 3.5 3.6
 jobs:
   build:
     dependencies:

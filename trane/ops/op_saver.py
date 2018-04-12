@@ -1,15 +1,15 @@
-from .op_base import OpBase
-from .aggregation_ops import *
-from .filter_ops import *
-from .row_ops import *
-from .transformation_ops import *
 import json
+
+from .aggregation_ops import *  # noqa
+from .filter_ops import *  # noqa
+from .row_ops import *  # noqa
+from .transformation_ops import *  # noqa
 
 __all__ = ["op_to_json", "op_from_json"]
 
 
 def op_to_json(op):
-    """Convert a operation object to a json string. 
+    """Convert a operation object to a json string.
 
     args:
         op: a subclass of OpBase

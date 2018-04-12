@@ -1,7 +1,8 @@
-from trane.ops.transformation_ops import *
-from pandas import DataFrame
-from trane.utils.table_meta import TableMeta as TM
 import numpy as np
+from pandas import DataFrame
+
+from trane.ops.transformation_ops import *
+from trane.utils.table_meta import TableMeta as TM
 
 df = DataFrame({'col': [1, 2, 3, 4, 5]})
 meta = TM({
@@ -39,7 +40,7 @@ def test_ObjectFrequencyTransformationOp():
     expected = DataFrame([(1.0, 2), (2.0, 3)],
                          columns=["id", "height"])
     expected2 = DataFrame([(1, 100), (1, 70), (1, 100),
-                    (1, 70), (1, 70)], columns=["id", "height"])
+                           (1, 70), (1, 70)], columns=["id", "height"])
 
     assert(output.equals(expected))
     assert(output2.equals(expected2))

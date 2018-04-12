@@ -78,7 +78,7 @@ class TableMeta(object):
                 'fields'][column_data['field_id']]['type']
             del self.table_meta['tables'][column_data['table_id']][
                 'fields'][column_data['field_id']]['subtype']
-        except:
+        except BaseException:
             pass
         if dtype in TableMeta.SUPERTYPE:
             self.table_meta['tables'][column_data['table_id']]['fields'][column_data['field_id']]['type'] = \

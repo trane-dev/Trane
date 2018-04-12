@@ -1,6 +1,6 @@
-from .table_meta import TableMeta as TM
 from ..ops import *
 from .generate_cutoff_times import *
+from .table_meta import TableMeta as TM
 
 __all__ = ['generate_nl_description']
 
@@ -11,16 +11,16 @@ def generate_nl_description(
     """This function generates natural language description
     for prediction problems.
 
-    description := For each [entity_id_column], predict 
+    description := For each [entity_id_column], predict
         [dataop_description] [cutoff_description] [filter_decription]
 
-    dataop_description := 
+    dataop_description :=
         the number of records if CountAggregationOp
         the [aggop] [transop] [rowop]
 
     cutoff_description := after [time_column](threshold)
 
-    filter_description := 
+    filter_description :=
         [empty] if AllFilterOp
         with [filter_column] [op] (threshold)
 
@@ -80,14 +80,15 @@ def generate_nl_description(
                 SumAggregationOp: "the sum of",
                 LMFAggregationOp: "the last minus first"
             }
-            if agg_op.input_type == TM.TYPE_BOOL and isinstance(agg_op, SumAggregationOp):
+            if agg_op.input_type == TM.TYPE_BOOL and isinstance(
+                    agg_op, SumAggregationOp):
                 return " the number of records whose"
             if agg_op.input_type == TM.TYPE_BOOL:
                 return " whether the {op}"
             if type(agg_op) in agg_op_str_dict:
                 return " " + agg_op_str_dict[type(agg_op)]
 
-        if type(agg_op) == CountAggregationOp:
+        if isinstance(agg_op, CountAggregationOp):
             return "{agg_op} records".format(agg_op=aggop_description())
         else:
             return "{agg_op}{trans_op}{row_op}".format(
@@ -98,7 +99,8 @@ def generate_nl_description(
 
     def cutoff_description(prob):
         if isinstance(cutoff_strategy, ConstantCutoffTime):
-            return ", after {col} {cutoff}".format(col=time_column, cutoff=cutoff_strategy.label_cutoff)
+            return ", after {col} {cutoff}".format(
+                col=time_column, cutoff=cutoff_strategy.label_cutoff)
         else:
             raise " (unknown cutoff time)"
 

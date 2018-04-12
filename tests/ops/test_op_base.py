@@ -1,13 +1,14 @@
+import pytest
+
 from trane.ops.op_base import OpBase
-from trane.utils.table_meta import TableMeta as TM
 from trane.ops.row_ops import *
 from trane.ops.transformation_ops import *
-import pytest
+from trane.utils.table_meta import TableMeta as TM
 
 
 class FakeOp(OpBase):
     """
-    Make a fake operation for testing. 
+    Make a fake operation for testing.
     It has PARAMS and IOTYPES, but execute is not implemented
     """
     PARAMS = [{'param': TM.TYPE_FLOAT}, {'param': TM.TYPE_TEXT}]
@@ -22,7 +23,7 @@ def test_op_base_init():
     op = FakeOp('col')
     assert op.input_type is None
     assert op.output_type is None
-    assert type(op.hyper_parameter_settings) == dict
+    assert isinstance(op.hyper_parameter_settings, dict)
     with pytest.raises(NotImplementedError):
         op(None)
 

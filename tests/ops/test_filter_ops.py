@@ -1,7 +1,8 @@
-from trane.ops.filter_ops import *
-from pandas import DataFrame
-from trane.utils.table_meta import TableMeta as TM
 import numpy as np
+from pandas import DataFrame
+
+from trane.ops.filter_ops import *
+from trane.utils.table_meta import TableMeta as TM
 
 df = DataFrame({'col': [1, 2, 3, 4, 5]})
 meta = TM({

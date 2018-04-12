@@ -1,7 +1,8 @@
-import pandas as pd
-import numpy as np
-from functools import reduce
 from datetime import datetime
+from functools import reduce
+
+import pandas as pd
+
 from .table_meta import TableMeta as TM
 
 __all__ = ['df_group_by_entity_id', 'csv_to_df', 'parse_data']
@@ -41,7 +42,7 @@ def csv_to_df(csv_filenames, output_filename=None, header=True):
 
     merged_df = reduce((lambda left_frame, right_frame: pd.merge(
         left_frame, right_frame, how='outer')), dataframes)
-    if output_filename != None:
+    if output_filename is not None:
         merged_df.to_csv(output_filename)
     return merged_df
 

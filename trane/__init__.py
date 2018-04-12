@@ -1,8 +1,7 @@
-from .libinfo import __version__
+from .core import *  # noqa
+from .utils import *  # noqa
+from . import ops  # noqa
 
-from .core import *
-from .utils import *
-from . import ops
 import logging
 logname = 'trane.log'
 logging.basicConfig(filename=logname,

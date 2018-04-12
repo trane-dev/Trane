@@ -13,8 +13,8 @@ Subpackages
 Submodules
 ----------
 
-trane\.libinfo module
----------------------
+trane.libinfo module
+--------------------
 
 .. automodule:: trane.libinfo
     :members:

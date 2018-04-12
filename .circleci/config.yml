@@ -18,7 +18,7 @@ jobs:
         
     docker:
       # - image: circleci/python:3.6.1
-      - image: circleci/python:3.5
+      # - image: circleci/python:3.5
       # - image: circleci/python:3.4
       
     working_directory: ~/repo

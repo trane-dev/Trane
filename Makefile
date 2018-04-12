@@ -51,13 +51,13 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .pytest_cache
 
 lint: ## check style with flake8 and isort
-	flake8 python_boilerplate tests
-	isort -c --recursive python_boilerplate tests
+	flake8 trane tests
+	isort -c --recursive trane tests
 
 fixlint: ## fix lint issues using autoflake, autopep8, and isort
-	find python_boilerplate -name '*.py' | xargs autoflake --in-place --remove-all-unused-imports --remove-unused-variables
-	autopep8 --in-place --recursive --aggressive python_boilerplate
-	isort --apply --atomic --recursive python_boilerplate
+	find trane -name '*.py' | xargs autoflake --in-place --remove-all-unused-imports --remove-unused-variables
+	autopep8 --in-place --recursive --aggressive trane
+	isort --apply --atomic --recursive trane
 
 	find tests -name '*.py' | xargs autoflake --in-place --remove-all-unused-imports --remove-unused-variables
 	autopep8 --in-place --recursive --aggressive tests
@@ -70,18 +70,18 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source python_boilerplate -m pytest
+	coverage run --source trane -m pytest
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
 clean-docs: ## remove previously built docs
-	rm -f docs/python_boilerplate.rst
+	rm -f docs/trane.rst
 	rm -f docs/modules.rst
 	$(MAKE) -C docs clean
 
 docs: clean-docs ## generate Sphinx HTML documentation, including API docs
-	sphinx-apidoc -o docs/ python_boilerplate
+	sphinx-apidoc -o docs/ trane
 	$(MAKE) -C docs html
 	touch docs/_build/html/.nojekyll
 

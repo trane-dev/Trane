@@ -4,6 +4,13 @@
 #
 version: 2
 jobs:
+  dependencies:
+    pre:
+      - pip install tox
+    test:
+      override:
+        - tox
+        
   build:
     docker:
       # specify the version you desire here
@@ -26,13 +33,7 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
       #
-      dependencies:
-        pre:
-          - pip install tox
-      test:
-        override:
-          - tox
-          
+
       - run:
           name: install dependencies
           command: |

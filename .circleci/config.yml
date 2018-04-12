@@ -13,7 +13,7 @@ jobs:
           - tox
         
     docker:
-      - image: circleci/python:3.6.1
+      - image: circleci/python:3.6.1, circleci/python:3.5.0, circleci/python:3.4.0
       
     working_directory: ~/repo
 

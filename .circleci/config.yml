@@ -48,6 +48,8 @@
 #     docker:
 #       - image: circleci/python:3.4
 
-machine:
-  post:
-    - pyenv global 3.4 3.5 3.6
+jobs:
+  machine:
+    post:
+      - pyenv global 3.4 3.5 3.6
+  

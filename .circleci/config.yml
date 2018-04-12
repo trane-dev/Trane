@@ -4,9 +4,7 @@
 #
 version: 2
 
-machine:
-  post:
-    - pyenv global 3.4 3.5 3.6
+
 jobs:
   build:
         
@@ -14,7 +12,9 @@ jobs:
       # - image: circleci/python:3.6.1
       # - image: circleci/python:3.5
       # - image: circleci/python:3.4
-      
+    machine:
+      post:
+        - pyenv global 3.4 3.5 3.6      
     working_directory: ~/repo
 
     steps:

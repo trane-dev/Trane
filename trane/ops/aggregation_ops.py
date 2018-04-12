@@ -1,18 +1,15 @@
+import numpy
+
 from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
-import sys
-import numpy
 
 AGGREGATION_OPS = ["FirstAggregationOp", "CountAggregationOp", "SumAggregationOp",
                    "LastAggregationOp", "LMFAggregationOp"]
 __all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
 
-import logging
-
 
 class AggregationOpBase(OpBase):
     """super class for all Aggregation Operations. (deprecated)"""
-    pass
 
 
 class FirstAggregationOp(AggregationOpBase):
@@ -47,8 +44,9 @@ class LMFAggregationOp(AggregationOpBase):
     def execute(self, dataframe):
         dataframe = dataframe.copy()
 
-        #HACKY FIX
-        dataframe[self.column_name] = dataframe[self.column_name].astype(numpy.float32)
+        # HACKY FIX
+        dataframe[self.column_name] = dataframe[self.column_name].astype(
+            numpy.float32)
 
         last = dataframe.tail(1)
         first = dataframe.head(1)

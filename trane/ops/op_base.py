@@ -1,21 +1,17 @@
-import json
-from ..utils.table_meta import TableMeta as TM
 __all__ = ['OpBase']
-
-import logging
 
 
 class OpBase(object):
-    """Super class of all operations. 
+    """Super class of all operations.
         All operations should have REQUIRED_PARAMETERS and IOTYPES.
 
     IOTYPES is a list of possible input and output type pairs.
         For example `greater` can operate on int and str and output bool.
         [(int, bool), (str, bool), ...]
 
-    REQUIRED_PARAMETERS is a list of parameter and type dicts. 
+    REQUIRED_PARAMETERS is a list of parameter and type dicts.
         REQUIRED_PARAMETERS have the same length as IOTYPES.
-        With different input types, parameters may have different types. 
+        With different input types, parameters may have different types.
         For example the REQUIRED_PARAMETERS of `greater` is
         [\{threshold: int\}, \{threshold: str\}, ...]
 
@@ -29,10 +25,10 @@ class OpBase(object):
 
     def __init__(self, column_name):
         """Initalization of all operations. Subclasses shouldn't have their own init.
-            This function checks whether REQUIRED_PARAMETERS and IOTYPES are defined and compatable. 
+            This function checks whether REQUIRED_PARAMETERS and IOTYPES are defined and compatable.
 
         args:
-            column_name: the column this operation is applied on. 
+            column_name: the column this operation is applied on.
 
         """
         self.column_name = column_name
@@ -40,9 +36,9 @@ class OpBase(object):
         self.hyper_parameter_settings = {}
 
     def op_type_check(self, table_meta):
-        """Data type check for the operation. 
-            Operations may change the data type of a column, eg. int -> bool. 
-            One operation can only be applied on a few data types, eg. `greater` can 
+        """Data type check for the operation.
+            Operations may change the data type of a column, eg. int -> bool.
+            One operation can only be applied on a few data types, eg. `greater` can
             be applied on int but can't be applied on bool.
             This function checks whether current operation can be applied on the data.
             It returns the updated TableMeta for next operation.
@@ -67,7 +63,6 @@ class OpBase(object):
         for parameter_requirement in self.REQUIRED_PARAMETERS:
             for parameter_name, parameter_type in parameter_requirement.items():
                 self.hyper_parameter_settings[parameter_name] = hyper_parameter
-
 
     def __call__(self, dataframe):
         return self.execute(dataframe)

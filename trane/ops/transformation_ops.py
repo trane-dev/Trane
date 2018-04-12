@@ -1,7 +1,7 @@
+import numpy
+
 from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
-import numpy
-import logging
 
 TRANSFORMATION_OPS = ["IdentityTransformationOp",
                       "DiffTransformationOp", "ObjectFrequencyTransformationOp"]
@@ -10,7 +10,6 @@ __all__ = ["TransformationOpBase", "TRANSFORMATION_OPS"] + TRANSFORMATION_OPS
 
 class TransformationOpBase(OpBase):
     """super class for all Transformation Operations. (deprecated)"""
-    pass
 
 
 class IdentityTransformationOp(TransformationOpBase):
@@ -32,7 +31,7 @@ class DiffTransformationOp(TransformationOpBase):
     def execute(self, dataframe):
         dataframe = dataframe.copy()
 
-        #HACKY FIX
+        # HACKY FIX
         # dataframe[self.column_name] = dataframe[self.column_name].astype(numpy.float32)
 
         index = dataframe.index
@@ -55,7 +54,7 @@ class ObjectFrequencyTransformationOp(TransformationOpBase):
         objects = dataframe.copy()[self.column_name].unique()
         objects_to_frequency = {}
         for obj in objects:
-          objects_to_frequency[obj] = 0
+            objects_to_frequency[obj] = 0
 
         for val in dataframe[self.column_name]:
             objects_to_frequency[val] = objects_to_frequency[val] + 1

@@ -1,17 +1,16 @@
-import json
-from .prediction_problem import PredictionProblem
-from ..ops import aggregation_ops, row_ops, transformation_ops, filter_ops
-from ..utils.table_meta import TableMeta
+import logging
 
+from ..ops import aggregation_ops, filter_ops, row_ops, transformation_ops
+from ..utils.table_meta import TableMeta
+from .prediction_problem import PredictionProblem
 
 __all__ = ['PredictionProblemGenerator']
-
-import logging
 
 
 class PredictionProblemGenerator:
 
-    def __init__(self, table_meta, entity_id_column, label_generating_column, time_column, filter_column):
+    def __init__(self, table_meta, entity_id_column,
+                 label_generating_column, time_column, filter_column):
 
         self.table_meta = table_meta
         self.entity_id_column = entity_id_column
@@ -23,7 +22,7 @@ class PredictionProblemGenerator:
 
     def generator(self, dataframe):
         """Generate prediction problems.
-        
+
         yields:
             PredictionProblem
         """
@@ -49,30 +48,29 @@ class PredictionProblemGenerator:
             filter_op_obj = getattr(
                 filter_ops, filter_op_name)(self.filter_column)
 
-            operations = [filter_op_obj, row_op_obj, transformation_op_obj, aggregation_op_obj]
-            
+            operations = [
+                filter_op_obj,
+                row_op_obj,
+                transformation_op_obj,
+                aggregation_op_obj]
+
             prediction_problem = PredictionProblem(operations)
 
             (is_valid_prediction_problem, filter_column_order_of_types, label_generating_column_order_of_types) = \
-                            prediction_problem.is_valid_prediction_problem(
-                                        self.table_meta, self.filter_column, 
-                                        self.label_generating_column)
+                prediction_problem.is_valid_prediction_problem(
+                self.table_meta, self.filter_column,
+                self.label_generating_column)
             if not is_valid_prediction_problem:
                 continue
 
-            prediction_problem.generate_and_set_hyper_parameters(dataframe, 
-                                                                self.label_generating_column, 
-                                                                self.filter_column,
-                                                                self.hyper_parameter_memo_table)
-            
-
-            
-
-            
+            prediction_problem.generate_and_set_hyper_parameters(dataframe,
+                                                                 self.label_generating_column,
+                                                                 self.filter_column,
+                                                                 self.hyper_parameter_memo_table)
 
             logging.debug(
                 "Prediction Problem Generated: {} \n".format(prediction_problem))
-            
+
             yield prediction_problem
 
     def ensure_valid_inputs(self):

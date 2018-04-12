@@ -1,5 +1,6 @@
-from trane.utils.generate_cutoff_times import *
 from pandas import DataFrame
+
+from trane.utils.generate_cutoff_times import *
 
 
 def test_fixed_cutoff_time():
@@ -9,9 +10,10 @@ def test_fixed_cutoff_time():
         'entity2': DataFrame({'col1': [4, 5, 6]})
     }
     cutoffs = cutoff_strategy.generate_cutoffs(data, 'col1')
-    assert type(cutoffs) == dict
+    assert isinstance(cutoffs, dict)
     assert cutoffs['entity1'][1] == 0
     assert cutoffs['entity2'][1] == 0
+
 
 def test_dynamic_cutoff_time():
     cutoff_strategy = DynamicCutoffTime()
@@ -21,9 +23,9 @@ def test_dynamic_cutoff_time():
         'entity2': DataFrame({'col1': [4, 4, 4, 6, 5]})
     }
     cutoffs = cutoff_strategy.generate_cutoffs(data, 'col1')
-    assert type(cutoffs) == dict
+    assert isinstance(cutoffs, dict)
     assert cutoffs['entity1'][1] == 2
     assert cutoffs['entity1'][2] == 3
-    
+
     assert cutoffs['entity2'][1] == 5
     assert cutoffs['entity2'][2] == 6

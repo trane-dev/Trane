@@ -1,9 +1,10 @@
-import json
-from .prediction_problem import PredictionProblem
-from .prediction_problem_saver import *
-import pandas as pd
-__all__ = ['Labeler']
 import logging
+
+import pandas as pd
+
+from .prediction_problem_saver import *
+
+__all__ = ['Labeler']
 
 
 class Labeler():
@@ -11,7 +12,8 @@ class Labeler():
     def __init__(self):
         pass
 
-    def execute(self, entity_to_data_and_cutoff_dict, json_prediction_problems_filename):
+    def execute(self, entity_to_data_and_cutoff_dict,
+                json_prediction_problems_filename):
         prediction_problems, table_meta, entity_id_column, label_generating_column, time_column = \
             prediction_problems_from_json_file(
                 json_prediction_problems_filename)
@@ -29,15 +31,17 @@ class Labeler():
             for entity in entity_to_data_and_cutoff_dict:
 
                 df_row = []
-                entity_data, training_cutoff, label_cutoff = entity_to_data_and_cutoff_dict[entity]
+                entity_data, training_cutoff, label_cutoff = entity_to_data_and_cutoff_dict[
+                    entity]
 
                 df_pre_label_cutoff_time_result, df_all_data_result = prediction_problem.execute(
-                                                                    entity_data, time_column, label_cutoff,
-                                                                    prediction_problem.filter_column_order_of_types,
-                                                                    prediction_problem.label_generating_column_order_of_types)
+                    entity_data, time_column, label_cutoff,
+                    prediction_problem.filter_column_order_of_types,
+                    prediction_problem.label_generating_column_order_of_types)
 
                 if len(df_pre_label_cutoff_time_result) == 1:
-                    label_precutoff_time = df_pre_label_cutoff_time_result[label_generating_column].values[0]
+                    label_precutoff_time = df_pre_label_cutoff_time_result[
+                        label_generating_column].values[0]
                 else:
                     logging.warning("Received output from prediction problem \
                                     execution on pre-label cutoff data with more than one result.")

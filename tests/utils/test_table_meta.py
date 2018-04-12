@@ -59,7 +59,7 @@ def test_table_meta_load_save():
             ]}
         ]})
     meta_json = meta.to_json()
-    assert type(meta_json) == str
+    assert isinstance(meta_json, str)
     meta2 = TM.from_json(meta_json)
     assert meta2.get_type('col1') == TM.TYPE_IDENTIFIER
     assert meta2.get_type('col2') == TM.TYPE_FLOAT

@@ -1,17 +1,18 @@
 # import sys
 # sys.path.insert(0, '/Users/Alexander/Documents/Trane__HDI_REPO/')
-from trane.core.labeler import *
-import trane
-from trane.core.prediction_problem import PredictionProblem
-from trane.ops.row_ops import *
-from trane.ops.filter_ops import *
-from trane.ops.transformation_ops import *
-from trane.ops.aggregation_ops import *
-from trane.utils.table_meta import TableMeta
-from trane.core.prediction_problem_saver import *
-import json
-import pandas as pd
 import os
+
+import pandas as pd
+
+import trane
+from trane.core.labeler import *
+from trane.core.prediction_problem import PredictionProblem
+from trane.core.prediction_problem_saver import *
+from trane.ops.aggregation_ops import *
+from trane.ops.filter_ops import *
+from trane.ops.row_ops import *
+from trane.ops.transformation_ops import *
+from trane.utils.table_meta import TableMeta
 
 """TESTING STRATEGY:
 Function: execute()
@@ -47,15 +48,14 @@ def test_labeler_apply():
                                             LastAggregationOp(label_generating_column)])
 
     (is_valid_prediction_problem, filter_column_order_of_types, label_generating_column_order_of_types) = prediction_problem.is_valid_prediction_problem(
-                table_meta, filter_column, label_generating_column)
-    
+        table_meta, filter_column, label_generating_column)
+
     filename = "prediction_problem.json"
 
     prediction_problems_to_json_file(
         [prediction_problem], table_meta, entity_id_column, label_generating_column, time_column, filename)
 
-    input_ = entity_id_to_data_and_cutoff_dict
     expected = pd.DataFrame([[0, 41.35, 0]], columns=[
                             entity_id_column, 'problem_label', 'cutoff_time'])
-    found = labeler.execute(entity_id_to_data_and_cutoff_dict, filename)
+    labeler.execute(entity_id_to_data_and_cutoff_dict, filename)
     os.remove(filename)

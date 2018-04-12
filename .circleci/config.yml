@@ -6,29 +6,21 @@ version: 2
 jobs:
   build:
     dependencies:
-      pre:
-        - pip install tox
-      test:
-        override:
-          - tox
+      # pre:
+      #   - pip install tox
+      # test:
+      #   override:
+      #     - tox
         
     docker:
       - image: circleci/python:3.6.1
-      - image: circleci/python:3.5
-      - image: circleci/python:3.4
+      # - image: circleci/python:3.5
+      # - image: circleci/python:3.4
       
     working_directory: ~/repo
 
     steps:
       - checkout
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "requirements.txt" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-      #
 
       - run:
           name: install dependencies
@@ -36,25 +28,41 @@ jobs:
             sudo pip install -r requirements.txt      
             sudo python3 -m venv venv
             . venv/bin/activate
-
-      - save_cache:
-          paths:
-            - ./venv
-          key: v1-dependencies-{{ checksum "requirements.txt" }}
         
       # run tests!
-      # this example uses Django's built-in test-runner
-      # other common Python testing frameworks include pytest and nose
-      # https://pytest.org
-      # https://nose.readthedocs.io
       - run:
           name: run tests
           command: |
-            tox
-            
+            pytest
 
+  build2:
+    dependencies:
+      # pre:
+      #   - pip install tox
+      # test:
+      #   override:
+      #     - tox
+        
+    docker:
+      # - image: circleci/python:3.6.1
+      - image: circleci/python:3.5
+      # - image: circleci/python:3.4
+      
+    working_directory: ~/repo
 
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
+    steps:
+      - checkout
+      
+      - run:
+          name: install dependencies
+          command: |
+            sudo pip install -r requirements.txt      
+            sudo python3 -m venv venv
+            . venv/bin/activate
+        
+      # run tests!
+      - run:
+          name: run tests
+          command: |
+            pytest
           

@@ -19,8 +19,8 @@ jobs:
 
     steps:
       - checkout
-      
-      - run: pip install tox && tox
+
+      - run: pip3 install tox && tox
 
       # Download and cache dependencies
       - restore_cache:

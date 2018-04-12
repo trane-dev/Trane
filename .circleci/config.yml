@@ -9,14 +9,8 @@ machine:
     - pyenv global 3.4 3.5 3.6
 jobs:
   build:
-    dependencies:
-      # pre:
-      #   - pip install tox
-      # test:
-      #   override:
-      #     - tox
         
-    docker:
+    # docker:
       # - image: circleci/python:3.6.1
       # - image: circleci/python:3.5
       # - image: circleci/python:3.4

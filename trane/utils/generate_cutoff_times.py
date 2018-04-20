@@ -46,26 +46,29 @@ class ConstantCutoffTime(CutoffTimeBase):
 
 class DynamicCutoffTime(CutoffTimeBase):
     """
-    DynamicCutoffTime use (1 - training_ratio - label_ratio) * N records
+    DynamicCutoffTime use (1 - training_label_ratio - test_label_ratio) * N records
     to generate features.
-    use the following training_ratio * N records for training labels.
-    use the last label_ratio * N records for testing labels.
+    use the following training_label_ratio * N records for training labels.
+    use the last test_label_ratio * N records for testing labels.
     """
 
-    def __init__(self, training_ratio=.2, label_ratio=.2):
-        assert training_ratio + label_ratio < 1
-        assert training_ratio > 0 and label_ratio > 0
-        self.training_ratio = training_ratio
-        self.label_ratio = label_ratio
+    def __init__(self, training_label_ratio=.2, test_label_ratio=.2):
+        assert training_label_ratio + test_label_ratio < 1
+        assert training_label_ratio > 0 and test_label_ratio > 0
+        self.training_label_ratio = training_label_ratio
+        self.test_label_ratio = test_label_ratio
 
     def get_cutoff(self, entity_data, time_column):
-        timestemps = entity_data[time_column].copy()
-        timestemps = timestemps.sort_values()
+        timestamps = entity_data[time_column].copy()
+        timestamps = timestamps.sort_values()
 
-        N = len(timestemps)
-        n_label = int(np.ceil(N * self.label_ratio))
-        n_training_label = int(
-            np.ceil(N * (self.training_ratio + self.label_ratio)))
-        n_feature = N - n_training_label
-        n_training = n_training_label - n_label
-        return timestemps.iloc[n_feature], timestemps.iloc[n_feature + n_training]
+        N = len(timestamps)
+
+        training_cutoff_index = int((1 - self.training_label_ratio - self.test_label_ratio) * N)
+        label_cutoff_index = int((1 - self.test_label_ratio) * N)
+
+        return timestamps.iloc[training_cutoff_index], timestamps.iloc[label_cutoff_index]
+
+
+
+

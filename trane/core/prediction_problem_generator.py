@@ -56,7 +56,8 @@ class PredictionProblemGenerator:
 
             prediction_problem = PredictionProblem(operations)
 
-            (is_valid_prediction_problem, filter_column_order_of_types, label_generating_column_order_of_types) = \
+            (is_valid_prediction_problem, filter_column_order_of_types,
+                label_generating_column_order_of_types) = \
                 prediction_problem.is_valid_prediction_problem(
                 self.table_meta, self.filter_column,
                 self.label_generating_column)

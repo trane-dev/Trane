@@ -1,6 +1,6 @@
 from pandas import DataFrame
 
-from trane.utils.generate_cutoff_times import *
+from trane.utils.generate_cutoff_times import *  # noqa
 
 
 def test_fixed_cutoff_time():

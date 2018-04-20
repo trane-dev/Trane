@@ -5,7 +5,7 @@ from collections import Counter
 import numpy as np
 from scipy import stats
 
-from ..ops.op_saver import *
+from ..ops.op_saver import op_from_json, op_to_json
 from ..utils.table_meta import TableMeta
 
 __all__ = ['PredictionProblem']
@@ -13,8 +13,8 @@ __all__ = ['PredictionProblem']
 
 class PredictionProblem:
 
-    """Prediction Problem is made up of a list of Operations. The list of operations delineate
-            the order the operations will be applied in.
+    """Prediction Problem is made up of a list of Operations. The list of operations
+    delineate the order the operations will be applied in.
 
     """
 
@@ -45,7 +45,7 @@ class PredictionProblem:
                 temp_meta.get_type(label_generating_column))
 
         self.filter_column_order_of_types = filter_column_order_of_types
-        self.label_generating_column_order_of_types = label_generating_column_order_of_types
+        self.label_generating_column_order_of_types = label_generating_column_order_of_types  # noqa
 
         return (True, filter_column_order_of_types,
                 label_generating_column_order_of_types)
@@ -55,8 +55,8 @@ class PredictionProblem:
             hyper_parameter = hyper_parameters[idx]
             op.set_hyper_parameter(hyper_parameter)
 
-    def generate_and_set_hyper_parameters(self, dataframe, label_generating_column, filter_column,
-                                          hyper_parameter_memo_table):
+    def generate_and_set_hyper_parameters(self, dataframe, label_generating_column,
+                                          filter_column, hyper_parameter_memo_table):
         hyper_parameters = []
 
         FRACTION_OF_DATA_TARGET = 0.8
@@ -83,7 +83,8 @@ class PredictionProblem:
                 column_data = dataframe[label_generating_column]
                 unique_parameter_values = set(column_data)
                 value = select_by_diversity(unique_parameter_values,
-                                            dataframe, operation, label_generating_column)
+                                            dataframe, operation,
+                                            label_generating_column)
                 hyper_parameter_memo_table[operation_hash] = value
 
             hyper_parameters.append(value)
@@ -92,7 +93,8 @@ class PredictionProblem:
         return hyper_parameters
 
     def execute(self, dataframe, time_column, label_cutoff_time,
-                filter_column_order_of_types, label_generating_column_order_of_types):
+                filter_column_order_of_types,
+                label_generating_column_order_of_types):
         """This function executes all the operations on the dataframe and returns the output. The output
                 should be structured as a single label/value per the Trane documentation.
                 See paper: "What would a data scientist ask? Automatically formulating and solving predicton
@@ -102,7 +104,8 @@ class PredictionProblem:
                 (Pandas DataFrame): the dataframe containing the data we wish to analyze.
 
         Returns:
-                (Boolean/Float): The Label/Value of the prediction problem's formulation when applied to the data.
+                (Boolean/Float): The Label/Value of the prediction problem's formulation
+                when applied to the data.
 
         """
         dataframe = dataframe.sort_values(by=time_column)
@@ -136,7 +139,8 @@ class PredictionProblem:
                         single_piece_of_data)
                 elif idx > 0:
                     check_type(
-                        label_generating_column_order_of_types[idx - 1], single_piece_of_data)
+                        label_generating_column_order_of_types[idx - 1],
+                        single_piece_of_data)
 
                 all_data_execution_result = operation.execute(
                     all_data_execution_result)
@@ -146,7 +150,8 @@ class PredictionProblem:
 
                 if idx == 0:
                     check_type(
-                        filter_column_order_of_types[idx + 1], single_piece_of_data)
+                        filter_column_order_of_types[idx + 1],
+                        single_piece_of_data)
                 elif idx > 0:
                     check_type(
                         label_generating_column_order_of_types[idx],
@@ -177,8 +182,10 @@ class PredictionProblem:
     def to_json(self):
         return json.dumps(
             {"operations": [json.loads(op_to_json(op)) for op in self.operations],
-             "filter_column_order_of_types": self.filter_column_order_of_types,
-             "label_generating_column_order_of_types": self.label_generating_column_order_of_types})
+             "filter_column_order_of_types":
+             self.filter_column_order_of_types,
+             "label_generating_column_order_of_types":
+             self.label_generating_column_order_of_types})
 
     def from_json(json_data):
         data = json.loads(json_data)
@@ -252,7 +259,8 @@ def entropy_of_a_list(values):
 
 def check_type(expected_type, actual_data):
     logging.debug(
-        "Beginning check type. Expected type is: {}, Actual data is: {}, Actual type is: {}".format(
+        "Beginning check type. Expected type is: {}, \
+        Actual data is: {}, Actual type is: {}".format(
             expected_type,
             actual_data,
             type(actual_data)))

@@ -1,8 +1,8 @@
 import pytest
 
 from trane.ops.op_base import OpBase
-from trane.ops.row_ops import *
-from trane.ops.transformation_ops import *
+from trane.ops.row_ops import *  # noqa
+from trane.ops.transformation_ops import *  # noqa
 from trane.utils.table_meta import TableMeta as TM
 
 

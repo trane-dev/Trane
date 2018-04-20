@@ -1,5 +1,5 @@
-from ..ops import *
-from .generate_cutoff_times import *
+from ..ops import *  # noqa
+from .generate_cutoff_times import *  # noqa
 from .table_meta import TableMeta as TM
 
 __all__ = ['generate_nl_description']

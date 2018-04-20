@@ -81,10 +81,10 @@ class TableMeta(object):
         except BaseException:
             pass
         if dtype in TableMeta.SUPERTYPE:
-            self.table_meta['tables'][column_data['table_id']]['fields'][column_data['field_id']]['type'] = \
-                TableMeta.SUPERTYPE[dtype]
-            self.table_meta['tables'][column_data['table_id']]['fields'][column_data['field_id']]['subtype'] = \
-                dtype
+            table_id = column_data['table_id']
+            field_id = column_data['field_id']
+            self.table_meta['tables'][table_id]['fields'][field_id]['type'] = TableMeta.SUPERTYPE[dtype]
+            self.table_meta['tables'][table_id]['fields'][field_id]['subtype'] = dtype
         else:
             self.table_meta['tables'][column_data['table_id']][
                 'fields'][column_data['field_id']]['type'] = dtype

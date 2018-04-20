@@ -1,5 +1,3 @@
-import numpy
-
 from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
 
@@ -43,11 +41,6 @@ class LMFAggregationOp(AggregationOpBase):
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()
-
-        # HACKY FIX
-        dataframe[self.column_name] = dataframe[self.column_name].astype(
-            numpy.float32)
-
         last = dataframe.tail(1)
         first = dataframe.head(1)
         last.at[last.index[0],
@@ -63,9 +56,9 @@ class CountAggregationOp(AggregationOpBase):
                (TM.TYPE_TIME, TM.TYPE_INTEGER), (TM.TYPE_IDENTIFIER, TM.TYPE_INTEGER)]
 
     def execute(self, dataframe):
-        dataframe = dataframe.copy()
-        head = dataframe.head(1)
-        head[self.column_name] = int(dataframe.shape[0])
+        head = dataframe.head(1).copy()
+        count = int(dataframe.shape[0])
+        head[self.column_name] = count
         return head
 
 
@@ -75,7 +68,7 @@ class SumAggregationOp(AggregationOpBase):
                (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
-        dataframe = dataframe.copy()
-        head = dataframe.head(1)
-        head[self.column_name] = float(dataframe[self.column_name].sum())
+        head = dataframe.head(1).copy()
+        total = float(dataframe[self.column_name].sum())
+        head[self.column_name] = total
         return head

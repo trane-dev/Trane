@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 
-from .prediction_problem_saver import *
+from .prediction_problem_saver import prediction_problems_from_json_file
 
 __all__ = ['Labeler']
 
@@ -47,7 +47,8 @@ class Labeler():
                                     execution on pre-label cutoff data with more than one result.")
                     label_precutoff_time = None
                 if len(df_all_data_result) == 1:
-                    label_postcutoff_time = df_all_data_result[label_generating_column].values[0]
+                    label_postcutoff_time = df_all_data_result[
+                        label_generating_column].values[0]
                 else:
                     logging.warning("Received output from prediction problem execution \
                                      on all data with more than one result.")

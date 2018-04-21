@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/HDI-Project/Trane.svg?branch=master)](https://travis-ci.org/HDI-Project/Trane)
+
 # Trane
 Trane is a software package for automatically generating prediction problems and generating labels for supervised learning. Trane is a system designed to advance the automation of the machine learning problem solving pipeline.
 

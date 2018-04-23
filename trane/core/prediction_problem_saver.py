@@ -6,6 +6,7 @@ from .prediction_problem import PredictionProblem
 __all__ = ["prediction_problems_to_json_file",
            "prediction_problems_from_json_file"]
 
+
 def prediction_problems_to_json_file(prediction_problems, table_meta,
                                      entity_id_column, label_generating_column, time_column, filename):
     """
@@ -14,16 +15,16 @@ def prediction_problems_to_json_file(prediction_problems, table_meta,
     Parameters
     ----------
     prediction_problems: a list of Prediction Problems.
-    table_meta: TableMeta object. Contains 
+    table_meta: TableMeta object. Contains
         meta information about the data
-    entity_id_column: column name of 
+    entity_id_column: column name of
         the column containing entities in the data
     label_generating_column: column name of the
         column of interest in the data
     time_column: column name of the column
         containing time information in the data
     filename: name of the file to write to. must end in .json
-    
+
     Returns
     ----------
     None
@@ -44,8 +45,9 @@ def prediction_problems_to_json_file(prediction_problems, table_meta,
 
 
 def prediction_problems_from_json_file(filename):
-    """Read Prediction Problems from a JSON structured file
-     
+    """
+    Read Prediction Problems from a JSON structured file
+
     Parameters
     ----------
     filename: filename to read problems from.
@@ -53,9 +55,9 @@ def prediction_problems_from_json_file(filename):
     Returns
     ----------
     prediction_problems: a list of Prediction Problems.
-    table_meta: TableMeta object. Contains 
+    table_meta: TableMeta object. Contains
         meta information about the data
-    entity_id_column: column name of 
+    entity_id_column: column name of
         the column containing entities in the data
     label_generating_column: column name of the
         column of interest in the data

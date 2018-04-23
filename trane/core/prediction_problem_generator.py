@@ -11,26 +11,27 @@ class PredictionProblemGenerator:
     """
     Object for generating prediction problems on data.
     """
+
     def __init__(self, table_meta, entity_id_column,
                  label_generating_column, time_column, filter_column):
-    """
-    Parameters
-    ----------
-    table_meta: TableMeta object. Contains 
-        meta information about the data
-    entity_id_column: column name of 
-        the column containing entities in the data
-    label_generating_column: column name of the
-        column of interest in the data
-    time_column: column name of the column
-        containing time information in the data
-    filter_column: column name of the column
-        to be filtered over
+        """
+        Parameters
+        ----------
+        table_meta: TableMeta object. Contains
+            meta information about the data
+        entity_id_column: column name of
+            the column containing entities in the data
+        label_generating_column: column name of the
+            column of interest in the data
+        time_column: column name of the column
+            containing time information in the data
+        filter_column: column name of the column
+            to be filtered over
 
-    Returns
-    ----------
-    None
-    """
+        Returns
+        ----------
+        None
+        """
         self.table_meta = table_meta
         self.entity_id_column = entity_id_column
         self.label_generating_column = label_generating_column
@@ -38,19 +39,19 @@ class PredictionProblemGenerator:
         self.filter_column = filter_column
         self.ensure_valid_inputs()
 
-    def generator(self, dataframe):
-    """
-    Generate the prediction problems. The prediction problems operations
-    hyper parameters are also set.
+    def generate(self, dataframe):
+        """
+        Generate the prediction problems. The prediction problems operations
+        hyper parameters are also set.
 
-    Parameters
-    ----------
-    dataframe: the data to be parsed
-    
-    Yields
-    ----------
-    the function yields Prediction Problem objects.
-    """
+        Parameters
+        ----------
+        dataframe: the data to be parsed
+
+        Returns
+        ----------
+        problems: a list of Prediction Problem objects.
+        """
         def iter_over_ops():
             for aggregation_op_name in aggregation_ops.AGGREGATION_OPS:
                 for transformation_op_name in transformation_ops.TRANSFORMATION_OPS:
@@ -59,6 +60,7 @@ class PredictionProblemGenerator:
                             yield aggregation_op_name, transformation_op_name, \
                                 row_op_name, filter_op_name
 
+        problems = []
         for ops in iter_over_ops():
             # for filter_column in self.table_meta.get_columns():
             aggregation_op_name, transformation_op_name, \
@@ -97,7 +99,8 @@ class PredictionProblemGenerator:
             logging.debug(
                 "Prediction Problem Generated: {} \n".format(prediction_problem))
 
-            yield prediction_problem
+            problems.append(prediction_problem)
+        return problems
 
     def ensure_valid_inputs(self):
         assert(self.table_meta.get_type(self.entity_id_column)

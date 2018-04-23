@@ -9,27 +9,27 @@ __all__ = ["RowOpBase", "ROW_OPS"] + ROW_OPS
 
 
 class RowOpBase(OpBase):
-"""
-Super class for all Row Operations. The class is empty and is currently a 
-placeholder for any RowOpBase level methods we want to make.
+    """
+    Super class for all Row Operations. The class is empty and is currently a
+    placeholder for any RowOpBase level methods we want to make.
 
-Row operations represent the 2nd operation
-in a prediction problem. They apply functions to rows. 
-Row operations are defined as classes
-that inherit the RowOpBase class and instantiate the execute method.
+    Row operations represent the 2nd operation
+    in a prediction problem. They apply functions to rows.
+    Row operations are defined as classes
+    that inherit the RowOpBase class and instantiate the execute method.
 
-Make Your Own
-----------  
-Simply make a new class that follows the requirements below and issue a pull request.
+    Make Your Own
+    ----------
+    Simply make a new class that follows the requirements below and issue a pull request.
 
-Requirements
-----------
-REQUIRED_PARAMETERS: the hyper parameters needed for the operation
-IOTYPES: the input and output types of the operation using TableMeta types
-execute method: transform dataframe according to the operation and return
-  the new dataframe
+    Requirements
+    ----------
+    REQUIRED_PARAMETERS: the hyper parameters needed for the operation
+    IOTYPES: the input and output types of the operation using TableMeta types
+    execute method: transform dataframe according to the operation and return
+      the new dataframe
 
-"""
+    """
 
 
 class IdentityRowOp(RowOpBase):

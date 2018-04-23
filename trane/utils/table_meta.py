@@ -5,10 +5,10 @@ __all__ = ['TableMeta']
 
 
 class TableMeta(object):
-"""
-Meta data object of a database table.
-More information available here: https://hdi-project.github.io/MetaData.json/index
-"""
+    """
+    Meta data object of a database table.
+    More information available here: https://hdi-project.github.io/MetaData.json/index
+    """
     SUPERTYPE = {}
     # categorical
     TYPE_CATEGORY = 'categorical'
@@ -33,17 +33,17 @@ More information available here: https://hdi-project.github.io/MetaData.json/ind
              TYPE_INTEGER, TYPE_FLOAT, TYPE_TIME, TYPE_IDENTIFIER]
 
     def __init__(self, table_meta):
-    """
-    Initalization of all operations. Subclasses shouldn't have their own init.
-    
-    Parameters
-    ----------
-    table_meta: a dict describe meta data of a database.
+        """
+        Initalization of all operations. Subclasses shouldn't have their own init.
 
-    Returns
-    ----------
-    None
-    """
+        Parameters
+        ----------
+        table_meta: a dict describe meta data of a database.
+
+        Returns
+        ----------
+        None
+        """
         self.table_meta = table_meta.copy()
         self.all_columns = {}
         for table_id, table in enumerate(self.table_meta['tables']):
@@ -56,32 +56,32 @@ More information available here: https://hdi-project.github.io/MetaData.json/ind
                 }
 
     def get_type(self, column_name):
-    """
-    Get type of a column
-    
-    Parameters
-    ----------
-    column_name: the column
+        """
+        Get type of a column
 
-    Returns
-    ----------
-    type: the type of the data in the column
-    """
+        Parameters
+        ----------
+        column_name: the column
+
+        Returns
+        ----------
+        type: the type of the data in the column
+        """
         return self.all_columns[column_name]['type']
 
     def set_type(self, column_name, dtype):
-    """
-    Set the type of a column.
-    
-    Parameters
-    ----------
-    column_name: the column this operation applies to
-    dtype: the data type to change the column to
-    
-    Returns
-    ----------
-    None
-    """
+        """
+        Set the type of a column.
+
+        Parameters
+        ----------
+        column_name: the column this operation applies to
+        dtype: the data type to change the column to
+
+        Returns
+        ----------
+        None
+        """
         self.all_columns[column_name]['type'] = dtype
         column_data = self.all_columns[column_name]
 
@@ -103,76 +103,76 @@ More information available here: https://hdi-project.github.io/MetaData.json/ind
                 'fields'][column_data['field_id']]['type'] = dtype
 
     def get_property(self, column_name, property_name):
-    """
-    Get column property.
-    
-    Parameters
-    ----------
-    column_name: the column this operation applies to
-    property_name: the property wanted
-    
-    Returns
-    ----------
-    propery: the property
-    """
+        """
+        Get column property.
+
+        Parameters
+        ----------
+        column_name: the column this operation applies to
+        property_name: the property wanted
+
+        Returns
+        ----------
+        propery: the property
+        """
         return self.all_columns[column_name]['properties'][property_name]
 
     def get_columns(self):
-    """
-    Get all column names.
-    
-    Parameters
-    ----------
-    None
-    
-    Returns
-    ----------
-    names: all the column names
-    """
+        """
+        Get all column names.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        ----------
+        names: all the column names
+        """
         return self.all_columns.keys()
 
     def copy(self):
-    """
-    Make a deep copy of self
-    
-    Parameters
-    ----------
-    None
-    
-    Returns
-    ----------
-    copy: a deep copy of self
-    """
+        """
+        Make a deep copy of self
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        ----------
+        copy: a deep copy of self
+        """
         return copy.deepcopy(self)
 
     def to_json(self):
-    """
-    Convert to json str
-    
-    Parameters
-    ----------
-    None
-    
-    Returns
-    ----------
-    str: JSON str of self
+        """
+        Convert to json str
 
-    """
+        Parameters
+        ----------
+        None
+
+        Returns
+        ----------
+        str: JSON str of self
+
+        """
         return json.dumps(self.table_meta)
 
     def from_json(json_data):
-    """
-    Load from json str.
-    
-    Parameters
-    ----------
-    json_data: JSON str
+        """
+        Load from json str.
 
-    Returns
-    ----------
-    table_meta: a TableMeta object
+        Parameters
+        ----------
+        json_data: JSON str
 
-    """
+        Returns
+        ----------
+        table_meta: a TableMeta object
+
+        """
         return TableMeta(json.loads(json_data))
 
     def __eq__(self, other):

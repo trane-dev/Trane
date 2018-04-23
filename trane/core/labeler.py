@@ -6,9 +6,10 @@ from .prediction_problem_saver import prediction_problems_from_json_file
 
 __all__ = ['Labeler']
 
+
 class Labeler():
     """
-    Object for executing prediction problems on data in order 
+    Object for executing prediction problems on data in order
     to generate labels for many prediction problems.
     The execute method performs the labelling operation.
     """
@@ -18,23 +19,22 @@ class Labeler():
 
     def execute(self, entity_to_data_and_cutoff_dict,
                 json_prediction_problems_filename):
-    """
-    Generate the labels.
+        """
+        Generate the labels.
 
-    Parameters
-    ----------
-    entity_to_data_and_cutoff_dict: mapping from 
-        unique entities to their related data and cutoff times
-    json_prediction_problems_filename: filename to read
-        prediction problems from, structured in JSON.
-    
-    Returns
-    ----------
-    dfs: a list of DataFrames. One dataframe for each problem.
-        Each dataframe contains entities, cutoff times and labels.
+        Parameters
+        ----------
+        entity_to_data_and_cutoff_dict: mapping from
+            unique entities to their related data and cutoff times
+        json_prediction_problems_filename: filename to read
+            prediction problems from, structured in JSON.
 
-    """
+        Returns
+        ----------
+        dfs: a list of DataFrames. One dataframe for each problem.
+            Each dataframe contains entities, cutoff times and labels.
 
+        """
 
         prediction_problems, table_meta, entity_id_column, label_generating_column, time_column = \
             prediction_problems_from_json_file(

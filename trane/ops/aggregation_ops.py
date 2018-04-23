@@ -8,28 +8,29 @@ __all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
 
 class AggregationOpBase(OpBase):
 
-"""
-Super class for all Aggregation Operations. The class is empty and is currently a 
-placeholder for any AggregationOpBase level methods we want to make.
+    """
+    Super class for all Aggregation Operations. The class is empty and is currently a
+    placeholder for any AggregationOpBase level methods we want to make.
 
-Aggregation operations represent the 4th and final operation
-in a prediction problem. They aggregate data from many rows into 
-a single row. The final output of the problem is the value in that row
-at the label generating column. Aggregation operations are defined as classes
-that inherit the AggregationOpBase class and instantiate the execute method.
+    Aggregation operations represent the 4th and final operation
+    in a prediction problem. They aggregate data from many rows into
+    a single row. The final output of the problem is the value in that row
+    at the label generating column. Aggregation operations are defined as classes
+    that inherit the AggregationOpBase class and instantiate the execute method.
 
-Make Your Own
-----------  
-Simply make a new class that follows the requirements below and issue a pull request.
+    Make Your Own
+    ----------
+    Simply make a new class that follows the requirements below and issue a pull request.
 
-Requirements
-----------
-REQUIRED_PARAMETERS: the hyper parameters needed for the operation
-IOTYPES: the input and output types of the operation using TableMeta types
-execute method: transform dataframe according to the operation and return
-  the new dataframe
+    Requirements
+    ----------
+    REQUIRED_PARAMETERS: the hyper parameters needed for the operation
+    IOTYPES: the input and output types of the operation using TableMeta types
+    execute method: transform dataframe according to the operation and return
+      the new dataframe
 
-"""
+    """
+
 
 class FirstAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []

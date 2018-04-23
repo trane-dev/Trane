@@ -9,18 +9,18 @@ __all__ = ['df_group_by_entity_id', 'csv_to_df', 'parse_data']
 
 
 def df_group_by_entity_id(dataframe, entity_id_column_name):
-"""
-Convert a dataframe with an entity_id column to a dictionary mapping entity id's to their relevant data.
+    """
+    Convert a dataframe with an entity_id column to a dictionary mapping entity id's to their relevant data.
 
-Parameters
-----------
-dataframe: the data
-entity_id_column: the column name with entity id's
+    Parameters
+    ----------
+    dataframe: the data
+    entity_id_column: the column name with entity id's
 
-Returns
-----------
-dict: Mapping from entity id's to a dataframe containing only that entity id's data.
-"""
+    Returns
+    ----------
+    dict: Mapping from entity id's to a dataframe containing only that entity id's data.
+    """
 
     df_groupby = dataframe.groupby(entity_id_column_name)
     entities = df_groupby.groups.keys()
@@ -29,18 +29,18 @@ dict: Mapping from entity id's to a dataframe containing only that entity id's d
 
 
 def csv_to_df(csv_filenames, header=True):
-"""
-Convert csv's to a dataframe
+    """
+    Convert csv's to a dataframe
 
-Parameters
-----------
-csv_filenames: a list of csv filepaths
-header: does the data have a header/column names at the top of the file?
+    Parameters
+    ----------
+    csv_filenames: a list of csv filepaths
+    header: does the data have a header/column names at the top of the file?
 
-Returns
-----------
-dataframe: a merge of all the csv's
-"""
+    Returns
+    ----------
+    dataframe: a merge of all the csv's
+    """
     if not header:
         dataframes = [pd.read_csv(file_path, header=None)
                       for file_path in csv_filenames]
@@ -54,18 +54,18 @@ dataframe: a merge of all the csv's
 
 
 def parse_data(dataframe, table_meta):
-"""
-Convert columns specified as time in the table_meta from str objects to datetime objects.
+    """
+    Convert columns specified as time in the table_meta from str objects to datetime objects.
 
-Parameters
-----------
-dataframe: the data
-table_meta: a TableMeta object specifying meta information about the data
+    Parameters
+    ----------
+    dataframe: the data
+    table_meta: a TableMeta object specifying meta information about the data
 
-Returns
-----------
-dataframe: with time columns converted from str to datetime.
-"""
+    Returns
+    ----------
+    dataframe: with time columns converted from str to datetime.
+    """
 
     columns = table_meta.get_columns()
     for column in columns:

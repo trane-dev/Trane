@@ -7,27 +7,27 @@ __all__ = ["FilterOpBase", "FILTER_OPS"] + FILTER_OPS
 
 
 class FilterOpBase(OpBase):
-"""
-Super class for all Filter Operations. The class is empty and is currently a 
-placeholder for any FilterOpBase level methods we want to make.
+    """
+    Super class for all Filter Operations. The class is empty and is currently a
+    placeholder for any FilterOpBase level methods we want to make.
 
-Filter operations represent the 1st operation
-in a prediction problem. They filter out rows
-based on values in the filter_column. Filter operations are defined as classes
-that inherit the FilterOpBase class and instantiate the execute method.
+    Filter operations represent the 1st operation
+    in a prediction problem. They filter out rows
+    based on values in the filter_column. Filter operations are defined as classes
+    that inherit the FilterOpBase class and instantiate the execute method.
 
-Make Your Own
-----------  
-Simply make a new class that follows the requirements below and issue a pull request.
+    Make Your Own
+    ----------
+    Simply make a new class that follows the requirements below and issue a pull request.
 
-Requirements
-----------
-REQUIRED_PARAMETERS: the hyper parameters needed for the operation
-IOTYPES: the input and output types of the operation using TableMeta types
-execute method: transform dataframe according to the operation and return
-  the new dataframe
+    Requirements
+    ----------
+    REQUIRED_PARAMETERS: the hyper parameters needed for the operation
+    IOTYPES: the input and output types of the operation using TableMeta types
+    execute method: transform dataframe according to the operation and return
+      the new dataframe
 
-"""
+    """
 
 
 class AllFilterOp(FilterOpBase):

@@ -8,32 +8,33 @@ __all__ = ["CutoffTimeBase", "ConstantCutoffTime", "DynamicCutoffTime"]
 
 
 class CutoffTimeBase:
-"""
-Base class that all cutoff time strategies inherit.
+    """
+    Base class that all cutoff time strategies inherit.
 
-Make Your Own
-----------  
-Simply make a new class that follows the requirements below and issue a pull request.
+    Make Your Own
+    ----------
+    Simply make a new class that follows the requirements below and issue a pull request.
 
-Requirements
-----------
-get_cutoff: function that returns a training cutoff time and a label cutoff time.
-"""
+    Requirements
+    ----------
+    get_cutoff: function that returns a training cutoff time and a label cutoff time.
+    """
+
     def __init__(self):
         pass
 
     def generate_cutoffs(self, entity_to_data_dict, time_column):
-    """
+        """
 
-    Parameters
-    ----------
-    entity_to_data_dict: mapping from entities to their data
+        Parameters
+        ----------
+        entity_to_data_dict: mapping from entities to their data
 
-    Returns
-    ----------
-    entity_to_data_and_cutoff_dict: mapping from entities to a tuple of their 
-        data and cutoff time
-    """
+        Returns
+        ----------
+        entity_to_data_and_cutoff_dict: mapping from entities to a tuple of their
+            data and cutoff time
+        """
         entity_to_data_and_cutoff_dict = {}
         for entity in entity_to_data_dict:
             entity_data = entity_to_data_dict[entity]
@@ -48,9 +49,10 @@ get_cutoff: function that returns a training cutoff time and a label cutoff time
 
 
 class ConstantCutoffTime(CutoffTimeBase):
-"""
-Apply a constant cutoff time across all entities
-"""
+    """
+    Apply a constant cutoff time across all entities
+    """
+
     def __init__(self, training_cutoff, label_cutoff):
         self.training_cutoff = training_cutoff
         self.label_cutoff = label_cutoff
@@ -60,14 +62,14 @@ Apply a constant cutoff time across all entities
 
 
 class DynamicCutoffTime(CutoffTimeBase):
-"""
-DynamicCutoffTime uses 1 - training_label_ratio - test_label_ratio 
-fraction of the data to generate training features.
-An additional training_label_ratio fraction of the data is
-used to label the training examples (1 - test_label_ratio)
-An additional test_label_ratio fraction of the data is used to label
-the test examples. (1 or all the data)
-"""
+    """
+    DynamicCutoffTime uses 1 - training_label_ratio - test_label_ratio
+    fraction of the data to generate training features.
+    An additional training_label_ratio fraction of the data is
+    used to label the training examples (1 - test_label_ratio)
+    An additional test_label_ratio fraction of the data is used to label
+    the test examples. (1 or all the data)
+    """
 
     def __init__(self, training_label_ratio=.2, test_label_ratio=.2):
         self.training_label_ratio = training_label_ratio

@@ -9,15 +9,18 @@ __all__ = ["op_to_json", "op_from_json"]
 
 
 def op_to_json(op):
-    """Convert a operation object to a json string.
+"""
+Convert an operation object to a JSON string.
 
-    args:
-        op: a subclass of OpBase
+Parameters
+----------
+op: an operation object (subclass of OpBase)
 
-    returns:
-        str: a json string of op
+Returns
+----------
+str: a JSON string representing the operation
 
-    """
+"""
     return json.dumps({
         "OpType": op.__class__.__bases__[-1].__name__,
         "SubopType": type(op).__name__,
@@ -28,15 +31,19 @@ def op_to_json(op):
 
 
 def op_from_json(json_data):
-    """Convert a operation json string to a operation object.
+"""
+Convert an operation from a JSON string 
+to an operation object.
 
-    args:
-        json_data: a json string of op
+Parameters
+----------
+json_data: the JSON string
 
-    returns:
-        object: subclass of OpBase
+Returns
+----------
+op: the operation object
 
-    """
+"""
     data = json.loads(json_data)
     op = globals()[data['SubopType']](data['column_name'])
     op.input_type, op.output_type = data['iotype']

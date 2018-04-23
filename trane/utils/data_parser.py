@@ -9,31 +9,38 @@ __all__ = ['df_group_by_entity_id', 'csv_to_df', 'parse_data']
 
 
 def df_group_by_entity_id(dataframe, entity_id_column_name):
-    """Convert a dataframe with an entity_id column to a dictionary mapping entity id's to their relevant data.
+"""
+Convert a dataframe with an entity_id column to a dictionary mapping entity id's to their relevant data.
 
-    Args:
-        (Dataframe): Dataframe containing all the data
-        (String) entity_id_column_name: the column name with entity id's
+Parameters
+----------
+dataframe: the data
+entity_id_column: the column name with entity id's
 
-    Returns:
-        (Dict): Mapping from entity id's to a dataframe containing only that entity id's data.
+Returns
+----------
+dict: Mapping from entity id's to a dataframe containing only that entity id's data.
+"""
 
-    """
     df_groupby = dataframe.groupby(entity_id_column_name)
     entities = df_groupby.groups.keys()
     entity_id_to_df = [(key, df_groupby.get_group(key)) for key in entities]
     return dict(entity_id_to_df)
 
 
-def csv_to_df(csv_filenames, output_filename=None, header=True):
-    """Args:
-        (List)csv_filenames: A list of the paths to the csv files you want to load
-        (Boolean)header: are there headers to the data columns?
+def csv_to_df(csv_filenames, header=True):
+"""
+Convert csv's to a dataframe
 
-    Returns:
-        Dataframe: a single de-normalized dataframe structured from all the input csv's.
+Parameters
+----------
+csv_filenames: a list of csv filepaths
+header: does the data have a header/column names at the top of the file?
 
-    """
+Returns
+----------
+dataframe: a merge of all the csv's
+"""
     if not header:
         dataframes = [pd.read_csv(file_path, header=None)
                       for file_path in csv_filenames]
@@ -42,21 +49,23 @@ def csv_to_df(csv_filenames, output_filename=None, header=True):
 
     merged_df = reduce((lambda left_frame, right_frame: pd.merge(
         left_frame, right_frame, how='outer')), dataframes)
-    if output_filename is not None:
-        merged_df.to_csv(output_filename)
+
     return merged_df
 
 
 def parse_data(dataframe, table_meta):
-    """convert column from str to correct object
+"""
+Convert columns specified as time in the table_meta from str objects to datetime objects.
 
-    Args:
-        (DataFrame)data_frame
-        (TableMeta)table_meta
+Parameters
+----------
+dataframe: the data
+table_meta: a TableMeta object specifying meta information about the data
 
-    Returns:
-        Dataframe
-    """
+Returns
+----------
+dataframe: with time columns converted from str to datetime.
+"""
 
     columns = table_meta.get_columns()
     for column in columns:

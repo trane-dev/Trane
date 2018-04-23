@@ -12,7 +12,8 @@ with open('HISTORY.md') as history_file:
     history = history_file.read()
 
 requirements = [
-    'pandas>=0.21.0',
+    'pandas;python_version>="3.5"',
+    'pandas<0.21;python_version<"3.5"',
     'numpy>=1.13.0',
     'python_dateutil>=2.6.0',
     'scipy>=1.0.0'

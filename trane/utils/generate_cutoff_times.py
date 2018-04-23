@@ -3,7 +3,6 @@
 # The only function that should change across classes is
 # apply_cutoff_strategy()
 
-import numpy as np
 
 __all__ = ["CutoffTimeBase", "ConstantCutoffTime", "DynamicCutoffTime"]
 
@@ -68,7 +67,3 @@ class DynamicCutoffTime(CutoffTimeBase):
         label_cutoff_index = int((1 - self.test_label_ratio) * N)
 
         return timestamps.iloc[training_cutoff_index], timestamps.iloc[label_cutoff_index]
-
-
-
-

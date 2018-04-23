@@ -37,7 +37,7 @@ class LastAggregationOp(AggregationOpBase):
 class LMFAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
     IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-               (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
+               (TM.TYPE_INTEGER, TM.TYPE_INTEGER)]
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()

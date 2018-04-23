@@ -3,6 +3,7 @@ import logging
 from collections import Counter
 
 import numpy as np
+import pandas as pd
 from scipy import stats
 
 from ..ops.op_saver import op_from_json, op_to_json
@@ -56,37 +57,25 @@ class PredictionProblem:
             op.set_hyper_parameter(hyper_parameter)
 
     def generate_and_set_hyper_parameters(self, dataframe, label_generating_column,
-                                          filter_column, hyper_parameter_memo_table):
+                                          filter_column, entity_id_column):
         hyper_parameters = []
 
+        dataframe = dataframe.copy()
         FRACTION_OF_DATA_TARGET = 0.8
-        column_data = dataframe[filter_column]
-        unique_filter_values = set(column_data)
         operation = self.operations[0]
-        operation_hash = hash(operation)
-        if operation_hash in hyper_parameter_memo_table:
-            value = hyper_parameter_memo_table[operation_hash]
-        else:
-            value = select_by_remaining(
-                FRACTION_OF_DATA_TARGET, unique_filter_values,
-                dataframe, operation
-            )
-            hyper_parameter_memo_table[operation_hash] = value
+
+        value = select_by_remaining(
+            FRACTION_OF_DATA_TARGET,
+            dataframe, operation, filter_column
+        )
 
         hyper_parameters.append(value)
 
         for operation in self.operations[1:]:
-            operation_hash = hash(operation)
-            if operation_hash in hyper_parameter_memo_table:
-                value = hyper_parameter_memo_table[operation_hash]
-            else:
-                column_data = dataframe[label_generating_column]
-                unique_parameter_values = set(column_data)
-                value = select_by_diversity(unique_parameter_values,
-                                            dataframe, operation,
-                                            label_generating_column)
-                hyper_parameter_memo_table[operation_hash] = value
-
+            value, dataframe = select_by_diversity(
+                dataframe, operation,
+                label_generating_column,
+                entity_id_column)
             hyper_parameters.append(value)
 
         self.set_hyper_parameters(hyper_parameters)
@@ -205,11 +194,12 @@ class PredictionProblem:
         return False
 
 
-def select_by_remaining(fraction_of_data_target,
-                        unique_filter_values, dataframe, operation):
+def select_by_remaining(fraction_of_data_target, dataframe, operation,
+                        filter_column):
     if len(operation.REQUIRED_PARAMETERS) == 0:
         return None
     else:
+        unique_filter_values = set(dataframe[filter_column])
         best = 1
         best_filter_value = 0
         for unique_filter_value in unique_filter_values:
@@ -229,24 +219,33 @@ def select_by_remaining(fraction_of_data_target,
         return best_filter_value
 
 
-def select_by_diversity(unique_parameter_values, dataframe,
-                        operation, label_generating_column):
+def select_by_diversity(dataframe, operation, label_generating_column,
+                        entity_id_column):
+    df = dataframe.copy()
+
     if len(operation.REQUIRED_PARAMETERS) == 0:
-        return None
+        return None, dataframe
     else:
+        unique_parameter_values = set(dataframe[label_generating_column])
         best = 0
         best_parameter_value = 0
-        for unique_parameter_value in unique_parameter_values:
 
+        for unique_parameter_value in unique_parameter_values:
+            output_df = pd.DataFrame(columns=list(df.columns.values))
             operation.set_hyper_parameter(unique_parameter_value)
 
-            resulting_df = operation.execute(dataframe)
+            for unique_entity in set(df[entity_id_column]):
+                execution_df = operation.execute(df.loc[df[entity_id_column] == unique_entity])
+                output_df = output_df.append(execution_df)
+
             entropy = entropy_of_a_list(
-                list(resulting_df[label_generating_column]))
+                list(output_df[label_generating_column]))
             if entropy > best:
                 best = entropy
                 best_parameter_value = unique_parameter_value
-        return best_parameter_value
+                pertinent_df = output_df
+
+        return best_parameter_value, pertinent_df
 
 
 def entropy_of_a_list(values):

@@ -17,7 +17,6 @@ class PredictionProblemGenerator:
         self.label_generating_column = label_generating_column
         self.time_column = time_column
         self.filter_column = filter_column
-        self.hyper_parameter_memo_table = {}
         self.ensure_valid_inputs()
 
     def generator(self, dataframe):
@@ -67,7 +66,7 @@ class PredictionProblemGenerator:
             prediction_problem.generate_and_set_hyper_parameters(dataframe,
                                                                  self.label_generating_column,
                                                                  self.filter_column,
-                                                                 self.hyper_parameter_memo_table)
+                                                                 self.entity_id_column)
 
             logging.debug(
                 "Prediction Problem Generated: {} \n".format(prediction_problem))

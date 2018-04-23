@@ -6,23 +6,29 @@ from .prediction_problem import PredictionProblem
 __all__ = ["prediction_problems_to_json_file",
            "prediction_problems_from_json_file"]
 
-
 def prediction_problems_to_json_file(prediction_problems, table_meta,
                                      entity_id_column, label_generating_column, time_column, filename):
-    """Convert a list of prediction problems to a JSON representation and store it in a file named filename.
-
-    args:
-        prediction_problems: a list of PredictionProblem
-        table_meta: TableMeta
-        entity_id_column: str
-        label_generating_column: str
-        time_column: str
-        filename: str, ending in .json
-
-    returns:
-        None
-
     """
+    Convert a list of prediction problems to a JSON file
+
+    Parameters
+    ----------
+    prediction_problems: a list of Prediction Problems.
+    table_meta: TableMeta object. Contains 
+        meta information about the data
+    entity_id_column: column name of 
+        the column containing entities in the data
+    label_generating_column: column name of the
+        column of interest in the data
+    time_column: column name of the column
+        containing time information in the data
+    filename: name of the file to write to. must end in .json
+    
+    Returns
+    ----------
+    None
+    """
+
     prediction_problems_json = [prob.to_json() for prob in prediction_problems]
 
     json_str = json.dumps({
@@ -38,18 +44,23 @@ def prediction_problems_to_json_file(prediction_problems, table_meta,
 
 
 def prediction_problems_from_json_file(filename):
-    """Read json data from a file and convert it to a list of prediction problems and extra information.
+    """Read Prediction Problems from a JSON structured file
+     
+    Parameters
+    ----------
+    filename: filename to read problems from.
 
-    args:
-        filename: a string, ending in .json
-
-    returns:
-        list of PredictionProblem
-        TableMeta: tablemeta
-        str: entity_id_column
-        str: label_generating_column
-        str: time_column
-
+    Returns
+    ----------
+    prediction_problems: a list of Prediction Problems.
+    table_meta: TableMeta object. Contains 
+        meta information about the data
+    entity_id_column: column name of 
+        the column containing entities in the data
+    label_generating_column: column name of the
+        column of interest in the data
+    time_column: column name of the column
+        containing time information in the data
     """
     with open(filename) as f:
         json_data = f.read()

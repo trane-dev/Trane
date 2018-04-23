@@ -8,18 +8,32 @@ __all__ = ["CutoffTimeBase", "ConstantCutoffTime", "DynamicCutoffTime"]
 
 
 class CutoffTimeBase:
+"""
+Base class that all cutoff time strategies inherit.
 
+Make Your Own
+----------  
+Simply make a new class that follows the requirements below and issue a pull request.
+
+Requirements
+----------
+get_cutoff: function that returns a training cutoff time and a label cutoff time.
+"""
     def __init__(self):
         pass
-    """Args:
-        entity_to_data_dict(Dict): mapping from entities to their data
-
-    Returns:
-        entity_to_data_and_cutoff_dict(Dict): mapping from entities to a tuple of data and cutoff time
-
-    """
 
     def generate_cutoffs(self, entity_to_data_dict, time_column):
+    """
+
+    Parameters
+    ----------
+    entity_to_data_dict: mapping from entities to their data
+
+    Returns
+    ----------
+    entity_to_data_and_cutoff_dict: mapping from entities to a tuple of their 
+        data and cutoff time
+    """
         entity_to_data_and_cutoff_dict = {}
         for entity in entity_to_data_dict:
             entity_data = entity_to_data_dict[entity]
@@ -34,7 +48,9 @@ class CutoffTimeBase:
 
 
 class ConstantCutoffTime(CutoffTimeBase):
-
+"""
+Apply a constant cutoff time across all entities
+"""
     def __init__(self, training_cutoff, label_cutoff):
         self.training_cutoff = training_cutoff
         self.label_cutoff = label_cutoff
@@ -44,16 +60,16 @@ class ConstantCutoffTime(CutoffTimeBase):
 
 
 class DynamicCutoffTime(CutoffTimeBase):
-    """
-    DynamicCutoffTime use (1 - training_label_ratio - test_label_ratio) * N records
-    to generate features.
-    use the following training_label_ratio * N records for training labels.
-    use the last test_label_ratio * N records for testing labels.
-    """
+"""
+DynamicCutoffTime uses 1 - training_label_ratio - test_label_ratio 
+fraction of the data to generate training features.
+An additional training_label_ratio fraction of the data is
+used to label the training examples (1 - test_label_ratio)
+An additional test_label_ratio fraction of the data is used to label
+the test examples. (1 or all the data)
+"""
 
     def __init__(self, training_label_ratio=.2, test_label_ratio=.2):
-        assert training_label_ratio + test_label_ratio < 1
-        assert training_label_ratio > 0 and test_label_ratio > 0
         self.training_label_ratio = training_label_ratio
         self.test_label_ratio = test_label_ratio
 

@@ -14,18 +14,49 @@ __all__ = ['PredictionProblem']
 
 class PredictionProblem:
 
-    """Prediction Problem is made up of a list of Operations. The list of operations
-    delineate the order the operations will be applied in.
-
+    """
+    Prediction Problem is made up of a series of Operations. It also contains
+    information about the types expected as the input and output of
+    each operation.
     """
 
     def __init__(self, operations):
+    """
+    Parameters
+    ----------
+    operations: list of Operations of type op_base
+
+    Returns
+    ----------
+    None
+    """
         self.operations = operations
         self.filter_column_order_of_types = None
         self.label_generating_column_order_of_types = None
 
     def is_valid_prediction_problem(
             self, table_meta, filter_column, label_generating_column):
+    """
+    Checks that a prediction problem is valid. Ensures the input output
+    types of operations match.
+
+    Parameters
+    ----------
+    table_meta: TableMeta object. Contains 
+        meta information about the data
+    filter_column: column name of the column
+        to be filtered over
+    label_generating_column: column name of the
+        column of interest in the data
+    
+    Returns
+    ----------
+    is_valid: True/False if problem is valid
+    filter_column_order_of_types: a list containing the types expected in the
+        sequence of operations on the filter column
+    label_generating_column_order_of_types: a list containing the types expected in the
+        sequence of operations on the label generating column
+    """
         temp_meta = table_meta.copy()
 
         filter_column_order_of_types = [table_meta.get_type(filter_column)]
@@ -52,12 +83,40 @@ class PredictionProblem:
                 label_generating_column_order_of_types)
 
     def set_hyper_parameters(self, hyper_parameters):
+    """
+
+    Parameters
+    ----------
+    hyper_parameters: hyper parameter settings 
+        to be set on the operations
+
+    Returns
+    ----------
+    None
+    """
         for idx, op in enumerate(self.operations):
             hyper_parameter = hyper_parameters[idx]
             op.set_hyper_parameter(hyper_parameter)
 
     def generate_and_set_hyper_parameters(self, dataframe, label_generating_column,
                                           filter_column, entity_id_column):
+    """
+    Generate then set hyper parameters for the operations in this prediction problem.
+
+    Parameters
+    ----------
+    dataframe: data
+    label_generating_column: column name of the
+        column of interest in the data
+    filter_column: column name of the column
+        to be filtered over
+    entity_id_column: column name of 
+        the column containing entities in the data
+    
+    Returns
+    ----------
+    hyper_parameters: list of hyper parameter settings
+    """
         hyper_parameters = []
 
         dataframe = dataframe.copy()
@@ -84,19 +143,38 @@ class PredictionProblem:
     def execute(self, dataframe, time_column, label_cutoff_time,
                 filter_column_order_of_types,
                 label_generating_column_order_of_types):
-        """This function executes all the operations on the dataframe and returns the output. The output
-                should be structured as a single label/value per the Trane documentation.
-                See paper: "What would a data scientist ask? Automatically formulating and solving predicton
-                problems."
+    """
+    This function executes all the operations on the dataframe 
+    and returns the output. The output is two values. The
+    first value is the result of executing on all data before 
+    the label_cutoff_time. The second value is the result
+    of executing on all data, including that after the 
+    label_cutoff_time.
 
-        Args:
-                (Pandas DataFrame): the dataframe containing the data we wish to analyze.
+    See paper:
+    "What would a data scientist ask? Automatically 
+    formulating and solving predicton problems."
 
-        Returns:
-                (Boolean/Float): The Label/Value of the prediction problem's formulation
-                when applied to the data.
+    Parameters
+    ----------
+    dataframe: data to be executed on
+    time_column: column name of the column
+        containing time information in the data
+    label_cutoff_time: the time at which the data
+        is segmented. data after the time is used for 
+        labels during test. data before the time is used
+        for labels during training.
+    filter_column_order_of_types: a list containing the types expected in the
+        sequence of operations on the filter column
+    label_generating_column_order_of_types: a list containing the types expected in the
+        sequence of operations on the label generating column
 
-        """
+    Returns
+    ----------
+    pre_label_cutoff_time_execution_result: label for training time segment
+    all_data_execution_result: label for testing (all time) time segment
+
+    """
         dataframe = dataframe.sort_values(by=time_column)
         dataframe = dataframe.copy()
 
@@ -153,13 +231,18 @@ class PredictionProblem:
         return pre_label_cutoff_time_execution_result, all_data_execution_result
 
     def __str__(self):
-        """Args:
-                None
+    """
+    This function converts Prediction Problems to English.
 
-        Returns:
-                A natural language text describing the prediction problem.
+    Parameters
+    ----------
+    None
 
-        """
+    Returns
+    ----------
+    description: natural language description
+
+    """
         description = ""
         last_op_idx = len(self.operations) - 1
         for idx, operation in enumerate(self.operations):
@@ -169,6 +252,18 @@ class PredictionProblem:
         return description
 
     def to_json(self):
+    """
+    This function converts Prediction Problems to JSON
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    ----------
+    json: JSON representation of the Prediction Problem.
+
+    """
         return json.dumps(
             {"operations": [json.loads(op_to_json(op)) for op in self.operations],
              "filter_column_order_of_types":
@@ -177,6 +272,18 @@ class PredictionProblem:
              self.label_generating_column_order_of_types})
 
     def from_json(json_data):
+    """
+    This function converts a JSON snippet
+    to a prediction problem
+
+    Parameters
+    ----------
+    json_data: JSON code containing the prediction problem.
+
+    Returns
+    ----------
+    problem: Prediction Problem
+    """
         data = json.loads(json_data)
         operations = [op_from_json(json.dumps(item))
                       for item in data['operations']]
@@ -196,6 +303,24 @@ class PredictionProblem:
 
 def select_by_remaining(fraction_of_data_target, dataframe, operation,
                         filter_column):
+    """
+    This function selects a parameter setting for the 
+    filter operation. The parameter setting that nearest filters 
+    fraction_of_data_target data is chosen.
+
+    Parameters
+    ----------
+    fraction_of_data_target: The fraction of the filter operation
+        aims to keep in the dataset. 
+    dataframe: the relevant data
+    operation: the filter operation
+    filter_column: the column name of the column intended to be filtered over
+
+    Returns
+    ----------
+    best_filter_value: parameter setting for the filter operation.
+    """
+
     if len(operation.REQUIRED_PARAMETERS) == 0:
         return None
     else:
@@ -221,6 +346,28 @@ def select_by_remaining(fraction_of_data_target, dataframe, operation,
 
 def select_by_diversity(dataframe, operation, label_generating_column,
                         entity_id_column):
+    """
+    This function selects a parameter setting for the 
+    operations, excluding the filter operation. 
+    The parameter setting that maximizes the
+    entropy of the output data is chosen.
+
+    Parameters
+    ----------
+    dataframe: the relevant data
+    operation: the filter operation
+    label_generating_column: column name of the
+        column of interest in the data
+    entity_id_column: column name of 
+        the column containing entities in the data
+    
+    Returns
+    ----------
+    best_parameter_value: parameter setting for the operation.
+    pertinent_df: the dataframe after having the operation applied
+        with the chosen parameter value.
+    """
+
     df = dataframe.copy()
 
     if len(operation.REQUIRED_PARAMETERS) == 0:
@@ -249,6 +396,17 @@ def select_by_diversity(dataframe, operation, label_generating_column,
 
 
 def entropy_of_a_list(values):
+"""
+Calculate the entropy (information) of the list.
+
+Parameters
+----------
+values: list of values
+
+Returns
+----------
+entropy: the entropy or information in the list.
+"""
     counts = Counter(values).values()
     total = float(sum(counts))
     probabilities = [val / total for val in counts]
@@ -257,6 +415,18 @@ def entropy_of_a_list(values):
 
 
 def check_type(expected_type, actual_data):
+"""
+Asserts that the expected type matches the actual data's type.
+
+Parameters
+----------
+expected_type: the expected type of the data in TableMeta format
+actual_data: a piece of the actual data
+
+Returns
+----------
+None
+"""
     logging.debug(
         "Beginning check type. Expected type is: {}, \
         Actual data is: {}, Actual type is: {}".format(
@@ -297,4 +467,4 @@ def check_type(expected_type, actual_data):
         assert(type(actual_data) in allowed_types)
 
     else:
-        logging.critical('Check_type function received an unexpected type.')
+        logging.critical('check_type function received an unexpected type.')

@@ -8,10 +8,29 @@ __all__ = ['PredictionProblemGenerator']
 
 
 class PredictionProblemGenerator:
-
+    """
+    Object for generating prediction problems on data.
+    """
     def __init__(self, table_meta, entity_id_column,
                  label_generating_column, time_column, filter_column):
+    """
+    Parameters
+    ----------
+    table_meta: TableMeta object. Contains 
+        meta information about the data
+    entity_id_column: column name of 
+        the column containing entities in the data
+    label_generating_column: column name of the
+        column of interest in the data
+    time_column: column name of the column
+        containing time information in the data
+    filter_column: column name of the column
+        to be filtered over
 
+    Returns
+    ----------
+    None
+    """
         self.table_meta = table_meta
         self.entity_id_column = entity_id_column
         self.label_generating_column = label_generating_column
@@ -20,11 +39,18 @@ class PredictionProblemGenerator:
         self.ensure_valid_inputs()
 
     def generator(self, dataframe):
-        """Generate prediction problems.
+    """
+    Generate the prediction problems. The prediction problems operations
+    hyper parameters are also set.
 
-        yields:
-            PredictionProblem
-        """
+    Parameters
+    ----------
+    dataframe: the data to be parsed
+    
+    Yields
+    ----------
+    the function yields Prediction Problem objects.
+    """
         def iter_over_ops():
             for aggregation_op_name in aggregation_ops.AGGREGATION_OPS:
                 for transformation_op_name in transformation_ops.TRANSFORMATION_OPS:

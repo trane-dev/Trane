@@ -8,33 +8,36 @@ __all__ = ['generate_nl_description']
 def generate_nl_description(
         problems, meta, entity_id_column, label_generating_column,
         time_column, cutoff_strategy):
-    """This function generates natural language description
-    for prediction problems.
+"""
+This function generates natural language description
+for prediction problems.
 
-    description := For each [entity_id_column], predict
-        [dataop_description] [cutoff_description] [filter_decription]
+description := For each [entity_id_column], predict
+    [dataop_description] [cutoff_description] [filter_decription]
 
-    dataop_description :=
-        the number of records if CountAggregationOp
-        the [aggop] [transop] [rowop]
+dataop_description :=
+    the number of records if CountAggregationOp
+    the [aggop] [transop] [rowop]
 
-    cutoff_description := after [time_column](threshold)
+cutoff_description := after [time_column](threshold)
 
-    filter_description :=
-        [empty] if AllFilterOp
-        with [filter_column] [op] (threshold)
+filter_description :=
+    [empty] if AllFilterOp
+    with [filter_column] [op] (threshold)
 
-    Args:
-        problems: list of PredictionProblem
-        meta: TableMeta
-        entity_id_column: str
-        label_generating_column: str
-        time_column:str
+Parameters
+----------
+problems: list of PredictionProblem
+meta: TableMeta
+entity_id_column: str
+label_generating_column: str
+time_column:str
 
-    Returns:
-        list of str: natural language descriptions
+Returns
+----------
+list of str: natural language descriptions
 
-    """
+"""
 
     def description(prob):
         return "For each {col}, predict{dataop_des}{filter_des}{cutoff_des}.".format(

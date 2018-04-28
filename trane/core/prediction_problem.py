@@ -1,9 +1,10 @@
 import json
 import logging
+import random
+import time
 from collections import Counter
 
 import numpy as np
-import pandas as pd
 from scipy import stats
 
 from ..ops.op_saver import op_from_json, op_to_json
@@ -57,6 +58,8 @@ class PredictionProblem:
         label_generating_column_order_of_types: a list containing the types expected in the
             sequence of operations on the label generating column
         """
+        logging.debug("Performing is_valid_prediction_problem...")
+
         temp_meta = table_meta.copy()
 
         filter_column_order_of_types = [table_meta.get_type(filter_column)]
@@ -117,6 +120,8 @@ class PredictionProblem:
         ----------
         hyper_parameters: list of hyper parameter settings
         """
+        logging.debug("Performing generate_and_set_hyper_parameters...")
+
         hyper_parameters = []
 
         dataframe = dataframe.copy()
@@ -302,7 +307,7 @@ class PredictionProblem:
 
 
 def select_by_remaining(fraction_of_data_target, dataframe, operation,
-                        filter_column):
+                        filter_column, num_random_samples=10):
     """
     This function selects a parameter setting for the
     filter operation. The parameter setting that nearest filters
@@ -315,19 +320,29 @@ def select_by_remaining(fraction_of_data_target, dataframe, operation,
     dataframe: the relevant data
     operation: the filter operation
     filter_column: the column name of the column intended to be filtered over
-
+    num_random_samples: if there's more than this many unique values to test,
+        randomly sample this many values from the dataset
     Returns
     ----------
     best_filter_value: parameter setting for the filter operation.
     """
-
+    logging.debug("Performing select_by_remaining...")
     if len(operation.REQUIRED_PARAMETERS) == 0:
         return None
     else:
         unique_filter_values = set(dataframe[filter_column])
+
+        if len(unique_filter_values) > num_random_samples:
+            unique_filter_values = list(random.sample(unique_filter_values, num_random_samples))
+
+        logging.debug("number of unique filter values: {}".format(len(unique_filter_values)))
+
         best = 1
         best_filter_value = 0
+
         for unique_filter_value in unique_filter_values:
+            loop_start_time = time.time()
+
             total = len(dataframe)
 
             operation.set_hyper_parameter(unique_filter_value)
@@ -341,11 +356,14 @@ def select_by_remaining(fraction_of_data_target, dataframe, operation,
             if score < best:
                 best = score
                 best_filter_value = unique_filter_value
+
+            logging.debug("single loop iteration time: {}".format(time.time() - loop_start_time))
+
         return best_filter_value
 
 
 def select_by_diversity(dataframe, operation, label_generating_column,
-                        entity_id_column):
+                        entity_id_column, num_random_samples=10):
     """
     This function selects a parameter setting for the
     operations, excluding the filter operation.
@@ -360,6 +378,8 @@ def select_by_diversity(dataframe, operation, label_generating_column,
         column of interest in the data
     entity_id_column: column name of
         the column containing entities in the data
+    num_random_samples: if there's more than this many unique values to test,
+        randomly sample this many values from the dataset
 
     Returns
     ----------
@@ -367,23 +387,29 @@ def select_by_diversity(dataframe, operation, label_generating_column,
     pertinent_df: the dataframe after having the operation applied
         with the chosen parameter value.
     """
-
+    logging.debug("Performing select_by_diversity")
     df = dataframe.copy()
 
     if len(operation.REQUIRED_PARAMETERS) == 0:
+        logging.debug("no parameters required for this operation")
         return None, dataframe
     else:
         unique_parameter_values = set(dataframe[label_generating_column])
+
+        if len(unique_parameter_values) > num_random_samples:
+            unique_parameter_values = list(random.sample(unique_parameter_values, num_random_samples))
+
+        logging.debug("number of unique parameter values: {}".format(len(unique_parameter_values)))
+
         best = 0
         best_parameter_value = 0
 
         for unique_parameter_value in unique_parameter_values:
-            output_df = pd.DataFrame(columns=list(df.columns.values))
+            loop_start_time = time.time()
+
             operation.set_hyper_parameter(unique_parameter_value)
 
-            for unique_entity in set(df[entity_id_column]):
-                execution_df = operation.execute(df.loc[df[entity_id_column] == unique_entity])
-                output_df = output_df.append(execution_df)
+            output_df = df.groupby(entity_id_column).apply(operation.execute)
 
             entropy = entropy_of_a_list(
                 list(output_df[label_generating_column]))
@@ -391,6 +417,10 @@ def select_by_diversity(dataframe, operation, label_generating_column,
                 best = entropy
                 best_parameter_value = unique_parameter_value
                 pertinent_df = output_df
+
+            logging.debug("single loop iteration time: {}".format(time.time() - loop_start_time))
+
+        logging.debug("found optimal parameter setting: {}".format(best_parameter_value))
 
         return best_parameter_value, pertinent_df
 

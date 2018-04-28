@@ -83,13 +83,18 @@ class PredictionProblemGenerator:
 
             prediction_problem = PredictionProblem(operations)
 
+            logging.debug("prediction problem generated, now checking validity...")
+
             (is_valid_prediction_problem, filter_column_order_of_types,
                 label_generating_column_order_of_types) = \
                 prediction_problem.is_valid_prediction_problem(
                 self.table_meta, self.filter_column,
                 self.label_generating_column)
             if not is_valid_prediction_problem:
+                logging.debug("invalid prediction problem")
                 continue
+
+            logging.debug("valid prediction problem, now generating and setting hyper parameters...")
 
             prediction_problem.generate_and_set_hyper_parameters(dataframe,
                                                                  self.label_generating_column,
@@ -97,7 +102,7 @@ class PredictionProblemGenerator:
                                                                  self.entity_id_column)
 
             logging.debug(
-                "Prediction Problem Generated: {} \n".format(prediction_problem))
+                "valid problem with parameters generated: {} \n".format(prediction_problem))
 
             problems.append(prediction_problem)
         return problems

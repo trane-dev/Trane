@@ -31,8 +31,7 @@ dataframe2 = pd.DataFrame([(0, 0),
                            (6, 6),
                            (7, 7),
                            (8, 8),
-                           (9, 9),
-                           (10, 10)], columns=['c1', 'c2'])
+                           (9, 9)], columns=['c1', 'c2'])
 
 
 def test_hyper_parameter_generation():

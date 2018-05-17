@@ -3,6 +3,9 @@
 # Trane
 Trane is a software package for automatically generating prediction problems and generating labels for supervised learning. Trane is a system designed to advance the automation of the machine learning problem solving pipeline.
 
+[![Trane Video](https://i.ytimg.com/vi/TrK5Tm9ic28/maxresdefault.jpg)](https://youtu.be/TrK5Tm9ic28)
+
+
 ## Prediction Problems
 In data science, people usually have a few records of an entity and want to predict what will happen to that entity in the future. Trane is designed to generate time-related prediction problems. Trane transforms data meta information into lists of relevant prediction problems and cutoff times. Prediction problems are structured in a formal language described in Operations below. Cutoff times are defined as the last time in the data used for training the classifier. Data after the cutoff time is used for evaluating the classifiers accuracy. Cutoff times are necessary to prevent the classifier from training to test data.
 
@@ -84,6 +87,30 @@ We use `pytest` to automatically collecting unit testings and `pytest-cov` to me
 ## Quick Usage
 We have [a tutorial notebook here](https://github.com/HDI-Project/Trane/blob/master/Tutorial.ipynb).
 
+
+## History 
+We started working on Trane in 2015. In its first iteration in 2016, we showed that it is possible to formally specify prediction problems using a language and then also created algorithms to generate prediction problems automatically. With other tools to synthesize features and generate models given a prediction problem - we were able to solve problems end-to-end. You can read our paper [here](https://dai.lids.mit.edu/wp-content/uploads/2017/10/Trane1.pdf). Ben Schreck's [thesis](https://dspace.mit.edu/bitstream/handle/1721.1/105963/965551096-MIT.pdf) goes even further to see if we can learn and filter uninteresting problems. 
+
+This repository is a second iteration where we are focusing on usability, apis and showing more use cases and ultimately taking it to real world datasets. Stay tuned for more demos and examples. 
+
+
+## Citing Trane 
+If you use Trane, please consider citing the following paper:
+
+Ben Schreck, Kalyan Veeramachaneni. [What Would a Data Scientist Ask? Automatically Formulating and Solving Predictive Problems.](https://dai.lids.mit.edu/wp-content/uploads/2017/10/Trane1.pdf) *IEEE DSAA 2016*, 440-451
+
+BibTeX entry:
+
+```bibtex
+@inproceedings{schreck2016would,
+  title={What Would a Data Scientist Ask? Automatically Formulating and Solving Predictive Problems},
+  author={Schreck, Benjamin and Veeramachaneni, Kalyan},
+  booktitle={Data Science and Advanced Analytics (DSAA), 2016 IEEE International Conference on},
+  pages={440--451},
+  year={2016},
+  organization={IEEE}
+}
+```
 
 ## TODO
 - Need an easier way to add customize operations. Currently, external plugin operations are not allowed. The bottleneck is we need to maintain a list of operations so that we can save, load, and iterate over operations. It's not easy to add an external operation into operation list. 

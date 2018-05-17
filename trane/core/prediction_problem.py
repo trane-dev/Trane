@@ -217,8 +217,10 @@ class PredictionProblem:
                 all_data_execution_result = operation.execute(
                     all_data_execution_result)
 
-                single_piece_of_data = all_data_execution_result.iloc[
-                    0][operation.column_name]
+                if len(all_data_execution_result) == 0:
+                    continue
+
+                single_piece_of_data = all_data_execution_result.iloc[0][operation.column_name]
 
                 if idx == 0:
                     check_type(
@@ -307,7 +309,7 @@ class PredictionProblem:
 
 
 def select_by_remaining(fraction_of_data_target, dataframe, operation,
-                        filter_column, num_random_samples=10):
+                        filter_column, num_random_samples=10, num_rows_to_execute_on=2000):
     """
     This function selects a parameter setting for the
     filter operation. The parameter setting that nearest filters
@@ -322,6 +324,9 @@ def select_by_remaining(fraction_of_data_target, dataframe, operation,
     filter_column: the column name of the column intended to be filtered over
     num_random_samples: if there's more than this many unique values to test,
         randomly sample this many values from the dataset
+    num_rows_to_execute_on: if the dataframe contains more than this number of rows,
+        randomly select this many rows to use as the dataframe
+
     Returns
     ----------
     best_filter_value: parameter setting for the filter operation.
@@ -334,6 +339,9 @@ def select_by_remaining(fraction_of_data_target, dataframe, operation,
 
         if len(unique_filter_values) > num_random_samples:
             unique_filter_values = list(random.sample(unique_filter_values, num_random_samples))
+
+        if len(dataframe) > num_rows_to_execute_on:
+            dataframe = dataframe.sample(num_rows_to_execute_on)
 
         logging.debug("number of unique filter values: {}".format(len(unique_filter_values)))
 
@@ -363,7 +371,7 @@ def select_by_remaining(fraction_of_data_target, dataframe, operation,
 
 
 def select_by_diversity(dataframe, operation, label_generating_column,
-                        entity_id_column, num_random_samples=10):
+                        entity_id_column, num_random_samples=10, num_rows_to_execute_on=2000):
     """
     This function selects a parameter setting for the
     operations, excluding the filter operation.
@@ -380,6 +388,8 @@ def select_by_diversity(dataframe, operation, label_generating_column,
         the column containing entities in the data
     num_random_samples: if there's more than this many unique values to test,
         randomly sample this many values from the dataset
+    num_rows_to_execute_on: if the dataframe contains more than this number of rows,
+        randomly select this many rows to use as the dataframe
 
     Returns
     ----------
@@ -399,6 +409,9 @@ def select_by_diversity(dataframe, operation, label_generating_column,
         if len(unique_parameter_values) > num_random_samples:
             unique_parameter_values = list(random.sample(unique_parameter_values, num_random_samples))
 
+        if len(dataframe) > num_rows_to_execute_on:
+            df = dataframe.sample(num_rows_to_execute_on)
+
         logging.debug("number of unique parameter values: {}".format(len(unique_parameter_values)))
 
         best = 0
@@ -416,9 +429,11 @@ def select_by_diversity(dataframe, operation, label_generating_column,
             if entropy > best:
                 best = entropy
                 best_parameter_value = unique_parameter_value
-                pertinent_df = output_df
 
             logging.debug("single loop iteration time: {}".format(time.time() - loop_start_time))
+
+        operation.set_hyper_parameter(best_parameter_value)
+        pertinent_df = dataframe.copy().groupby(entity_id_column).apply(operation.execute)
 
         logging.debug("found optimal parameter setting: {}".format(best_parameter_value))
 

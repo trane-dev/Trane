@@ -77,13 +77,14 @@ class ObjectFrequencyTransformationOp(TransformationOpBase):
             objects_to_frequency[val] = objects_to_frequency[val] + 1
 
         for idx, obj in enumerate(objects):
-            dataframe.at[idx, self.column_name] = objects_to_frequency[obj]
-
-        dataframe[self.column_name] = dataframe[self.column_name].astype(int)
+            column_idx = dataframe.columns.get_loc(self.column_name)
+            dataframe.iat[idx, column_idx] = objects_to_frequency[obj]
 
         num_rows_to_drop = len(dataframe) - len(objects_to_frequency)
         assert(num_rows_to_drop >= 0)
-        if num_rows_to_drop == 0:
-            return dataframe
 
-        return dataframe[:-num_rows_to_drop]
+        if num_rows_to_drop != 0:
+            dataframe = dataframe[:-num_rows_to_drop]
+
+        dataframe[self.column_name] = dataframe[self.column_name].astype(int)
+        return dataframe

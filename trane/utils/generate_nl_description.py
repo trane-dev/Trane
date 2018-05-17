@@ -1,7 +1,7 @@
-from trane.ops.aggregation_ops import *  # noqa
-from trane.ops.filter_ops import *  # noqa
-from trane.ops.row_ops import *  # noqa
-from trane.ops.transformation_ops import *  # noqa
+from ..ops.aggregation_ops import *  # noqa
+from ..ops.filter_ops import *  # noqa
+from ..ops.row_ops import *  # noqa
+from ..ops.transformation_ops import *  # noqa
 
 from .generate_cutoff_times import *  # noqa
 from .table_meta import TableMeta as TM

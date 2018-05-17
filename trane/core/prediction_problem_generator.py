@@ -112,6 +112,7 @@ class PredictionProblemGenerator:
                in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
                    TableMeta.TYPE_CATEGORY])
         assert(self.table_meta.get_type(self.label_generating_column)
-               in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER])
+               in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER,
+                   TableMeta.TYPE_TEXT])
         assert(self.table_meta.get_type(self.time_column)
                in [TableMeta.TYPE_TIME, TableMeta.TYPE_INTEGER])

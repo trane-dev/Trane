@@ -1,4 +1,8 @@
-from ..ops import *  # noqa
+from trane.ops.aggregation_ops import *  # noqa
+from trane.ops.filter_ops import *  # noqa
+from trane.ops.row_ops import *  # noqa
+from trane.ops.transformation_ops import *  # noqa
+
 from .generate_cutoff_times import *  # noqa
 from .table_meta import TableMeta as TM
 
@@ -38,7 +42,6 @@ def generate_nl_description(
     list of str: natural language descriptions
 
     """
-
     def description(prob):
         return "For each {col}, predict{dataop_des}{filter_des}{cutoff_des}.".format(
             col=entity_id_column,

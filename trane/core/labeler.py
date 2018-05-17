@@ -41,8 +41,8 @@ class Labeler():
                 json_prediction_problems_filename)
 
         dfs = []
-        columns = [entity_id_column, 'problem_label_excluding_data_post_label_cutoff_time',
-                   'problem_label_all_data', 'training_cutoff_time', 'label_cutoff_time']
+        columns = [entity_id_column, 'training_labels',
+                   'test_labels', 'training_cutoff_time', 'label_cutoff_time']
 
         for prediction_problem in prediction_problems:
 

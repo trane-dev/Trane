@@ -1,4 +1,5 @@
 import logging
+import time
 
 import pandas as pd
 
@@ -44,8 +45,8 @@ class Labeler():
         columns = [entity_id_column, 'training_labels',
                    'test_labels', 'training_cutoff_time', 'label_cutoff_time']
 
-        for prediction_problem in prediction_problems:
-
+        for idx, prediction_problem in enumerate(prediction_problems):
+            start = time.time()
             df_rows = []
             logging.debug("in labeller and beginning exuection of problem: {} \n".format(
                 prediction_problem))
@@ -64,22 +65,28 @@ class Labeler():
                 if len(df_pre_label_cutoff_time_result) == 1:
                     label_precutoff_time = df_pre_label_cutoff_time_result[
                         label_generating_column].values[0]
-                else:
+                elif len(df_pre_label_cutoff_time_result) > 1:
                     logging.warning("Received output from prediction problem \
                                     execution on pre-label cutoff data with more than one result.")
+                    label_precutoff_time = None
+                else:
                     label_precutoff_time = None
                 if len(df_all_data_result) == 1:
                     label_postcutoff_time = df_all_data_result[
                         label_generating_column].values[0]
-                else:
+                elif len(df_all_data_result) > 1:
                     logging.warning("Received output from prediction problem execution \
                                      on all data with more than one result.")
+                    label_postcutoff_time = None
+                else:
                     label_postcutoff_time = None
 
                 df_row = [entity, label_precutoff_time,
                           label_postcutoff_time, training_cutoff, label_cutoff]
                 df_rows.append(df_row)
             df = pd.DataFrame(df_rows, columns=columns)
+            end = time.time()
+            logging.info("Finished labelling problem: {} of {}. Time elapsed: {}".format(idx, len(prediction_problems), end - start))
             dfs.append(df)
 
         return dfs

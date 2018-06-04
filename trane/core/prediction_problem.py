@@ -185,7 +185,8 @@ class PredictionProblem:
 
         pre_label_cutoff_time_execution_result = dataframe[
             dataframe[time_column] < label_cutoff_time]
-        all_data_execution_result = dataframe
+        all_data_execution_result = dataframe[
+            dataframe[time_column] > label_cutoff_time]
 
         continue_executing_on_precutoff_df = True
         continue_executing_on_all_data_df = True
@@ -394,8 +395,8 @@ def select_by_diversity(dataframe, operation, label_generating_column,
     Returns
     ----------
     best_parameter_value: parameter setting for the operation.
-    pertinent_df: the dataframe after having the operation applied
-        with the chosen parameter value.
+    best_df: the dataframe (possibly filtered depending on num_rows_to_execute_on) 
+        after having the operation applied with the chosen parameter value.
     """
     logging.debug("Performing select_by_diversity")
     df = dataframe.copy()
@@ -416,6 +417,7 @@ def select_by_diversity(dataframe, operation, label_generating_column,
 
         best = 0
         best_parameter_value = 0
+        best_df = df
 
         for unique_parameter_value in unique_parameter_values:
             loop_start_time = time.time()
@@ -429,15 +431,13 @@ def select_by_diversity(dataframe, operation, label_generating_column,
             if entropy > best:
                 best = entropy
                 best_parameter_value = unique_parameter_value
+                best_df = output_df
 
             logging.debug("single loop iteration time: {}".format(time.time() - loop_start_time))
 
-        operation.set_hyper_parameter(best_parameter_value)
-        pertinent_df = dataframe.copy().groupby(entity_id_column).apply(operation.execute)
-
         logging.debug("found optimal parameter setting: {}".format(best_parameter_value))
 
-        return best_parameter_value, pertinent_df
+        return best_parameter_value, best_df
 
 
 def entropy_of_a_list(values):
@@ -479,37 +479,38 @@ def check_type(expected_type, actual_data):
             actual_data,
             type(actual_data)))
 
-    if expected_type == TableMeta.TYPE_CATEGORY:
-        allowed_types = [bool, int, str, float]
-        assert(type(actual_data) in allowed_types)
+    allowed_types_category = [bool, int, str, float]
+    allowed_types_bool = [bool, np.bool_]
+    allowed_types_text = [str]
+    allowed_types_int = [int, np.int64]
+    allowed_types_float = [float, np.float64, np.float32]
+    allowed_types_time = allowed_types_bool + allowed_types_int + allowed_types_text + allowed_types_float
+    allowed_types_ordered = allowed_types_bool + allowed_types_int + allowed_types_text + allowed_types_float
+    allowed_types_id = allowed_types_int + allowed_types_text + allowed_types_float
+
+    if expected_type == TableMeta.TYPE_CATEGORY:    
+        assert(type(actual_data) in allowed_types_category)
 
     elif expected_type == TableMeta.TYPE_BOOL:
-        allowed_types = [bool, np.bool_]
-        assert(type(actual_data) in allowed_types)
+        assert(type(actual_data) in allowed_types_bool)
 
     elif expected_type == TableMeta.TYPE_ORDERED:
-        allowed_types = [bool, int, str, float]
-        assert(type(actual_data) in allowed_types)
+        assert(type(actual_data) in allowed_types_ordered)
 
     elif expected_type == TableMeta.TYPE_TEXT:
-        allowed_types = [str]
-        assert(type(actual_data) in allowed_types)
+        assert(type(actual_data) in allowed_types_text)
 
     elif expected_type == TableMeta.TYPE_INTEGER:
-        allowed_types = [int, np.int64]
-        assert(type(actual_data) in allowed_types)
+        assert(type(actual_data) in allowed_types_int)
 
     elif expected_type == TableMeta.TYPE_FLOAT:
-        allowed_types = [float, np.float64, np.float32]
-        assert(type(actual_data) in allowed_types)
+        assert(type(actual_data) in allowed_types_float)
 
     elif expected_type == TableMeta.TYPE_TIME:
-        allowed_types = [bool, int, str, float]
-        assert(type(actual_data) in allowed_types)
+        assert(type(actual_data) in allowed_types_time)
 
     elif expected_type == TableMeta.TYPE_IDENTIFIER:
-        allowed_types = [int, str, float]
-        assert(type(actual_data) in allowed_types)
+        assert(type(actual_data) in allowed_types_id)
 
     else:
         logging.critical('check_type function received an unexpected type.')

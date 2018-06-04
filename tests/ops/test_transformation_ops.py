@@ -25,7 +25,7 @@ def test_diff_transformation_op_input_value():
     op = DiffTransformationOp('col')
     op.op_type_check(meta)
     output = op(df.copy())
-    assert np.all(output.values == np.asarray([[0, 1, 1, 1, 1]]).T)
+    assert np.all(output.values == np.asarray([[1, 1, 1, 1]]).T)
 
 
 def test_ObjectFrequencyTransformationOp():
@@ -37,10 +37,9 @@ def test_ObjectFrequencyTransformationOp():
     output = op(df.copy())
     output2 = op2(df.copy())
 
-    expected = DataFrame([(1.0, 2), (2.0, 3)],
+    expected = DataFrame([(1.0, 3), (2.0, 2)],
                          columns=["id", "height"])
     expected2 = DataFrame([(1, 100), (1, 70), (1, 100),
                            (1, 70), (1, 70)], columns=["id", "height"])
-
     assert(output.equals(expected))
     assert(output2.equals(expected2))

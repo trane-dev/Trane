@@ -55,7 +55,8 @@ class DiffTransformationOp(TransformationOpBase):
         for i in range(len(index) - 1, 0, -1):
             dataframe.at[index[i], self.column_name] -= float(dataframe.at[
                 index[i - 1], self.column_name].astype(numpy.float32))
-        dataframe.at[index[0], self.column_name] = 0
+        #Note: drop first row.
+        dataframe = dataframe.iloc[1:]
         return dataframe
 
 
@@ -69,6 +70,7 @@ class ObjectFrequencyTransformationOp(TransformationOpBase):
     def execute(self, dataframe):
         dataframe = dataframe.copy()
         objects = dataframe.copy()[self.column_name].unique()
+        objects = numpy.sort(objects)
         objects_to_frequency = {}
         for obj in objects:
             objects_to_frequency[obj] = 0
@@ -76,6 +78,7 @@ class ObjectFrequencyTransformationOp(TransformationOpBase):
         for val in dataframe[self.column_name]:
             objects_to_frequency[val] = objects_to_frequency[val] + 1
 
+        dataframe[self.column_name] = dataframe[self.column_name].astype(int)
         for idx, obj in enumerate(objects):
             column_idx = dataframe.columns.get_loc(self.column_name)
             dataframe.iat[idx, column_idx] = objects_to_frequency[obj]

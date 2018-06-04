@@ -44,7 +44,7 @@ class AllFilterOp(FilterOpBase):
 class EqFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
     IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
-                                              TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+              TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()

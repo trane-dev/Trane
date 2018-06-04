@@ -185,7 +185,8 @@ class PredictionProblem:
 
         pre_label_cutoff_time_execution_result = dataframe[
             dataframe[time_column] < label_cutoff_time]
-        all_data_execution_result = dataframe
+        all_data_execution_result = dataframe[
+            dataframe[time_column] > label_cutoff_time]
 
         continue_executing_on_precutoff_df = True
         continue_executing_on_all_data_df = True

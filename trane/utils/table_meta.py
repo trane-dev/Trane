@@ -160,7 +160,8 @@ class TableMeta(object):
         """
         return json.dumps(self.table_meta)
 
-    def from_json(json_data):
+    @classmethod
+    def from_json(cls, json_data):
         """
         Load from json str.
 

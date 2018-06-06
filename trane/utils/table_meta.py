@@ -41,7 +41,7 @@ class TableMeta(object):
         table_meta: a dict describe meta data of a database.
 
         Returns
-        ----------
+        -------
         None
         """
         self.table_meta = table_meta.copy()
@@ -64,7 +64,7 @@ class TableMeta(object):
         column_name: the column
 
         Returns
-        ----------
+        -------
         type: the type of the data in the column
         """
         return self.all_columns[column_name]['type']
@@ -79,7 +79,7 @@ class TableMeta(object):
         dtype: the data type to change the column to
 
         Returns
-        ----------
+        -------
         None
         """
         self.all_columns[column_name]['type'] = dtype
@@ -112,7 +112,7 @@ class TableMeta(object):
         property_name: the property wanted
 
         Returns
-        ----------
+        -------
         propery: the property
         """
         return self.all_columns[column_name]['properties'][property_name]
@@ -126,7 +126,7 @@ class TableMeta(object):
         None
 
         Returns
-        ----------
+        -------
         names: all the column names
         """
         return self.all_columns.keys()
@@ -140,7 +140,7 @@ class TableMeta(object):
         None
 
         Returns
-        ----------
+        -------
         copy: a deep copy of self
         """
         return copy.deepcopy(self)
@@ -154,7 +154,7 @@ class TableMeta(object):
         None
 
         Returns
-        ----------
+        -------
         str: JSON str of self
 
         """
@@ -170,7 +170,7 @@ class TableMeta(object):
         json_data: JSON str
 
         Returns
-        ----------
+        -------
         table_meta: a TableMeta object
 
         """

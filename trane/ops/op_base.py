@@ -28,7 +28,7 @@ class OpBase(object):
         column_name: the column this operation applies to
 
         Returns
-        ----------
+        -------
         None
         """
         self.column_name = column_name
@@ -50,7 +50,7 @@ class OpBase(object):
         table_meta: table meta before this operation.
 
         Returns
-        ----------
+        -------
         table_meta: table meta after this operation. None if not compatable.
 
         """
@@ -71,7 +71,7 @@ class OpBase(object):
         hyper_parameter: value for the hyper parameter
 
         Returns
-        ----------
+        -------
         None
 
         """

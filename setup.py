@@ -17,7 +17,7 @@ requirements = [
     'numpy>=1.13.0',
     'python_dateutil>=2.6.0',
     'scipy>=1.0.0'
-    ]
+]
 
 setup_requirements = ['pytest-runner', ]
 
@@ -36,7 +36,9 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
-    description="Trane is a software package for automatically generating prediction problems and generating labels for supervised learning.",
+    description="Trane is a software package for automatically "
+                "generating prediction problems and generating "
+                "labels for supervised learning.",
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,

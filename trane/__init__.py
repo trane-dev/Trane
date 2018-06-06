@@ -6,4 +6,4 @@ import logging
 logname = 'trane.log'
 logging.basicConfig(filename=logname,
                     filemode='w',
-                    level=logging.DEBUG)
+                    level=logging.INFO)

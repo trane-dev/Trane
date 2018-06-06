@@ -43,8 +43,10 @@ class AllFilterOp(FilterOpBase):
 
 class EqFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
-              TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    IOTYPES = [(
+        TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
+                                      TM.TYPE_INTEGER), (
+                                          TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()
@@ -54,8 +56,10 @@ class EqFilterOp(FilterOpBase):
 
 class NeqFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
-                                              TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    IOTYPES = [(
+        TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
+                                      TM.TYPE_INTEGER), (
+                                          TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()
@@ -65,8 +69,10 @@ class NeqFilterOp(FilterOpBase):
 
 class GreaterFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
-                                              TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    IOTYPES = [(
+        TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
+                                      TM.TYPE_INTEGER), (
+                                          TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()
@@ -76,8 +82,10 @@ class GreaterFilterOp(FilterOpBase):
 
 class LessFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
-                                              TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    IOTYPES = [(
+        TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
+                                      TM.TYPE_INTEGER), (
+                                          TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()

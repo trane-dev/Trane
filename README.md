@@ -95,7 +95,7 @@ This repository is a second iteration where we are focusing on usability, apis a
 
 You can find the related theses here:
 
-* [Towards An Automatic Predictive Question Formulation](https://dai.lids.mit.edu/wp-content/uploads/2017/10/Trane1.pdf)
+* [Towards An Automatic Predictive Question Formulation](https://dspace.mit.edu/bitstream/handle/1721.1/105963/965551096-MIT.pdf?sequence=1)
 Benjamin J. Schreck, M.E. thesis, MIT Dept of EECS, June 2016. Advisor: Kalyan Veeramachaneni.
 * [End to End Machine Learning Workflow Using
 Automation Tools](https://dai.lids.mit.edu/wp-content/uploads/2018/05/Alex_MEng_final.pdf) Alexander Friedrich Nordin, MIT Dept of EECS, June, 2018. Advisor: Kalyan Veeramachaneni.

@@ -31,7 +31,7 @@ class Labeler():
             prediction problems from, structured in JSON.
 
         Returns
-        ----------
+        -------
         dfs: a list of DataFrames. One dataframe for each problem.
             Each dataframe contains entities, cutoff times and labels.
 

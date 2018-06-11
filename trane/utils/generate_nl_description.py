@@ -106,8 +106,18 @@ def generate_nl_description(
         if isinstance(cutoff_strategy, ConstantCutoffTime):
             return ", after {col} {cutoff}".format(
                 col=time_column, cutoff=cutoff_strategy.label_cutoff)
+        elif isinstance(cutoff_strategy, DynamicCutoffTime):
+            percentage_elapsed = (
+                1 - cutoff_strategy.training_label_ratio) * 100
+            return ", after {percentage}% of the row's " \
+                   "{col} column has elapsed".format(
+                       percentage=percentage_elapsed, col=time_column)
         else:
-            raise " (unknown cutoff time)"
+            error_msg = "unknown CutoffType type passed. Expected instance " \
+                        "of type {cutoff_time_base} received " \
+                        "{other_type}".format(
+                            type(CutoffTimeBase), type(cutoff_strategy))
+            raise TypeError(error_msg)
 
     def filter_description(prob):
         filter_op_str_dict = {

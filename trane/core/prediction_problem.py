@@ -55,8 +55,8 @@ class PredictionProblem:
         is_valid: True/False if problem is valid
         filter_column_order_of_types: a list containing the types expected in the
             sequence of operations on the filter column
-        label_generating_column_order_of_types: a list containing the types expected in the
-            sequence of operations on the label generating column
+        label_generating_column_order_of_types: a list containing the types expected
+            in the sequence of operations on the label generating column
         """
         logging.debug("Performing is_valid_prediction_problem...")
 
@@ -171,8 +171,8 @@ class PredictionProblem:
             for labels during training.
         filter_column_order_of_types: a list containing the types expected in the
             sequence of operations on the filter column
-        label_generating_column_order_of_types: a list containing the types expected in the
-            sequence of operations on the label generating column
+        label_generating_column_order_of_types: a list containing the types expected
+            in the sequence of operations on the label generating column
 
         Returns
         -------
@@ -221,7 +221,8 @@ class PredictionProblem:
                 if len(all_data_execution_result) == 0:
                     continue
 
-                single_piece_of_data = all_data_execution_result.iloc[0][operation.column_name]
+                single_piece_of_data = all_data_execution_result.iloc[0][
+                    operation.column_name]
 
                 if idx == 0:
                     check_type(
@@ -273,7 +274,8 @@ class PredictionProblem:
 
         """
         return json.dumps(
-            {"operations": [json.loads(op_to_json(op)) for op in self.operations],
+            {"operations": [json.loads(op_to_json(op)
+                                       ) for op in self.operations],
              "filter_column_order_of_types":
              self.filter_column_order_of_types,
              "label_generating_column_order_of_types":
@@ -311,7 +313,8 @@ class PredictionProblem:
 
 
 def select_by_remaining(fraction_of_data_target, dataframe, operation,
-                        filter_column, num_random_samples=10, num_rows_to_execute_on=2000):
+                        filter_column, num_random_samples=10,
+                        num_rows_to_execute_on=2000):
     """
     This function selects a parameter setting for the
     filter operation. The parameter setting that nearest filters
@@ -340,12 +343,14 @@ def select_by_remaining(fraction_of_data_target, dataframe, operation,
         unique_filter_values = set(dataframe[filter_column])
 
         if len(unique_filter_values) > num_random_samples:
-            unique_filter_values = list(random.sample(unique_filter_values, num_random_samples))
+            unique_filter_values = list(
+                random.sample(unique_filter_values, num_random_samples))
 
         if len(dataframe) > num_rows_to_execute_on:
             dataframe = dataframe.sample(num_rows_to_execute_on)
 
-        logging.debug("number of unique filter values: {}".format(len(unique_filter_values)))
+        logging.debug(
+            "number of unique filter values: {}".format(len(unique_filter_values)))
 
         best = 1
         best_filter_value = 0
@@ -367,13 +372,15 @@ def select_by_remaining(fraction_of_data_target, dataframe, operation,
                 best = score
                 best_filter_value = unique_filter_value
 
-            logging.debug("single loop iteration time: {}".format(time.time() - loop_start_time))
+            logging.debug("single loop iteration time: {}".format(
+                time.time() - loop_start_time))
 
         return best_filter_value
 
 
 def select_by_diversity(dataframe, operation, label_generating_column,
-                        entity_id_column, num_random_samples=10, num_rows_to_execute_on=2000):
+                        entity_id_column, num_random_samples=10,
+                        num_rows_to_execute_on=2000):
     """
     This function selects a parameter setting for the
     operations, excluding the filter operation.
@@ -390,13 +397,14 @@ def select_by_diversity(dataframe, operation, label_generating_column,
         the column containing entities in the data
     num_random_samples: if there's more than this many unique values to test,
         randomly sample this many values from the dataset
-    num_rows_to_execute_on: if the dataframe contains more than this number of rows,
-        randomly select this many rows to use as the dataframe
+    num_rows_to_execute_on: if the dataframe contains more than this number of
+        rows, randomly select this many rows to use as the dataframe
 
     Returns
-    ----------
+    -------
     best_parameter_value: parameter setting for the operation.
-    best_df: the dataframe (possibly filtered depending on num_rows_to_execute_on)
+    best_df: the dataframe (possibly filtered depending on
+        num_rows_to_execute_on)
         after having the operation applied with the chosen parameter value.
     """
     logging.debug("Performing select_by_diversity")
@@ -409,12 +417,14 @@ def select_by_diversity(dataframe, operation, label_generating_column,
         unique_parameter_values = set(dataframe[label_generating_column])
 
         if len(unique_parameter_values) > num_random_samples:
-            unique_parameter_values = list(random.sample(unique_parameter_values, num_random_samples))
+            unique_parameter_values = list(random.sample(
+                unique_parameter_values, num_random_samples))
 
         if len(dataframe) > num_rows_to_execute_on:
             df = dataframe.sample(num_rows_to_execute_on)
 
-        logging.debug("number of unique parameter values: {}".format(len(unique_parameter_values)))
+        logging.debug("number of unique parameter values: {}".format(
+            len(unique_parameter_values)))
 
         best = 0
         best_parameter_value = 0
@@ -434,9 +444,11 @@ def select_by_diversity(dataframe, operation, label_generating_column,
                 best_parameter_value = unique_parameter_value
                 best_df = output_df
 
-            logging.debug("single loop iteration time: {}".format(time.time() - loop_start_time))
+            logging.debug("single loop iteration time: {}".format(
+                time.time() - loop_start_time))
 
-        logging.debug("found optimal parameter setting: {}".format(best_parameter_value))
+        logging.debug("found optimal parameter setting: {}".format(
+            best_parameter_value))
 
         return best_parameter_value, best_df
 
@@ -485,8 +497,10 @@ def check_type(expected_type, actual_data):
     allowed_types_text = [str]
     allowed_types_int = [int, np.int64]
     allowed_types_float = [float, np.float64, np.float32]
-    allowed_types_time = allowed_types_bool + allowed_types_int + allowed_types_text + allowed_types_float
-    allowed_types_ordered = allowed_types_bool + allowed_types_int + allowed_types_text + allowed_types_float
+    allowed_types_time = allowed_types_bool + allowed_types_int + \
+        allowed_types_text + allowed_types_float
+    allowed_types_ordered = allowed_types_bool + \
+        allowed_types_int + allowed_types_text + allowed_types_float
     allowed_types_id = allowed_types_int + allowed_types_text + allowed_types_float
 
     if expected_type == TableMeta.TYPE_CATEGORY:

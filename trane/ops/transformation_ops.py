@@ -55,7 +55,8 @@ class DiffTransformationOp(TransformationOpBase):
         for i in range(len(index) - 1, 0, -1):
             dataframe.at[index[i], self.column_name] -= float(dataframe.at[
                 index[i - 1], self.column_name].astype(numpy.float32))
-        #Note: drop first row.
+
+        # Note: drop first row.
         dataframe = dataframe.iloc[1:]
         return dataframe
 

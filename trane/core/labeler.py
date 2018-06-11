@@ -37,8 +37,8 @@ class Labeler():
 
         """
 
-        prediction_problems, table_meta, entity_id_column, label_generating_column, time_column = \
-            prediction_problems_from_json_file(
+        (prediction_problems, table_meta, entity_id_column, label_generating_column,
+            time_column) = prediction_problems_from_json_file(
                 json_prediction_problems_filename)
 
         dfs = []
@@ -86,7 +86,8 @@ class Labeler():
                 df_rows.append(df_row)
             df = pd.DataFrame(df_rows, columns=columns)
             end = time.time()
-            logging.info("Finished labelling problem: {} of {}. Time elapsed: {}".format(idx, len(prediction_problems), end - start))
+            logging.info("Finished labelling problem: {} of {}. Time elapsed: {}".format(
+                idx, len(prediction_problems), end - start))
             dfs.append(df)
 
         return dfs

@@ -29,7 +29,7 @@ class PredictionProblemGenerator:
             to be filtered over
 
         Returns
-        ----------
+        -------
         None
         """
         self.table_meta = table_meta
@@ -49,7 +49,7 @@ class PredictionProblemGenerator:
         dataframe: the data to be parsed
 
         Returns
-        ----------
+        -------
         problems: a list of Prediction Problem objects.
         """
         def iter_over_ops():

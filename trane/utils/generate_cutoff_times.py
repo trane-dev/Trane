@@ -12,11 +12,11 @@ class CutoffTimeBase:
     Base class that all cutoff time strategies inherit.
 
     Make Your Own
-    ----------
+    -------------
     Simply make a new class that follows the requirements below and issue a pull request.
 
     Requirements
-    ----------
+    ------------
     get_cutoff: function that returns a training cutoff time and a label cutoff time.
     """
 
@@ -31,7 +31,7 @@ class CutoffTimeBase:
         entity_to_data_dict: mapping from entities to their data
 
         Returns
-        ----------
+        -------
         entity_to_data_and_cutoff_dict: mapping from entities to a tuple of their
             data and cutoff time
         """

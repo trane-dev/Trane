@@ -20,11 +20,11 @@ class TransformationOpBase(OpBase):
     that inherit the RowOpBase class and instantiate the execute method.
 
     Make Your Own
-    ----------
+    -------------
     Simply make a new class that follows the requirements below and issue a pull request.
 
     Requirements
-    ----------
+    ------------
     REQUIRED_PARAMETERS: the hyper parameters needed for the operation
     IOTYPES: the input and output types of the operation using TableMeta types
     execute method: transform dataframe according to the operation and return

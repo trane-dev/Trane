@@ -1,9 +1,20 @@
+<p align="center">
+<img width=40% src="https://dai.lids.mit.edu/wp-content/uploads/2018/06/Trane-logo-300x180.jpg" alt=“Trane_Logo” />
+</p>
+
+<p align="center">
+<i>Automatically formulating machine learning tasks for temporal datasets"</i>
+</p>
+
 [![Build Status](https://travis-ci.org/HDI-Project/Trane.svg?branch=master)](https://travis-ci.org/HDI-Project/Trane)
 
 # Trane
 Trane is a software package for automatically generating prediction problems and generating labels for supervised learning. Trane is a system designed to advance the automation of the machine learning problem solving pipeline.
 
-[![Trane Video](https://i.ytimg.com/vi/TrK5Tm9ic28/maxresdefault.jpg)](https://youtu.be/TrK5Tm9ic28)
+<p align="center">
+<a href="https://youtu.be/TrK5Tm9ic28"> <img src="https://i.ytimg.com/vi/TrK5Tm9ic28/maxresdefault.jpg" alt="Trane Introductory Video" style="width:60%;"/>
+</a>
+</p>
 
 
 ## Prediction Problems

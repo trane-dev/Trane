@@ -85,16 +85,23 @@ We use `pytest` to automatically collecting unit testings and `pytest-cov` to me
 ```
 
 ## Quick Usage
-We have [a tutorial notebook here](https://github.com/HDI-Project/Trane/blob/master/Tutorial.ipynb).
+We have [tutorial notebooks here](https://github.com/HDI-Project/Trane-Demos/tree/master/IPYNBs).
 
 
-## History 
-We started working on Trane in 2015. In its first iteration in 2016, we showed that it is possible to formally specify prediction problems using a language and then also created algorithms to generate prediction problems automatically. With other tools to synthesize features and generate models given a prediction problem - we were able to solve problems end-to-end. You can read our paper [here](https://dai.lids.mit.edu/wp-content/uploads/2017/10/Trane1.pdf). Ben Schreck's [thesis](https://dspace.mit.edu/bitstream/handle/1721.1/105963/965551096-MIT.pdf) goes even further to see if we can learn and filter uninteresting problems. 
+## History
+We started working on Trane in 2015. In its first iteration in 2016, we showed that it is possible to formally specify prediction problems using a language and then also created algorithms to generate prediction problems automatically. With other tools to synthesize features and generate models given a prediction problem - we were able to solve problems end-to-end. You can read our paper [here](https://dai.lids.mit.edu/wp-content/uploads/2017/10/Trane1.pdf). Ben Schreck's [thesis](https://dspace.mit.edu/bitstream/handle/1721.1/105963/965551096-MIT.pdf) goes even further to see if we can learn and filter uninteresting problems.
 
-This repository is a second iteration where we are focusing on usability, apis and showing more use cases and ultimately taking it to real world datasets. Stay tuned for more demos and examples. 
+This repository is a second iteration where we are focusing on usability, apis and showing more use cases and ultimately taking it to real world datasets. Stay tuned for more demos and examples.
+
+You can find the related theses here:
+
+* [Towards An Automatic Predictive Question Formulation](https://dspace.mit.edu/bitstream/handle/1721.1/105963/965551096-MIT.pdf?sequence=1)
+Benjamin J. Schreck, M.E. thesis, MIT Dept of EECS, June 2016. Advisor: Kalyan Veeramachaneni.
+* [End to End Machine Learning Workflow Using
+Automation Tools](https://dai.lids.mit.edu/wp-content/uploads/2018/05/Alex_MEng_final.pdf) Alexander Friedrich Nordin, MIT Dept of EECS, June, 2018. Advisor: Kalyan Veeramachaneni.
 
 
-## Citing Trane 
+## Citing Trane
 If you use Trane, please consider citing the following paper:
 
 Ben Schreck, Kalyan Veeramachaneni. [What Would a Data Scientist Ask? Automatically Formulating and Solving Predictive Problems.](https://dai.lids.mit.edu/wp-content/uploads/2017/10/Trane1.pdf) *IEEE DSAA 2016*, 440-451
@@ -113,8 +120,8 @@ BibTeX entry:
 ```
 
 ## TODO
-- Need an easier way to add customize operations. Currently, external plugin operations are not allowed. The bottleneck is we need to maintain a list of operations so that we can save, load, and iterate over operations. It's not easy to add an external operation into operation list. 
+- Need an easier way to add customize operations. Currently, external plugin operations are not allowed. The bottleneck is we need to maintain a list of operations so that we can save, load, and iterate over operations. It's not easy to add an external operation into operation list.
 - Currently, all operations are in-place operations. The aggregation ops simply take a record, change the value in the column and return. May not be a good design.
-- API for setting thresholds. 
+- API for setting thresholds.
 - Some NotImplementedError.
 - NL system should be independent of Trane. Seems better to generate NL from JSON.

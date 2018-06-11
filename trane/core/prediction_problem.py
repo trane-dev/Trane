@@ -28,7 +28,7 @@ class PredictionProblem:
         operations: list of Operations of type op_base
 
         Returns
-        ----------
+        -------
         None
         """
         self.operations = operations
@@ -51,7 +51,7 @@ class PredictionProblem:
             column of interest in the data
 
         Returns
-        ----------
+        -------
         is_valid: True/False if problem is valid
         filter_column_order_of_types: a list containing the types expected in the
             sequence of operations on the filter column
@@ -94,7 +94,7 @@ class PredictionProblem:
             to be set on the operations
 
         Returns
-        ----------
+        -------
         None
         """
         for idx, op in enumerate(self.operations):
@@ -117,7 +117,7 @@ class PredictionProblem:
             the column containing entities in the data
 
         Returns
-        ----------
+        -------
         hyper_parameters: list of hyper parameter settings
         """
         logging.debug("Performing generate_and_set_hyper_parameters...")
@@ -175,7 +175,7 @@ class PredictionProblem:
             sequence of operations on the label generating column
 
         Returns
-        ----------
+        -------
         pre_label_cutoff_time_execution_result: label for training time segment
         all_data_execution_result: label for testing (all time) time segment
 
@@ -247,7 +247,7 @@ class PredictionProblem:
         None
 
         Returns
-        ----------
+        -------
         description: natural language description
 
         """
@@ -268,7 +268,7 @@ class PredictionProblem:
         None
 
         Returns
-        ----------
+        -------
         json: JSON representation of the Prediction Problem.
 
         """
@@ -279,7 +279,8 @@ class PredictionProblem:
              "label_generating_column_order_of_types":
              self.label_generating_column_order_of_types})
 
-    def from_json(json_data):
+    @classmethod
+    def from_json(cls, json_data):
         """
         This function converts a JSON snippet
         to a prediction problem
@@ -289,7 +290,7 @@ class PredictionProblem:
         json_data: JSON code containing the prediction problem.
 
         Returns
-        ----------
+        -------
         problem: Prediction Problem
         """
         data = json.loads(json_data)
@@ -395,7 +396,7 @@ def select_by_diversity(dataframe, operation, label_generating_column,
     Returns
     ----------
     best_parameter_value: parameter setting for the operation.
-    best_df: the dataframe (possibly filtered depending on num_rows_to_execute_on) 
+    best_df: the dataframe (possibly filtered depending on num_rows_to_execute_on)
         after having the operation applied with the chosen parameter value.
     """
     logging.debug("Performing select_by_diversity")
@@ -488,7 +489,7 @@ def check_type(expected_type, actual_data):
     allowed_types_ordered = allowed_types_bool + allowed_types_int + allowed_types_text + allowed_types_float
     allowed_types_id = allowed_types_int + allowed_types_text + allowed_types_float
 
-    if expected_type == TableMeta.TYPE_CATEGORY:    
+    if expected_type == TableMeta.TYPE_CATEGORY:
         assert(type(actual_data) in allowed_types_category)
 
     elif expected_type == TableMeta.TYPE_BOOL:

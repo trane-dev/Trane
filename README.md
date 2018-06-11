@@ -12,8 +12,7 @@
 Trane is a software package for automatically generating prediction problems and generating labels for supervised learning. Trane is a system designed to advance the automation of the machine learning problem solving pipeline.
 
 <p align="center">
-<a href="https://youtu.be/TrK5Tm9ic28"> <img src="https://i.ytimg.com/vi/TrK5Tm9ic28/maxresdefault.jpg" alt="Trane Introductory Video" style="width:60%;"/>
-</a>
+  <a href="https://www.youtube-nocookie.com/embed/TrK5Tm9ic28"><img src="https://img.youtube-nocookie.com/vi/TrK5Tm9ic28/0.jpg" width="300" alt="Trane About Video"></a>
 </p>
 
 

@@ -93,6 +93,13 @@ We started working on Trane in 2015. In its first iteration in 2016, we showed t
 
 This repository is a second iteration where we are focusing on usability, apis and showing more use cases and ultimately taking it to real world datasets. Stay tuned for more demos and examples.
 
+You can find the related theses here:
+
+* [Towards An Automatic Predictive Question Formulation](https://dai.lids.mit.edu/wp-content/uploads/2017/10/Trane1.pdf)
+Benjamin J. Schreck, M.E. thesis, MIT Dept of EECS, June 2016. Advisor: Kalyan Veeramachaneni.
+* [End to End Machine Learning Workflow Using
+Automation Tools](https://dai.lids.mit.edu/wp-content/uploads/2018/05/Alex_MEng_final.pdf) Alexander Friedrich Nordin, MIT Dept of EECS, June, 2018. Advisor: Kalyan Veeramachaneni.
+
 
 ## Citing Trane
 If you use Trane, please consider citing the following paper:
@@ -111,13 +118,6 @@ BibTeX entry:
   organization={IEEE}
 }
 ```
-
-## Trane Code
-The Trane library was re-written by Alexander Nordin. You can find his thesis here:
-
-Alexander Friedrich Nordin, [End to End Machine Learning Workflow Using
-Automation Tools](https://dai.lids.mit.edu/wp-content/uploads/2018/05/Alex_MEng_final.pdf), 2018
-
 
 ## TODO
 - Need an easier way to add customize operations. Currently, external plugin operations are not allowed. The bottleneck is we need to maintain a list of operations so that we can save, load, and iterate over operations. It's not easy to add an external operation into operation list.

@@ -2,86 +2,73 @@
 # Each cutoff strategy will be it's own class.
 # The only function that should change across classes is
 # apply_cutoff_strategy()
+import numpy as np
+import pandas as pd
 
 
-__all__ = ["CutoffTimeBase", "ConstantCutoffTime", "DynamicCutoffTime"]
+__all__ = ["CutoffStrategy"]
 
 
-class CutoffTimeBase:
+class CutoffStrategy:
     """
-    Base class that all cutoff time strategies inherit.
+    Class that holds a CutoffStrategy. This is a measure to prevent leakage
 
-    Make Your Own
-    -------------
-    Simply make a new class that follows the requirements below and issue a pull request.
+    Parameters
+    ----------
+    generate_fn: a function that generates training and test cutoff times.
+        input: entity rows
+        output: a tuple with the following timestamps:
+            (training_cutoff, test_cutoff)
 
-    Requirements
-    ------------
-    get_cutoff: function that returns a training cutoff time and a label cutoff time.
+    Returns
+    -------
+    CutoffStrategy Instance
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, generate_fn, description='undescribed cutoff strategy'):
+        self.generate_fn = generate_fn
+        self.description = description
 
-    def generate_cutoffs(self, entity_to_data_dict, time_column):
+    def generate_cutoffs(self, df, entity_id_col):
         """
+        generate a cutoff dataframe. Takes about 10 sec to load, but then runs
+        inNlogN time.
 
         Parameters
         ----------
-        entity_to_data_dict: mapping from entities to their data
+        df: Pandas.DataFrame that problems are generated from
+        entity_id_col: str name of the entity_id_column
 
         Returns
         -------
-        entity_to_data_and_cutoff_dict: mapping from entities to a tuple of their
-            data and cutoff time
+        DF with three columns:
+        entity_id (indexed) | training_cutoff | test_cutoff
+
+        training_cutoff and test_cutoff are of type np.datetime64
         """
-        entity_to_data_and_cutoff_dict = {}
-        for entity in entity_to_data_dict:
-            entity_data = entity_to_data_dict[entity]
 
-            entity_training_cutoff, entity_label_cutoff = self.get_cutoff(
-                entity_data, time_column)
+        # group by the entity id column
+        grouped = df.groupby(entity_id_col)
 
-            entity_to_data_and_cutoff_dict[entity] = (
-                entity_data, entity_training_cutoff, entity_label_cutoff)
+        val_arr = []
 
-        return entity_to_data_and_cutoff_dict
+        # for each group, compute the training and test cutoff
+        for entity_id, df_group in grouped:
 
+            # we re-index by the entity_id column because
+            # a user's generate_fn may expect it
+            df_group.set_index(entity_id_col, inplace=True)
+            training_cutoff, test_cutoff = self.generate_fn(
+                entity_id, df_group)
 
-class ConstantCutoffTime(CutoffTimeBase):
-    """
-    Apply a constant cutoff time across all entities
-    """
+            # add this data to a long array
+            val_arr.extend((entity_id, training_cutoff, test_cutoff))
 
-    def __init__(self, training_cutoff, label_cutoff):
-        self.training_cutoff = training_cutoff
-        self.label_cutoff = label_cutoff
+        # reshape the array so that it has 3 columns.
+        # -1 indicates that the number of rows is inferred
+        data = np.array(val_arr).reshape(-1, 3)
+        cutoff_df = pd.DataFrame(
+            data, columns=[entity_id_col, 'training_cutoff', 'test_cutoff'])
+        cutoff_df.set_index(entity_id_col, inplace=True)
 
-    def get_cutoff(self, entity_data, time_column):
-        return self.training_cutoff, self.label_cutoff
-
-
-class DynamicCutoffTime(CutoffTimeBase):
-    """
-    DynamicCutoffTime uses 1 - training_label_ratio - test_label_ratio
-    fraction of the data to generate training features.
-    An additional training_label_ratio fraction of the data is
-    used to label the training examples (1 - test_label_ratio)
-    An additional test_label_ratio fraction of the data is used to label
-    the test examples. (1 or all the data)
-    """
-
-    def __init__(self, training_label_ratio=.2, test_label_ratio=.2):
-        self.training_label_ratio = training_label_ratio
-        self.test_label_ratio = test_label_ratio
-
-    def get_cutoff(self, entity_data, time_column):
-        timestamps = entity_data[time_column].copy()
-        timestamps = timestamps.sort_values()
-
-        N = len(timestamps)
-
-        training_cutoff_index = int((1 - self.training_label_ratio - self.test_label_ratio) * N)
-        label_cutoff_index = int((1 - self.test_label_ratio) * N)
-
-        return timestamps.iloc[training_cutoff_index], timestamps.iloc[label_cutoff_index]
+        return cutoff_df

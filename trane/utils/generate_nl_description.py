@@ -2,7 +2,6 @@ from ..ops.aggregation_ops import *  # noqa
 from ..ops.filter_ops import *  # noqa
 from ..ops.row_ops import *  # noqa
 from ..ops.transformation_ops import *  # noqa
-from .generate_cutoff_times import *  # noqa
 from .table_meta import TableMeta as TM
 
 __all__ = ['generate_nl_description']

@@ -1,7 +1,7 @@
 from pandas import DataFrame
 import numpy as np
 
-from trane.utils.generate_cutoff_times import CutoffStrategy  # noqa
+from trane.core.cutoff_strategy import CutoffStrategy  # noqa
 
 
 def test_fixed_cutoff_time():

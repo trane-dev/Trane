@@ -2,9 +2,6 @@ import numpy as np
 import pandas as pd
 
 
-__all__ = ["CutoffStrategy"]
-
-
 class CutoffStrategy:
     """
     Class that holds a CutoffStrategy. This is a measure to prevent leakage

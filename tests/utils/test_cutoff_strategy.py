@@ -1,8 +1,7 @@
 import numpy as np
+import pandas as pd
 
-from pandas import DataFrame
-
-from trane.core.cutoff_strategy import CutoffStrategy  # noqa
+from trane.core.cutoff_strategy import CutoffStrategy
 
 
 def test_fixed_cutoff_time():
@@ -15,7 +14,7 @@ def test_fixed_cutoff_time():
         generate_fn=generate_fn,
         description='foo description')
 
-    test_data = DataFrame(
+    test_data = pd.DataFrame(
         data=np.arange(90).reshape(-1, 3),
         columns=['entity_id', 'other_data', 'other_data_2'])
 
@@ -56,7 +55,7 @@ def test_dynamic_cutoff_time():
                 np.datetime64('1980-02-23')],
             'other_col': ['d', 'e', 'f']}
 
-    test_data = DataFrame(data)
+    test_data = pd.DataFrame(data)
 
     cutoff_df = cutoff_strategy.generate_cutoffs(
         df=test_data, entity_id_col='entity_id')

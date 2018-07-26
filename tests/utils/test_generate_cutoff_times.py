@@ -1,5 +1,6 @@
-from pandas import DataFrame
 import numpy as np
+
+from pandas import DataFrame
 
 from trane.core.cutoff_strategy import CutoffStrategy  # noqa
 

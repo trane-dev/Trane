@@ -2,10 +2,11 @@
 # sys.path.insert(0, '/Users/Alexander/Documents/Trane__HDI_REPO/')
 import os
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 import trane
+
 from trane.core.labeler import *  # noqa
 from trane.core.prediction_problem import PredictionProblem
 from trane.core.prediction_problem_saver import *  # noqa

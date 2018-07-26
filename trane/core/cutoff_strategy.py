@@ -1,7 +1,3 @@
-# IMPORTANT INFO ABOUT FILE STRUCTURE:
-# Each cutoff strategy will be it's own class.
-# The only function that should change across classes is
-# apply_cutoff_strategy()
 import numpy as np
 import pandas as pd
 

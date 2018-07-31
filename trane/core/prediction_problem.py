@@ -21,17 +21,19 @@ class PredictionProblem:
     each operation.
     """
 
-    def __init__(self, operations):
+    def __init__(self, operations, cutoff_strategy=None):
         """
         Parameters
         ----------
         operations: list of Operations of type op_base
+        cutoff_strategy: a CutoffStrategy object
 
         Returns
         -------
         None
         """
         self.operations = operations
+        self.cutoff_strategy = cutoff_strategy
         self.filter_column_order_of_types = None
         self.label_generating_column_order_of_types = None
 
@@ -298,7 +300,7 @@ class PredictionProblem:
         data = json.loads(json_data)
         operations = [op_from_json(json.dumps(item))
                       for item in data['operations']]
-        problem = PredictionProblem(operations)
+        problem = PredictionProblem(operations, cutoff_strategy=None)
         problem.filter_column_order_of_types = data[
             'filter_column_order_of_types']
         problem.label_generating_column_order_of_types = data[

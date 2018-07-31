@@ -81,7 +81,7 @@ class PredictionProblemGenerator:
                 transformation_op_obj,
                 aggregation_op_obj]
 
-            prediction_problem = PredictionProblem(operations)
+            prediction_problem = PredictionProblem(operations, cutoff_strategy=None)
 
             logging.debug("prediction problem generated, now checking validity...")
 

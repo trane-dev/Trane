@@ -58,13 +58,15 @@ def test_labeler_apply():
 
     print(cutoff_df)
 
+    operations = [
+        AllFilterOp(label_generating_column),
+        IdentityRowOp(label_generating_column),
+        IdentityTransformationOp(label_generating_column),
+        LastAggregationOp(label_generating_column)]
+
     prediction_problem = PredictionProblem(
-        [AllFilterOp(label_generating_column),
-         IdentityRowOp(
-            label_generating_column),
-         IdentityTransformationOp(
-            label_generating_column),
-         LastAggregationOp(label_generating_column)])
+        operations=operations,
+        cutoff_strategy=None)
 
     (is_valid_prediction_problem,
         filter_column_order_of_types,

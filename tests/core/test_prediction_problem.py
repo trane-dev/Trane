@@ -38,15 +38,16 @@ def test_hyper_parameter_generation():
     label_generating_column = "fare"
     filter_column = "taxi_id"
     entity_id_column = "taxi_id"
-    prediction_problem = PredictionProblem([GreaterFilterOp(filter_column),
-                                            GreaterRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
-    prediction_problem.generate_and_set_hyper_parameters(dataframe,
-                                                         label_generating_column, filter_column,
-                                                         entity_id_column)
+
+    operations = [GreaterFilterOp(filter_column),
+                  GreaterRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
+
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
+    prediction_problem.generate_and_set_hyper_parameters(
+        dataframe, label_generating_column, filter_column, entity_id_column)
 
     op1_hyper_parameter = prediction_problem.operations[0].hyper_parameter_settings
     op2_hyper_parameter = prediction_problem.operations[1].hyper_parameter_settings
@@ -75,16 +76,16 @@ def test_hashing_collisions():
 def test_hyper_parameter_generation_2():
     label_generating_column = "c1"
     filter_column = "c2"
+    operations = [GreaterFilterOp(filter_column),
+                  GreaterRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
 
-    prediction_problem = PredictionProblem([GreaterFilterOp(filter_column),
-                                            GreaterRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
-    prediction_problem.generate_and_set_hyper_parameters(dataframe2,
-                                                         label_generating_column, filter_column,
-                                                         entity_id_column="c1")
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
+    prediction_problem.generate_and_set_hyper_parameters(
+        dataframe2, label_generating_column, filter_column,
+        entity_id_column="c1")
 
     op1_hyper_parameter = prediction_problem.operations[0].hyper_parameter_settings
     op2_hyper_parameter = prediction_problem.operations[1].hyper_parameter_settings
@@ -100,22 +101,22 @@ def test_hyper_parameter_generation_2():
 def test_op_type_check():
     filter_column = "fare"
     label_generating_column = "fare"
+    operations = [AllFilterOp(filter_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
     table_meta = TableMeta.from_json(json_str)
 
-    prediction_problem_correct_types = PredictionProblem([AllFilterOp(filter_column),
-                                                          IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
+    prediction_problem_correct_types = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
 
     label_generating_column = "vendor_id"
-    prediction_problem_incorrect_types = PredictionProblem([AllFilterOp(filter_column),
-                                                            IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LMFAggregationOp(label_generating_column)])
+    operations = [AllFilterOp(filter_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LMFAggregationOp(label_generating_column)]
+    prediction_problem_incorrect_types = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
 
     (
         correct_is_valid,
@@ -149,13 +150,13 @@ def test_execute():
 
     time_column = "trip_id"
     cutoff_time = 100
+    operations = [AllFilterOp(label_generating_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
 
-    prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
-                                            IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
 
     expected = 41.35
     precutoff_time, all_data = prediction_problem.execute(
@@ -167,12 +168,12 @@ def test_execute():
 
 def test_to_and_from_json():
     label_generating_column = "fare"
-    prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
-                                            IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
+    operations = [AllFilterOp(label_generating_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
     json_str = prediction_problem.to_json()
     prediction_problem_from_json = PredictionProblem.from_json(json_str)
 
@@ -181,12 +182,12 @@ def test_to_and_from_json():
 
 def test_to_and_from_json_with_order_of_types():
     label_generating_column = "fare"
-    prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
-                                            IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
+    operations = [AllFilterOp(label_generating_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
     prediction_problem.filter_column_order_of_types = [TableMeta.TYPE_INTEGER]
     prediction_problem.label_generating_column_order_of_types = \
         [TableMeta.TYPE_INTEGER, TableMeta.TYPE_BOOL, TableMeta.TYPE_CATEGORY]
@@ -198,18 +199,14 @@ def test_to_and_from_json_with_order_of_types():
 
 def test_equality():
     label_generating_column = "fare"
-    prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
-                                            IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
-    prediction_problem_clone = PredictionProblem([AllFilterOp(label_generating_column),
-                                                  IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
+    operations = [AllFilterOp(label_generating_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
+    prediction_problem_clone = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
 
     assert(prediction_problem_clone == prediction_problem)
 

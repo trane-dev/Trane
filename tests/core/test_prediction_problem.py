@@ -240,8 +240,11 @@ class TestPredictionProblemMethods(unittest.TestCase):
         mock_cutoff_strategy = self.create_patch(
             'trane.core.CutoffStrategy')
 
+        self.entity_col = 'entity_col'
+
         self.problem = PredictionProblem(
-            operations=operations, cutoff_strategy=mock_cutoff_strategy)
+            operations=operations, entity_id_col=self.entity_col,
+            cutoff_strategy=mock_cutoff_strategy)
 
     def create_patch(self, name):
         # helper method for creating patches
@@ -253,5 +256,18 @@ class TestPredictionProblemMethods(unittest.TestCase):
     def test_cutoff_strategy_exists(self):
         self.assertIsNotNone(self.problem.cutoff_strategy)
 
+    def entity_id_col_exists(self):
+        self.assertIsNot(self.problem.entity_id_col)
+
     def test_generate_cutoffs_method_exists(self):
         self.assertIsNotNone(self.problem.generate_cutoffs)
+
+    def test_generate_cutoffs_method_calls_cutoff_strategy_gen_cutoffs(self):
+        self.problem.generate_cutoffs(df=None)
+
+        self.assertTrue(self.problem.cutoff_strategy.generate_cutoffs.called)
+
+        # entity_column passed?
+        self.assertTrue(
+            self.entity_col in
+            self.problem.cutoff_strategy.generate_cutoffs.call_args[0])

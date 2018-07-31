@@ -25,7 +25,8 @@ class CutoffStrategy:
     def generate_cutoffs(self, df, entity_id_col):
         """
         generate a cutoff dataframe. Takes about 10 sec to load, but then runs
-        inNlogN time.
+        inNlogN time. (probably. Haven't checked numpy and pandas code. That's
+        just what anecdotally seen in testing)
 
         Parameters
         ----------

@@ -1,3 +1,6 @@
+import unittest
+
+from mock import patch
 import pandas as pd
 
 from trane.core.prediction_problem import *  # noqa
@@ -226,3 +229,29 @@ def test_entropy():
     assert(entropy_b == 1.9061547465398496)
     assert(entropy_c == 0.0)
     assert(entropy_d == 0.6931471805599453)
+
+
+class TestPredictionProblemMethods(unittest.TestCase):
+    def setUp(self):
+        mock_op = self.create_patch(
+            'trane.ops.OpBase')
+        operations = [mock_op for x in range(4)]
+
+        mock_cutoff_strategy = self.create_patch(
+            'trane.core.CutoffStrategy')
+
+        self.problem = PredictionProblem(
+            operations=operations, cutoff_strategy=mock_cutoff_strategy)
+
+    def create_patch(self, name):
+        # helper method for creating patches
+        patcher = patch(name)
+        thing = patcher.start()
+        self.addCleanup(patcher.stop)
+        return thing
+
+    def test_cutoff_strategy_exists(self):
+        self.assertIsNotNone(self.problem.cutoff_strategy)
+
+    def test_generate_cutoffs_method_exists(self):
+        self.assertIsNotNone(self.problem.generate_cutoffs)

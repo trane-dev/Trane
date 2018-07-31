@@ -2,6 +2,8 @@ import json
 import logging
 import random
 import time
+import warnings
+
 from collections import Counter
 
 import numpy as np
@@ -36,6 +38,14 @@ class PredictionProblem:
         self.cutoff_strategy = cutoff_strategy
         self.filter_column_order_of_types = None
         self.label_generating_column_order_of_types = None
+
+    def generate_cutoffs(self):
+        if self.cutoff_strategy is None:
+            warnings.warn(
+                "Problem cutoff strategy not specified. Returning None",
+                RuntimeWarning)
+            return None
+
 
     def is_valid_prediction_problem(
             self, table_meta, filter_column, label_generating_column):

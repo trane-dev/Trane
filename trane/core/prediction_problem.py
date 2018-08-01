@@ -1,5 +1,6 @@
 import json
 import logging
+import pickle
 import random
 import time
 import warnings
@@ -318,6 +319,10 @@ class PredictionProblem:
         problem.label_generating_column_order_of_types = data[
             'label_generating_column_order_of_types']
         return problem
+
+    def _pickle_cutoff_strategy(self):
+        cutoff_pickle = pickle.dumps(self.cutoff_strategy)
+        return cutoff_pickle
 
     def __eq__(self, other):
         """Overrides the default implementation"""

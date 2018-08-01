@@ -237,14 +237,17 @@ class TestPredictionProblemMethods(unittest.TestCase):
             'trane.ops.OpBase')
         operations = [mock_op for x in range(4)]
 
-        mock_cutoff_strategy = self.create_patch(
+        self.mock_cutoff_strategy = self.create_patch(
             'trane.core.CutoffStrategy')
 
         self.entity_col = 'entity_col'
 
         self.problem = PredictionProblem(
             operations=operations, entity_id_col=self.entity_col,
-            cutoff_strategy=mock_cutoff_strategy)
+            cutoff_strategy=self.mock_cutoff_strategy)
+
+        self.mock_pickle = self.create_patch(
+            'trane.core.prediction_problem.pickle')
 
     def create_patch(self, name):
         # helper method for creating patches
@@ -271,3 +274,13 @@ class TestPredictionProblemMethods(unittest.TestCase):
         self.assertTrue(
             self.entity_col in
             self.problem.cutoff_strategy.generate_cutoffs.call_args[0])
+
+    def test_to_json_exists(self):
+        self.assertIsNotNone(self.problem.to_json)
+
+    def test_pickle_cutoff_strategy(self):
+        self.assertIsNotNone(self.problem._pickle_cutoff_strategy)
+        cutoff_pickle = self.problem._pickle_cutoff_strategy()
+
+        self.assertEqual(
+            cutoff_pickle, self.mock_pickle.dumps(self.mock_cutoff_strategy))

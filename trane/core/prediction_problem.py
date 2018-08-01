@@ -49,7 +49,6 @@ class PredictionProblem:
 
         return self.cutoff_strategy.generate_cutoffs(df, self.entity_id_col)
 
-
     def is_valid_prediction_problem(
             self, table_meta, filter_column, label_generating_column):
         """

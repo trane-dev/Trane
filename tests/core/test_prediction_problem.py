@@ -1,7 +1,7 @@
 import unittest
 
-from mock import patch
 import pandas as pd
+from mock import patch
 
 from trane.core.prediction_problem import *  # noqa
 from trane.core.prediction_problem import entropy_of_a_list

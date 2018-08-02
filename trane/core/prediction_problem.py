@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import pickle
 import random
 import time
@@ -67,10 +68,11 @@ class PredictionProblem:
         Returns
         -------
         is_valid: True/False if problem is valid
-        filter_column_order_of_types: a list containing the types expected in the
-            sequence of operations on the filter column
-        label_generating_column_order_of_types: a list containing the types expected
-            in the sequence of operations on the label generating column
+        filter_column_order_of_types: a list containing the types
+            expected in the sequence of operations on the filter column
+        label_generating_column_order_of_types: a list containing the types
+            expected in the sequence of operations on the label generating
+            column
         """
         logging.debug("Performing is_valid_prediction_problem...")
 
@@ -115,10 +117,12 @@ class PredictionProblem:
             hyper_parameter = hyper_parameters[idx]
             op.set_hyper_parameter(hyper_parameter)
 
-    def generate_and_set_hyper_parameters(self, dataframe, label_generating_column,
-                                          filter_column, entity_id_column):
+    def generate_and_set_hyper_parameters(
+            self, dataframe, label_generating_column, filter_column,
+            entity_id_column):
         """
-        Generate then set hyper parameters for the operations in this prediction problem.
+        Generate then set hyper parameters for the operations in this
+        prediction problem.
 
         Parameters
         ----------
@@ -274,6 +278,73 @@ class PredictionProblem:
                 description += "->"
         return description
 
+    def save(self, path, problem_name):
+        '''
+        Saves the pediction problem in two files.
+
+        One file is a pickle of the cutoff strategy.
+        The other file is the jsonified operations and the relative path to
+        that cutoff strategy.
+
+        Parameters
+        ----------
+        path: str - the directory in which save the problem
+        problem_name: str - the filename to assign the problem
+
+        Returns
+        -------
+        dict
+        {'saved_correctly': bool,
+         'directory_created': bool,
+         'problem_name': str}
+        The new problem_name may have changed due to a filename collision
+
+        '''
+        json_saved = False
+        pickle_saved = False
+        created_directory = False
+
+        # create directory if it doesn't exist
+        if not os.path.isdir(path):
+            os.makedirs(path)
+            created_directory = True
+
+        # rename the problem_name if already exists
+        json_file_exists = os.path.exists(
+            os.path.join(path, problem_name + '.json'))
+        pickle_file_exists = os.path.exists(
+            os.path.join(path, problem_name + 'pkl'))
+
+        i = 1
+        while json_file_exists or pickle_file_exists:
+            problem_name += str(i)
+
+            i += 1
+            json_file_exists = os.path.exists(
+                os.path.join(path, problem_name + '.json'))
+            pickle_file_exists = os.path.exists(
+                os.path.join(path, problem_name + 'pkl'))
+
+        # get the cutoff_strategy bytes
+        cutoff_pickle_bytes = self._pickle_cutoff_strategy()
+
+        # add a key to the problem json
+        json_dict = json.loads(self.to_json())
+        json_dict['cutoff_pickle'] = problem_name + '.pkl'
+
+        # write the files
+        with open(os.path.join(path, problem_name + '.json'), 'w') as f:
+            json.dump(obj=json_dict, fp=f, indent=4, sort_keys=True)
+            json_saved = True
+
+        with open(os.path.join(path, problem_name + '.pkl'), 'wb') as f:
+            f.write(cutoff_pickle_bytes)
+            pickle_saved = True
+
+        return({'saved_correctly': json_saved & pickle_saved,
+                'created_directory': created_directory,
+                'problem_name': problem_name})
+
     def to_json(self):
         """
         This function converts Prediction Problems to JSON
@@ -320,6 +391,18 @@ class PredictionProblem:
         return problem
 
     def _pickle_cutoff_strategy(self):
+        '''
+        Function creates a pickle for the problem's associated cutoff strategy
+
+        This function requires cutoff time to be assigned.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        a pickle of the cutoff strategy
+        '''
         cutoff_pickle = pickle.dumps(self.cutoff_strategy)
         return cutoff_pickle
 

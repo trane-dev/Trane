@@ -278,6 +278,33 @@ class TestPredictionProblemMethods(unittest.TestCase):
     def test_to_json_exists(self):
         self.assertIsNotNone(self.problem.to_json)
 
+    def test_save(self):
+        self.assertIsNotNone(self.problem.save)
+
+        pickle_cutoff_strategy_patch = self.create_patch(
+            'trane.core.PredictionProblem._pickle_cutoff_strategy')
+        os_path_exists_patch = self.create_patch(
+            'trane.core.prediction_problem.os.path.exists')
+        os_path_exists_patch.return_value = False
+        to_json_patch = self.create_patch(
+            'trane.core.PredictionProblem.to_json')
+        pickle_cutoff_strategy_patch = self.create_patch(
+            'trane.core.PredictionProblem._pickle_cutoff_strategy')
+
+        path = '../Data'
+        problem_name = 'problem_name'
+
+        try:
+            self.problem.save(path=path, problem_name=problem_name)
+        except Exception as e:
+            print('test_save doesn\'t test i/o. '
+                  'This exception statement catches the error.')
+            print(e)
+
+        self.assertTrue(to_json_patch.called)
+        self.assertTrue(pickle_cutoff_strategy_patch.called)
+        self.assertTrue(os_path_exists_patch.called)
+
     def test_pickle_cutoff_strategy(self):
         self.assertIsNotNone(self.problem._pickle_cutoff_strategy)
         cutoff_pickle = self.problem._pickle_cutoff_strategy()

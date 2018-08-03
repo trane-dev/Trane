@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-import pickle
+import dill
 import random
 import time
 import warnings
@@ -282,7 +282,7 @@ class PredictionProblem:
         '''
         Saves the pediction problem in two files.
 
-        One file is a pickle of the cutoff strategy.
+        One file is a dill of the cutoff strategy.
         The other file is the jsonified operations and the relative path to
         that cutoff strategy.
 
@@ -301,7 +301,7 @@ class PredictionProblem:
 
         '''
         json_saved = False
-        pickle_saved = False
+        dill_saved = False
         created_directory = False
 
         # create directory if it doesn't exist
@@ -312,36 +312,36 @@ class PredictionProblem:
         # rename the problem_name if already exists
         json_file_exists = os.path.exists(
             os.path.join(path, problem_name + '.json'))
-        pickle_file_exists = os.path.exists(
-            os.path.join(path, problem_name + 'pkl'))
+        dill_file_exists = os.path.exists(
+            os.path.join(path, problem_name + '.dill'))
 
         i = 1
-        while json_file_exists or pickle_file_exists:
+        while json_file_exists or dill_file_exists:
             problem_name += str(i)
 
             i += 1
             json_file_exists = os.path.exists(
                 os.path.join(path, problem_name + '.json'))
-            pickle_file_exists = os.path.exists(
-                os.path.join(path, problem_name + 'pkl'))
+            dill_file_exists = os.path.exists(
+                os.path.join(path, problem_name + '.dill'))
 
         # get the cutoff_strategy bytes
-        cutoff_pickle_bytes = self._pickle_cutoff_strategy()
+        cutoff_dill_bytes = self._dill_cutoff_strategy()
 
         # add a key to the problem json
         json_dict = json.loads(self.to_json())
-        json_dict['cutoff_pickle'] = problem_name + '.pkl'
+        json_dict['cutoff_dill'] = problem_name + '.dill'
 
         # write the files
         with open(os.path.join(path, problem_name + '.json'), 'w') as f:
             json.dump(obj=json_dict, fp=f, indent=4, sort_keys=True)
             json_saved = True
 
-        with open(os.path.join(path, problem_name + '.pkl'), 'wb') as f:
-            f.write(cutoff_pickle_bytes)
-            pickle_saved = True
+        with open(os.path.join(path, problem_name + '.dill'), 'wb') as f:
+            f.write(cutoff_dill_bytes)
+            dill_saved = True
 
-        return({'saved_correctly': json_saved & pickle_saved,
+        return({'saved_correctly': json_saved & dill_saved,
                 'created_directory': created_directory,
                 'problem_name': problem_name})
 
@@ -390,9 +390,9 @@ class PredictionProblem:
             'label_generating_column_order_of_types']
         return problem
 
-    def _pickle_cutoff_strategy(self):
+    def _dill_cutoff_strategy(self):
         '''
-        Function creates a pickle for the problem's associated cutoff strategy
+        Function creates a dill for the problem's associated cutoff strategy
 
         This function requires cutoff time to be assigned.
 
@@ -401,10 +401,10 @@ class PredictionProblem:
 
         Returns
         -------
-        a pickle of the cutoff strategy
+        a dill of the cutoff strategy
         '''
-        cutoff_pickle = pickle.dumps(self.cutoff_strategy)
-        return cutoff_pickle
+        cutoff_dill = dill.dumps(self.cutoff_strategy)
+        return cutoff_dill
 
     def __eq__(self, other):
         """Overrides the default implementation"""

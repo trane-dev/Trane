@@ -246,8 +246,8 @@ class TestPredictionProblemMethods(unittest.TestCase):
             operations=operations, entity_id_col=self.entity_col,
             cutoff_strategy=self.mock_cutoff_strategy)
 
-        self.mock_pickle = self.create_patch(
-            'trane.core.prediction_problem.pickle')
+        self.mock_dill = self.create_patch(
+            'trane.core.prediction_problem.dill')
 
     def create_patch(self, name):
         # helper method for creating patches
@@ -281,15 +281,15 @@ class TestPredictionProblemMethods(unittest.TestCase):
     def test_save(self):
         self.assertIsNotNone(self.problem.save)
 
-        pickle_cutoff_strategy_patch = self.create_patch(
-            'trane.core.PredictionProblem._pickle_cutoff_strategy')
+        dill_cutoff_strategy_patch = self.create_patch(
+            'trane.core.PredictionProblem._dill_cutoff_strategy')
         os_path_exists_patch = self.create_patch(
             'trane.core.prediction_problem.os.path.exists')
         os_path_exists_patch.return_value = False
         to_json_patch = self.create_patch(
             'trane.core.PredictionProblem.to_json')
-        pickle_cutoff_strategy_patch = self.create_patch(
-            'trane.core.PredictionProblem._pickle_cutoff_strategy')
+        dill_cutoff_strategy_patch = self.create_patch(
+            'trane.core.PredictionProblem._dill_cutoff_strategy')
 
         path = '../Data'
         problem_name = 'problem_name'
@@ -302,12 +302,12 @@ class TestPredictionProblemMethods(unittest.TestCase):
             print(e)
 
         self.assertTrue(to_json_patch.called)
-        self.assertTrue(pickle_cutoff_strategy_patch.called)
+        self.assertTrue(dill_cutoff_strategy_patch.called)
         self.assertTrue(os_path_exists_patch.called)
 
-    def test_pickle_cutoff_strategy(self):
-        self.assertIsNotNone(self.problem._pickle_cutoff_strategy)
-        cutoff_pickle = self.problem._pickle_cutoff_strategy()
+    def test_dill_cutoff_strategy(self):
+        self.assertIsNotNone(self.problem._dill_cutoff_strategy)
+        cutoff_dill = self.problem._dill_cutoff_strategy()
 
         self.assertEqual(
-            cutoff_pickle, self.mock_pickle.dumps(self.mock_cutoff_strategy))
+            cutoff_dill, self.mock_dill.dumps(self.mock_cutoff_strategy))

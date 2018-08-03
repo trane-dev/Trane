@@ -345,6 +345,42 @@ class PredictionProblem:
                 'created_directory': created_directory,
                 'problem_name': problem_name})
 
+    @classmethod
+    def load(cls, json_file_path):
+        '''
+        Load a prediction problem from json file.
+        If the file links to a dill (binary) cutoff_srategy, also load that
+        and assign it to the prediction problem.
+
+        Parameters
+        ----------
+        json_file_path: str, path and filename for the json file
+
+        Returns
+        -------
+        PredictionProblem
+
+        '''
+        with open(json_file_path, 'r') as f:
+            problem_dict = json.load(f)
+            problem = cls.from_json(problem_dict)
+
+        cutoff_strategy_file_name = problem_dict.get('cutoff_dill', None)
+
+        if cutoff_strategy_file_name:
+            # reconstruct cutoff strategy filename
+            pickle_path = os.path.join(
+                os.path.dirname(json_file_path), cutoff_strategy_file_name)
+
+            # load cutoff strategy from file
+            with open(pickle_path, 'rb') as f:
+                cutoff_strategy = dill.load(f)
+
+            # assign cutoff strategy to problem
+            problem.cutoff_strategy = cutoff_strategy
+
+        return problem
+
     def to_json(self):
         """
         This function converts Prediction Problems to JSON
@@ -374,13 +410,19 @@ class PredictionProblem:
 
         Parameters
         ----------
-        json_data: JSON code containing the prediction problem.
+        json_data: JSON code or dict containing the prediction problem.
 
         Returns
         -------
         problem: Prediction Problem
         """
-        data = json.loads(json_data)
+
+        data = json_data
+
+        # only tries json.loads if json_data is not a dict
+        if type(data) != dict:
+            data = json.loads(json_data)
+
         operations = [op_from_json(json.dumps(item))
                       for item in data['operations']]
         problem = PredictionProblem(operations, cutoff_strategy=None)

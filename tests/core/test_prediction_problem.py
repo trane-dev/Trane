@@ -1,3 +1,4 @@
+import sys
 import unittest
 
 import pandas as pd
@@ -304,6 +305,32 @@ class TestPredictionProblemMethods(unittest.TestCase):
         self.assertTrue(to_json_patch.called)
         self.assertTrue(dill_cutoff_strategy_patch.called)
         self.assertTrue(os_path_exists_patch.called)
+
+    def test_load(self):
+        self.assertIsNotNone(PredictionProblem.load)
+
+        open_patch = None
+        if (sys.version_info > (3, 0)):
+            open_patch = self.create_patch('builtins.open')
+        else:
+            open_patch = self.create_patch('__builtin__.open')
+
+        json_patch = self.create_patch(
+            'trane.core.prediction_problem.json')
+        from_json_patch = self.create_patch(
+            'trane.core.PredictionProblem.from_json')
+        os_path_patch = self.create_patch(
+            'trane.core.prediction_problem.os.path')
+        dill_patch = self.create_patch(
+            'trane.core.prediction_problem.dill')
+
+        PredictionProblem.load('filepath.json')
+        self.assertTrue(open_patch.called)
+        self.assertTrue(json_patch.load.called)
+        self.assertTrue(from_json_patch.called)
+        self.assertTrue(os_path_patch.join.called)
+        self.assertTrue(os_path_patch.dirname.called)
+        self.assertTrue(dill_patch.load.called)
 
     def test_dill_cutoff_strategy(self):
         self.assertIsNotNone(self.problem._dill_cutoff_strategy)

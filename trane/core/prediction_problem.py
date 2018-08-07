@@ -1,12 +1,12 @@
 import json
 import logging
 import os
-import dill
 import random
 import time
 import warnings
 from collections import Counter
 
+import dill
 import numpy as np
 from scipy import stats
 
@@ -50,6 +50,32 @@ class PredictionProblem:
 
         return self.cutoff_strategy.generate_cutoffs(df, self.entity_id_col)
 
+    def is_valid(self, table_meta):
+        '''
+        Typechecking for operations. Insures that their input and output types
+        match.
+
+        Parameters
+        ----------
+        table_meta: TableMeta object. Contains meta information about the data
+
+        Returns
+        -------
+        Bool
+        '''
+        # don't contaminate original table_meta
+        temp_meta = table_meta.copy()
+
+        # sort each operation in its respective bucket
+        for op in self.operations:
+            # op.type_check returns a modified temp_meta,
+            # which accounts for the operation having taken place
+            temp_meta = op.op_type_check(temp_meta)
+            if temp_meta is None:
+                return False
+
+        return True
+
     def is_valid_prediction_problem(
             self, table_meta, filter_column, label_generating_column):
         """
@@ -83,6 +109,7 @@ class PredictionProblem:
             table_meta.get_type(label_generating_column)]
 
         filter_op = self.operations[0]
+
         temp_meta = filter_op.op_type_check(temp_meta)
         if not temp_meta:
             return False, None, None
@@ -187,10 +214,11 @@ class PredictionProblem:
             is segmented. data after the time is used for
             labels during test. data before the time is used
             for labels during training.
-        filter_column_order_of_types: a list containing the types expected in the
-            sequence of operations on the filter column
-        label_generating_column_order_of_types: a list containing the types expected
-            in the sequence of operations on the label generating column
+        filter_column_order_of_types: a list containing the types expected in
+            the sequence of operations on the filter column
+        label_generating_column_order_of_types: a list containing the types
+            expected in the sequence of operations on the label generating
+            column
 
         Returns
         -------

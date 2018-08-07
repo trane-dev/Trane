@@ -2,10 +2,9 @@ import sys
 import unittest
 
 import pandas as pd
-from mock import patch
+from mock import MagicMock, patch
 
-from trane.core.prediction_problem import *  # noqa
-from trane.core.prediction_problem import entropy_of_a_list
+from trane.core.prediction_problem import PredictionProblem, entropy_of_a_list
 from trane.ops.aggregation_ops import *  # noqa
 from trane.ops.filter_ops import *  # noqa
 from trane.ops.row_ops import *  # noqa
@@ -53,8 +52,10 @@ def test_hyper_parameter_generation():
     prediction_problem.generate_and_set_hyper_parameters(
         dataframe, label_generating_column, filter_column, entity_id_column)
 
-    op1_hyper_parameter = prediction_problem.operations[0].hyper_parameter_settings
-    op2_hyper_parameter = prediction_problem.operations[1].hyper_parameter_settings
+    op1_hyper_parameter = prediction_problem.operations[
+        0].hyper_parameter_settings
+    op2_hyper_parameter = prediction_problem.operations[
+        1].hyper_parameter_settings
     prediction_problem.operations[2].hyper_parameter_settings
     prediction_problem.operations[3].hyper_parameter_settings
 
@@ -91,8 +92,10 @@ def test_hyper_parameter_generation_2():
         dataframe2, label_generating_column, filter_column,
         entity_id_column="c1")
 
-    op1_hyper_parameter = prediction_problem.operations[0].hyper_parameter_settings
-    op2_hyper_parameter = prediction_problem.operations[1].hyper_parameter_settings
+    op1_hyper_parameter = prediction_problem.operations[
+        0].hyper_parameter_settings
+    op2_hyper_parameter = prediction_problem.operations[
+        1].hyper_parameter_settings
     prediction_problem.operations[2].hyper_parameter_settings
     prediction_problem.operations[3].hyper_parameter_settings
 
@@ -233,6 +236,7 @@ def test_entropy():
 
 
 class TestPredictionProblemMethods(unittest.TestCase):
+
     def setUp(self):
         mock_op = self.create_patch(
             'trane.ops.OpBase')
@@ -338,3 +342,33 @@ class TestPredictionProblemMethods(unittest.TestCase):
 
         self.assertEqual(
             cutoff_dill, self.mock_dill.dumps(self.mock_cutoff_strategy))
+
+    def test_is_valid_succeeds(self):
+        self.assertIsNotNone(self.problem.is_valid)
+
+        table_meta_mock = MagicMock()
+        table_meta_mock.copy.return_value = table_meta_mock
+
+        for op in self.problem.operations:
+            op.op_type_check.return_value = table_meta_mock
+
+        self.assertTrue(
+            self.problem.is_valid(table_meta=table_meta_mock))
+
+        self.assertTrue(table_meta_mock.copy.called)
+        for op in self.problem.operations:
+            self.assertTrue(op.op_type_check.called)
+            self.assertTrue(op.op_type_check.call_args[
+                            0][0] == table_meta_mock)
+
+    def test_is_valid_fails(self):
+        table_meta_mock = MagicMock()
+        table_meta_mock.copy.return_value = table_meta_mock
+
+        for op in self.problem.operations:
+            op.op_type_check.return_value = None
+
+        self.assertFalse(
+            self.problem.is_valid(table_meta=table_meta_mock))
+
+        self.assertTrue(table_meta_mock.copy.called)

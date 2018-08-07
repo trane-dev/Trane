@@ -1,7 +1,10 @@
-import pandas as pd
+import sys
+import unittest
 
-from trane.core.prediction_problem import *  # noqa
-from trane.core.prediction_problem import entropy_of_a_list
+import pandas as pd
+from mock import MagicMock, patch
+
+from trane.core.prediction_problem import PredictionProblem, entropy_of_a_list
 from trane.ops.aggregation_ops import *  # noqa
 from trane.ops.filter_ops import *  # noqa
 from trane.ops.row_ops import *  # noqa
@@ -38,18 +41,21 @@ def test_hyper_parameter_generation():
     label_generating_column = "fare"
     filter_column = "taxi_id"
     entity_id_column = "taxi_id"
-    prediction_problem = PredictionProblem([GreaterFilterOp(filter_column),
-                                            GreaterRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
-    prediction_problem.generate_and_set_hyper_parameters(dataframe,
-                                                         label_generating_column, filter_column,
-                                                         entity_id_column)
 
-    op1_hyper_parameter = prediction_problem.operations[0].hyper_parameter_settings
-    op2_hyper_parameter = prediction_problem.operations[1].hyper_parameter_settings
+    operations = [GreaterFilterOp(filter_column),
+                  GreaterRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
+
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
+    prediction_problem.generate_and_set_hyper_parameters(
+        dataframe, label_generating_column, filter_column, entity_id_column)
+
+    op1_hyper_parameter = prediction_problem.operations[
+        0].hyper_parameter_settings
+    op2_hyper_parameter = prediction_problem.operations[
+        1].hyper_parameter_settings
     prediction_problem.operations[2].hyper_parameter_settings
     prediction_problem.operations[3].hyper_parameter_settings
 
@@ -75,19 +81,21 @@ def test_hashing_collisions():
 def test_hyper_parameter_generation_2():
     label_generating_column = "c1"
     filter_column = "c2"
+    operations = [GreaterFilterOp(filter_column),
+                  GreaterRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
 
-    prediction_problem = PredictionProblem([GreaterFilterOp(filter_column),
-                                            GreaterRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
-    prediction_problem.generate_and_set_hyper_parameters(dataframe2,
-                                                         label_generating_column, filter_column,
-                                                         entity_id_column="c1")
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
+    prediction_problem.generate_and_set_hyper_parameters(
+        dataframe2, label_generating_column, filter_column,
+        entity_id_column="c1")
 
-    op1_hyper_parameter = prediction_problem.operations[0].hyper_parameter_settings
-    op2_hyper_parameter = prediction_problem.operations[1].hyper_parameter_settings
+    op1_hyper_parameter = prediction_problem.operations[
+        0].hyper_parameter_settings
+    op2_hyper_parameter = prediction_problem.operations[
+        1].hyper_parameter_settings
     prediction_problem.operations[2].hyper_parameter_settings
     prediction_problem.operations[3].hyper_parameter_settings
 
@@ -100,22 +108,22 @@ def test_hyper_parameter_generation_2():
 def test_op_type_check():
     filter_column = "fare"
     label_generating_column = "fare"
+    operations = [AllFilterOp(filter_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
     table_meta = TableMeta.from_json(json_str)
 
-    prediction_problem_correct_types = PredictionProblem([AllFilterOp(filter_column),
-                                                          IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
+    prediction_problem_correct_types = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
 
     label_generating_column = "vendor_id"
-    prediction_problem_incorrect_types = PredictionProblem([AllFilterOp(filter_column),
-                                                            IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LMFAggregationOp(label_generating_column)])
+    operations = [AllFilterOp(filter_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LMFAggregationOp(label_generating_column)]
+    prediction_problem_incorrect_types = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
 
     (
         correct_is_valid,
@@ -149,13 +157,13 @@ def test_execute():
 
     time_column = "trip_id"
     cutoff_time = 100
+    operations = [AllFilterOp(label_generating_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
 
-    prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
-                                            IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
 
     expected = 41.35
     precutoff_time, all_data = prediction_problem.execute(
@@ -167,12 +175,12 @@ def test_execute():
 
 def test_to_and_from_json():
     label_generating_column = "fare"
-    prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
-                                            IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
+    operations = [AllFilterOp(label_generating_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
     json_str = prediction_problem.to_json()
     prediction_problem_from_json = PredictionProblem.from_json(json_str)
 
@@ -181,12 +189,12 @@ def test_to_and_from_json():
 
 def test_to_and_from_json_with_order_of_types():
     label_generating_column = "fare"
-    prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
-                                            IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
+    operations = [AllFilterOp(label_generating_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
     prediction_problem.filter_column_order_of_types = [TableMeta.TYPE_INTEGER]
     prediction_problem.label_generating_column_order_of_types = \
         [TableMeta.TYPE_INTEGER, TableMeta.TYPE_BOOL, TableMeta.TYPE_CATEGORY]
@@ -198,18 +206,14 @@ def test_to_and_from_json_with_order_of_types():
 
 def test_equality():
     label_generating_column = "fare"
-    prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
-                                            IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
-    prediction_problem_clone = PredictionProblem([AllFilterOp(label_generating_column),
-                                                  IdentityRowOp(
-        label_generating_column),
-        IdentityTransformationOp(
-        label_generating_column),
-        LastAggregationOp(label_generating_column)])
+    operations = [AllFilterOp(label_generating_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
+    prediction_problem_clone = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
 
     assert(prediction_problem_clone == prediction_problem)
 
@@ -229,3 +233,142 @@ def test_entropy():
     assert(entropy_b == 1.9061547465398496)
     assert(entropy_c == 0.0)
     assert(entropy_d == 0.6931471805599453)
+
+
+class TestPredictionProblemMethods(unittest.TestCase):
+
+    def setUp(self):
+        mock_op = self.create_patch(
+            'trane.ops.OpBase')
+        operations = [mock_op for x in range(4)]
+
+        self.mock_cutoff_strategy = self.create_patch(
+            'trane.core.CutoffStrategy')
+
+        self.entity_col = 'entity_col'
+
+        self.problem = PredictionProblem(
+            operations=operations, entity_id_col=self.entity_col,
+            cutoff_strategy=self.mock_cutoff_strategy)
+
+        self.mock_dill = self.create_patch(
+            'trane.core.prediction_problem.dill')
+
+    def create_patch(self, name):
+        # helper method for creating patches
+        patcher = patch(name)
+        thing = patcher.start()
+        self.addCleanup(patcher.stop)
+        return thing
+
+    def test_cutoff_strategy_exists(self):
+        self.assertIsNotNone(self.problem.cutoff_strategy)
+
+    def entity_id_col_exists(self):
+        self.assertIsNot(self.problem.entity_id_col)
+
+    def test_generate_cutoffs_method_exists(self):
+        self.assertIsNotNone(self.problem.generate_cutoffs)
+
+    def test_generate_cutoffs_method_calls_cutoff_strategy_gen_cutoffs(self):
+        self.problem.generate_cutoffs(df=None)
+
+        self.assertTrue(self.problem.cutoff_strategy.generate_cutoffs.called)
+
+        # entity_column passed?
+        self.assertTrue(
+            self.entity_col in
+            self.problem.cutoff_strategy.generate_cutoffs.call_args[0])
+
+    def test_to_json_exists(self):
+        self.assertIsNotNone(self.problem.to_json)
+
+    def test_save(self):
+        self.assertIsNotNone(self.problem.save)
+
+        dill_cutoff_strategy_patch = self.create_patch(
+            'trane.core.PredictionProblem._dill_cutoff_strategy')
+        os_path_exists_patch = self.create_patch(
+            'trane.core.prediction_problem.os.path.exists')
+        os_path_exists_patch.return_value = False
+        to_json_patch = self.create_patch(
+            'trane.core.PredictionProblem.to_json')
+        dill_cutoff_strategy_patch = self.create_patch(
+            'trane.core.PredictionProblem._dill_cutoff_strategy')
+
+        path = '../Data'
+        problem_name = 'problem_name'
+
+        try:
+            self.problem.save(path=path, problem_name=problem_name)
+        except Exception as e:
+            print('test_save doesn\'t test i/o. '
+                  'This exception statement catches the error.')
+            print(e)
+
+        self.assertTrue(to_json_patch.called)
+        self.assertTrue(dill_cutoff_strategy_patch.called)
+        self.assertTrue(os_path_exists_patch.called)
+
+    def test_load(self):
+        self.assertIsNotNone(PredictionProblem.load)
+
+        open_patch = None
+        if (sys.version_info > (3, 0)):
+            open_patch = self.create_patch('builtins.open')
+        else:
+            open_patch = self.create_patch('__builtin__.open')
+
+        json_patch = self.create_patch(
+            'trane.core.prediction_problem.json')
+        from_json_patch = self.create_patch(
+            'trane.core.PredictionProblem.from_json')
+        os_path_patch = self.create_patch(
+            'trane.core.prediction_problem.os.path')
+        dill_patch = self.create_patch(
+            'trane.core.prediction_problem.dill')
+
+        PredictionProblem.load('filepath.json')
+        self.assertTrue(open_patch.called)
+        self.assertTrue(json_patch.load.called)
+        self.assertTrue(from_json_patch.called)
+        self.assertTrue(os_path_patch.join.called)
+        self.assertTrue(os_path_patch.dirname.called)
+        self.assertTrue(dill_patch.load.called)
+
+    def test_dill_cutoff_strategy(self):
+        self.assertIsNotNone(self.problem._dill_cutoff_strategy)
+        cutoff_dill = self.problem._dill_cutoff_strategy()
+
+        self.assertEqual(
+            cutoff_dill, self.mock_dill.dumps(self.mock_cutoff_strategy))
+
+    def test_is_valid_succeeds(self):
+        self.assertIsNotNone(self.problem.is_valid)
+
+        table_meta_mock = MagicMock()
+        table_meta_mock.copy.return_value = table_meta_mock
+
+        for op in self.problem.operations:
+            op.op_type_check.return_value = table_meta_mock
+
+        self.assertTrue(
+            self.problem.is_valid(table_meta=table_meta_mock))
+
+        self.assertTrue(table_meta_mock.copy.called)
+        for op in self.problem.operations:
+            self.assertTrue(op.op_type_check.called)
+            self.assertTrue(op.op_type_check.call_args[
+                            0][0] == table_meta_mock)
+
+    def test_is_valid_fails(self):
+        table_meta_mock = MagicMock()
+        table_meta_mock.copy.return_value = table_meta_mock
+
+        for op in self.problem.operations:
+            op.op_type_check.return_value = None
+
+        self.assertFalse(
+            self.problem.is_valid(table_meta=table_meta_mock))
+
+        self.assertTrue(table_meta_mock.copy.called)

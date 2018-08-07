@@ -2,7 +2,6 @@ from ..ops.aggregation_ops import *  # noqa
 from ..ops.filter_ops import *  # noqa
 from ..ops.row_ops import *  # noqa
 from ..ops.transformation_ops import *  # noqa
-from .generate_cutoff_times import *  # noqa
 from .table_meta import TableMeta as TM
 
 __all__ = ['generate_nl_description']
@@ -103,21 +102,7 @@ def generate_nl_description(
             )
 
     def cutoff_description(prob):
-        if isinstance(cutoff_strategy, ConstantCutoffTime):
-            return ", after {col} {cutoff}".format(
-                col=time_column, cutoff=cutoff_strategy.label_cutoff)
-        elif isinstance(cutoff_strategy, DynamicCutoffTime):
-            percentage_elapsed = (
-                1 - cutoff_strategy.training_label_ratio) * 100
-            return ", after {percentage}% of the row's " \
-                   "{col} column has elapsed".format(
-                       percentage=percentage_elapsed, col=time_column)
-        else:
-            error_msg = "unknown CutoffType type passed. Expected instance " \
-                        "of type {cutoff_time_base} received " \
-                        "{other_type}".format(
-                            type(CutoffTimeBase), type(cutoff_strategy))
-            raise TypeError(error_msg)
+        return cutoff_strategy.description
 
     def filter_description(prob):
         filter_op_str_dict = {

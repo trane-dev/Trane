@@ -29,16 +29,17 @@ def test_write_then_read():
     entity_id_column = "taxi_id"
     time_column = "trip_id"
     label_generating_column = "fare"
-    prediction_problem = PredictionProblem([AllFilterOp(label_generating_column),
-                                            IdentityRowOp(
-                                                label_generating_column),
-                                            IdentityTransformationOp(
-                                                label_generating_column),
-                                            LastAggregationOp(label_generating_column)])
+    operations = [AllFilterOp(label_generating_column),
+                  IdentityRowOp(label_generating_column),
+                  IdentityTransformationOp(label_generating_column),
+                  LastAggregationOp(label_generating_column)]
+    prediction_problem = PredictionProblem(
+        operations=operations, cutoff_strategy=None)
     filename = "prediction_problem.json"
 
-    prediction_problems_to_json_file([prediction_problem], table_meta, entity_id_column,
-                                     label_generating_column, time_column, filename)
+    prediction_problems_to_json_file(
+        [prediction_problem], table_meta, entity_id_column,
+        label_generating_column, time_column, filename)
 
     prediction_problems_from_json, table_meta_from_json, entity_id_column_from_json, \
         label_generating_column_from_json, time_column_from_json = prediction_problems_from_json_file(

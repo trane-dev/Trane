@@ -1,9 +1,12 @@
 import json
 import logging
+import os
 import random
 import time
+import warnings
 from collections import Counter
 
+import dill
 import numpy as np
 from scipy import stats
 
@@ -21,19 +24,57 @@ class PredictionProblem:
     each operation.
     """
 
-    def __init__(self, operations):
+    def __init__(self, operations, entity_id_col=None, cutoff_strategy=None):
         """
         Parameters
         ----------
         operations: list of Operations of type op_base
+        cutoff_strategy: a CutoffStrategy object
 
         Returns
         -------
         None
         """
         self.operations = operations
+        self.entity_id_col = entity_id_col
+        self.cutoff_strategy = cutoff_strategy
         self.filter_column_order_of_types = None
         self.label_generating_column_order_of_types = None
+
+    def generate_cutoffs(self, df):
+        if self.cutoff_strategy is None:
+            warnings.warn(
+                "Problem cutoff strategy not specified. Returning None",
+                RuntimeWarning)
+            return None
+
+        return self.cutoff_strategy.generate_cutoffs(df, self.entity_id_col)
+
+    def is_valid(self, table_meta):
+        '''
+        Typechecking for operations. Insures that their input and output types
+        match.
+
+        Parameters
+        ----------
+        table_meta: TableMeta object. Contains meta information about the data
+
+        Returns
+        -------
+        Bool
+        '''
+        # don't contaminate original table_meta
+        temp_meta = table_meta.copy()
+
+        # sort each operation in its respective bucket
+        for op in self.operations:
+            # op.type_check returns a modified temp_meta,
+            # which accounts for the operation having taken place
+            temp_meta = op.op_type_check(temp_meta)
+            if temp_meta is None:
+                return False
+
+        return True
 
     def is_valid_prediction_problem(
             self, table_meta, filter_column, label_generating_column):
@@ -53,10 +94,11 @@ class PredictionProblem:
         Returns
         -------
         is_valid: True/False if problem is valid
-        filter_column_order_of_types: a list containing the types expected in the
-            sequence of operations on the filter column
-        label_generating_column_order_of_types: a list containing the types expected
-            in the sequence of operations on the label generating column
+        filter_column_order_of_types: a list containing the types
+            expected in the sequence of operations on the filter column
+        label_generating_column_order_of_types: a list containing the types
+            expected in the sequence of operations on the label generating
+            column
         """
         logging.debug("Performing is_valid_prediction_problem...")
 
@@ -67,6 +109,7 @@ class PredictionProblem:
             table_meta.get_type(label_generating_column)]
 
         filter_op = self.operations[0]
+
         temp_meta = filter_op.op_type_check(temp_meta)
         if not temp_meta:
             return False, None, None
@@ -101,10 +144,12 @@ class PredictionProblem:
             hyper_parameter = hyper_parameters[idx]
             op.set_hyper_parameter(hyper_parameter)
 
-    def generate_and_set_hyper_parameters(self, dataframe, label_generating_column,
-                                          filter_column, entity_id_column):
+    def generate_and_set_hyper_parameters(
+            self, dataframe, label_generating_column, filter_column,
+            entity_id_column):
         """
-        Generate then set hyper parameters for the operations in this prediction problem.
+        Generate then set hyper parameters for the operations in this
+        prediction problem.
 
         Parameters
         ----------
@@ -169,10 +214,11 @@ class PredictionProblem:
             is segmented. data after the time is used for
             labels during test. data before the time is used
             for labels during training.
-        filter_column_order_of_types: a list containing the types expected in the
-            sequence of operations on the filter column
-        label_generating_column_order_of_types: a list containing the types expected
-            in the sequence of operations on the label generating column
+        filter_column_order_of_types: a list containing the types expected in
+            the sequence of operations on the filter column
+        label_generating_column_order_of_types: a list containing the types
+            expected in the sequence of operations on the label generating
+            column
 
         Returns
         -------
@@ -260,6 +306,109 @@ class PredictionProblem:
                 description += "->"
         return description
 
+    def save(self, path, problem_name):
+        '''
+        Saves the pediction problem in two files.
+
+        One file is a dill of the cutoff strategy.
+        The other file is the jsonified operations and the relative path to
+        that cutoff strategy.
+
+        Parameters
+        ----------
+        path: str - the directory in which save the problem
+        problem_name: str - the filename to assign the problem
+
+        Returns
+        -------
+        dict
+        {'saved_correctly': bool,
+         'directory_created': bool,
+         'problem_name': str}
+        The new problem_name may have changed due to a filename collision
+
+        '''
+        json_saved = False
+        dill_saved = False
+        created_directory = False
+
+        # create directory if it doesn't exist
+        if not os.path.isdir(path):
+            os.makedirs(path)
+            created_directory = True
+
+        # rename the problem_name if already exists
+        json_file_exists = os.path.exists(
+            os.path.join(path, problem_name + '.json'))
+        dill_file_exists = os.path.exists(
+            os.path.join(path, problem_name + '.dill'))
+
+        i = 1
+        while json_file_exists or dill_file_exists:
+            problem_name += str(i)
+
+            i += 1
+            json_file_exists = os.path.exists(
+                os.path.join(path, problem_name + '.json'))
+            dill_file_exists = os.path.exists(
+                os.path.join(path, problem_name + '.dill'))
+
+        # get the cutoff_strategy bytes
+        cutoff_dill_bytes = self._dill_cutoff_strategy()
+
+        # add a key to the problem json
+        json_dict = json.loads(self.to_json())
+        json_dict['cutoff_dill'] = problem_name + '.dill'
+
+        # write the files
+        with open(os.path.join(path, problem_name + '.json'), 'w') as f:
+            json.dump(obj=json_dict, fp=f, indent=4, sort_keys=True)
+            json_saved = True
+
+        with open(os.path.join(path, problem_name + '.dill'), 'wb') as f:
+            f.write(cutoff_dill_bytes)
+            dill_saved = True
+
+        return({'saved_correctly': json_saved & dill_saved,
+                'created_directory': created_directory,
+                'problem_name': problem_name})
+
+    @classmethod
+    def load(cls, json_file_path):
+        '''
+        Load a prediction problem from json file.
+        If the file links to a dill (binary) cutoff_srategy, also load that
+        and assign it to the prediction problem.
+
+        Parameters
+        ----------
+        json_file_path: str, path and filename for the json file
+
+        Returns
+        -------
+        PredictionProblem
+
+        '''
+        with open(json_file_path, 'r') as f:
+            problem_dict = json.load(f)
+            problem = cls.from_json(problem_dict)
+
+        cutoff_strategy_file_name = problem_dict.get('cutoff_dill', None)
+
+        if cutoff_strategy_file_name:
+            # reconstruct cutoff strategy filename
+            pickle_path = os.path.join(
+                os.path.dirname(json_file_path), cutoff_strategy_file_name)
+
+            # load cutoff strategy from file
+            with open(pickle_path, 'rb') as f:
+                cutoff_strategy = dill.load(f)
+
+            # assign cutoff strategy to problem
+            problem.cutoff_strategy = cutoff_strategy
+
+        return problem
+
     def to_json(self):
         """
         This function converts Prediction Problems to JSON
@@ -289,21 +438,43 @@ class PredictionProblem:
 
         Parameters
         ----------
-        json_data: JSON code containing the prediction problem.
+        json_data: JSON code or dict containing the prediction problem.
 
         Returns
         -------
         problem: Prediction Problem
         """
-        data = json.loads(json_data)
+
+        data = json_data
+
+        # only tries json.loads if json_data is not a dict
+        if type(data) != dict:
+            data = json.loads(json_data)
+
         operations = [op_from_json(json.dumps(item))
                       for item in data['operations']]
-        problem = PredictionProblem(operations)
+        problem = PredictionProblem(operations, cutoff_strategy=None)
         problem.filter_column_order_of_types = data[
             'filter_column_order_of_types']
         problem.label_generating_column_order_of_types = data[
             'label_generating_column_order_of_types']
         return problem
+
+    def _dill_cutoff_strategy(self):
+        '''
+        Function creates a dill for the problem's associated cutoff strategy
+
+        This function requires cutoff time to be assigned.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        a dill of the cutoff strategy
+        '''
+        cutoff_dill = dill.dumps(self.cutoff_strategy)
+        return cutoff_dill
 
     def __eq__(self, other):
         """Overrides the default implementation"""

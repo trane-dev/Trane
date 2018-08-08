@@ -125,7 +125,7 @@ class TestPredictionProblemMethods(unittest.TestCase):
         self.assertEqual(self.problem.entity_id_col, self.entity_col)
         self.assertEqual(self.problem.time_col, self.time_col)
         self.assertEqual(self.problem.cutoff_strategy,
-            self.mock_cutoff_strategy)
+                         self.mock_cutoff_strategy)
 
     def test_equality_false(self):
         entity_id = 'entity_col'

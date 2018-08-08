@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import warnings
 
 import dill
 import numpy as np
@@ -20,7 +19,8 @@ class PredictionProblem:
     each operation.
     """
 
-    def __init__(self, operations, entity_id_col=None, cutoff_strategy=None):
+    def __init__(self, operations, entity_id_col=None, time_col=None,
+                 cutoff_strategy=None):
         """
         Parameters
         ----------
@@ -33,18 +33,10 @@ class PredictionProblem:
         """
         self.operations = operations
         self.entity_id_col = entity_id_col
+        self.time_col = time_col
         self.cutoff_strategy = cutoff_strategy
         self.filter_column_order_of_types = None
         self.label_generating_column_order_of_types = None
-
-    def generate_cutoffs(self, df):
-        if self.cutoff_strategy is None:
-            warnings.warn(
-                "Problem cutoff strategy not specified. Returning None",
-                RuntimeWarning)
-            return None
-
-        return self.cutoff_strategy.generate_cutoffs(df, self.entity_id_col)
 
     def is_valid(self, table_meta):
         '''

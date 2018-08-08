@@ -98,16 +98,17 @@ class TestPredictionProblemMethods(unittest.TestCase):
     def setUp(self):
         mock_op = self.create_patch(
             'trane.ops.OpBase')
-        operations = [mock_op for x in range(4)]
+        self.operations = [mock_op for x in range(4)]
 
         self.mock_cutoff_strategy = self.create_patch(
             'trane.core.CutoffStrategy')
 
         self.entity_col = 'entity_col'
+        self.time_col = 'time_col'
 
         self.problem = PredictionProblem(
-            operations=operations, entity_id_col=self.entity_col,
-            cutoff_strategy=self.mock_cutoff_strategy)
+            operations=self.operations, entity_id_col=self.entity_col,
+            time_col=self.time_col, cutoff_strategy=self.mock_cutoff_strategy)
 
         self.mock_dill = self.create_patch(
             'trane.core.prediction_problem.dill')
@@ -118,6 +119,13 @@ class TestPredictionProblemMethods(unittest.TestCase):
         thing = patcher.start()
         self.addCleanup(patcher.stop)
         return thing
+
+    def test_attributes_assigned(self):
+        self.assertEqual(self.problem.operations, self.operations)
+        self.assertEqual(self.problem.entity_id_col, self.entity_col)
+        self.assertEqual(self.problem.time_col, self.time_col)
+        self.assertEqual(self.problem.cutoff_strategy,
+            self.mock_cutoff_strategy)
 
     def test_equality_false(self):
         entity_id = 'entity_col'
@@ -153,19 +161,6 @@ class TestPredictionProblemMethods(unittest.TestCase):
 
     def entity_id_col_exists(self):
         self.assertIsNot(self.problem.entity_id_col)
-
-    def test_generate_cutoffs_method_exists(self):
-        self.assertIsNotNone(self.problem.generate_cutoffs)
-
-    def test_generate_cutoffs_method_calls_cutoff_strategy_gen_cutoffs(self):
-        self.problem.generate_cutoffs(df=None)
-
-        self.assertTrue(self.problem.cutoff_strategy.generate_cutoffs.called)
-
-        # entity_column passed?
-        self.assertTrue(
-            self.entity_col in
-            self.problem.cutoff_strategy.generate_cutoffs.call_args[0])
 
     def test_to_json_exists(self):
         self.assertIsNotNone(self.problem.to_json)

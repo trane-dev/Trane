@@ -72,22 +72,6 @@ class PredictionProblem:
 
         return True
 
-    def set_hyper_parameters(self, hyper_parameters):
-        """
-
-        Parameters
-        ----------
-        hyper_parameters: hyper parameter settings
-            to be set on the operations
-
-        Returns
-        -------
-        None
-        """
-        for idx, op in enumerate(self.operations):
-            hyper_parameter = hyper_parameters[idx]
-            op.set_hyper_parameter(hyper_parameter)
-
     def execute(self, dataframe, time_column, label_cutoff_time,
                 filter_column_order_of_types,
                 label_generating_column_order_of_types):

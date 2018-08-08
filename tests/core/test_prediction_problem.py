@@ -5,17 +5,18 @@ import pandas as pd
 from mock import MagicMock, patch
 
 from trane.core.prediction_problem import PredictionProblem
-from trane.ops.aggregation_ops import *  # noqa
-from trane.ops.filter_ops import *  # noqa
-from trane.ops.row_ops import *  # noqa
-from trane.ops.transformation_ops import *  # noqa
+from trane.ops.aggregation_ops import LastAggregationOp
+from trane.ops.filter_ops import AllFilterOp, GreaterFilterOp
+from trane.ops.row_ops import IdentityRowOp
+from trane.ops.transformation_ops import IdentityTransformationOp
 from trane.utils.table_meta import TableMeta
 
 dataframe = pd.DataFrame([(0, 0, 0, 5.32, 19.7, 53.89, 1),
                           (0, 0, 1, 1.08, 6.78, 18.89, 2),
                           (0, 0, 2, 4.69, 14.11, 41.35, 4)],
-                         columns=["vendor_id", "taxi_id", "trip_id", "distance",
-                                  "duration", "fare", "num_passengers"])
+                         columns=[
+                            "vendor_id", "taxi_id", "trip_id", "distance",
+                            "duration", "fare", "num_passengers"])
 
 json_str = '{ "path": "", "tables": [ { "path": "synthetic_taxi_data.csv", \
     "name": "taxi_data", "fields": [ {"name": "vendor_id", "type": "id"},\
@@ -68,7 +69,8 @@ def test_execute():
 
     expected = 41.35
     precutoff_time, all_data = prediction_problem.execute(
-        df, time_column, cutoff_time, ['float', 'float'], ['float', 'float', 'float', 'float'])
+        df, time_column, cutoff_time, ['float', 'float'],
+        ['float', 'float', 'float', 'float'])
 
     found = precutoff_time[label_generating_column].iloc[0]
     assert(expected == found)
@@ -90,19 +92,6 @@ def test_to_and_from_json_with_order_of_types():
 
     assert(prediction_problem == prediction_problem_from_json)
 
-
-def test_equality():
-    label_generating_column = "fare"
-    operations = [AllFilterOp(label_generating_column),
-                  IdentityRowOp(label_generating_column),
-                  IdentityTransformationOp(label_generating_column),
-                  LastAggregationOp(label_generating_column)]
-    prediction_problem = PredictionProblem(
-        operations=operations, cutoff_strategy=None)
-    prediction_problem_clone = PredictionProblem(
-        operations=operations, cutoff_strategy=None)
-
-    assert(prediction_problem_clone == prediction_problem)
 
 class TestPredictionProblemMethods(unittest.TestCase):
 
@@ -129,6 +118,35 @@ class TestPredictionProblemMethods(unittest.TestCase):
         thing = patcher.start()
         self.addCleanup(patcher.stop)
         return thing
+
+    def test_equality_false(self):
+        entity_id = 'entity_col'
+        mock_op = MagicMock()
+        operations = [mock_op for x in range(4)]
+        mock_cutoff_strategy = MagicMock()
+        problem_1 = PredictionProblem(
+            operations=operations, entity_id_col=entity_id,
+            cutoff_strategy=mock_cutoff_strategy)
+
+        # add a different magicmock for cutoff strategy
+        problem_2 = PredictionProblem(
+            operations=operations, entity_id_col=entity_id,
+            cutoff_strategy=MagicMock())
+        self.assertFalse(problem_1 == problem_2)
+
+    def test_equality_true(self):
+        entity_id = 'entity_col'
+        mock_op = MagicMock()
+        operations = [mock_op for x in range(4)]
+        mock_cutoff_strategy = MagicMock()
+        problem_1 = PredictionProblem(
+            operations=operations, entity_id_col=entity_id,
+            cutoff_strategy=mock_cutoff_strategy)
+
+        problem_2 = PredictionProblem(
+            operations=operations, entity_id_col=entity_id,
+            cutoff_strategy=mock_cutoff_strategy)
+        self.assertTrue(problem_1 == problem_2)
 
     def test_cutoff_strategy_exists(self):
         self.assertIsNotNone(self.problem.cutoff_strategy)

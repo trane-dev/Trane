@@ -41,7 +41,7 @@ class TestCutoffStrategy(unittest.TestCase):
     def test_description_assigned(self):
         self.assertEqual(self.description, self.cutoff_strategy.description)
 
-    def test_cutoff_times_returned_as_expected(self):
+    def test_cutoff_times_returned_as_expected_with_cutoff_strategy(self):
         # this is more of an integration test than a unittest, really
 
         data = {'entity_id': ['a', 'a', 'b'],
@@ -69,3 +69,58 @@ class TestCutoffStrategy(unittest.TestCase):
         self.assertEqual(
             cutoff_df.loc['b'].test_cutoff,
             np.datetime64('1980-02-18'))
+
+    def test_cutoff_times_returned_as_expected_with_cutoff_strategy(self):
+        # this is more of an integration test than a unittest, really
+
+        data = {'entity_id': ['a', 'a', 'b'],
+                'dates': [
+                    np.datetime64('1980-02-25'),
+                    np.datetime64('1980-02-24'),
+                    np.datetime64('1980-02-23')],
+                'other_col': ['d', 'e', 'f']}
+        test_data = pd.DataFrame(data)
+
+        cutoff_df = self.cutoff_strategy.generate_cutoffs(
+            df=test_data, entity_id_col='entity_id')
+
+        # no variance in training_cutoff columns
+        self.assertEqual(len(cutoff_df.training_cutoff.unique()), 1)
+        self.assertEqual(
+            cutoff_df.training_cutoff.unique()[0],
+            np.datetime64('1980-02-25'))
+
+        # test_cutoff should be a different date
+        self.assertEqual(
+            cutoff_df.loc['a'].test_cutoff,
+            np.datetime64('1980-02-20'))
+
+        self.assertEqual(
+            cutoff_df.loc['b'].test_cutoff,
+            np.datetime64('1980-02-18'))
+
+    def test_cutoff_times_returned_as_expected_without_cutoff_strategy(self):
+        # this is more of an integration test than a unittest, really
+        # test to make sure that generate_cutoffs returns a df full of
+        # None columns if generate_fn is not specified
+        self.cutoff_strategy.generate_fn = None
+
+        data = {'entity_id': ['a', 'a', 'b'],
+                'dates': [
+                    np.datetime64('1980-02-25'),
+                    np.datetime64('1980-02-24'),
+                    np.datetime64('1980-02-23')],
+                'other_col': ['d', 'e', 'f']}
+        test_data = pd.DataFrame(data)
+
+        cutoff_df = self.cutoff_strategy.generate_cutoffs(
+            df=test_data, entity_id_col='entity_id')
+
+        # no variance in training and test_cutoff columns
+        self.assertEqual(len(cutoff_df.training_cutoff.unique()), 1)
+        self.assertEqual(len(cutoff_df.test_cutoff.unique()), 1)
+
+        # training and test cutoff should both be None
+        self.assertEqual(cutoff_df.loc['a'].test_cutoff, None)
+
+        self.assertEqual(cutoff_df.loc['b'].test_cutoff, None)

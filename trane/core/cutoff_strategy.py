@@ -52,8 +52,12 @@ class CutoffStrategy:
             # we re-index by the entity_id column because
             # a user's generate_fn may expect it
             df_group.set_index(entity_id_col, inplace=True)
-            training_cutoff, test_cutoff = self.generate_fn(
-                entity_id, df_group)
+
+            training_cutoff, test_cutoff = None, None
+
+            if self.generate_fn:
+                training_cutoff, test_cutoff = self.generate_fn(
+                    entity_id, df_group)
 
             # add this data to a long array
             val_arr.extend((entity_id, training_cutoff, test_cutoff))

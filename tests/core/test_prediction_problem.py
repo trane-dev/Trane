@@ -4,7 +4,7 @@ import unittest
 import pandas as pd
 from mock import MagicMock, patch
 
-from trane.core.prediction_problem import PredictionProblem, entropy_of_a_list
+from trane.core.prediction_problem import PredictionProblem
 from trane.ops.aggregation_ops import *  # noqa
 from trane.ops.filter_ops import *  # noqa
 from trane.ops.row_ops import *  # noqa
@@ -37,32 +37,6 @@ dataframe2 = pd.DataFrame([(0, 0),
                            (9, 9)], columns=['c1', 'c2'])
 
 
-def test_hyper_parameter_generation():
-    label_generating_column = "fare"
-    filter_column = "taxi_id"
-    entity_id_column = "taxi_id"
-
-    operations = [GreaterFilterOp(filter_column),
-                  GreaterRowOp(label_generating_column),
-                  IdentityTransformationOp(label_generating_column),
-                  LastAggregationOp(label_generating_column)]
-
-    prediction_problem = PredictionProblem(
-        operations=operations, cutoff_strategy=None)
-    prediction_problem.generate_and_set_hyper_parameters(
-        dataframe, label_generating_column, filter_column, entity_id_column)
-
-    op1_hyper_parameter = prediction_problem.operations[
-        0].hyper_parameter_settings
-    op2_hyper_parameter = prediction_problem.operations[
-        1].hyper_parameter_settings
-    prediction_problem.operations[2].hyper_parameter_settings
-    prediction_problem.operations[3].hyper_parameter_settings
-
-    assert(op1_hyper_parameter['threshold'] == 0)
-    assert(op2_hyper_parameter['threshold'] == 41.35)
-
-
 def test_hashing_collisions():
     col1 = "a"
     col2 = "b"
@@ -76,79 +50,6 @@ def test_hashing_collisions():
 
     assert(op1_hash != op2_hash)
     assert(op1_hash == op3_hash)
-
-
-def test_hyper_parameter_generation_2():
-    label_generating_column = "c1"
-    filter_column = "c2"
-    operations = [GreaterFilterOp(filter_column),
-                  GreaterRowOp(label_generating_column),
-                  IdentityTransformationOp(label_generating_column),
-                  LastAggregationOp(label_generating_column)]
-
-    prediction_problem = PredictionProblem(
-        operations=operations, cutoff_strategy=None)
-    prediction_problem.generate_and_set_hyper_parameters(
-        dataframe2, label_generating_column, filter_column,
-        entity_id_column="c1")
-
-    op1_hyper_parameter = prediction_problem.operations[
-        0].hyper_parameter_settings
-    op2_hyper_parameter = prediction_problem.operations[
-        1].hyper_parameter_settings
-    prediction_problem.operations[2].hyper_parameter_settings
-    prediction_problem.operations[3].hyper_parameter_settings
-
-    print(op1_hyper_parameter)
-    print(op2_hyper_parameter)
-    assert(op1_hyper_parameter['threshold'] == 1)
-    assert(op2_hyper_parameter['threshold'] == 4)
-
-
-def test_op_type_check():
-    filter_column = "fare"
-    label_generating_column = "fare"
-    operations = [AllFilterOp(filter_column),
-                  IdentityRowOp(label_generating_column),
-                  IdentityTransformationOp(label_generating_column),
-                  LastAggregationOp(label_generating_column)]
-    table_meta = TableMeta.from_json(json_str)
-
-    prediction_problem_correct_types = PredictionProblem(
-        operations=operations, cutoff_strategy=None)
-
-    label_generating_column = "vendor_id"
-    operations = [AllFilterOp(filter_column),
-                  IdentityRowOp(label_generating_column),
-                  IdentityTransformationOp(label_generating_column),
-                  LMFAggregationOp(label_generating_column)]
-    prediction_problem_incorrect_types = PredictionProblem(
-        operations=operations, cutoff_strategy=None)
-
-    (
-        correct_is_valid,
-        filter_column_types_A,
-        label_generating_column_types_A) = prediction_problem_correct_types.is_valid_prediction_problem(
-        table_meta,
-        filter_column,
-        "fare")
-    (
-        incorrect_is_valid,
-        filter_column_types_B,
-        label_generating_column_types_B) = prediction_problem_incorrect_types.is_valid_prediction_problem(
-        table_meta,
-        filter_column,
-        label_generating_column)
-
-    assert(filter_column_types_A == ['float', 'float'])
-    assert(label_generating_column_types_A == [
-           'float', 'float', 'float', 'float'])
-
-    assert(filter_column_types_B is None)
-    assert(label_generating_column_types_B is None)
-
-    assert(correct_is_valid)
-    assert(not incorrect_is_valid)
 
 
 def test_execute():
@@ -171,20 +72,6 @@ def test_execute():
 
     found = precutoff_time[label_generating_column].iloc[0]
     assert(expected == found)
-
-
-def test_to_and_from_json():
-    label_generating_column = "fare"
-    operations = [AllFilterOp(label_generating_column),
-                  IdentityRowOp(label_generating_column),
-                  IdentityTransformationOp(label_generating_column),
-                  LastAggregationOp(label_generating_column)]
-    prediction_problem = PredictionProblem(
-        operations=operations, cutoff_strategy=None)
-    json_str = prediction_problem.to_json()
-    prediction_problem_from_json = PredictionProblem.from_json(json_str)
-
-    assert(prediction_problem == prediction_problem_from_json)
 
 
 def test_to_and_from_json_with_order_of_types():
@@ -216,24 +103,6 @@ def test_equality():
         operations=operations, cutoff_strategy=None)
 
     assert(prediction_problem_clone == prediction_problem)
-
-
-def test_entropy():
-    a = [1, 2, 3, 4, 5, 6, 7, 8]
-    entropy_a = entropy_of_a_list(a)
-    b = [1, 1, 2, 3, 4, 5, 6, 7]
-    entropy_b = entropy_of_a_list(b)
-    c = [1, 1, 1, 1, 1, 1, 1, 1]
-    entropy_c = entropy_of_a_list(c)
-    d = [1, 2]
-    entropy_d = entropy_of_a_list(d)
-
-    assert(entropy_a > entropy_b > entropy_d > entropy_c)
-    assert(entropy_a == 2.0794415416798357)
-    assert(entropy_b == 1.9061547465398496)
-    assert(entropy_c == 0.0)
-    assert(entropy_d == 0.6931471805599453)
-
 
 class TestPredictionProblemMethods(unittest.TestCase):
 

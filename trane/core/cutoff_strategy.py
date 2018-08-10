@@ -57,7 +57,7 @@ class CutoffStrategy:
 
             if self.generate_fn:
                 training_cutoff, test_cutoff = self.generate_fn(
-                    entity_id, df_group)
+                    df_group, entity_id)
 
             # add this data to a long array
             val_arr.extend((entity_id, training_cutoff, test_cutoff))

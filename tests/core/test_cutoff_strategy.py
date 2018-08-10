@@ -12,7 +12,7 @@ class TestCutoffStrategy(unittest.TestCase):
 
         self.description = 'a description'
 
-        def generate_fn(entity_id, group):
+        def generate_fn(group, entity_id):
 
             # test_cutoff is 5 days after first row's date
             # import pdb; pdb.set_trace()

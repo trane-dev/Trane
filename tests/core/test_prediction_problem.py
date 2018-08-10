@@ -254,3 +254,55 @@ class TestPredictionProblemMethods(unittest.TestCase):
             self.problem.is_valid(table_meta=table_meta_mock))
 
         self.assertTrue(table_meta_mock.copy.called)
+
+    def test_execute_operations_on_df(self):
+        mock_df = MagicMock()
+        mock_df.copy.return_value = mock_df
+        self.operations[0].execute.return_value = mock_df
+
+        self.problem._execute_operations_on_df(mock_df)
+
+        # the operation has been called as many times as there are operations
+        # remember, all operations are actually the same mock in set_up
+        self.assertEqual(
+            self.operations[0].execute.call_count, len(self.operations))
+
+        # the operation is passed the mock_df
+        self.assertEqual(
+            self.operations[0].execute.call_args[0][0], mock_df)
+
+    # def test_new_execute(self):
+    #     self.assertIsNotNone(self.problem.new_execute)
+    #
+    #     # mock out what will eventually return from df_mock['whatever']
+    #     df_index_mock = MagicMock(name='mock after getattr')
+    #     df_index_mock.unique = [0]
+    #
+    #     # mock out the original df to be passed
+    #     df_mock = MagicMock(name='original df mock')
+    #     df_mock.copy.return_value = df_mock
+    #     # make sure that df_index_mock is returned from df_mock['whatever']
+    #     df_mock_dict = {self.problem.entity_id_col: df_index_mock}
+    #     df_mock.__getitem__.side_effect = df_mock_dict.__getitem__
+    #
+    #     # patch pd.DataFrame
+    #     entity_df_mock = MagicMock(name='entity_df_mock')
+    #     entity_df_mock.__getitem__.side_effect = {'time_col': 0}
+    #
+    #     df_patch = self.create_patch(
+    #         'trane.core.prediction_problem.pd.DataFrame')
+    #     df_patch.return_value = df_patch()
+    #     df_patch.T = entity_df_mock
+    #
+    #     self.problem.cutoff_strategy.generate_cutoffs.return_value = (
+    #         None, 0, 1)
+    #
+    #
+    #     # EXECUTE
+    #     self.problem.new_execute(df=df_mock, time_col='time_col')
+    #
+    #     # make sure that the df is copied
+    #     self.assertTrue(df_mock.copy.calld)
+    #
+    #     # make sure that the df is indexed
+    #     self.assertEqual(df_mock.index, df_mock[self.problem.entity_id_col])

@@ -1,9 +1,11 @@
 import json
 import logging
 import os
+import warnings
 
 import dill
 import numpy as np
+import pandas as pd
 
 from ..ops.op_saver import op_from_json, op_to_json
 from ..utils.table_meta import TableMeta
@@ -63,6 +65,102 @@ class PredictionProblem:
                 return False
 
         return True
+
+    def new_execute(self, df):
+        """
+        executes a prediction problem on an entire dataframe. Makes use of
+        cutoff times supplied by self.cutoff_strategy
+
+        Parameters
+        ----------
+        df: dataframe for labels to be generated from
+        time_col: str column which will be used to compare data cutoffs
+
+        Returns
+        -------
+        pre_label_execution_df: a dataframe of labels generated from before the
+            specified cutoff time
+        post_label_execution_df: a dataframe of labels generated from after the
+            specified cutoff time
+        """
+        df = df.copy()
+        df.index = df[self.entity_id_col]
+        pre_res_dict, post_res_dict = {}, {}
+
+        # cycle through each entity
+        for index in df.index.unique():
+
+            # original rows of an entity
+            entity_df = df.loc[[index]]
+
+            # test cutoff and label cutoff are the same thing
+            # Go directly to the cutoff_fn instead of generate_cutoffs, which
+            # is used for generating cutoffs from multi-entity df's
+            _, test_cut = self.cutoff_strategy.generate_fn(
+                entity_df, self.entity_id_col)
+
+            # tested to here. Having trouble with comparison operators
+            pre_test_df = entity_df[entity_df[self.time_col] <= test_cut]
+            test_df = entity_df[entity_df[self.time_col] > test_cut]
+            # execute the operations
+            # import pdb; pdb.set_trace()
+
+            pre_test_df = self._execute_operations_on_df(pre_test_df)
+            test_df = self._execute_operations_on_df(test_df)
+            # add the operation result to a dictionary
+            pre_res_dict = self._insert_first_row_into_dict(
+                pre_res_dict, pre_test_df, index)
+            post_res_dict = self._insert_first_row_into_dict(
+                post_res_dict, test_df, index)
+
+        # convert pre-test cutoff results to a dataframe
+        pre_test_df = pd.DataFrame.from_dict(
+            data=pre_res_dict, orient='index', columns=df.columns)
+        pre_test_df.index = pre_test_df[self.entity_id_col]
+
+        # convert post-test cutoff results to a dataframe
+        test_df = pd.DataFrame.from_dict(
+            data=post_res_dict, orient='index', columns=df.columns)
+        test_df.index = test_df[self.entity_id_col]
+
+        # return the two dataframes
+        return pre_test_df, test_df
+
+    def _insert_first_row_into_dict(
+            self, dict_to_insert, df, entity_id):
+        num_rows = len(df)
+        if num_rows > 1:
+            warnings.warn(
+                "Operations returned more than 1 result for entity " +
+                str(entity_id) + ". This probably means you forgot to add " +
+                " an aggregation operation. Arbitrarily picking the first " +
+                " result.",
+                RuntimeWarning)
+
+        # handle edge case in which the df is empty but we still need to return
+        # a shaped array
+        if num_rows > 0:
+            dict_to_insert[entity_id] = df.iloc[0].values
+
+        return dict_to_insert
+
+    def _execute_operations_on_df(self, df):
+        '''
+        Execute operations on df. This method assumes that data leakage/cutoff
+            times have already been taken into account, and just blindly
+            executes the operations.
+        Parameters
+        ----------
+        df: dataframe to be operated on
+
+        Returns
+        -------
+        df: dataframe after operations
+        '''
+        df = df.copy()
+        for operation in self.operations:
+            df = operation.execute(df)
+        return df
 
     def execute(self, dataframe, time_column, label_cutoff_time,
                 filter_column_order_of_types,

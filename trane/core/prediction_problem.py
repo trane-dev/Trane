@@ -22,7 +22,7 @@ class PredictionProblem:
     """
 
     def __init__(self, operations, entity_id_col=None, time_col=None,
-                 cutoff_strategy=None):
+                 table_meta=None, cutoff_strategy=None):
         """
         Parameters
         ----------
@@ -36,14 +36,16 @@ class PredictionProblem:
         self.operations = operations
         self.entity_id_col = entity_id_col
         self.time_col = time_col
+        self.table_meta = table_meta
         self.cutoff_strategy = cutoff_strategy
         self.filter_column_order_of_types = None
         self.label_generating_column_order_of_types = None
 
-    def is_valid(self, table_meta):
+    def is_valid(self, table_meta=None):
         '''
         Typechecking for operations. Insures that their input and output types
-        match.
+        match. Allows a user to use the problem's existing table_meta, or pass
+        in a new one
 
         Parameters
         ----------
@@ -54,7 +56,10 @@ class PredictionProblem:
         Bool
         '''
         # don't contaminate original table_meta
-        temp_meta = table_meta.copy()
+        if table_meta:
+            temp_meta = table_meta.copy()
+        else:
+            temp_meta = self.table_meta.copy()
 
         # sort each operation in its respective bucket
         for op in self.operations:
@@ -66,7 +71,7 @@ class PredictionProblem:
 
         return True
 
-    def new_execute(self, df):
+    def execute(self, df):
         """
         executes a prediction problem on an entire dataframe. Makes use of
         cutoff times supplied by self.cutoff_strategy
@@ -83,6 +88,12 @@ class PredictionProblem:
         post_label_execution_df: a dataframe of labels generated from after the
             specified cutoff time
         """
+        if not self.is_valid(self.table_meta):
+            print('Your Problem\'s specified operations do not match with the '
+                  'problem\'s table meta. Therefore, the problem is not '
+                  'valid.')
+            raise
+
         df = df.copy()
         df.index = df[self.entity_id_col]
         pre_res_dict, post_res_dict = {}, {}
@@ -113,17 +124,42 @@ class PredictionProblem:
                 post_res_dict, test_df, index)
 
         # convert pre-test cutoff results to a dataframe
-        pre_test_df = pd.DataFrame.from_dict(
-            data=pre_res_dict, orient='index', columns=df.columns)
+        # pre_test_df = pd.DataFrame.from_dict(
+        #     data=pre_res_dict, orient='index', columns=df.columns)
+        pre_test_df = pd.DataFrame.from_dict(data=pre_res_dict, orient='index')
+        pre_test_df = self._rename_columns(pre_test_df, df.columns.values)
         pre_test_df.index = pre_test_df[self.entity_id_col]
 
         # convert post-test cutoff results to a dataframe
-        test_df = pd.DataFrame.from_dict(
-            data=post_res_dict, orient='index', columns=df.columns)
+        test_df = pd.DataFrame.from_dict(data=post_res_dict, orient='index')
+        test_df = self._rename_columns(test_df, df.columns.values)
         test_df.index = test_df[self.entity_id_col]
 
         # return the two dataframes
         return pre_test_df, test_df
+
+    def _rename_columns(self, df, column_list):
+        '''
+        Renames columns in a given dataframe, in order, as the column_list.
+        This is required because of support for Python 2.7 and Pandas 0.21
+        A more modern way is to pass columns=df.columns
+            into pd.DataFrame.from_dict.
+
+        Parameters
+        ----------
+        df: DataFrame whose columns will be renamed
+        column_list: list of column names
+
+        Returns
+        -------
+        dataframe with renamed columns
+        '''
+
+        rename_dict = {}
+        for col_num in df.columns.values:
+            rename_dict[col_num] = column_list[col_num]
+        df.rename(columns=rename_dict, inplace=True)
+        return df
 
     def _insert_first_row_into_dict(
             self, dict_to_insert, df, entity_id):
@@ -160,102 +196,6 @@ class PredictionProblem:
         for operation in self.operations:
             df = operation.execute(df)
         return df
-
-    def execute(self, dataframe, time_column, label_cutoff_time,
-                filter_column_order_of_types,
-                label_generating_column_order_of_types):
-        """
-        This function executes all the operations on the dataframe
-        and returns the output. The output is two values. The
-        first value is the result of executing on all data before
-        the label_cutoff_time. The second value is the result
-        of executing on all data, including that after the
-        label_cutoff_time.
-
-        See paper:
-        "What would a data scientist ask? Automatically
-        formulating and solving predicton problems."
-
-        Parameters
-        ----------
-        dataframe: data to be executed on
-        time_column: column name of the column
-            containing time information in the data
-        label_cutoff_time: the time at which the data
-            is segmented. data after the time is used for
-            labels during test. data before the time is used
-            for labels during training.
-        filter_column_order_of_types: a list containing the types expected in
-            the sequence of operations on the filter column
-        label_generating_column_order_of_types: a list containing the types
-            expected in the sequence of operations on the label generating
-            column
-
-        Returns
-        -------
-        pre_label_cutoff_time_execution_result: label for training time segment
-        all_data_execution_result: label for testing (all time) time segment
-
-        """
-        dataframe = dataframe.sort_values(by=time_column)
-        dataframe = dataframe.copy()
-
-        pre_label_cutoff_time_execution_result = dataframe[
-            dataframe[time_column] < label_cutoff_time]
-        all_data_execution_result = dataframe[
-            dataframe[time_column] > label_cutoff_time]
-
-        continue_executing_on_precutoff_df = True
-        continue_executing_on_all_data_df = True
-
-        for idx, operation in enumerate(self.operations):
-
-            logging.debug(
-                "Beginning execution of operation: {}".format(operation))
-
-            if len(pre_label_cutoff_time_execution_result) == 0:
-                continue_executing_on_precutoff_df = False
-
-            if len(all_data_execution_result) == 0:
-                continue_executing_on_all_data_df = False
-
-            if continue_executing_on_all_data_df:
-                single_piece_of_data = all_data_execution_result.iloc[
-                    0][operation.column_name]
-
-                if idx == 0:
-                    self._check_type(
-                        filter_column_order_of_types[idx],
-                        single_piece_of_data)
-                elif idx > 0:
-                    self._check_type(
-                        label_generating_column_order_of_types[idx - 1],
-                        single_piece_of_data)
-
-                all_data_execution_result = operation.execute(
-                    all_data_execution_result)
-
-                if len(all_data_execution_result) == 0:
-                    continue
-
-                single_piece_of_data = all_data_execution_result.iloc[0][
-                    operation.column_name]
-
-                if idx == 0:
-                    self._check_type(
-                        filter_column_order_of_types[idx + 1],
-                        single_piece_of_data)
-                elif idx > 0:
-                    self._check_type(
-                        label_generating_column_order_of_types[idx],
-                        single_piece_of_data)
-
-            if continue_executing_on_precutoff_df:
-                pre_label_cutoff_time_execution_result = operation.execute(
-                    pre_label_cutoff_time_execution_result)
-
-        return(
-            pre_label_cutoff_time_execution_result, all_data_execution_result)
 
     def __str__(self):
         """

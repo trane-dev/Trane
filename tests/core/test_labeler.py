@@ -1,17 +1,12 @@
-import os
-
 import numpy as np
 import pandas as pd
 
-import trane
 from trane.core.labeler import *  # noqa
-from trane.core.prediction_problem import PredictionProblem
 from trane.core.prediction_problem_saver import *  # noqa
 from trane.ops.aggregation_ops import *  # noqa
 from trane.ops.filter_ops import *  # noqa
 from trane.ops.row_ops import *  # noqa
 from trane.ops.transformation_ops import *  # noqa
-from trane.utils.table_meta import TableMeta
 
 """TESTING STRATEGY:
 Function: execute()

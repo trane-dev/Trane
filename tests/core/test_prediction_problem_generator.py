@@ -5,8 +5,6 @@ Function: generate(self)
 3. Ensure prediction problems are generated in order of Filter->Row->Transformation->Aggregation
 """
 
-import logging
-
 import pandas as pd
 
 from trane.core.prediction_problem import *  # noqa
@@ -15,7 +13,6 @@ from trane.ops.aggregation_ops import *  # noqa
 from trane.ops.filter_ops import *  # noqa
 from trane.ops.row_ops import *  # noqa
 from trane.ops.transformation_ops import *  # noqa
-from trane.utils.table_meta import TableMeta
 
 meta_json_str = '{ "path": "", "tables": [ { "path": "synthetic_taxi_data.csv",\
     "name": "taxi_data", "fields": [ {"name": "vendor_id", "type": "id"},\

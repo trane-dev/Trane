@@ -2,6 +2,7 @@ import sys
 import unittest
 import warnings
 
+import numpy as np
 import pandas as pd
 from mock import MagicMock, patch
 
@@ -314,38 +315,73 @@ class TestPredictionProblemMethods(unittest.TestCase):
         self.assertEqual(my_dict[entity_id][0], 1)
         self.assertEqual(my_dict[entity_id][1], 2)
 
-    # def test_new_execute(self):
-    #     self.assertIsNotNone(self.problem.new_execute)
-    #
-    #     # mock out what will eventually return from df_mock['whatever']
-    #     df_index_mock = MagicMock(name='mock after getattr')
-    #     df_index_mock.unique = [0]
-    #
-    #     # mock out the original df to be passed
-    #     df_mock = MagicMock(name='original df mock')
-    #     df_mock.copy.return_value = df_mock
-    #     # make sure that df_index_mock is returned from df_mock['whatever']
-    #     df_mock_dict = {self.problem.entity_id_col: df_index_mock}
-    #     df_mock.__getitem__.side_effect = df_mock_dict.__getitem__
-    #
-    #     # patch pd.DataFrame
-    #     entity_df_mock = MagicMock(name='entity_df_mock')
-    #     entity_df_mock.__getitem__.side_effect = {'time_col': 0}
-    #
-    #     df_patch = self.create_patch(
-    #         'trane.core.prediction_problem.pd.DataFrame')
-    #     df_patch.return_value = df_patch()
-    #     df_patch.T = entity_df_mock
-    #
-    #     self.problem.cutoff_strategy.generate_cutoffs.return_value = (
-    #         None, 0, 1)
-    #
-    #
-    #     # EXECUTE
-    #     self.problem.new_execute(df=df_mock, time_col='time_col')
-    #
-    #     # make sure that the df is copied
-    #     self.assertTrue(df_mock.copy.calld)
-    #
-    #     # make sure that the df is indexed
-    #     self.assertEqual(df_mock.index, df_mock[self.problem.entity_id_col])
+    def test_new_execute(self):
+        # this is an integration test. Unit tests with DataFrames are dastardly
+        # complicated, and this method is central enough that it needs an
+        # integration test anyhow.
+
+        df = pd.DataFrame(
+            [(0, 0, 0, 5.32, 19.7, 53.89, 1, np.datetime64('2000-01-01')),
+             (1, 0, 1, 1.08, 6.78, 18.89, 2, np.datetime64('2000-01-01')),
+             (0, 0, 2, 4.69, 14.11, 41.35, 4, np.datetime64('2000-01-01'))],
+            columns=[
+                "vendor_id", "taxi_id", "trip_id", "distance",
+                "duration", "fare", "num_passengers", "date"])
+
+        json_str = '{ \
+            "path": "", \
+            "tables": \
+                [{"path": "synthetic_taxi_data.csv", \
+                  "name": "taxi_data", \
+                  "fields": \
+                      [{"name": "vendor_id", "type": "id"},\
+                       {"name": "taxi_id", "type": "id"}, \
+                       {"name": "trip_id", "type": "datetime"}, \
+                       {"name": "distance", "type": "number", \
+                            "subtype": "float"},\
+                       {"name": "duration", "type": "number", \
+                            "subtype": "float"},\
+                       {"name": "fare", "type": "number", \
+                            "subtype": "float"},\
+                       {"name": "num_passengers", "type": "number", \
+                            "subtype": "float"}]\
+                    }]}'
+
+        # set some things on this problem, since it's an integration test
+        static_cutoff = (
+            np.datetime64('1980-02-25'), np.datetime64('1980-02-25'))
+        self.mock_cutoff_strategy.generate_fn.return_value = static_cutoff
+        self.entity_col = 'vendor_id'
+        self.time_col = 'date'
+
+        # keep operations as mocks.
+        self.problem = PredictionProblem(
+            operations=self.operations, entity_id_col=self.entity_col,
+            time_col=self.time_col, cutoff_strategy=self.mock_cutoff_strategy)
+
+        # patch some helper methods
+        mock_execute_ops = self.create_patch(
+            'trane.core.PredictionProblem._execute_operations_on_df')
+        ops_return_val = {
+            0: ['execute', 'ops', 'on', 'df', 'patch', 'lives', 'here',
+                'io']}
+        mock_execute_ops.return_value = ops_return_val
+
+        mock_insert_first_row = self.create_patch(
+            'trane.core.PredictionProblem._insert_first_row_into_dict')
+        insert_return_val = {
+            0: ['this', 'has', 'been', 'patched', 'so', 'don\'t', 'expect',
+                'much']}
+        mock_insert_first_row.return_value = insert_return_val
+
+        # expected output
+        expected_output = pd.DataFrame.from_dict(
+            data=insert_return_val, orient='index', columns=df.columns)
+        expected_output.index = expected_output['vendor_id']
+
+        # Actually Execute
+        pre_test_df, test_df = self.problem.new_execute(df)
+        self.assertEqual(mock_insert_first_row.call_args[0][1], ops_return_val)
+
+        self.assertTrue(expected_output.equals(pre_test_df))
+        self.assertTrue(expected_output.equals(test_df))

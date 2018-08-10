@@ -103,7 +103,6 @@ class PredictionProblem:
             pre_test_df = entity_df[entity_df[self.time_col] <= test_cut]
             test_df = entity_df[entity_df[self.time_col] > test_cut]
             # execute the operations
-            # import pdb; pdb.set_trace()
 
             pre_test_df = self._execute_operations_on_df(pre_test_df)
             test_df = self._execute_operations_on_df(test_df)

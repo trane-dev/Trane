@@ -1,5 +1,6 @@
 import sys
 import unittest
+import warnings
 
 import pandas as pd
 from mock import MagicMock, patch
@@ -270,6 +271,48 @@ class TestPredictionProblemMethods(unittest.TestCase):
         # the operation is passed the mock_df
         self.assertEqual(
             self.operations[0].execute.call_args[0][0], mock_df)
+
+    def test_insert_first_row_into_dict_does_nothing_with_empty_arr(self):
+        my_dict = {}
+        my_empty_df = []
+        entity_id = '12345'
+
+        my_dict = self.problem._insert_first_row_into_dict(
+            my_dict, my_empty_df, entity_id)
+
+        self.assertEqual(len(my_dict.keys()), 0)
+
+    def test_insert_first_row_into_dict_warns_with_more_than_one_res(self):
+        # more integration than unit. It's *really* hard to mock out DataFrames
+        my_dict = {}
+        my_long_df = pd.DataFrame([[1, 2], [3, 4]])
+        entity_id = '12345'
+
+        with warnings.catch_warnings(record=True) as w:
+            # Cause all warnings to always be triggered.
+            warnings.simplefilter("always")
+            # Trigger a warning.
+            my_dict = self.problem._insert_first_row_into_dict(
+                my_dict, my_long_df, entity_id)
+            # Verify number and type of warning
+            assert len(w) == 1
+            assert issubclass(w[-1].category, RuntimeWarning)
+
+    def test_insert_first_row_into_dict_happy_path(self):
+        # again, more integration than unittest
+        my_dict = {}
+        my_good_df = pd.DataFrame([[1, 2]])
+        entity_id = '12345'
+
+        # assert no warnings RuntimeWarningsed
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            my_dict = self.problem._insert_first_row_into_dict(
+                my_dict, my_good_df, entity_id)
+            assert len(w) == 0
+
+        self.assertEqual(my_dict[entity_id][0], 1)
+        self.assertEqual(my_dict[entity_id][1], 2)
 
     # def test_new_execute(self):
     #     self.assertIsNotNone(self.problem.new_execute)

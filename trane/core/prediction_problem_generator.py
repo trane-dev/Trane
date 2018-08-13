@@ -1,6 +1,10 @@
+import itertools
 import logging
 
-from ..ops import aggregation_ops, filter_ops, row_ops, transformation_ops
+from ..ops import aggregation_ops as agg_ops
+from ..ops import filter_ops
+from ..ops import row_ops
+from ..ops import transformation_ops as trans_ops
 from ..utils.table_meta import TableMeta
 from .prediction_problem import PredictionProblem
 
@@ -53,58 +57,52 @@ class PredictionProblemGenerator:
         problems: a list of Prediction Problem objects.
         """
 
+        op_types = [agg_ops.AGGREGATION_OPS, trans_ops.TRANSFORMATION_OPS,
+                    row_ops.ROW_OPS, filter_ops.FILTER_OPS]
 
         def iter_over_ops():
-            for aggregation_op_name in aggregation_ops.AGGREGATION_OPS:
-                for transformation_op_name in transformation_ops.TRANSFORMATION_OPS:
-                    for row_op_name in row_ops.ROW_OPS:
-                        for filter_op_name in filter_ops.FILTER_OPS:
-                            yield aggregation_op_name, transformation_op_name, \
-                                row_op_name, filter_op_name
+            for ag, trans, row, filter in itertools.product(*op_types):
+                yield ag, trans, row, filter
 
         problems = []
         for ops in iter_over_ops():
             # for filter_col in self.table_meta.get_columns():
-            aggregation_op_name, transformation_op_name, \
-                row_op_name, filter_op_name = ops
+            agg_op_name, trans_op_name, row_op_name, filter_op_name = ops
 
-            aggregation_op_obj = getattr(aggregation_ops, aggregation_op_name)(
-                self.label_generating_col)
-            transformation_op_obj = getattr(transformation_ops, transformation_op_name)(
-                self.label_generating_col)
-            row_op_obj = getattr(row_ops, row_op_name)(
-                self.label_generating_col)
-            filter_op_obj = getattr(
-                filter_ops, filter_op_name)(self.filter_col)
+            agg_op_obj = getattr(agg_ops, agg_op_name)(self.label_generating_col) # noqa
+            trans_op_obj = getattr(trans_ops, trans_op_name)(self.label_generating_col) # noqa
+            row_op_obj = getattr(row_ops, row_op_name)(self.label_generating_col) # noqa
+            filter_op_obj = getattr(filter_ops, filter_op_name)(self.filter_col) # noqa
 
-            operations = [
-                filter_op_obj,
-                row_op_obj,
-                transformation_op_obj,
-                aggregation_op_obj]
+            operations = [filter_op_obj, row_op_obj, trans_op_obj, agg_op_obj]
 
-            prediction_problem = PredictionProblem(operations, cutoff_strategy=None)
+            prediction_problem = PredictionProblem(
+                operations=operations, entity_id_col=self.entity_id_col,
+                time_col=self.time_col, table_meta=self.table_meta,
+                cutoff_strategy=None)
 
-            logging.debug("prediction problem generated, now checking validity...")
+            logging.debug(
+                "prediction problem generated, now checking validity...")
 
-            (is_valid_prediction_problem, filter_col_order_of_types,
-                label_generating_col_order_of_types) = \
-                prediction_problem.is_valid_prediction_problem(
-                self.table_meta, self.filter_col,
-                self.label_generating_col)
-            if not is_valid_prediction_problem:
+            is_valid = prediction_problem.is_valid()
+
+            if not is_valid:
                 logging.debug("invalid prediction problem")
                 continue
 
-            logging.debug("valid prediction problem, now generating and setting hyper parameters...")
+            logging.debug("valid prediction problem, now generating and "
+                          "setting hyper parameters...")
 
-            prediction_problem.generate_and_set_hyper_parameters(dataframe,
-                                                                 self.label_generating_col,
-                                                                 self.filter_col,
-                                                                 self.entity_id_col)
+            # this is the bit that needs work
+            prediction_problem.generate_and_set_hyper_parameters(
+                dataframe,
+                self.label_generating_col,
+                self.filter_col,
+                self.entity_id_col)
 
             logging.debug(
-                "valid problem with parameters generated: {} \n".format(prediction_problem))
+                "valid problem with parameters generated: {} \n".format(
+                    prediction_problem))
 
             problems.append(prediction_problem)
         return problems

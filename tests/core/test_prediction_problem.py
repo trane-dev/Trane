@@ -142,20 +142,34 @@ class TestPredictionProblemMethods(unittest.TestCase):
             'trane.core.PredictionProblem.to_json')
         dill_cutoff_strategy_patch = self.create_patch(
             'trane.core.PredictionProblem._dill_cutoff_strategy')
+        json_patch = self.create_patch(
+            'trane.core.prediction_problem.json')
+
+        path_patch = self.create_patch(
+            'trane.core.prediction_problem.os.path.isdir')
+        path_patch.return_value = False
+        makedirs_patch = self.create_patch(
+            'trane.core.prediction_problem.os.makedirs')
 
         path = '../Data'
         problem_name = 'problem_name'
 
-        try:
-            self.problem.save(path=path, problem_name=problem_name)
-        except Exception as e:
-            print('test_save doesn\'t test i/o. '
-                  'This exception statement catches the error.')
-            print(e)
+        open_patch = None
+        if (sys.version_info > (3, 0)):
+            open_patch = self.create_patch('builtins.open')
+        else:
+            open_patch = self.create_patch('__builtin__.open')
 
-        self.assertTrue(to_json_patch.called)
+        # Save
+        self.problem.save(path=path, problem_name=problem_name)
+
         self.assertTrue(dill_cutoff_strategy_patch.called)
         self.assertTrue(os_path_exists_patch.called)
+        self.assertTrue(to_json_patch.called)
+        self.assertTrue(path_patch.called)
+        self.assertTrue(makedirs_patch.called)
+        self.assertTrue(json_patch.loads.called)
+        self.assertTrue(open_patch.called)
 
     def test_load(self):
         self.assertIsNotNone(PredictionProblem.load)

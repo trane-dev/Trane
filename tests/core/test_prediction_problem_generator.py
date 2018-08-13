@@ -8,7 +8,7 @@ Function: generate(self)
 import unittest
 
 import pandas as pd
-from mock import MagicMock, patch
+from mock import MagicMock, call, patch
 
 from trane.core.prediction_problem_generator import PredictionProblemGenerator
 from trane.ops.aggregation_ops import *  # noqa
@@ -82,3 +82,50 @@ class TestPredictionProblemGenerator(unittest.TestCase):
             thing.return_value = return_value
 
         return thing
+
+
+class TestPredictionProblemGeneratorValidation(unittest.TestCase):
+    '''
+    TestPredictionProblemGeneratorValidation has its own class, because unlike
+    other tests, the ensure_valid_inputs method cannot be mocked out.
+    '''
+
+    def create_patch(self, name, return_value=None):
+        '''helper method for creating patches'''
+        patcher = patch(name)
+        thing = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        if return_value:
+            thing.return_value = return_value
+
+        return thing
+
+    def test_ensure_valid_imputs(self):
+        table_meta_mock = MagicMock()
+        entity_id_col = "taxi_id"
+        label_generating_col = "fare"
+        time_col = "trip_id"
+        filter_col = "taxi_id"
+
+        # set up table_meta types
+        table_meta_mock.get_type.return_value = True
+        table_meta_patch = self.create_patch(
+            'trane.core.prediction_problem_generator.TableMeta', 'tm_patch')
+        table_meta_patch.TYPE_IDENTIFIER = True
+        table_meta_patch.TYPE_FLOAT = True
+        table_meta_patch.TYPE_TIME = True
+
+        # create generator
+        generator = PredictionProblemGenerator(
+            table_meta=table_meta_mock,
+            entity_id_col=entity_id_col,
+            label_generating_col=label_generating_col,
+            time_col=time_col,
+            filter_col=filter_col)
+
+        self.assertIsNotNone(generator.ensure_valid_inputs)
+        table_meta_mock.get_type.assert_has_calls([
+            call(entity_id_col),
+            call(label_generating_col),
+            call(time_col)])

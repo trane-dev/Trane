@@ -57,8 +57,9 @@ class TestPredictionProblemGenerator(unittest.TestCase):
                 {"name": "num_passengers", "type": "number", \
                     "subtype": "float"} \
                  ]}]}'
+
         self.table_meta = TableMeta.from_json(meta_json_str)
-        self.dataframe = pd.DataFrame(
+        self.df = pd.DataFrame(
             [(0, 0, 0, 5.32, 19.7, 53.89, 1),
              (0, 0, 1, 1.08, 6.78, 18.89, 2),
              (0, 0, 2, 4.69, 14.11, 41.35, 4)],
@@ -82,6 +83,11 @@ class TestPredictionProblemGenerator(unittest.TestCase):
             thing.return_value = return_value
 
         return thing
+
+    def test_generate(self):
+        self.prep_for_integration()
+        self.assertIsNotNone(self.generator.generate)
+        self.generator.generate(self.df)
 
 
 class TestPredictionProblemGeneratorValidation(unittest.TestCase):
@@ -128,4 +134,4 @@ class TestPredictionProblemGeneratorValidation(unittest.TestCase):
         table_meta_mock.get_type.assert_has_calls([
             call(entity_id_col),
             call(label_generating_col),
-            call(time_col)])
+            call(time_col)], any_order=True)

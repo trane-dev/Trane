@@ -117,6 +117,11 @@ class OpBase(object):
         hyperparameter: But this has already been set to the operation
 
         """
+
+        # If the operator has no required parameters, return None
+        if len(self.REQUIRED_PARAMETERS) == 0:
+            return None
+
         hyperaparam = self.find_threshhold_by_diversity(
             df=df, label_col=label_col,
             entity_col=entity_col,
@@ -152,27 +157,19 @@ class OpBase(object):
         best_filter_value: parameter setting for the filter op.
         """
 
-        # if no params are required, return None
-        if len(self.REQUIRED_PARAMETERS) == 0:
-            return None
-
         # record the original settings to prevent side effects
         original_hyperparam_settings = self.hyper_parameter_settings
 
-        unique_vals = set(df[col])
+        df, unique_vals = self._sample_df_and_uniqe_values(
+            df=df, col=col, max_num_unique_values=num_random_samples,
+            max_num_rows=num_rows_to_execute_on)
 
-        # randomly select samples from the unique values
-        if len(unique_vals) > num_random_samples:
-            unique_vals = list(
-                random.sample(unique_vals, num_random_samples))
+        # best score is the fraction of data that remains after data is
+        # truncated at a given value
+        best_score, best_val = 1, 0
 
-        # pare down the dataframe to just the length desired
-        if len(df) > num_rows_to_execute_on:
-            df = df.sample(num_rows_to_execute_on)
-
-        best = 1
-        best_val = 0
         # cycle through unique values for the parameter
+        unique_vals = set(df[col])
         for unique_val in unique_vals:
 
             total = len(df)
@@ -190,8 +187,8 @@ class OpBase(object):
             score = abs(fraction_of_data_left - fraction_of_data_target)
 
             #  record the closest score
-            if score < best:
-                best = score
+            if score < best_score:
+                best_score = score
                 best_val = unique_val
 
         # reset operation to original hyperparamets
@@ -225,30 +222,19 @@ class OpBase(object):
             after having the operation applied with the chosen parameter value.
         """
 
-        # If the operator has no required parameters, return None
-        if len(self.REQUIRED_PARAMETERS) == 0:
-            return None, df
-
-        df = df.copy()
         # record the original settings to prevent side effects
         original_hyperparam_settings = self.hyper_parameter_settings
 
-        unique_vals = set(df[label_col])
-
-        # randomly sample from the unique parameters
-        if len(unique_vals) > num_random_samples:
-            unique_vals = list(random.sample(
-                unique_vals, num_random_samples))
-
-        # randomly sample the dataframe to be the right size
-        if len(df) > num_rows_to_execute_on:
-            df = df.sample(num_rows_to_execute_on)
+        df, unique_vals = self._sample_df_and_uniqe_values(
+            df=df, col=label_col, max_num_unique_values=num_random_samples,
+            max_num_rows=num_rows_to_execute_on)
 
         best_entropy = 0
         best_parameter_value = 0
 
         # try each unique value
         # return the one that results in the most entropy
+        unique_vals = set(df[label_col])
         for unique_val in unique_vals:
 
             self.set_hyper_parameter(unique_val)
@@ -264,6 +250,41 @@ class OpBase(object):
 
         self.hyper_parameter_settings = original_hyperparam_settings
         return best_parameter_value
+
+    def _sample_df_and_uniqe_values(
+            self, df, col, max_num_unique_values, max_num_rows):
+        """
+        Helper methods
+
+        Randomly sample unique values in the passed col in a dataframe so that
+        the number of unique_values is the <= max_num_unique_values
+
+        Randomly sample a dataframe so that the number of
+        rows is <= max_num_rows
+
+        Parameters
+        ----------
+        df: Pandas DataFrame
+        col: column to base sampling on
+        max_num_unique_values: the maximum allowed number of unique values to
+            return
+        max_num_rows: the maximum allowed number of rows to return
+
+        Returns
+        -------
+        df: sampled dataframe which is a subset of the original dataframe
+        unique_vals: a list of unique values
+        """
+        unique_vals = set(df[col])
+
+        if len(unique_vals) > max_num_unique_values:
+            unique_vals = list(
+                random.sample(unique_vals, max_num_unique_values))
+
+        if len(df) > max_num_rows:
+            df = df.sample(max_num_rows)
+
+        return (df, unique_vals)
 
     def _entropy_of_a_list(self, values):
         """

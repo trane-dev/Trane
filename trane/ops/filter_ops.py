@@ -54,6 +54,10 @@ class FilterOpBase(OpBase):
         hyperparameter: But this has already been set to the operation
 
         """
+        # If the operator has no required parameters, return None
+        if len(self.REQUIRED_PARAMETERS) == 0:
+            return None
+
         filter_hyperparam = self.find_threshhold_by_remaining(
             fraction_of_data_target=0.8, df=df, col=filter_col,
             num_random_samples=num_random_samples,

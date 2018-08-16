@@ -22,8 +22,8 @@ class TestPredictionProblemGenerator(unittest.TestCase):
 
     def setUp(self):
         self.table_meta_mock = MagicMock()
-        self.entity_id_col = "taxi_id"
-        self.label_generating_col = "fare"
+        self.entity_col = "taxi_id"
+        self.label_col = "fare"
         self.time_col = "trip_id"
         self.filter_col = "taxi_id"
 
@@ -32,8 +32,8 @@ class TestPredictionProblemGenerator(unittest.TestCase):
 
         self.generator = PredictionProblemGenerator(
             table_meta=self.table_meta_mock,
-            entity_id_col=self.entity_id_col,
-            label_generating_col=self.label_generating_col,
+            entity_col=self.entity_col,
+            label_col=self.label_col,
             time_col=self.time_col,
             filter_col=self.filter_col)
 
@@ -68,8 +68,8 @@ class TestPredictionProblemGenerator(unittest.TestCase):
 
         self.generator = PredictionProblemGenerator(
             table_meta=self.table_meta,
-            entity_id_col=self.entity_id_col,
-            label_generating_col=self.label_generating_col,
+            entity_col=self.entity_col,
+            label_col=self.label_col,
             time_col=self.time_col,
             filter_col=self.filter_col)
 
@@ -109,8 +109,8 @@ class TestPredictionProblemGeneratorValidation(unittest.TestCase):
 
     def test_ensure_valid_imputs(self):
         table_meta_mock = MagicMock()
-        entity_id_col = "taxi_id"
-        label_generating_col = "fare"
+        entity_col = "taxi_id"
+        label_col = "fare"
         time_col = "trip_id"
         filter_col = "taxi_id"
 
@@ -125,13 +125,13 @@ class TestPredictionProblemGeneratorValidation(unittest.TestCase):
         # create generator
         generator = PredictionProblemGenerator(
             table_meta=table_meta_mock,
-            entity_id_col=entity_id_col,
-            label_generating_col=label_generating_col,
+            entity_col=entity_col,
+            label_col=label_col,
             time_col=time_col,
             filter_col=filter_col)
 
         self.assertIsNotNone(generator.ensure_valid_inputs)
         table_meta_mock.get_type.assert_has_calls([
-            call(entity_id_col),
-            call(label_generating_col),
+            call(entity_col),
+            call(label_col),
             call(time_col)], any_order=True)

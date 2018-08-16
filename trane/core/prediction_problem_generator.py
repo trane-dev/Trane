@@ -3,7 +3,6 @@ import itertools
 from ..ops import aggregation_ops as agg_ops
 from ..ops import filter_ops, row_ops
 from ..ops import transformation_ops as trans_ops
-from ..ops.filter_ops import FilterOpBase
 from ..utils.table_meta import TableMeta
 from .prediction_problem import PredictionProblem
 

@@ -64,8 +64,8 @@ class CutoffStrategy:
         # reshape the array so that it has 3 columns.
         # -1 indicates that the number of rows is inferred
         data = np.array(val_arr).reshape(-1, 2)
-        cutoff_df = pd.DataFrame(
-            data, columns=[entity_id_col, 'cutoff'])
+        cutoff_df = pd.DataFrame(data)
+        cutoff_df.rename(columns={0: entity_id_col, 1: 'cutoff'}, inplace=True)
         cutoff_df.set_index(entity_id_col, inplace=True)
 
         return cutoff_df

@@ -1,9 +1,11 @@
 import json
 import logging
 import os
+import warnings
 
 import dill
 import numpy as np
+import pandas as pd
 
 from ..ops.op_saver import op_from_json, op_to_json
 from ..utils.table_meta import TableMeta
@@ -20,7 +22,7 @@ class PredictionProblem:
     """
 
     def __init__(self, operations, entity_id_col=None, time_col=None,
-                 cutoff_strategy=None):
+                 table_meta=None, cutoff_strategy=None):
         """
         Parameters
         ----------
@@ -34,14 +36,16 @@ class PredictionProblem:
         self.operations = operations
         self.entity_id_col = entity_id_col
         self.time_col = time_col
+        self.table_meta = table_meta
         self.cutoff_strategy = cutoff_strategy
         self.filter_column_order_of_types = None
         self.label_generating_column_order_of_types = None
 
-    def is_valid(self, table_meta):
+    def is_valid(self, table_meta=None):
         '''
         Typechecking for operations. Insures that their input and output types
-        match.
+        match. Allows a user to use the problem's existing table_meta, or pass
+        in a new one
 
         Parameters
         ----------
@@ -52,7 +56,10 @@ class PredictionProblem:
         Bool
         '''
         # don't contaminate original table_meta
-        temp_meta = table_meta.copy()
+        if table_meta:
+            temp_meta = table_meta.copy()
+        else:
+            temp_meta = self.table_meta.copy()
 
         # sort each operation in its respective bucket
         for op in self.operations:
@@ -64,101 +71,131 @@ class PredictionProblem:
 
         return True
 
-    def execute(self, dataframe, time_column, label_cutoff_time,
-                filter_column_order_of_types,
-                label_generating_column_order_of_types):
+    def execute(self, df):
         """
-        This function executes all the operations on the dataframe
-        and returns the output. The output is two values. The
-        first value is the result of executing on all data before
-        the label_cutoff_time. The second value is the result
-        of executing on all data, including that after the
-        label_cutoff_time.
-
-        See paper:
-        "What would a data scientist ask? Automatically
-        formulating and solving predicton problems."
+        executes a prediction problem on an entire dataframe. Makes use of
+        cutoff times supplied by self.cutoff_strategy
 
         Parameters
         ----------
-        dataframe: data to be executed on
-        time_column: column name of the column
-            containing time information in the data
-        label_cutoff_time: the time at which the data
-            is segmented. data after the time is used for
-            labels during test. data before the time is used
-            for labels during training.
-        filter_column_order_of_types: a list containing the types expected in
-            the sequence of operations on the filter column
-        label_generating_column_order_of_types: a list containing the types
-            expected in the sequence of operations on the label generating
-            column
+        df: dataframe for labels to be generated from
+        time_col: str column which will be used to compare data cutoffs
 
         Returns
         -------
-        pre_label_cutoff_time_execution_result: label for training time segment
-        all_data_execution_result: label for testing (all time) time segment
-
+        pre_label_execution_df: a dataframe of labels generated from before the
+            specified cutoff time
+        post_label_execution_df: a dataframe of labels generated from after the
+            specified cutoff time
         """
-        dataframe = dataframe.sort_values(by=time_column)
-        dataframe = dataframe.copy()
+        if not self.is_valid(self.table_meta):
+            print('Your Problem\'s specified operations do not match with the '
+                  'problem\'s table meta. Therefore, the problem is not '
+                  'valid.')
+            raise
 
-        pre_label_cutoff_time_execution_result = dataframe[
-            dataframe[time_column] < label_cutoff_time]
-        all_data_execution_result = dataframe[
-            dataframe[time_column] > label_cutoff_time]
+        df = df.copy()
+        df.index = df[self.entity_id_col]
+        pre_res_dict, post_res_dict = {}, {}
 
-        continue_executing_on_precutoff_df = True
-        continue_executing_on_all_data_df = True
+        # cycle through each entity
+        for index in df.index.unique():
 
-        for idx, operation in enumerate(self.operations):
+            # original rows of an entity
+            entity_df = df.loc[[index]]
 
-            logging.debug(
-                "Beginning execution of operation: {}".format(operation))
+            # test cutoff and label cutoff are the same thing
+            # Go directly to the cutoff_fn instead of generate_cutoffs, which
+            # is used for generating cutoffs from multi-entity df's
+            _, test_cut = self.cutoff_strategy.generate_fn(
+                entity_df, self.entity_id_col)
 
-            if len(pre_label_cutoff_time_execution_result) == 0:
-                continue_executing_on_precutoff_df = False
+            # tested to here. Having trouble with comparison operators
+            pre_test_df = entity_df[entity_df[self.time_col] <= test_cut]
+            test_df = entity_df[entity_df[self.time_col] > test_cut]
+            # execute the operations
 
-            if len(all_data_execution_result) == 0:
-                continue_executing_on_all_data_df = False
+            pre_test_df = self._execute_operations_on_df(pre_test_df)
+            test_df = self._execute_operations_on_df(test_df)
+            # add the operation result to a dictionary
+            pre_res_dict = self._insert_first_row_into_dict(
+                pre_res_dict, pre_test_df, index)
+            post_res_dict = self._insert_first_row_into_dict(
+                post_res_dict, test_df, index)
 
-            if continue_executing_on_all_data_df:
-                single_piece_of_data = all_data_execution_result.iloc[
-                    0][operation.column_name]
+        # convert pre-test cutoff results to a dataframe
+        # pre_test_df = pd.DataFrame.from_dict(
+        #     data=pre_res_dict, orient='index', columns=df.columns)
+        pre_test_df = pd.DataFrame.from_dict(data=pre_res_dict, orient='index')
+        pre_test_df = self._rename_columns(pre_test_df, df.columns.values)
+        pre_test_df.index = pre_test_df[self.entity_id_col]
 
-                if idx == 0:
-                    self._check_type(
-                        filter_column_order_of_types[idx],
-                        single_piece_of_data)
-                elif idx > 0:
-                    self._check_type(
-                        label_generating_column_order_of_types[idx - 1],
-                        single_piece_of_data)
+        # convert post-test cutoff results to a dataframe
+        test_df = pd.DataFrame.from_dict(data=post_res_dict, orient='index')
+        test_df = self._rename_columns(test_df, df.columns.values)
+        test_df.index = test_df[self.entity_id_col]
 
-                all_data_execution_result = operation.execute(
-                    all_data_execution_result)
+        # return the two dataframes
+        return pre_test_df, test_df
 
-                if len(all_data_execution_result) == 0:
-                    continue
+    def _rename_columns(self, df, column_list):
+        '''
+        Renames columns in a given dataframe, in order, as the column_list.
+        This is required because of support for Python 2.7 and Pandas 0.21
+        A more modern way is to pass columns=df.columns
+            into pd.DataFrame.from_dict.
 
-                single_piece_of_data = all_data_execution_result.iloc[0][
-                    operation.column_name]
+        Parameters
+        ----------
+        df: DataFrame whose columns will be renamed
+        column_list: list of column names
 
-                if idx == 0:
-                    self._check_type(
-                        filter_column_order_of_types[idx + 1],
-                        single_piece_of_data)
-                elif idx > 0:
-                    self._check_type(
-                        label_generating_column_order_of_types[idx],
-                        single_piece_of_data)
+        Returns
+        -------
+        dataframe with renamed columns
+        '''
 
-            if continue_executing_on_precutoff_df:
-                pre_label_cutoff_time_execution_result = operation.execute(
-                    pre_label_cutoff_time_execution_result)
+        rename_dict = {}
+        for col_num in df.columns.values:
+            rename_dict[col_num] = column_list[col_num]
+        df.rename(columns=rename_dict, inplace=True)
+        return df
 
-        return(
-            pre_label_cutoff_time_execution_result, all_data_execution_result)
+    def _insert_first_row_into_dict(
+            self, dict_to_insert, df, entity_id):
+        num_rows = len(df)
+        if num_rows > 1:
+            warnings.warn(
+                "Operations returned more than 1 result for entity " +
+                str(entity_id) + ". This probably means you forgot to add " +
+                " an aggregation operation. Arbitrarily picking the first " +
+                " result.",
+                RuntimeWarning)
+
+        # handle edge case in which the df is empty but we still need to return
+        # a shaped array
+        if num_rows > 0:
+            dict_to_insert[entity_id] = df.iloc[0].values
+
+        return dict_to_insert
+
+    def _execute_operations_on_df(self, df):
+        '''
+        Execute operations on df. This method assumes that data leakage/cutoff
+            times have already been taken into account, and just blindly
+            executes the operations.
+        Parameters
+        ----------
+        df: dataframe to be operated on
+
+        Returns
+        -------
+        df: dataframe after operations
+        '''
+        df = df.copy()
+        for operation in self.operations:
+            df = operation.execute(df)
+        return df
 
     def __str__(self):
         """

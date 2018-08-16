@@ -10,8 +10,9 @@ __all__ = ["TransformationOpBase", "TRANSFORMATION_OPS"] + TRANSFORMATION_OPS
 
 class TransformationOpBase(OpBase):
     """
-    Super class for all Transformation Operations. The class is empty and is currently a
-    placeholder for any TransformationOpBase level methods we want to make.
+    Super class for all Transformation Operations. The class is empty and is
+    currently a placeholder for any TransformationOpBase level methods we want
+    to make.
 
     Transformation operations represent the 3rd operation
     in a prediction problem. They apply functions across rows by
@@ -21,7 +22,8 @@ class TransformationOpBase(OpBase):
 
     Make Your Own
     -------------
-    Simply make a new class that follows the requirements below and issue a pull request.
+    Simply make a new class that follows the requirements below and issue a
+    pull request.
 
     Requirements
     ------------
@@ -35,10 +37,14 @@ class TransformationOpBase(OpBase):
 
 class IdentityTransformationOp(TransformationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY), (TM.TYPE_BOOL, TM.TYPE_BOOL),
-               (TM.TYPE_ORDERED, TM.TYPE_ORDERED), (TM.TYPE_TEXT, TM.TYPE_TEXT),
-               (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-               (TM.TYPE_TIME, TM.TYPE_TIME), (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
+    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
+               (TM.TYPE_BOOL, TM.TYPE_BOOL),
+               (TM.TYPE_ORDERED, TM.TYPE_ORDERED),
+               (TM.TYPE_TEXT, TM.TYPE_TEXT),
+               (TM.TYPE_INTEGER, TM.TYPE_INTEGER),
+               (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
+               (TM.TYPE_TIME, TM.TYPE_TIME),
+               (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
 
     def execute(self, dataframe):
         return dataframe
@@ -63,10 +69,14 @@ class DiffTransformationOp(TransformationOpBase):
 
 class ObjectFrequencyTransformationOp(TransformationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_INTEGER), (TM.TYPE_BOOL, TM.TYPE_INTEGER),
-               (TM.TYPE_ORDERED, TM.TYPE_INTEGER), (TM.TYPE_TEXT, TM.TYPE_INTEGER),
-               (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_INTEGER),
-               (TM.TYPE_TIME, TM.TYPE_INTEGER), (TM.TYPE_IDENTIFIER, TM.TYPE_INTEGER)]
+    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_INTEGER),
+               (TM.TYPE_BOOL, TM.TYPE_INTEGER),
+               (TM.TYPE_ORDERED, TM.TYPE_INTEGER),
+               (TM.TYPE_TEXT, TM.TYPE_INTEGER),
+               (TM.TYPE_INTEGER, TM.TYPE_INTEGER),
+               (TM.TYPE_FLOAT, TM.TYPE_INTEGER),
+               (TM.TYPE_TIME, TM.TYPE_INTEGER),
+               (TM.TYPE_IDENTIFIER, TM.TYPE_INTEGER)]
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()

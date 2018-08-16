@@ -20,7 +20,8 @@ class RowOpBase(OpBase):
 
     Make Your Own
     -------------
-    Simply make a new class that follows the requirements below and issue a pull request.
+    Simply make a new class that follows the requirements below and issue a
+    pull request.
 
     Requirements
     ------------
@@ -34,10 +35,10 @@ class RowOpBase(OpBase):
 
 class IdentityRowOp(RowOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY), (TM.TYPE_BOOL, TM.TYPE_BOOL),
-               (TM.TYPE_ORDERED, TM.TYPE_ORDERED), (TM.TYPE_TEXT, TM.TYPE_TEXT),
-               (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-               (TM.TYPE_TIME, TM.TYPE_TIME), (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
+    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY), (TM.TYPE_BOOL, TM.TYPE_BOOL), # noqa
+               (TM.TYPE_ORDERED, TM.TYPE_ORDERED), (TM.TYPE_TEXT, TM.TYPE_TEXT),  # noqa
+               (TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT), # noqa
+               (TM.TYPE_TIME, TM.TYPE_TIME), (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)] # noqa
 
     def execute(self, dataframe):
         return dataframe
@@ -45,8 +46,9 @@ class IdentityRowOp(RowOpBase):
 
 class EqRowOp(RowOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
-                                              TM.TYPE_BOOL), (TM.TYPE_FLOAT, TM.TYPE_BOOL)]
+    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL),
+               (TM.TYPE_INTEGER, TM.TYPE_BOOL),
+               (TM.TYPE_FLOAT, TM.TYPE_BOOL)]
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()
@@ -57,8 +59,9 @@ class EqRowOp(RowOpBase):
 
 class NeqRowOp(RowOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
-                                              TM.TYPE_BOOL), (TM.TYPE_FLOAT, TM.TYPE_BOOL)]
+    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL),
+               (TM.TYPE_INTEGER, TM.TYPE_BOOL),
+               (TM.TYPE_FLOAT, TM.TYPE_BOOL)]
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()
@@ -69,8 +72,9 @@ class NeqRowOp(RowOpBase):
 
 class GreaterRowOp(RowOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
-                                              TM.TYPE_BOOL), (TM.TYPE_FLOAT, TM.TYPE_BOOL)]
+    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL),
+               (TM.TYPE_INTEGER, TM.TYPE_BOOL),
+               (TM.TYPE_FLOAT, TM.TYPE_BOOL)]
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()
@@ -81,8 +85,9 @@ class GreaterRowOp(RowOpBase):
 
 class LessRowOp(RowOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
-                                              TM.TYPE_BOOL), (TM.TYPE_FLOAT, TM.TYPE_BOOL)]
+    IOTYPES = [(TM.TYPE_BOOL, TM.TYPE_BOOL),
+               (TM.TYPE_INTEGER, TM.TYPE_BOOL),
+               (TM.TYPE_FLOAT, TM.TYPE_BOOL)]
 
     def execute(self, dataframe):
         dataframe = dataframe.copy()

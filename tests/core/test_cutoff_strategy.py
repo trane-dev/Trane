@@ -14,14 +14,11 @@ class TestCutoffStrategy(unittest.TestCase):
 
         def generate_fn(group, entity_id):
 
-            # test_cutoff is 5 days after first row's date
+            # cutoff is 5 days after first row's date
             date_of_first_row = group.iloc[0].dates
-            test_cutoff = date_of_first_row - np.timedelta64(5, 'D')
+            cutoff = date_of_first_row + np.timedelta64(5, 'D')
 
-            # training_cutoff is constant
-            training_cutoff = np.datetime64('1980-02-25')
-
-            return((training_cutoff, test_cutoff))
+            return(cutoff)
         self.generate_fn = generate_fn
 
         self.cutoff_strategy = CutoffStrategy(
@@ -45,29 +42,23 @@ class TestCutoffStrategy(unittest.TestCase):
 
         data = {'entity_id': ['a', 'a', 'b'],
                 'dates': [
-                    np.datetime64('1980-02-25'),
+                    np.datetime64('1980-02-01'),
                     np.datetime64('1980-02-24'),
-                    np.datetime64('1980-02-23')],
+                    np.datetime64('1980-03-01')],
                 'other_col': ['d', 'e', 'f']}
         test_data = pd.DataFrame(data)
 
         cutoff_df = self.cutoff_strategy.generate_cutoffs(
             df=test_data, entity_id_col='entity_id')
 
-        # no variance in training_cutoff columns
-        self.assertEqual(len(cutoff_df.training_cutoff.unique()), 1)
-        self.assertEqual(
-            cutoff_df.training_cutoff.unique()[0],
-            np.datetime64('1980-02-25'))
-
         # test_cutoff should be a different date
         self.assertEqual(
-            cutoff_df.loc['a'].test_cutoff,
-            np.datetime64('1980-02-20'))
+            cutoff_df.loc['a'].cutoff,
+            np.datetime64('1980-02-06'))
 
         self.assertEqual(
-            cutoff_df.loc['b'].test_cutoff,
-            np.datetime64('1980-02-18'))
+            cutoff_df.loc['b'].cutoff,
+            np.datetime64('1980-03-06'))
 
     def test_cutoff_times_returned_as_expected_without_cutoff_strategy(self):
         # this is more of an integration test than a unittest, really
@@ -86,11 +77,10 @@ class TestCutoffStrategy(unittest.TestCase):
         cutoff_df = self.cutoff_strategy.generate_cutoffs(
             df=test_data, entity_id_col='entity_id')
 
-        # no variance in training and test_cutoff columns
-        self.assertEqual(len(cutoff_df.training_cutoff.unique()), 1)
-        self.assertEqual(len(cutoff_df.test_cutoff.unique()), 1)
+        # no variance in cutoff columns
+        self.assertEqual(len(cutoff_df.cutoff.unique()), 1)
 
         # training and test cutoff should both be None
-        self.assertEqual(cutoff_df.loc['a'].test_cutoff, None)
+        self.assertEqual(cutoff_df.loc['a'].cutoff, None)
 
-        self.assertEqual(cutoff_df.loc['b'].test_cutoff, None)
+        self.assertEqual(cutoff_df.loc['b'].cutoff, None)

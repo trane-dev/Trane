@@ -8,10 +8,9 @@ class CutoffStrategy:
 
     Parameters
     ----------
-    generate_fn: a function that generates training and test cutoff times.
+    generate_fn: a function that generates a cutoff time for a given entity.
         input: entity rows
-        output: a tuple with the following timestamps:
-            (training_cutoff, test_cutoff)
+        output: a training cutoff in np.datetime64 format
 
     Returns
     -------
@@ -53,20 +52,20 @@ class CutoffStrategy:
             # a user's generate_fn may expect it
             df_group.set_index(entity_id_col, inplace=True)
 
-            training_cutoff, test_cutoff = None, None
+            cutoff = None
 
             if self.generate_fn:
-                training_cutoff, test_cutoff = self.generate_fn(
+                cutoff = self.generate_fn(
                     df_group, entity_id)
 
             # add this data to a long array
-            val_arr.extend((entity_id, training_cutoff, test_cutoff))
+            val_arr.extend((entity_id, cutoff))
 
         # reshape the array so that it has 3 columns.
         # -1 indicates that the number of rows is inferred
-        data = np.array(val_arr).reshape(-1, 3)
-        cutoff_df = pd.DataFrame(
-            data, columns=[entity_id_col, 'training_cutoff', 'test_cutoff'])
+        data = np.array(val_arr).reshape(-1, 2)
+        cutoff_df = pd.DataFrame(data)
+        cutoff_df.rename(columns={0: entity_id_col, 1: 'cutoff'}, inplace=True)
         cutoff_df.set_index(entity_id_col, inplace=True)
 
         return cutoff_df

@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from mock import MagicMock, patch
+from mock import MagicMock, PropertyMock, patch
 
 from trane.core.prediction_problem import PredictionProblem
 from trane.ops.aggregation_ops import LastAggregationOp
@@ -106,6 +106,10 @@ class TestPredictionProblemMethods(unittest.TestCase):
             operations=operations, entity_id_col=entity_id,
             cutoff_strategy=MagicMock())
         self.assertFalse(problem_1 == problem_2)
+
+    def test_equality_false_diff_types(self):
+        other_obj = 'a string'
+        self.assertFalse(self.problem == other_obj)
 
     def test_equality_true(self):
         entity_id = 'entity_col'
@@ -268,105 +272,146 @@ class TestPredictionProblemMethods(unittest.TestCase):
         self.assertEqual(
             self.operations[0].execute.call_args[0][0], mock_df)
 
-    def test_insert_first_row_into_dict_does_nothing_with_empty_arr(self):
-        my_dict = {}
-        my_empty_df = []
-        entity_id = '12345'
+    def test_rename_columns(self):
+        self.assertIsNotNone(self.problem._rename_columns)
 
-        my_dict = self.problem._insert_first_row_into_dict(
-            my_dict, my_empty_df, entity_id)
+        mock_df = MagicMock()
+        column_list = ('a', 'b', 'c')
 
-        self.assertEqual(len(my_dict.keys()), 0)
+        names = PropertyMock(return_value=['D'])
+        type(mock_df.index).names = names
 
-    def test_insert_first_row_into_dict_warns_with_more_than_one_res(self):
-        # more integration than unit. It's *really* hard to mock out DataFrames
-        my_dict = {}
-        my_long_df = pd.DataFrame([[1, 2], [3, 4]])
-        entity_id = '12345'
+        values = PropertyMock(return_value=[0, 1])
+        type(mock_df.columns).values = values
 
-        with warnings.catch_warnings(record=True) as w:
-            # Cause all warnings to always be triggered.
-            warnings.simplefilter("always")
-            # Trigger a warning.
-            my_dict = self.problem._insert_first_row_into_dict(
-                my_dict, my_long_df, entity_id)
-            # Verify number and type of warning
-            assert len(w) == 1
-            assert issubclass(w[-1].category, RuntimeWarning)
+        self.problem._rename_columns(mock_df, column_list)
 
-    def test_insert_first_row_into_dict_happy_path(self):
-        # again, more integration than unittest
-        my_dict = {}
-        my_good_df = pd.DataFrame([[1, 2]])
+        self.assertEqual(mock_df.index.names, ['D'])
+        self.assertTrue(mock_df.rename.called)
+
+    def test_execute_raises_if_not_valid(self):
+        is_valid_mock = MagicMock()
+        self.problem.is_valid = is_valid_mock
+        is_valid_mock.return_value = False
+
+        with self.assertRaises(ValueError):
+            self.problem.execute('foo')
+
+    def test_execute(self):
+        '''
+        This method is central to Trane running, so is getting an integration
+        test.
+        '''
+        self.assertIsNotNone(self.problem.execute)
+        df = pd.DataFrame(
+            [(100, 0, 0, 5.32, 19.7, 53.89, 1, np.datetime64('2000-01-01')),
+             (200, 0, 1, 1.08, 6.78, 18.89, 2, np.datetime64('2000-01-01')),
+             (100, 0, 2, 4.69, 14.11, 41.35, 4, np.datetime64('2000-01-01'))],
+            columns=[
+                "vendor_id", "taxi_id", "trip_id", "distance",
+                "duration", "fare", "num_passengers", "date"])
+
+    #     # set some things on this problem, since it's an integration test
+        static_cutoff = np.datetime64('1980-02-25')
+        self.mock_cutoff_strategy.generate_fn.return_value = static_cutoff
+        self.entity_col = 'vendor_id'
+        self.time_col = 'date'
+
+        # operation.execute all return the same thing
+        op_mock = MagicMock(name='operation')
+        op_mock.execute.return_value = pd.DataFrame(
+            [[1, 2, 0]], columns=[self.entity_col, 'a', 'fare'])
+        operations = [op_mock for x in range(4)]
+
+        # prediction problem gets new mock operations
+        self.problem = PredictionProblem(
+            operations=operations, entity_id_col=self.entity_col,
+            time_col=self.time_col, label_col='fare',
+            cutoff_strategy=self.mock_cutoff_strategy)
+
+        is_valid_mock = MagicMock()
+        self.problem.is_valid = is_valid_mock
+        is_valid_mock.return_value = True
+
+        # _execute_operations_on_df and _insert_single_row_into_dict
+        # are actually tested as part of integration
+
+        res = self.problem.execute(df)
+        self.assertEqual(res.columns.tolist(), ['cutoff', 'label'])
+        self.assertEqual(res.index.tolist(), [100, 200])
+        self.assertEqual(res.loc[100]['label'], 0)
+        self.assertEqual(res.loc[200]['label'], 0)
+
+    def test_insert_single_label_into_dict_happy_path(self):
+        self.assertIsNotNone(self.problem._insert_single_label_into_dict)
+
+        entity_id = 'entity_id'
+        cutoff = 'cutoff'
+
+        res_dict = {}
+        label_series = pd.Series([1])
         entity_id = '12345'
 
         # assert no warnings RuntimeWarningsed
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            my_dict = self.problem._insert_first_row_into_dict(
-                my_dict, my_good_df, entity_id)
+            res_dict = self.problem._insert_single_label_into_dict(
+                entity_id, label_series, cutoff, res_dict)
             assert len(w) == 0
 
-        self.assertEqual(my_dict[entity_id][0], 1)
-        self.assertEqual(my_dict[entity_id][1], 2)
+        self.assertEqual(res_dict[entity_id][0], cutoff)
+        self.assertEqual(res_dict[entity_id][1], 1)
 
-    def test_execute(self):
-        # this is an integration test. Unit tests with DataFrames are dastardly
-        # complicated, and this method is central enough that it needs an
-        # integration test anyhow.
+    def test_insert_single_label_into_dict_warn_gt1_path(self):
 
-        df = pd.DataFrame(
-            [(0, 0, 0, 5.32, 19.7, 53.89, 1, np.datetime64('2000-01-01')),
-             (1, 0, 1, 1.08, 6.78, 18.89, 2, np.datetime64('2000-01-01')),
-             (0, 0, 2, 4.69, 14.11, 41.35, 4, np.datetime64('2000-01-01'))],
-            columns=[
-                "vendor_id", "taxi_id", "trip_id", "distance",
-                "duration", "fare", "num_passengers", "date"])
+        entity_id = 'entity_id'
+        cutoff = 'cutoff'
 
-        # set some things on this problem, since it's an integration test
-        static_cutoff = (
-            np.datetime64('1980-02-25'), np.datetime64('1980-02-25'))
-        self.mock_cutoff_strategy.generate_fn.return_value = static_cutoff
-        self.entity_col = 'vendor_id'
-        self.time_col = 'date'
+        res_dict = {}
+        label_series = pd.Series([1, 2])
+        entity_id = '12345'
 
-        # keep operations as mocks.
-        self.problem = PredictionProblem(
-            operations=self.operations, entity_id_col=self.entity_col,
-            time_col=self.time_col, cutoff_strategy=self.mock_cutoff_strategy)
+        # assert no warnings RuntimeWarningsed
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            res_dict = self.problem._insert_single_label_into_dict(
+                entity_id, label_series, cutoff, res_dict)
+            assert len(w) == 1
 
-        # patch some helper methods
-        mock_is_valid = self.create_patch(
-            'trane.core.PredictionProblem.is_valid')
-        mock_is_valid.return_value = True
+        self.assertEqual(res_dict[entity_id][0], cutoff)
+        # assert that the method still picks the first row in the df
+        self.assertEqual(res_dict[entity_id][1], 1)
 
-        mock_execute_ops = self.create_patch(
-            'trane.core.PredictionProblem._execute_operations_on_df')
-        ops_return_val = {
-            0: ['execute', 'ops', 'on', 'df', 'patch', 'lives', 'here',
-                'io']}
-        mock_execute_ops.return_value = ops_return_val
+    def test_insert_single_label_into_dict_warn_lt1_path(self):
 
-        mock_insert_first_row = self.create_patch(
-            'trane.core.PredictionProblem._insert_first_row_into_dict')
-        insert_return_val = {
-            0: ['this', 'has', 'been', 'patched', 'so', 'don\'t', 'expect',
-                'much']}
-        mock_insert_first_row.return_value = insert_return_val
+        entity_id = 'entity_id'
+        cutoff = 'cutoff'
 
-        # expected output
-        expected_output = pd.DataFrame.from_dict(
-            data=insert_return_val, orient='index')
-        expected_output.rename(
-            columns={
-                0: 'vendor_id', 1: 'taxi_id', 2: 'trip_id', 3: 'distance',
-                4: 'duration', 5: 'fare', 6: 'num_passengers', 7: 'date'},
-            inplace=True)
-        expected_output.index = expected_output['vendor_id']
+        res_dict = {}
+        label_df = pd.Series()
+        entity_id = '12345'
 
-        # Actually Execute
-        pre_test_df, test_df = self.problem.execute(df)
-        self.assertEqual(mock_insert_first_row.call_args[0][1], ops_return_val)
+        # assert no warnings RuntimeWarningsed
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            res_dict = self.problem._insert_single_label_into_dict(
+                entity_id, label_df, cutoff, res_dict)
+            assert len(w) == 1
 
-        self.assertTrue(expected_output.equals(pre_test_df))
-        self.assertTrue(expected_output.equals(test_df))
+        # assert that the results dict is untouched
+        self.assertEqual(res_dict, {})
+
+    def test_str(self):
+        self.assertIsNotNone(self.problem.__str__)
+
+        # mock some operations
+        mock_op = MagicMock()
+        mock_op.__str__.return_value = 'foo'
+        operations = [mock_op for x in range(4)]
+        self.problem.operations = operations
+
+        description = self.problem.__str__()
+        self.assertEqual(description, 'foo->foo->foo->foo')
+
+    def test_check_type(self):
+        pass

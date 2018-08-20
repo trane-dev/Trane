@@ -22,7 +22,7 @@ class PredictionProblem:
     """
 
     def __init__(self, operations, entity_id_col=None, time_col=None,
-                 table_meta=None, cutoff_strategy=None):
+                 label_col=None, table_meta=None, cutoff_strategy=None):
         """
         Parameters
         ----------
@@ -36,6 +36,7 @@ class PredictionProblem:
         self.operations = operations
         self.entity_id_col = entity_id_col
         self.time_col = time_col
+        self.label_col = label_col
         self.table_meta = table_meta
         self.cutoff_strategy = cutoff_strategy
         self.filter_column_order_of_types = None
@@ -72,75 +73,80 @@ class PredictionProblem:
         return True
 
     def execute(self, df):
-        """
-        executes a prediction problem on an entire dataframe. Makes use of
-        cutoff times supplied by self.cutoff_strategy
+        '''
+        Executes the problem's operations on a dataframe. Generates
+        '''
+
+        if not self.is_valid(self.table_meta):
+            raise ValueError(
+                'Your Problem\'s specified operations do not match with the '
+                'problem\'s table meta. Therefore, the problem is not '
+                'valid.')
+
+        df = df.copy()
+        grouped = df.groupby(self.entity_id_col)
+
+        res_dict = {}
+
+        for entity_id, df_group in grouped:
+
+            # generate the a cutoff date if the problem has a cutoff strategy
+            cutoff = None
+            if self.cutoff_strategy:
+                cutoff = self.cutoff_strategy.generate_fn(
+                    df_group, self.entity_id_col)
+
+            label_series = self._execute_operations_on_df(
+                df_group)[self.label_col]
+
+            # add the label to the results dictionary
+            res_dict = self._insert_single_label_into_dict(
+                entity_id, label_series, cutoff, res_dict)
+
+        res = pd.DataFrame.from_dict(data=res_dict, orient='index')
+        self._rename_columns(res, [self.entity_id_col, 'cutoff', 'label'])
+        return res
+
+    def _insert_single_label_into_dict(
+            self, entity_id, label_series, cutoff, res_dict):
+        '''
+        Inserts a single row of a dataframe into the passed dictionary and
+        returns it.
 
         Parameters
         ----------
-        df: dataframe for labels to be generated from
-        time_col: str column which will be used to compare data cutoffs
+        label_df: dataframe
+        cutoff: cutoff time
+        res_dict: dictionary with key entity_id and value a two part tuple:
+            (cutoff time, binary label)
 
         Returns
         -------
-        pre_label_execution_df: a dataframe of labels generated from before the
-            specified cutoff time
-        post_label_execution_df: a dataframe of labels generated from after the
-            specified cutoff time
-        """
-        if not self.is_valid(self.table_meta):
-            print('Your Problem\'s specified operations do not match with the '
-                  'problem\'s table meta. Therefore, the problem is not '
-                  'valid.')
-            raise
+        dictionary
+        '''
+        num_rows = len(label_series)
+        if num_rows > 1:
+            warnings.warn(
+                "Operations returned more than 1 result for entity " +
+                str(entity_id) + ". This probably means you forgot to " +
+                "add an aggregation operation. Arbitrarily picking the " +
+                "first result.",
+                RuntimeWarning)
+        elif num_rows < 1:
+            warnings.warn(
+                "Operation returned fewer than 1 result for entity " +
+                str(entity_id) + ". Returning an unedited res_dict",
+                RuntimeWarning)
+        if num_rows > 0:
+            group_tuple = (cutoff, label_series.iloc[0])
+            res_dict[entity_id] = group_tuple
 
-        df = df.copy()
-        df.index = df[self.entity_id_col]
-        pre_res_dict, post_res_dict = {}, {}
-
-        # cycle through each entity
-        for index in df.index.unique():
-
-            # original rows of an entity
-            entity_df = df.loc[[index]]
-
-            # test cutoff and label cutoff are the same thing
-            # Go directly to the cutoff_fn instead of generate_cutoffs, which
-            # is used for generating cutoffs from multi-entity df's
-            _, test_cut = self.cutoff_strategy.generate_fn(
-                entity_df, self.entity_id_col)
-
-            # tested to here. Having trouble with comparison operators
-            pre_test_df = entity_df[entity_df[self.time_col] <= test_cut]
-            test_df = entity_df[entity_df[self.time_col] > test_cut]
-            # execute the operations
-
-            pre_test_df = self._execute_operations_on_df(pre_test_df)
-            test_df = self._execute_operations_on_df(test_df)
-            # add the operation result to a dictionary
-            pre_res_dict = self._insert_first_row_into_dict(
-                pre_res_dict, pre_test_df, index)
-            post_res_dict = self._insert_first_row_into_dict(
-                post_res_dict, test_df, index)
-
-        # convert pre-test cutoff results to a dataframe
-        # pre_test_df = pd.DataFrame.from_dict(
-        #     data=pre_res_dict, orient='index', columns=df.columns)
-        pre_test_df = pd.DataFrame.from_dict(data=pre_res_dict, orient='index')
-        pre_test_df = self._rename_columns(pre_test_df, df.columns.values)
-        pre_test_df.index = pre_test_df[self.entity_id_col]
-
-        # convert post-test cutoff results to a dataframe
-        test_df = pd.DataFrame.from_dict(data=post_res_dict, orient='index')
-        test_df = self._rename_columns(test_df, df.columns.values)
-        test_df.index = test_df[self.entity_id_col]
-
-        # return the two dataframes
-        return pre_test_df, test_df
+        return res_dict
 
     def _rename_columns(self, df, column_list):
         '''
         Renames columns in a given dataframe, in order, as the column_list.
+        The method assumes that
         This is required because of support for Python 2.7 and Pandas 0.21
         A more modern way is to pass columns=df.columns
             into pd.DataFrame.from_dict.
@@ -154,30 +160,13 @@ class PredictionProblem:
         -------
         dataframe with renamed columns
         '''
-
         rename_dict = {}
         for col_num in df.columns.values:
-            rename_dict[col_num] = column_list[col_num]
+            rename_dict[col_num] = column_list[col_num + 1]
+
+        df.index.names = [column_list[0]]
         df.rename(columns=rename_dict, inplace=True)
         return df
-
-    def _insert_first_row_into_dict(
-            self, dict_to_insert, df, entity_id):
-        num_rows = len(df)
-        if num_rows > 1:
-            warnings.warn(
-                "Operations returned more than 1 result for entity " +
-                str(entity_id) + ". This probably means you forgot to add " +
-                " an aggregation operation. Arbitrarily picking the first " +
-                " result.",
-                RuntimeWarning)
-
-        # handle edge case in which the df is empty but we still need to return
-        # a shaped array
-        if num_rows > 0:
-            dict_to_insert[entity_id] = df.iloc[0].values
-
-        return dict_to_insert
 
     def _execute_operations_on_df(self, df):
         '''

@@ -15,7 +15,7 @@ class PredictionProblemGenerator:
     """
 
     def __init__(self, table_meta, entity_col,
-                 label_col, time_col, filter_col):
+                 label_col, filter_col):
         """
         Parameters
         ----------
@@ -37,7 +37,6 @@ class PredictionProblemGenerator:
         self.table_meta = table_meta
         self.entity_col = entity_col
         self.label_col = label_col
-        self.time_col = time_col
         self.filter_col = filter_col
         self.ensure_valid_inputs()
 
@@ -84,8 +83,8 @@ class PredictionProblemGenerator:
 
             problem = PredictionProblem(
                 operations=operations, entity_id_col=self.entity_col,
-                time_col=self.time_col, table_meta=self.table_meta,
-                cutoff_strategy=None)
+                label_col=self.label_col,
+                table_meta=self.table_meta, cutoff_strategy=None)
 
             if problem.is_valid():
                 problems.append(problem)
@@ -103,5 +102,3 @@ class PredictionProblemGenerator:
         assert(self.table_meta.get_type(self.label_col)
                in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER,
                    TableMeta.TYPE_TEXT])
-        assert(self.table_meta.get_type(self.time_col)
-               in [TableMeta.TYPE_TIME, TableMeta.TYPE_INTEGER])

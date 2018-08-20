@@ -24,7 +24,6 @@ class TestPredictionProblemGenerator(unittest.TestCase):
         self.table_meta_mock = MagicMock()
         self.entity_col = "taxi_id"
         self.label_col = "fare"
-        self.time_col = "trip_id"
         self.filter_col = "taxi_id"
 
         self.ensure_valid_inputs_patch = self.create_patch(
@@ -34,7 +33,6 @@ class TestPredictionProblemGenerator(unittest.TestCase):
             table_meta=self.table_meta_mock,
             entity_col=self.entity_col,
             label_col=self.label_col,
-            time_col=self.time_col,
             filter_col=self.filter_col)
 
     def prep_for_integration(self):
@@ -70,7 +68,6 @@ class TestPredictionProblemGenerator(unittest.TestCase):
             table_meta=self.table_meta,
             entity_col=self.entity_col,
             label_col=self.label_col,
-            time_col=self.time_col,
             filter_col=self.filter_col)
 
     def create_patch(self, name, return_value=None):
@@ -111,7 +108,6 @@ class TestPredictionProblemGeneratorValidation(unittest.TestCase):
         table_meta_mock = MagicMock()
         entity_col = "taxi_id"
         label_col = "fare"
-        time_col = "trip_id"
         filter_col = "taxi_id"
 
         # set up table_meta types
@@ -127,11 +123,9 @@ class TestPredictionProblemGeneratorValidation(unittest.TestCase):
             table_meta=table_meta_mock,
             entity_col=entity_col,
             label_col=label_col,
-            time_col=time_col,
             filter_col=filter_col)
 
         self.assertIsNotNone(generator.ensure_valid_inputs)
         table_meta_mock.get_type.assert_has_calls([
             call(entity_col),
-            call(label_col),
-            call(time_col)], any_order=True)
+            call(label_col)], any_order=True)

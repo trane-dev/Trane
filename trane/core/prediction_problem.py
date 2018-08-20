@@ -146,7 +146,7 @@ class PredictionProblem:
     def _rename_columns(self, df, column_list):
         '''
         Renames columns in a given dataframe, in order, as the column_list.
-        The method assumes that
+
         This is required because of support for Python 2.7 and Pandas 0.21
         A more modern way is to pass columns=df.columns
             into pd.DataFrame.from_dict.

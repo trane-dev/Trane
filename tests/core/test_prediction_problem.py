@@ -338,7 +338,7 @@ class TestPredictionProblemMethods(unittest.TestCase):
 
         res = self.problem.execute(df)
         self.assertEqual(res.columns.tolist(), ['cutoff', 'label'])
-        self.assertEqual(res.index.tolist(), [100, 200])
+        self.assertEqual(set(res.index.tolist()), set([100, 200]))
         self.assertEqual(res.loc[100]['label'], 0)
         self.assertEqual(res.loc[200]['label'], 0)
 
@@ -412,6 +412,3 @@ class TestPredictionProblemMethods(unittest.TestCase):
 
         description = self.problem.__str__()
         self.assertEqual(description, 'foo->foo->foo->foo')
-
-    def test_check_type(self):
-        pass

@@ -299,13 +299,14 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
 
         self.mock_cutoff_strategy = self.create_patch(
             'trane.core.CutoffStrategy')
+        self.table_meta = MagicMock(name='table_meta')
 
         self.entity_col = 'entity_col'
         self.label_col = 'label_col'
 
         self.problem = PredictionProblem(
             operations=self.operations, entity_id_col=self.entity_col,
-            label_col=self.label_col,
+            label_col=self.label_col, table_meta=self.table_meta,
             cutoff_strategy=self.mock_cutoff_strategy)
 
         self.mock_dill = self.create_patch(
@@ -320,80 +321,120 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
 
     def test_to_json(self):
         self.assertIsNotNone(self.problem.to_json)
+        json_patch = self.create_patch('trane.core.prediction_problem.json')
 
+        op_to_json_patch = self.create_patch(
+            'trane.core.prediction_problem.op_to_json')
+        op_to_json_patch.return_value = {'op': 'exists'}
 
+        self.problem.table_meta.to_json.return_value = {'table_meta': 'exists'}
 
+        self.problem.to_json()
 
-    # def test_save(self):
-    #     self.assertIsNotNone(self.problem.save)
+        self.assertTrue(json_patch.dumps.called)
+        self.assertTrue(json_patch.loads.called)
 
-    #     dill_cutoff_strategy_patch = self.create_patch(
-    #         'trane.core.PredictionProblem._dill_cutoff_strategy')
-    #     os_path_exists_patch = self.create_patch(
-    #         'trane.core.prediction_problem.os.path.exists')
-    #     os_path_exists_patch.return_value = False
-    #     to_json_patch = self.create_patch(
-    #         'trane.core.PredictionProblem.to_json')
-    #     dill_cutoff_strategy_patch = self.create_patch(
-    #         'trane.core.PredictionProblem._dill_cutoff_strategy')
-    #     json_patch = self.create_patch(
-    #         'trane.core.prediction_problem.json')
+    def test_from_json(self):
+        json_loads_patch = self.create_patch(
+            'trane.core.prediction_problem.json.loads')
+        json_dumps_patch = self.create_patch(
+            'trane.core.prediction_problem.json.dumps')
+        op_from_json_patch = self.create_patch(
+            'trane.core.prediction_problem.op_from_json')
+        op_from_json_patch.return_value = op_from_json_patch
 
-    #     path_patch = self.create_patch(
-    #         'trane.core.prediction_problem.os.path.isdir')
-    #     path_patch.return_value = False
-    #     makedirs_patch = self.create_patch(
-    #         'trane.core.prediction_problem.os.makedirs')
+        table_meta_from_json_patch = self.create_patch(
+            'trane.core.prediction_problem.TableMeta.from_json')
+        table_meta_from_json_patch.return_value = table_meta_from_json_patch
 
-    #     path = '../Data'
-    #     problem_name = 'problem_name'
+        data = MagicMock(name='data')
+        json_loads_patch.return_value = data
 
-    #     open_patch = None
-    #     if (sys.version_info > (3, 0)):
-    #         open_patch = self.create_patch('builtins.open')
-    #     else:
-    #         open_patch = self.create_patch('__builtin__.open')
+        # mock out json_data['operations']
+        attr_dict = {'operations': [1, 2, 3],
+                     'entity_id_col': 'entity_id_col',
+                     'label_col': 'label_col',
+                     'table_meta': 'table_meta'}
+        data.__getitem__.side_effect = attr_dict.__getitem__
 
-    #     # Save
-    #     self.problem.save(path=path, problem_name=problem_name)
+        json_dumps_patch.return_value = MagicMock(name='op')
 
-    #     self.assertTrue(dill_cutoff_strategy_patch.called)
-    #     self.assertTrue(os_path_exists_patch.called)
-    #     self.assertTrue(to_json_patch.called)
-    #     self.assertTrue(path_patch.called)
-    #     self.assertTrue(makedirs_patch.called)
-    #     self.assertTrue(json_patch.loads.called)
-    #     self.assertTrue(open_patch.called)
+        problem = PredictionProblem.from_json(data)
+        self.assertEqual(problem.operations[0], op_from_json_patch)
+        self.assertEqual(problem.entity_id_col, attr_dict['entity_id_col'])
+        self.assertEqual(problem.label_col, attr_dict['label_col'])
+        self.assertEqual(problem.table_meta, table_meta_from_json_patch)
 
-    # def test_load(self):
-    #     self.assertIsNotNone(PredictionProblem.load)
+    def test_save(self):
+        self.assertIsNotNone(self.problem.save)
 
-    #     open_patch = None
-    #     if (sys.version_info > (3, 0)):
-    #         open_patch = self.create_patch('builtins.open')
-    #     else:
-    #         open_patch = self.create_patch('__builtin__.open')
+        dill_cutoff_strategy_patch = self.create_patch(
+            'trane.core.PredictionProblem._dill_cutoff_strategy')
+        os_path_exists_patch = self.create_patch(
+            'trane.core.prediction_problem.os.path.exists')
+        os_path_exists_patch.return_value = False
+        to_json_patch = self.create_patch(
+            'trane.core.PredictionProblem.to_json')
+        dill_cutoff_strategy_patch = self.create_patch(
+            'trane.core.PredictionProblem._dill_cutoff_strategy')
+        json_patch = self.create_patch(
+            'trane.core.prediction_problem.json')
 
-    #     json_patch = self.create_patch(
-    #         'trane.core.prediction_problem.json')
-    #     from_json_patch = self.create_patch(
-    #         'trane.core.PredictionProblem.from_json')
-    #     os_path_patch = self.create_patch(
-    #         'trane.core.prediction_problem.os.path')
-    #     dill_patch = self.create_patch(
-    #         'trane.core.prediction_problem.dill')
+        path_patch = self.create_patch(
+            'trane.core.prediction_problem.os.path.isdir')
+        path_patch.return_value = False
+        makedirs_patch = self.create_patch(
+            'trane.core.prediction_problem.os.makedirs')
 
-    #     PredictionProblem.load('filepath.json')
-    #     self.assertTrue(open_patch.called)
-    #     self.assertTrue(json_patch.load.called)
-    #     self.assertTrue(from_json_patch.called)
-    #     self.assertTrue(os_path_patch.join.called)
-    #     self.assertTrue(os_path_patch.dirname.called)
-    #     self.assertTrue(dill_patch.load.called)
+        path = '../Data'
+        problem_name = 'problem_name'
 
-    # def test_dill_cutoff_strategy(self):
-    #     self.assertIsNotNone(self.problem._dill_cutoff_strategy)
-    #     cutoff_dill = self.problem._dill_cutoff_strategy()
+        open_patch = None
+        if (sys.version_info > (3, 0)):
+            open_patch = self.create_patch('builtins.open')
+        else:
+            open_patch = self.create_patch('__builtin__.open')
 
-    #     self.assertEqual(
-    #         cutoff_dill, self.mock_dill.dumps(self.mock_cutoff_strategy))
+        # Save
+        self.problem.save(path=path, problem_name=problem_name)
+
+        self.assertTrue(dill_cutoff_strategy_patch.called)
+        self.assertTrue(os_path_exists_patch.called)
+        self.assertTrue(to_json_patch.called)
+        self.assertTrue(path_patch.called)
+        self.assertTrue(makedirs_patch.called)
+        self.assertTrue(json_patch.loads.called)
+        self.assertTrue(open_patch.called)
+
+    def test_load(self):
+        self.assertIsNotNone(PredictionProblem.load)
+
+        open_patch = None
+        if (sys.version_info > (3, 0)):
+            open_patch = self.create_patch('builtins.open')
+        else:
+            open_patch = self.create_patch('__builtin__.open')
+
+        json_patch = self.create_patch(
+            'trane.core.prediction_problem.json')
+        from_json_patch = self.create_patch(
+            'trane.core.PredictionProblem.from_json')
+        os_path_patch = self.create_patch(
+            'trane.core.prediction_problem.os.path')
+        dill_patch = self.create_patch(
+            'trane.core.prediction_problem.dill')
+
+        PredictionProblem.load('filepath.json')
+        self.assertTrue(open_patch.called)
+        self.assertTrue(json_patch.load.called)
+        self.assertTrue(from_json_patch.called)
+        self.assertTrue(os_path_patch.join.called)
+        self.assertTrue(os_path_patch.dirname.called)
+        self.assertTrue(dill_patch.load.called)
+
+    def test_dill_cutoff_strategy(self):
+        self.assertIsNotNone(self.problem._dill_cutoff_strategy)
+        cutoff_dill = self.problem._dill_cutoff_strategy()
+
+        self.assertEqual(
+            cutoff_dill, self.mock_dill.dumps(self.mock_cutoff_strategy))

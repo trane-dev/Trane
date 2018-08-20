@@ -309,7 +309,8 @@ class PredictionProblem:
 
     def to_json(self):
         """
-        This function converts Prediction Problems to JSON
+        This function converts Prediction Problems to JSON. It captures the
+        table_meta, but not the cutoff_strategy
 
         Parameters
         ----------
@@ -320,13 +321,16 @@ class PredictionProblem:
         json: JSON representation of the Prediction Problem.
 
         """
+        table_meta_json = None
+        if self.table_meta:
+            table_meta_json = self.table_meta.to_json()
+
         return json.dumps(
-            {"operations": [json.loads(op_to_json(op)
-                                       ) for op in self.operations],
-             "filter_column_order_of_types":
-             self.filter_column_order_of_types,
-             "label_generating_column_order_of_types":
-             self.label_generating_column_order_of_types})
+            {"operations": [
+                json.loads(op_to_json(op)) for op in self.operations],
+             "entity_id_col": self.entity_id_col,
+             "label_col": self.label_col,
+             "table_meta": table_meta_json})
 
     @classmethod
     def from_json(cls, json_data):
@@ -343,19 +347,22 @@ class PredictionProblem:
         problem: Prediction Problem
         """
 
-        data = json_data
-
         # only tries json.loads if json_data is not a dict
-        if type(data) != dict:
-            data = json.loads(json_data)
+        if type(json_data) != dict:
+            json_data = json.loads(json_data)
 
-        operations = [op_from_json(json.dumps(item))
-                      for item in data['operations']]
-        problem = PredictionProblem(operations, cutoff_strategy=None)
-        problem.filter_column_order_of_types = data[
-            'filter_column_order_of_types']
-        problem.label_generating_column_order_of_types = data[
-            'label_generating_column_order_of_types']
+        operations = [
+            op_from_json(json.dumps(item)) for item in json_data['operations']]
+        entity_id_col = json_data['entity_id_col']
+        label_col = json_data['label_col']
+        table_meta = TableMeta.from_json(json_data.get('table_meta'))
+
+        problem = PredictionProblem(
+            operations=operations,
+            entity_id_col=entity_id_col,
+            label_col=label_col,
+            table_meta=table_meta,
+            cutoff_strategy=None)
         return problem
 
     def _dill_cutoff_strategy(self):

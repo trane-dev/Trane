@@ -7,7 +7,11 @@ import dill
 import numpy as np
 import pandas as pd
 
+from ..ops.aggregation_ops import *  # noqa
+from ..ops.filter_ops import *  # noqa
 from ..ops.op_saver import op_from_json, op_to_json
+from ..ops.row_ops import *  # noqa
+from ..ops.transformation_ops import *  # noqa
 from ..utils.table_meta import TableMeta
 
 __all__ = ['PredictionProblem']
@@ -193,16 +197,150 @@ class PredictionProblem:
 
         Returns
         -------
-        description: natural language description
+        description: str natural language description of the problem
 
         """
-        description = ""
-        last_op_idx = len(self.operations) - 1
-        for idx, operation in enumerate(self.operations):
-            description += str(operation)
-            if idx != last_op_idx:
-                description += "->"
+        desc_arr = []
+
+        # cycle through each operation to create dataops
+        # dataops are a series of operations containing one and only one
+        # aggregation op at its end
+        dataop = []
+        for op in self.operations:
+            op_type = type(op)
+            dataop.append(op)
+
+            if issubclass(op_type, AggregationOpBase):
+                # describe each dataop
+                desc_arr = desc_arr + self._describe_dataop(dataop)
+                dataop = []
+
+        # join the dataops together with ' of '
+        description = 'For each ' + self.entity_id_col + ' predict'
+        description += ' of '.join(desc_arr)
+
+        # cycle through ops, pick out filters and describe them
+        filterop_desc_arr = []
+        for op in self.operations:
+            if issubclass(type(op), FilterOpBase):
+                filterop_desc_arr.append(self._describe_filter(op))
+
+        # join these with ands and append to the description
+        description += 'where ' + ' and '.join(filterop_desc_arr)
+
         return description
+
+    def _describe_dataop(self, dataop):
+        """
+        A DataOp is a series of non-aggregation operations ending with one and
+        only one aggregation op.
+
+        In a dataop, filter operations are ignored. (They are dealt with
+        elsewhere.) The NL description puts the agg op first, followed other
+        operations in linear (left to right order.)
+
+        So an operation which is row_op -> trans_op -> agg_op will be written
+        as agg_op OF trans_op OF row_op.
+        """
+        descriptions = []
+
+        agg_op = dataop[-1]
+        if not issubclass(type(agg_op), AggregationOpBase):
+            raise ValueError(
+                'Last operation of dataop must be an aggregation op. '
+                'It is currently a ' + type(agg_op) + '.')
+
+        descriptions.append(self._describe_aggop(agg_op))
+        # remove the last operation (aggregation) and reverse the list
+        dataop = dataop[:-1]
+        dataop.reverse()
+
+        for op in dataop:
+            op_type = type(op)
+            description = ''
+            if issubclass(op_type, FilterOpBase):
+                # filter ops are described seperately
+                break
+            elif issubclass(op_type, AggregationOpBase):
+                raise ValueError(
+                    'There is more than one aggreagation op in your dataop. '
+                    'A dataop must contain one and only one aggregation '
+                    ' at its end.')
+            elif issubclass(op_type, TransformationOpBase):
+                description = self._describe_transop(op)
+            elif issubclass(op_type, RowOpBase):
+                description = self._describe_rowop(op)
+
+            descriptions.append(description)
+
+        return descriptions
+
+    def _describe_aggop(self, op):
+            agg_op_str_dict = {
+                FirstAggregationOp: "the first",
+                LastAggregationOp: "the last",
+                CountAggregationOp: "the number of",
+                SumAggregationOp: "the sum of",
+                LMFAggregationOp: "the last minus first"
+            }
+            if op.input_type == TableMeta.TYPE_BOOL and isinstance(
+                    op, SumAggregationOp):
+                return " the number of records whose"
+            if type(op) in agg_op_str_dict:
+                return agg_op_str_dict[type(op)]
+
+    def _describe_rowop(self, op):
+        row_op_str_dict = {
+            GreaterRowOp: "greater than",
+            EqRowOp: "equal to",
+            NeqRowOp: "not equal to",
+            LessRowOp: "less than"}
+
+        if isinstance(op, IdentityRowOp):
+            # return " {col}".format(col=op.column_name)
+            return ""
+        if isinstance(op, ExpRowOp):
+            return " the exp of {col}".format(col=op.column_name)
+        if type(op) in row_op_str_dict:
+            return " {col} is {op} {threshold}".format(
+                col=op.column_name, op=row_op_str_dict[type(op)],
+                threshold=op.hyper_parameter_settings['threshold'])
+        return " (unknown row op)"
+
+    def _describe_transop(self, op):
+        if isinstance(op, IdentityTransformationOp):
+            return ""
+        if isinstance(op, DiffTransformationOp):
+            return "fluctuation of " + str(op.column_name)
+        if isinstance(op, ObjectFrequencyTransformationOp):
+            return "frequency of " + str(op.column_name)
+
+    def _describe_filter(self, op):
+        filter_op_str_dict = {
+            GreaterFilterOp: "greater than",
+            EqFilterOp: "equal to",
+            NeqFilterOp: "not equal to",
+            LessFilterOp: "less than"}
+
+        filter_ops = [
+            x for x in self.operations if issubclass(type(x), FilterOpBase)]
+
+        # remove AllFilterOp
+        filter_ops = [x for x in filter_ops if not isinstance(x, AllFilterOp)]
+
+        desc = ', with '
+        last_op_idx = len(filter_ops) - 1
+        for idx, op in enumerate(filter_ops):
+            op_desc = '{col} {op} {threshold}'.format(
+                col=op.column_name,
+                op=filter_op_str_dict[type(op)],
+                threshold=op.hyper_parameter_settings.get('threshold', ''))
+            desc += op_desc
+
+            if idx != last_op_idx:
+                desc += ' and '
+
+        return desc
 
     def save(self, path, problem_name):
         '''

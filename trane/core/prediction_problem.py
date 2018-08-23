@@ -201,7 +201,7 @@ class PredictionProblem:
 
         """
         desc_arr = []
-
+        description = 'For each ' + self.entity_id_col + ' predict'
         # cycle through each operation to create dataops
         # dataops are a series of operations containing one and only one
         # aggregation op at its end
@@ -215,18 +215,22 @@ class PredictionProblem:
                 desc_arr = desc_arr + self._describe_dataop(dataop)
                 dataop = []
 
-        # join the dataops together with ' of '
-        description = 'For each ' + self.entity_id_col + ' predict'
-        description += ' of '.join(desc_arr)
-
         # cycle through ops, pick out filters and describe them
         filterop_desc_arr = []
         for op in self.operations:
             if issubclass(type(op), FilterOpBase):
                 filterop_desc_arr.append(self._describe_filter(op))
 
-        # join these with ands and append to the description
-        description += 'where ' + ' and '.join(filterop_desc_arr)
+        # join filter ops with ands and append to the description
+        if len(filterop_desc_arr) > 0:
+            description += ' and '.join(filterop_desc_arr)
+
+        # join the dataops together with ' of '
+        description += ' of '.join(desc_arr)
+
+        # add the cutoff strategy description if it exists
+        if self.cutoff_strategy:
+            description += ' ' + self.cutoff_strategy.description
 
         return description
 
@@ -272,6 +276,10 @@ class PredictionProblem:
                 description = self._describe_rowop(op)
 
             descriptions.append(description)
+
+        # add the cutoff strategy description
+        if self.cutoff_strategy:
+            description += self.cutoff_strategy.description
 
         return descriptions
 
@@ -328,7 +336,7 @@ class PredictionProblem:
         # remove AllFilterOp
         filter_ops = [x for x in filter_ops if not isinstance(x, AllFilterOp)]
 
-        desc = ', with '
+        desc = ' with '
         last_op_idx = len(filter_ops) - 1
         for idx, op in enumerate(filter_ops):
             op_desc = '{col} {op} {threshold}'.format(

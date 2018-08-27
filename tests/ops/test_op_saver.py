@@ -8,12 +8,13 @@ ALL_OPS = AGGREGATION_OPS + FILTER_OPS + ROW_OPS + TRANSFORMATION_OPS
 
 def test_save_load_before_op_type_check():
     """
-    Randomly select 10 operations, check op_to_json and op_from_json work properly before op_type_check
+    Randomly select 10 operations, check op.to_json and op_from_json work
+    properly before op_type_check
     """
     for i in range(10):
         op_type = np.random.choice(ALL_OPS)
         op = globals()[op_type]('col')
-        op_json = op_to_json(op)
+        op_json = op.to_json()
         assert isinstance(op_json, str)
         op2 = op_from_json(op_json)
         assert isinstance(op2, globals()[op_type])
@@ -26,7 +27,8 @@ def test_save_load_before_op_type_check():
 
 def test_save_load_after_op_type_check():
     """
-    Randomly select 10 operations, check op_to_json and op_from_json work properly after op_type_check
+    Randomly select 10 operations, check op.to_json and op_from_json work
+    properly after op_type_check
     """
     for i in range(10):
         meta = TM({
@@ -37,7 +39,7 @@ def test_save_load_after_op_type_check():
         op_type = np.random.choice(ALL_OPS)
         op = globals()[op_type]('col')
         op.op_type_check(meta)
-        op_json = op_to_json(op)
+        op_json = op.to_json()
         assert isinstance(op_json, str)
         op2 = op_from_json(op_json)
         assert isinstance(op2, globals()[op_type])

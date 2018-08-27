@@ -5,8 +5,6 @@ import pandas as pd
 
 from .prediction_problem_saver import prediction_problems_from_json_file
 
-__all__ = ['Labeler']
-
 
 class Labeler():
     """

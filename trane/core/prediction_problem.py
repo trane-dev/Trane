@@ -14,8 +14,6 @@ from ..ops.row_ops import *  # noqa
 from ..ops.transformation_ops import *  # noqa
 from ..utils.table_meta import TableMeta
 
-__all__ = ['PredictionProblem']
-
 
 class PredictionProblem:
 

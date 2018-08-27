@@ -6,8 +6,6 @@ from ..ops import transformation_ops as trans_ops
 from ..utils.table_meta import TableMeta
 from .prediction_problem import PredictionProblem
 
-__all__ = ['PredictionProblemGenerator']
-
 
 class PredictionProblemGenerator:
     """

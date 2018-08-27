@@ -1,8 +1,6 @@
 import copy
 import json
 
-__all__ = ['TableMeta']
-
 
 class TableMeta(object):
     """

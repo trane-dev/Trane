@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from trane.core.labeler import *  # noqa
+from trane.core.conductor import *  # noqa
 from trane.core.prediction_problem_saver import *  # noqa
 from trane.ops.aggregation_ops import *  # noqa
 from trane.ops.filter_ops import *  # noqa

@@ -6,7 +6,7 @@ import pandas as pd
 from .prediction_problem_saver import prediction_problems_from_json_file
 
 
-class Labeler():
+class Conductor():
     """
     Object for executing prediction problems on data in order
     to generate labels for many prediction problems.

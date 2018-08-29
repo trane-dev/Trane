@@ -32,7 +32,8 @@ class TableMeta(object):
 
     def __init__(self, table_meta):
         """
-        Initalization of all operations. Subclasses shouldn't have their own init.
+        Initalization of all operations. Subclasses shouldn't have their own
+        init.
 
         Parameters
         ----------
@@ -42,6 +43,10 @@ class TableMeta(object):
         -------
         None
         """
+        # convert table_meta from json to dict if necessary
+        if type(table_meta) != dict:
+            table_meta = json.loads(table_meta)
+
         self.table_meta = table_meta.copy()
         self.all_columns = {}
         for table_id, table in enumerate(self.table_meta['tables']):
@@ -49,8 +54,8 @@ class TableMeta(object):
                 self.all_columns[field['name']] = {
                     'table_id': table_id,
                     'field_id': field_id,
-                    'type': field['subtype'] if 'subtype' in field else field['type'],
-                    'properties': field['properties'] if 'properties' in field else None
+                    'type': field['subtype'] if 'subtype' in field else field['type'],  # noqa
+                    'properties': field['properties'] if 'properties' in field else None  # noqa
                 }
 
     def get_type(self, column_name):
@@ -94,8 +99,8 @@ class TableMeta(object):
         if dtype in TableMeta.SUPERTYPE:
             table_id = column_data['table_id']
             field_id = column_data['field_id']
-            self.table_meta['tables'][table_id]['fields'][field_id]['type'] = TableMeta.SUPERTYPE[dtype]
-            self.table_meta['tables'][table_id]['fields'][field_id]['subtype'] = dtype
+            self.table_meta['tables'][table_id]['fields'][field_id]['type'] = TableMeta.SUPERTYPE[dtype]  # noqa
+            self.table_meta['tables'][table_id]['fields'][field_id]['subtype'] = dtype  # noqa
         else:
             self.table_meta['tables'][column_data['table_id']][
                 'fields'][column_data['field_id']]['type'] = dtype

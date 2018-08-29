@@ -5,6 +5,8 @@ Credits
 Development Lead
 ----------------
 
+* Albert Carter <albert@latentine.com>
+
 * Alexander Nordin <anordin@mit.edu>
 
 * Lei Xu <leix@mit.edu>

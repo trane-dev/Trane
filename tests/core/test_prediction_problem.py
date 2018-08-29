@@ -277,18 +277,6 @@ class TestPredictionProblemMethods(unittest.TestCase):
         # assert that the results dict is untouched
         self.assertEqual(res_dict, {})
 
-    def test_str(self):
-        self.assertIsNotNone(self.problem.__str__)
-
-        # mock some operations
-        mock_op = MagicMock()
-        mock_op.__str__.return_value = 'foo'
-        operations = [mock_op for x in range(4)]
-        self.problem.operations = operations
-
-        description = self.problem.__str__()
-        self.assertEqual(description, 'foo->foo->foo->foo')
-
 
 class TestPredictionProblemSaveLoad(unittest.TestCase):
 
@@ -438,3 +426,37 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
 
         self.assertEqual(
             cutoff_dill, self.mock_dill.dumps(self.mock_cutoff_strategy))
+
+
+class TestPredictionProblemDescription(unittest.TestCase):
+
+    def setUp(self):
+        mock_op = self.create_patch(
+            'trane.ops.OpBase')
+        self.operations = [mock_op for x in range(4)]
+
+        self.mock_cutoff_strategy = self.create_patch(
+            'trane.core.CutoffStrategy')
+
+        self.entity_col = 'entity_col'
+        self.label_col = 'label_col'
+
+        self.problem = PredictionProblem(
+            operations=self.operations, entity_id_col=self.entity_col,
+            label_col=self.label_col,
+            cutoff_strategy=self.mock_cutoff_strategy)
+
+        self.mock_dill = self.create_patch(
+            'trane.core.prediction_problem.dill')
+
+    def create_patch(self, name):
+        # helper method for creating patches
+        patcher = patch(name)
+        thing = patcher.start()
+        self.addCleanup(patcher.stop)
+        return thing
+
+    def test_str(self):
+        self.assertIsNotNone(self.problem.__str__)
+        # don't do any more testing here, because this is likely to
+        # be rewritten so frequently/quickly

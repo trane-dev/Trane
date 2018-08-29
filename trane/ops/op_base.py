@@ -305,8 +305,15 @@ class OpBase(object):
     def __hash__(self):
         return hash((type(self).__name__, self.column_name))
 
-    def __str__(self):
-        return "%s(%s)" % (type(self).__name__, self.column_name)
+    def __repr__(self):
+        hyper_param_str = ','.join(
+            [str(x) for x in list(self.hyper_parameter_settings.values())])
+
+        if len(hyper_param_str) > 0:
+            hyper_param_str = '@' + hyper_param_str
+
+        return "%s(%s%s)" % (
+            type(self).__name__, self.column_name, hyper_param_str)
 
     def __eq__(self, other):
         """Overrides the default implementation"""

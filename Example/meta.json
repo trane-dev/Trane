@@ -1,0 +1,19 @@
+{"tables":[
+    {"fields":[
+        {"name": "patient_id", "type": "text"},
+        {"name": "appointment_id", "type": "text"},
+        {"name": "gender", "type": "text"},
+        {"name": "scheduled_day", "type": "datetime"},
+        {"name": "appointment_day", "type": "datetime"},
+        {"name": "age", "type": "number", "subtype": "integer"},
+        {"name": "neighborhood", "type": "categorical", "subtype": "categorical"},
+        {"name": "scholarship", "type": "categorical", "subtype": "boolean"},
+        {"name": "hipertension", "type": "categorical", "subtype": "boolean"},
+        {"name": "diabetes", "type": "categorical", "subtype": "boolean"},
+        {"name": "alcoholism", "type": "categorical", "subtype": "boolean"},
+        {"name": "handcap", "type": "categorical", "subtype": "boolean"},
+        {"name": "sms_received", "type": "categorical", "subtype": "boolean"},
+        {"name": "no_show", "type": "number", "subtype": "integer"}
+    ]
+    }
+]}

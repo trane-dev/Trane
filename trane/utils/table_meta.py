@@ -174,6 +174,9 @@ class TableMeta(object):
         table_meta: a TableMeta object
 
         """
+        if json_data is None:
+            return None
+
         return TableMeta(json.loads(json_data))
 
     def __eq__(self, other):

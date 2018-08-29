@@ -311,10 +311,6 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
         self.assertIsNotNone(self.problem.to_json)
         json_patch = self.create_patch('trane.core.prediction_problem.json')
 
-        op_to_json_patch = self.create_patch(
-            'trane.core.prediction_problem.op_to_json')
-        op_to_json_patch.return_value = {'op': 'exists'}
-
         self.problem.table_meta.to_json.return_value = {'table_meta': 'exists'}
 
         self.problem.to_json()

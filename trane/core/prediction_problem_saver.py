@@ -3,9 +3,6 @@ import json
 from ..utils.table_meta import TableMeta
 from .prediction_problem import PredictionProblem
 
-__all__ = ["prediction_problems_to_json_file",
-           "prediction_problems_from_json_file"]
-
 
 def prediction_problems_to_json_file(prediction_problems, table_meta,
                                      entity_id_column, label_generating_column, time_column, filename):

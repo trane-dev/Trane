@@ -9,12 +9,10 @@ import pandas as pd
 
 from ..ops.aggregation_ops import *  # noqa
 from ..ops.filter_ops import *  # noqa
-from ..ops.op_saver import op_from_json, op_to_json
+from ..ops.op_saver import op_from_json
 from ..ops.row_ops import *  # noqa
 from ..ops.transformation_ops import *  # noqa
 from ..utils.table_meta import TableMeta
-
-__all__ = ['PredictionProblem']
 
 
 class PredictionProblem:
@@ -473,7 +471,7 @@ class PredictionProblem:
 
         return json.dumps(
             {"operations": [
-                json.loads(op_to_json(op)) for op in self.operations],
+                json.loads(op.to_json()) for op in self.operations],
              "entity_id_col": self.entity_id_col,
              "label_col": self.label_col,
              "table_meta": table_meta_json})
@@ -498,7 +496,7 @@ class PredictionProblem:
             json_data = json.loads(json_data)
 
         operations = [
-            op_from_json(json.dumps(item)) for item in json_data['operations']]
+            op_from_json(item) for item in json_data['operations']]
         entity_id_col = json_data['entity_id_col']
         label_col = json_data['label_col']
         table_meta = TableMeta.from_json(json_data.get('table_meta'))

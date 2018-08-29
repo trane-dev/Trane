@@ -1,3 +1,4 @@
+import json
 import random
 from collections import Counter
 
@@ -320,3 +321,20 @@ class OpBase(object):
         if isinstance(self, other.__class__):
             return self.__dict__ == other.__dict__
         return False
+
+    def to_json(self):
+        """
+        Convert an operation object to a JSON string.
+
+        Returns
+        ----------
+        str: a JSON strin representing the operation
+
+        """
+        return json.dumps({
+            "OpType": self.__class__.__bases__[-1].__name__,
+            "SubopType": type(self).__name__,
+            "column_name": self.column_name,
+            "iotype": (self.input_type, self.output_type),
+            "hyper_parameter_settings": self.hyper_parameter_settings
+        })

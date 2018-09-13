@@ -4,6 +4,14 @@ trane\.core package
 Submodules
 ----------
 
+trane\.core\.cutoff\_strategy module
+------------------------------------
+
+.. automodule:: trane.core.cutoff_strategy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 trane\.core\.labeler module
 ---------------------------
 

@@ -12,14 +12,6 @@ trane\.utils\.data\_parser module
     :undoc-members:
     :show-inheritance:
 
-trane\.utils\.generate\_cutoff\_times module
---------------------------------------------
-
-.. automodule:: trane.utils.generate_cutoff_times
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 trane\.utils\.table\_meta module
 --------------------------------
 

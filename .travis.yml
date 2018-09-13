@@ -40,5 +40,5 @@ deploy:
     local-dir: docs/_build/html
     target-branch: gh-pages
     on:
-      branch: LX-rebuild-doc
+      branch: master
       python: 3.6

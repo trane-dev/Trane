@@ -11,9 +11,7 @@ Welcome to Trane's documentation!
    :caption: Contents:
 
    readme
-   installation
-   usage
-   modules
+   _modules/trane
    contributing
    authors
    history

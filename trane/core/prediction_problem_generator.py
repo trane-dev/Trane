@@ -1,8 +1,7 @@
 import itertools
 
 from ..ops import aggregation_ops as agg_ops
-from ..ops import filter_ops, row_ops
-from ..ops import transformation_ops as trans_ops
+from ..ops import filter_ops
 from ..utils.table_meta import TableMeta
 from .prediction_problem import PredictionProblem
 
@@ -14,8 +13,7 @@ class PredictionProblemGenerator:
     Object for generating prediction problems on data.
     """
 
-    def __init__(self, table_meta, entity_col,
-                 label_col, filter_col):
+    def __init__(self, table_meta, entity_cols):
         """
         Parameters
         ----------
@@ -35,9 +33,7 @@ class PredictionProblemGenerator:
         None
         """
         self.table_meta = table_meta
-        self.entity_col = entity_col
-        self.label_col = label_col
-        self.filter_col = filter_col
+        self.entity_cols = entity_cols
         self.ensure_valid_inputs()
 
     def generate(self, df):
@@ -54,36 +50,37 @@ class PredictionProblemGenerator:
         problems: a list of Prediction Problem objects.
         """
 
-        op_types = [agg_ops.AGGREGATION_OPS, trans_ops.TRANSFORMATION_OPS,
-                    row_ops.ROW_OPS, filter_ops.FILTER_OPS]
-
         # a list of problems that will eventually be returned
         problems = []
 
         def iter_over_ops():
-            for ag, trans, row, filter in itertools.product(*op_types):
-                yield ag, trans, row, filter
+            for entity_col, ag, filter in itertools.product(
+                self.entity_cols, agg_ops.AGGREGATION_OPS, filter_ops.FILTER_OPS):
 
-        for ops_combo in iter_over_ops():
-            # for filter_col in self.table_meta.get_columns():
-            agg_op_name, trans_op_name, row_op_name, filter_op_name = ops_combo
+                filter_cols = [None] if filter == "AllFilterOp" else self.table_meta.get_columns()
+                ag_cols = [None] if ag == "CountAggregationOp" else self.table_meta.get_columns()
 
-            agg_op_obj = getattr(agg_ops, agg_op_name)(self.label_col)  # noqa
-            trans_op_obj = getattr(trans_ops, trans_op_name)(self.label_col)  # noqa
-            row_op_obj = getattr(row_ops, row_op_name)(self.label_col)  # noqa
-            filter_op_obj = getattr(filter_ops, filter_op_name)(self.filter_col)  # noqa
+                for filter_col, ag_col in itertools.product(filter_cols, ag_cols):
+                    if filter_col != entity_col and ag_col != entity_col:
+                        yield entity_col, ag_col, filter_col, ag, filter
 
-            operations = [filter_op_obj, row_op_obj, trans_op_obj, agg_op_obj]
+        for op_col_combo in iter_over_ops():
+            entity_col, ag_col, filter_col, agg_op_name, filter_op_name = op_col_combo
+
+            agg_op_obj = getattr(agg_ops, agg_op_name)(ag_col)  # noqa
+            filter_op_obj = getattr(filter_ops, filter_op_name)(filter_col)  # noqa
+
+            operations = [filter_op_obj, agg_op_obj]
 
             # filter ops are treated differently than other ops
             for op in operations:
                 op.auto_set_hyperparams(
-                    df=df, label_col=self.label_col,
-                    entity_col=self.entity_col, filter_col=self.filter_col)
+                    df=df, label_col=ag_col,
+                    entity_col=entity_col, filter_col=filter_col)
 
             problem = PredictionProblem(
-                operations=operations, entity_id_col=self.entity_col,
-                label_col=self.label_col,
+                operations=operations, entity_id_col=entity_col,
+                label_col=ag_col,
                 table_meta=self.table_meta, cutoff_strategy=None)
 
             if problem.is_valid():
@@ -96,9 +93,8 @@ class PredictionProblemGenerator:
         TypeChecking for the problem generator entity_col
         and label_col. Errors if types don't match up.
         """
-        assert(self.table_meta.get_type(self.entity_col)
+        assert len(self.entity_cols) > 0
+        for col in self.entity_cols:
+            assert(self.table_meta.get_type(col)
                in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
                    TableMeta.TYPE_CATEGORY])
-        assert(self.table_meta.get_type(self.label_col)
-               in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER,
-                   TableMeta.TYPE_TEXT])

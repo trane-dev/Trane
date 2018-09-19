@@ -62,6 +62,8 @@ class OpBase(object):
         table_meta: table meta after this operation. None if not compatable.
 
         """
+        if self.column_name is None:
+            return table_meta
         self.input_type = table_meta.get_type(self.column_name)
         for idx, (input_type, output_type) in enumerate(self.IOTYPES):
             if self.input_type == input_type:
@@ -122,11 +124,12 @@ class OpBase(object):
         if len(self.REQUIRED_PARAMETERS) == 0:
             return None
 
-        hyperaparam = self.find_threshhold_by_diversity(
-            df=df, label_col=label_col,
-            entity_col=entity_col,
-            num_random_samples=num_random_samples,
-            num_rows_to_execute_on=num_rows_to_execute_on)
+        hyperaparam = 0
+        # hyperaparam = self.find_threshhold_by_diversity(
+        #     df=df, label_col=label_col,
+        #     entity_col=entity_col,
+        #     num_random_samples=num_random_samples,
+        #     num_rows_to_execute_on=num_rows_to_execute_on)
 
         self.set_hyper_parameter(hyperaparam)
         return hyperaparam

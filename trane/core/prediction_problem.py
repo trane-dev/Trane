@@ -10,8 +10,6 @@ import pandas as pd
 from ..ops.aggregation_ops import *  # noqa
 from ..ops.filter_ops import *  # noqa
 from ..ops.op_saver import op_from_json, op_to_json
-from ..ops.row_ops import *  # noqa
-from ..ops.transformation_ops import *  # noqa
 from ..utils.table_meta import TableMeta
 
 __all__ = ['PredictionProblem']
@@ -92,57 +90,21 @@ class PredictionProblem:
         for entity_id, df_group in grouped:
 
             # generate the a cutoff date if the problem has a cutoff strategy
-            cutoff = None
+            cutoff_st = None
+            cutoff_ed = None
             if self.cutoff_strategy:
-                cutoff = self.cutoff_strategy.generate_fn(
+                cutoff_st, cutoff_ed, df_group_labeling = self.cutoff_strategy.generate_fn(
                     df_group, self.entity_id_col)
 
-            label_series = self._execute_operations_on_df(
-                df_group)[self.label_col]
+            label = self._execute_operations_on_df(
+                df_group_labeling)
 
             # add the label to the results dictionary
-            res_dict = self._insert_single_label_into_dict(
-                entity_id, label_series, cutoff, res_dict)
+            res_dict[entity_id] = (cutoff_st, cutoff_ed, label)
 
         res = pd.DataFrame.from_dict(data=res_dict, orient='index')
-        self._rename_columns(res, [self.entity_id_col, 'cutoff', 'label'])
+        self._rename_columns(res, [self.entity_id_col, 'cutoff_st', 'cutoff_ed', 'label'])
         return res
-
-    def _insert_single_label_into_dict(
-            self, entity_id, label_series, cutoff, res_dict):
-        '''
-        Inserts a single row of a dataframe into the passed dictionary and
-        returns it.
-
-        Parameters
-        ----------
-        label_df: dataframe
-        cutoff: cutoff time
-        res_dict: dictionary with key entity_id and value a two part tuple:
-            (cutoff time, binary label)
-
-        Returns
-        -------
-        dictionary
-        '''
-        num_rows = len(label_series)
-        if num_rows > 1:
-            warnings.warn(
-                "Operations returned more than 1 result for entity " +
-                str(entity_id) + ". This probably means you forgot to " +
-                "add an aggregation operation. Arbitrarily picking the " +
-                "first result.",
-                RuntimeWarning)
-        elif num_rows < 1:
-            warnings.warn(
-                "Operation returned fewer than 1 result for entity " +
-                str(entity_id) + ". Returning an unedited res_dict",
-                RuntimeWarning)
-        if num_rows > 0:
-            group_tuple = (cutoff, label_series.iloc[0])
-            res_dict[entity_id] = group_tuple
-
-        return res_dict
 
     def _rename_columns(self, df, column_list):
         '''

@@ -3,7 +3,7 @@ from .op_base import OpBase
 
 AGGREGATION_OPS = [
     "FirstAggregationOp", "CountAggregationOp", "SumAggregationOp",
-    "LastAggregationOp", "LMFAggregationOp"]
+    "LastAggregationOp"]
 __all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
 
 
@@ -48,8 +48,9 @@ class FirstAggregationOp(AggregationOpBase):
                (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
 
     def execute(self, dataframe):
-        dataframe = dataframe.copy()
-        return dataframe.head(1)
+        if len(dataframe) > 0:
+            return dataframe.head(1)[self.column_name]
+        return None
 
 
 class LastAggregationOp(AggregationOpBase):
@@ -64,22 +65,9 @@ class LastAggregationOp(AggregationOpBase):
                (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
 
     def execute(self, dataframe):
-        dataframe = dataframe.copy()
-        return dataframe.tail(1)
-
-
-class LMFAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-               (TM.TYPE_INTEGER, TM.TYPE_INTEGER)]
-
-    def execute(self, dataframe):
-        dataframe = dataframe.copy()
-        last = dataframe.tail(1)
-        first = dataframe.head(1)
-        last.at[last.index[0],
-                self.column_name] -= first.at[first.index[0], self.column_name]
-        return last
+        if len(dataframe) > 0:
+            return dataframe.last(1)[self.column_name]
+        return None
 
 
 class CountAggregationOp(AggregationOpBase):
@@ -94,10 +82,7 @@ class CountAggregationOp(AggregationOpBase):
                (TM.TYPE_IDENTIFIER, TM.TYPE_INTEGER)]
 
     def execute(self, dataframe):
-        head = dataframe.head(1).copy()
-        count = int(dataframe.shape[0])
-        head[self.column_name] = count
-        return head
+        return len(dataframe)
 
 
 class SumAggregationOp(AggregationOpBase):
@@ -106,7 +91,4 @@ class SumAggregationOp(AggregationOpBase):
                (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
-        head = dataframe.head(1).copy()
-        total = float(dataframe[self.column_name].sum())
-        head[self.column_name] = total
-        return head
+        return float(dataframe[self.column_name].sum())

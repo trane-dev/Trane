@@ -5,6 +5,8 @@ from ..ops import filter_ops
 from ..utils.table_meta import TableMeta
 from .prediction_problem import PredictionProblem
 
+import sys
+
 __all__ = ['PredictionProblemGenerator']
 
 
@@ -64,19 +66,17 @@ class PredictionProblemGenerator:
                     if filter_col != entity_col and ag_col != entity_col:
                         yield entity_col, ag_col, filter_col, ag, filter
 
+        all_attempts = 0
+        success_attempts = 0
         for op_col_combo in iter_over_ops():
+            print("\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts), end="")
+            all_attempts += 1
             entity_col, ag_col, filter_col, agg_op_name, filter_op_name = op_col_combo
 
             agg_op_obj = getattr(agg_ops, agg_op_name)(ag_col)  # noqa
             filter_op_obj = getattr(filter_ops, filter_op_name)(filter_col)  # noqa
 
             operations = [filter_op_obj, agg_op_obj]
-
-            # filter ops are treated differently than other ops
-            for op in operations:
-                op.auto_set_hyperparams(
-                    df=df, label_col=ag_col,
-                    entity_col=entity_col, filter_col=filter_col)
 
             problem = PredictionProblem(
                 operations=operations, entity_id_col=entity_col,
@@ -85,6 +85,7 @@ class PredictionProblemGenerator:
 
             if problem.is_valid():
                 problems.append(problem)
+                success_attempts += 1
 
         return problems
 

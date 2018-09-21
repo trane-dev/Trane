@@ -2,8 +2,8 @@ from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
 
 AGGREGATION_OPS = [
-    "FirstAggregationOp", "CountAggregationOp", "SumAggregationOp",
-    "LastAggregationOp"]
+    "CountAggregationOp", "SumAggregationOp",
+    "AvgAggregationOp", "MajorityAggregationOp"]
 __all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
 
 
@@ -91,4 +91,26 @@ class SumAggregationOp(AggregationOpBase):
                (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
+        if len(dataframe) == 0:
+            return None
         return float(dataframe[self.column_name].sum())
+
+class AvgAggregationOp(AggregationOpBase):
+    REQUIRED_PARAMETERS = []
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_FLOAT),
+               (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
+
+    def execute(self, dataframe):
+        if len(dataframe) == 0:
+            return None
+        return float(dataframe[self.column_name].mean())
+
+class MajorityAggregationOp(AggregationOpBase):
+    REQUIRED_PARAMETERS = []
+    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY)]
+
+    def execute(self, dataframe):
+        if len(dataframe) == 0:
+            return None
+
+        return dataframe[self.column_name].mode()

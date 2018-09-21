@@ -85,7 +85,7 @@ class PredictionProblem:
         df = df.copy()
         grouped = df.groupby(self.entity_id_col)
 
-        res_dict = {}
+        res_list = []
 
         for entity_id, df_group in grouped:
 
@@ -93,43 +93,19 @@ class PredictionProblem:
             cutoff_st = None
             cutoff_ed = None
             if self.cutoff_strategy:
-                cutoff_st, cutoff_ed, df_group_labeling = self.cutoff_strategy.generate_fn(
-                    df_group, self.entity_id_col)
+                for cutoff_st, cutoff_ed, df_group_labeling in self.cutoff_strategy.generate_fn(
+                    df_group, self.entity_id_col):
 
-            label = self._execute_operations_on_df(
-                df_group_labeling)
+                    label = self._execute_operations_on_df(
+                    df_group_labeling)
 
-            # add the label to the results dictionary
-            res_dict[entity_id] = (cutoff_st, cutoff_ed, label)
+                    # add the label to the results dictionary
+                    res_list.append((entity_id, cutoff_st, cutoff_ed, label))
 
-        res = pd.DataFrame.from_dict(data=res_dict, orient='index')
-        self._rename_columns(res, [self.entity_id_col, 'cutoff_st', 'cutoff_ed', 'label'])
+        res = pd.DataFrame(data=res_list,
+            columns=[self.entity_id_col, 'cutoff_st', 'cutoff_ed', 'label'])
+        res.set_index([self.entity_id_col, 'cutoff_st', 'cutoff_ed'], inplace=True)
         return res
-
-    def _rename_columns(self, df, column_list):
-        '''
-        Renames columns in a given dataframe, in order, as the column_list.
-
-        This is required because of support for Python 2.7 and Pandas 0.21
-        A more modern way is to pass columns=df.columns
-            into pd.DataFrame.from_dict.
-
-        Parameters
-        ----------
-        df: DataFrame whose columns will be renamed
-        column_list: list of column names
-
-        Returns
-        -------
-        dataframe with renamed columns
-        '''
-        rename_dict = {}
-        for col_num in df.columns.values:
-            rename_dict[col_num] = column_list[col_num + 1]
-
-        df.index.names = [column_list[0]]
-        df.rename(columns=rename_dict, inplace=True)
-        return df
 
     def _execute_operations_on_df(self, df):
         '''
@@ -163,19 +139,12 @@ class PredictionProblem:
 
         """
         desc_arr = []
-        description = 'For each ' + self.entity_id_col + ' predict'
+        description = 'For each <' + self.entity_id_col + '> predict'
         # cycle through each operation to create dataops
         # dataops are a series of operations containing one and only one
         # aggregation op at its end
-        dataop = []
-        for op in self.operations:
-            op_type = type(op)
-            dataop.append(op)
 
-            if issubclass(op_type, AggregationOpBase):
-                # describe each dataop
-                desc_arr = desc_arr + self._describe_dataop(dataop)
-                dataop = []
+        description += self._describe_aggop(self.operations[-1])
 
         # cycle through ops, pick out filters and describe them
         filterop_desc_arr = []
@@ -187,103 +156,28 @@ class PredictionProblem:
         if len(filterop_desc_arr) > 0:
             description += ' and '.join(filterop_desc_arr)
 
-        # join the dataops together with ' of '
-        description += ' of '.join(desc_arr)
-
         # add the cutoff strategy description if it exists
         if self.cutoff_strategy:
             description += ' ' + self.cutoff_strategy.description
 
         return description
 
-    def _describe_dataop(self, dataop):
-        """
-        A DataOp is a series of non-aggregation operations ending with one and
-        only one aggregation op.
-
-        In a dataop, filter operations are ignored. (They are dealt with
-        elsewhere.) The NL description puts the agg op first, followed other
-        operations in linear (left to right order.)
-
-        So an operation which is row_op -> trans_op -> agg_op will be written
-        as agg_op OF trans_op OF row_op.
-        """
-        descriptions = []
-
-        agg_op = dataop[-1]
-        if not issubclass(type(agg_op), AggregationOpBase):
-            raise ValueError(
-                'Last operation of dataop must be an aggregation op. '
-                'It is currently a ' + type(agg_op) + '.')
-
-        descriptions.append(self._describe_aggop(agg_op))
-        # remove the last operation (aggregation) and reverse the list
-        dataop = dataop[:-1]
-        dataop.reverse()
-
-        for op in dataop:
-            op_type = type(op)
-            description = ''
-            if issubclass(op_type, FilterOpBase):
-                # filter ops are described seperately
-                break
-            elif issubclass(op_type, AggregationOpBase):
-                raise ValueError(
-                    'There is more than one aggreagation op in your dataop. '
-                    'A dataop must contain one and only one aggregation '
-                    ' at its end.')
-            elif issubclass(op_type, TransformationOpBase):
-                description = self._describe_transop(op)
-            elif issubclass(op_type, RowOpBase):
-                description = self._describe_rowop(op)
-
-            descriptions.append(description)
-
-        # add the cutoff strategy description
-        if self.cutoff_strategy:
-            description += self.cutoff_strategy.description
-
-        return descriptions
-
     def _describe_aggop(self, op):
             agg_op_str_dict = {
-                FirstAggregationOp: "the first",
-                LastAggregationOp: "the last",
-                CountAggregationOp: "the number of",
-                SumAggregationOp: "the sum of",
-                LMFAggregationOp: "the last minus first"
+                # FirstAggregationOp: " <{}> in the first record",
+                # LastAggregationOp: " <{}> in the last record",
+                CountAggregationOp: " the number in all records related to this entity",
+                SumAggregationOp: " the total <{}> in all the records related to this entity",
+                AvgAggregationOp: " the average of <{}> in all the records related to this entity",
+                MajorityAggregationOp: " the majority of <{}> in all the records related to this entity"
             }
             if op.input_type == TableMeta.TYPE_BOOL and isinstance(
                     op, SumAggregationOp):
-                return " the number of records whose"
+                return " the number of records"
+            if isinstance(op, CountAggregationOp):
+                return " the number of records"
             if type(op) in agg_op_str_dict:
-                return agg_op_str_dict[type(op)]
-
-    def _describe_rowop(self, op):
-        row_op_str_dict = {
-            GreaterRowOp: "greater than",
-            EqRowOp: "equal to",
-            NeqRowOp: "not equal to",
-            LessRowOp: "less than"}
-
-        if isinstance(op, IdentityRowOp):
-            # return " {col}".format(col=op.column_name)
-            return ""
-        if isinstance(op, ExpRowOp):
-            return " the exp of {col}".format(col=op.column_name)
-        if type(op) in row_op_str_dict:
-            return " {col} is {op} {threshold}".format(
-                col=op.column_name, op=row_op_str_dict[type(op)],
-                threshold=op.hyper_parameter_settings['threshold'])
-        return " (unknown row op)"
-
-    def _describe_transop(self, op):
-        if isinstance(op, IdentityTransformationOp):
-            return ""
-        if isinstance(op, DiffTransformationOp):
-            return "fluctuation of " + str(op.column_name)
-        if isinstance(op, ObjectFrequencyTransformationOp):
-            return "frequency of " + str(op.column_name)
+                return agg_op_str_dict[type(op)].format(op.column_name)
 
     def _describe_filter(self, op):
         filter_op_str_dict = {
@@ -297,14 +191,16 @@ class PredictionProblem:
 
         # remove AllFilterOp
         filter_ops = [x for x in filter_ops if not isinstance(x, AllFilterOp)]
+        if len(filter_ops) == 0:
+            return ""
 
         desc = ' with '
         last_op_idx = len(filter_ops) - 1
         for idx, op in enumerate(filter_ops):
-            op_desc = '{col} {op} {threshold}'.format(
+            op_desc = '<{col}> {op} {threshold}'.format(
                 col=op.column_name,
                 op=filter_op_str_dict[type(op)],
-                threshold=op.hyper_parameter_settings.get('threshold', ''))
+                threshold=op.hyper_parameter_settings.get('threshold', '__'))
             desc += op_desc
 
             if idx != last_op_idx:

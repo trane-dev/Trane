@@ -85,7 +85,7 @@ class PredictionProblemGenerator:
             if problem.is_valid():
                 problems.append(problem)
                 success_attempts += 1
-
+        print("\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts))
         return problems
 
     def ensure_valid_inputs(self):

@@ -34,7 +34,32 @@ class AggregationOpBase(OpBase):
       the new dataframe
 
     """
+    def op_type_check(self, table_meta):
+        """
+        Data type check for the operation.
+        Operations may change the data type of a column, eg. int -> bool.
+        One operation can only be applied on a few data types, eg. `greater`
+        can be applied on int but can't be applied on bool.
+        This function checks whether the current operation can be applied on
+        the data.
+        It returns the updated TableMeta for next operation or None if it's not
+        valid.
 
+        Parameters
+        ----------
+        table_meta: table meta before this operation.
+
+        Returns
+        -------
+        table_meta: table meta after this operation. None if not compatable.
+
+        """
+        self.input_type = table_meta.get_type(self.column_name)
+        for idx, (input_type, output_type) in enumerate(self.IOTYPES):
+            if self.input_type == input_type:
+                self.output_type = output_type
+                return output_type
+        return None
 
 class FirstAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
@@ -72,14 +97,11 @@ class LastAggregationOp(AggregationOpBase):
 
 class CountAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_INTEGER),
-               (TM.TYPE_BOOL, TM.TYPE_INTEGER),
-               (TM.TYPE_ORDERED, TM.TYPE_INTEGER),
-               (TM.TYPE_TEXT, TM.TYPE_INTEGER),
-               (TM.TYPE_INTEGER, TM.TYPE_INTEGER),
-               (TM.TYPE_FLOAT, TM.TYPE_INTEGER),
-               (TM.TYPE_TIME, TM.TYPE_INTEGER),
-               (TM.TYPE_IDENTIFIER, TM.TYPE_INTEGER)]
+    IOTYPES = None
+
+    def op_type_check(self, table_meta):
+        self.output_type = TM.TYPE_INTEGER
+        return TM.TYPE_INTEGER
 
     def execute(self, dataframe):
         return len(dataframe)
@@ -113,4 +135,4 @@ class MajorityAggregationOp(AggregationOpBase):
         if len(dataframe) == 0:
             return None
 
-        return dataframe[self.column_name].mode()
+        return str(dataframe[self.column_name].mode()[0])

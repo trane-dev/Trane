@@ -62,8 +62,6 @@ class OpBase(object):
         table_meta: table meta after this operation. None if not compatable.
 
         """
-        if self.column_name is None:
-            return table_meta
         self.input_type = table_meta.get_type(self.column_name)
         for idx, (input_type, output_type) in enumerate(self.IOTYPES):
             if self.input_type == input_type:

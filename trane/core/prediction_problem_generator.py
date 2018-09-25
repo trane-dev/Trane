@@ -15,7 +15,7 @@ class PredictionProblemGenerator:
     Object for generating prediction problems on data.
     """
 
-    def __init__(self, table_meta, entity_cols):
+    def __init__(self, table_meta, entity_col):
         """
         Parameters
         ----------
@@ -35,17 +35,16 @@ class PredictionProblemGenerator:
         None
         """
         self.table_meta = table_meta
-        self.entity_cols = entity_cols
+        self.entity_col = entity_col
         self.ensure_valid_inputs()
 
-    def generate(self, df):
+    def generate(self):
         """
         Generate the prediction problems. The prediction problems operations
         hyper parameters are also set.
 
         Parameters
         ----------
-        df: the data to be parsed
 
         Returns
         -------
@@ -56,22 +55,22 @@ class PredictionProblemGenerator:
         problems = []
 
         def iter_over_ops():
-            for entity_col, ag, filter in itertools.product(
-                self.entity_cols, agg_ops.AGGREGATION_OPS, filter_ops.FILTER_OPS):
+            for ag, filter in itertools.product(
+                agg_ops.AGGREGATION_OPS, filter_ops.FILTER_OPS):
 
                 filter_cols = [None] if filter == "AllFilterOp" else self.table_meta.get_columns()
                 ag_cols = [None] if ag == "CountAggregationOp" else self.table_meta.get_columns()
 
                 for filter_col, ag_col in itertools.product(filter_cols, ag_cols):
-                    if filter_col != entity_col and ag_col != entity_col:
-                        yield entity_col, ag_col, filter_col, ag, filter
+                    if filter_col != self.entity_col and ag_col != self.entity_col:
+                        yield ag_col, filter_col, ag, filter
 
         all_attempts = 0
         success_attempts = 0
         for op_col_combo in iter_over_ops():
             print("\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts), end="")
             all_attempts += 1
-            entity_col, ag_col, filter_col, agg_op_name, filter_op_name = op_col_combo
+            ag_col, filter_col, agg_op_name, filter_op_name = op_col_combo
 
             agg_op_obj = getattr(agg_ops, agg_op_name)(ag_col)  # noqa
             filter_op_obj = getattr(filter_ops, filter_op_name)(filter_col)  # noqa
@@ -79,7 +78,7 @@ class PredictionProblemGenerator:
             operations = [filter_op_obj, agg_op_obj]
 
             problem = PredictionProblem(
-                operations=operations, entity_id_col=entity_col,
+                operations=operations, entity_col=self.entity_col,
                 label_col=ag_col,
                 table_meta=self.table_meta, cutoff_strategy=None)
 
@@ -94,8 +93,6 @@ class PredictionProblemGenerator:
         TypeChecking for the problem generator entity_col
         and label_col. Errors if types don't match up.
         """
-        assert len(self.entity_cols) > 0
-        for col in self.entity_cols:
-            assert(self.table_meta.get_type(col)
-               in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
-                   TableMeta.TYPE_CATEGORY])
+        assert(self.table_meta.get_type(self.entity_col)
+           in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
+               TableMeta.TYPE_CATEGORY])

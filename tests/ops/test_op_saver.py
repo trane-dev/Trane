@@ -3,7 +3,7 @@ import numpy as np
 from trane.ops import *  # noqa
 from trane.utils.table_meta import TableMeta as TM
 
-ALL_OPS = AGGREGATION_OPS + FILTER_OPS + ROW_OPS + TRANSFORMATION_OPS
+ALL_OPS = AGGREGATION_OPS + FILTER_OPS
 
 
 def test_save_load_before_op_type_check():

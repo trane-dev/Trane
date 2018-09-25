@@ -23,7 +23,7 @@ class PredictionProblem:
     each operation.
     """
 
-    def __init__(self, operations, entity_id_col,
+    def __init__(self, operations, entity_col,
                  label_col, table_meta=None, cutoff_strategy=None):
         """
         Parameters
@@ -36,10 +36,11 @@ class PredictionProblem:
         None
         """
         self.operations = operations
-        self.entity_id_col = entity_id_col
+        self.entity_col = entity_col
         self.label_col = label_col
         self.table_meta = table_meta
         self.cutoff_strategy = cutoff_strategy
+        self.label_type = None
 
     def is_valid(self, table_meta=None):
         '''
@@ -69,7 +70,11 @@ class PredictionProblem:
             if temp_meta is None:
                 return False
 
-        return True
+        if temp_meta in TableMeta.TYPES:
+            self.label_type = temp_meta
+            return True
+        else:
+            return False
 
     def execute(self, df):
         '''
@@ -82,29 +87,35 @@ class PredictionProblem:
                 'problem\'s table meta. Therefore, the problem is not '
                 'valid.')
 
+        assert self.cutoff_strategy is not None
+
         df = df.copy()
-        grouped = df.groupby(self.entity_id_col)
+        cutoffs = self.cutoff_strategy.generate_cutoffs(df)
+        cutoffs.set_index([self.entity_col], inplace=True)
 
         res_list = []
 
-        for entity_id, df_group in grouped:
+        grouped = df.groupby(self.entity_col)
 
-            # generate the a cutoff date if the problem has a cutoff strategy
-            cutoff_st = None
-            cutoff_ed = None
-            if self.cutoff_strategy:
-                for cutoff_st, cutoff_ed, df_group_labeling in self.cutoff_strategy.generate_fn(
-                    df_group, self.entity_id_col):
+        for entity_name, sub_df in grouped:
+            sub_cutoffs = cutoffs.loc[entity_name]
 
-                    label = self._execute_operations_on_df(
-                    df_group_labeling)
+            for row_id, row in sub_cutoffs.iterrows():
+                cutoff_st = row['cutoff_st']
+                cutoff_ed = row['cutoff_ed']
 
-                    # add the label to the results dictionary
-                    res_list.append((entity_id, cutoff_st, cutoff_ed, label))
+                df_labeling = sub_df.loc[
+                    (sub_df['trending_date'] >= cutoff_st) & (sub_df['trending_date'] < cutoff_ed)]
+
+                label = self._execute_operations_on_df(
+                    df_labeling)
+
+                # add the label to the results dictionary
+                res_list.append((entity_name, cutoff_st, cutoff_ed, label))
 
         res = pd.DataFrame(data=res_list,
-            columns=[self.entity_id_col, 'cutoff_st', 'cutoff_ed', 'label'])
-        res.set_index([self.entity_id_col, 'cutoff_st', 'cutoff_ed'], inplace=True)
+            columns=[self.entity_col, 'cutoff_st', 'cutoff_ed', 'label'])
+        res.set_index([self.entity_col, 'cutoff_st', 'cutoff_ed'], inplace=True)
         return res
 
     def _execute_operations_on_df(self, df):
@@ -139,7 +150,7 @@ class PredictionProblem:
 
         """
         desc_arr = []
-        description = 'For each <' + self.entity_id_col + '> predict'
+        description = 'For each <' + self.entity_col + '> predict'
         # cycle through each operation to create dataops
         # dataops are a series of operations containing one and only one
         # aggregation op at its end
@@ -332,7 +343,7 @@ class PredictionProblem:
         return json.dumps(
             {"operations": [
                 json.loads(op_to_json(op)) for op in self.operations],
-             "entity_id_col": self.entity_id_col,
+             "entity_col": self.entity_col,
              "label_col": self.label_col,
              "table_meta": table_meta_json})
 
@@ -357,13 +368,13 @@ class PredictionProblem:
 
         operations = [
             op_from_json(json.dumps(item)) for item in json_data['operations']]
-        entity_id_col = json_data['entity_id_col']
+        entity_col = json_data['entity_col']
         label_col = json_data['label_col']
         table_meta = TableMeta.from_json(json_data.get('table_meta'))
 
         problem = PredictionProblem(
             operations=operations,
-            entity_id_col=entity_id_col,
+            entity_col=entity_col,
             label_col=label_col,
             table_meta=table_meta,
             cutoff_strategy=None)

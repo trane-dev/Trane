@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
+from datetime import timedelta, datetime
 
+__all__ = ["FixWindowCutoffStrategy"]
 
 class CutoffStrategy:
     """
@@ -19,4 +21,31 @@ class CutoffStrategy:
 
     def __init__(self, generate_fn, description='undescribed cutoff strategy'):
         self.generate_fn = generate_fn
-        self.description = description        
+        self.description = description
+
+
+class FixWindowCutoffStrategy(CutoffStrategy):
+    def __init__(self, entity_col, cutoff_base, cutoff_end, cutoff_window):
+        self.description = "in next {} days".format(cutoff_window)
+        self.cutoff_base = cutoff_base
+        self.cutoff_end = cutoff_end
+        self.cutoff_window = cutoff_window
+        self.entity_col = entity_col
+
+    def generate_cutoffs(self, df):
+        cutoff_st_ed_pairs = []
+
+        current = self.cutoff_base
+        while True:
+            current_end = current + timedelta(days=self.cutoff_window)
+            if current_end > self.cutoff_end:
+                break
+            cutoff_st_ed_pairs.append((current, current_end))
+            current = current_end
+
+        entity_cutoffs = []
+        for entity_name in set(df[self.entity_col]):
+            for cutoff_st, cutoff_ed in cutoff_st_ed_pairs:
+                entity_cutoffs.append((entity_name, cutoff_st, cutoff_ed))
+
+        return pd.DataFrame(entity_cutoffs, columns=[self.entity_col, "cutoff_st", "cutoff_ed"])

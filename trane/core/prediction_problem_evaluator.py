@@ -14,13 +14,16 @@ __all__ = ["PredictionProblemEvaluator"]
 class PredictionProblemEvaluator(object):
     """docstring for PredictionProblemEvaluator."""
     def __init__(self, df, entity_col, cutoff_strategy,
-                sample=2000, previous_k_as_feature=2, latest_k_as_test=2):
+                sample=2000, previous_k_as_feature=2, latest_k_as_test=2,
+                min_train_set=100, min_test_set=100):
         self.df = df
         self.sampled_df = df.sample(sample)
         self.entity_col = entity_col
         self.cutoff_strategy = cutoff_strategy
         self.previous_k_as_feature = previous_k_as_feature
         self.latest_k_as_test = latest_k_as_test
+        self.min_train_set = min_train_set
+        self.min_test_set = min_test_set
 
         self.regressor = [
             {
@@ -134,7 +137,7 @@ class PredictionProblemEvaluator(object):
             X_train, X_test, Y_train, Y_test = self.split_dataset(
                 problem_final, problem_type, labels, features)
 
-            if len(X_train) == 0 or len(X_test) == 0:
+            if len(X_train) < self.min_train_set or len(X_test) < self.min_test_set:
                 continue
 
             problem_result["N_train"] = len(X_train)

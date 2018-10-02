@@ -1,5 +1,4 @@
 import pytest
-
 from trane.ops import *
 from trane.utils.table_meta import TableMeta as TM
 

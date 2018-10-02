@@ -1,11 +1,7 @@
 import sys
 import unittest
-import warnings
 
-import numpy as np
-import pandas as pd
-from mock import MagicMock, PropertyMock, patch
-
+from mock import MagicMock, patch
 from trane.core.prediction_problem import PredictionProblem
 
 

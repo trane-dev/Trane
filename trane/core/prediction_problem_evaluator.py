@@ -1,21 +1,22 @@
-from ..utils.table_meta import TableMeta as TM
-
-from sklearn.linear_model import LinearRegression
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.preprocessing import OneHotEncoder
-
 import copy
+
 import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+
+from ..utils.table_meta import TableMeta as TM
 
 __all__ = ["PredictionProblemEvaluator"]
 
+
 class PredictionProblemEvaluator(object):
     """docstring for PredictionProblemEvaluator."""
+
     def __init__(self, df, entity_col, cutoff_strategy,
-                sample=2000, previous_k_as_feature=2, latest_k_as_test=2,
-                min_train_set=100, min_test_set=100):
+                 sample=2000, previous_k_as_feature=2, latest_k_as_test=2,
+                 min_train_set=100, min_test_set=100):
         self.df = df
         self.sampled_df = df.sample(sample)
         self.entity_col = entity_col
@@ -63,7 +64,7 @@ class PredictionProblemEvaluator(object):
                         fraction_of_data_target=keep_rate, df=self.sampled_df, col=filter_op.column_name)
                     problem_final = copy.deepcopy(problem)
                     problem_final.operations[0].set_hyper_parameter(threshold)
-                    yield problem_final, "threshold: {} (keep {}%%)".format(threshold, keep_rate*100)
+                    yield problem_final, "threshold: {} (keep {}%%)".format(threshold, keep_rate * 100)
 
     def split_dataset(self, problem, problem_type, labels, features):
         X_train, X_test, Y_train, Y_test = [], [], [], []
@@ -85,7 +86,7 @@ class PredictionProblemEvaluator(object):
                 sample_feature = features.get_feature(entity_name, cutoff_st)
 
                 for j in range(self.previous_k_as_feature):
-                    prev_label = sub_labels.iloc[i-j-1]['label']
+                    prev_label = sub_labels.iloc[i - j - 1]['label']
                     if problem_type == "classification":
                         sample_feature.append(label_to_index[prev_label])
                     else:
@@ -106,7 +107,7 @@ class PredictionProblemEvaluator(object):
 
         if problem_type == "classification" and len(X_train) > 0 and len(X_test) > 0:
             enc = OneHotEncoder(sparse=False,
-                categorical_features=[-i-1 for i in range(self.previous_k_as_feature)])
+                                categorical_features=[-i - 1 for i in range(self.previous_k_as_feature)])
             enc.fit(X_train + X_test)
             X_train = enc.transform(X_train)
             X_test = enc.transform(X_test)
@@ -142,7 +143,6 @@ class PredictionProblemEvaluator(object):
 
             problem_result["N_train"] = len(X_train)
             problem_result["N_test"] = len(X_test)
-
 
             if problem_type == "regression":
                 problem_result['R2'] = {}

@@ -34,6 +34,7 @@ class AggregationOpBase(OpBase):
       the new dataframe
 
     """
+
     def op_type_check(self, table_meta):
         """
         Data type check for the operation.
@@ -61,6 +62,7 @@ class AggregationOpBase(OpBase):
                 return output_type
         return None
 
+
 class CountAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
     IOTYPES = None
@@ -83,6 +85,7 @@ class SumAggregationOp(AggregationOpBase):
             return None
         return float(dataframe[self.column_name].sum())
 
+
 class AvgAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
     IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_FLOAT),
@@ -92,6 +95,7 @@ class AvgAggregationOp(AggregationOpBase):
         if len(dataframe) == 0:
             return None
         return float(dataframe[self.column_name].mean())
+
 
 class MajorityAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []

@@ -1,8 +1,9 @@
-import numpy as np
+from datetime import timedelta
+
 import pandas as pd
-from datetime import timedelta, datetime
 
 __all__ = ["FixWindowCutoffStrategy"]
+
 
 class CutoffStrategy:
     """

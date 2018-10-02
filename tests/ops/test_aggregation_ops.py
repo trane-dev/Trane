@@ -1,5 +1,4 @@
 from pandas import DataFrame
-
 from trane.ops.aggregation_ops import *  # noqa
 from trane.utils.table_meta import TableMeta as TM
 
@@ -14,6 +13,7 @@ meta = TM({
         ]}
     ]})
 
+
 def test_count_aggregation_op_input_value():
     op = CountAggregationOp(None)
     op.op_type_check(meta)
@@ -27,11 +27,13 @@ def test_sum_aggregation_op_input_value():
     output = op(df.copy())
     assert output == 15
 
+
 def test_avg_aggregation_op_input_value():
     op = AvgAggregationOp('col')
     op.op_type_check(meta)
     output = op(df.copy())
     assert output == 3
+
 
 def test_majority_aggregation_op_input_value():
     op = MajorityAggregationOp('col2')

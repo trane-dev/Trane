@@ -5,8 +5,6 @@ from ..ops import filter_ops
 from ..utils.table_meta import TableMeta
 from .prediction_problem import PredictionProblem
 
-import sys
-
 __all__ = ['PredictionProblemGenerator']
 
 
@@ -56,7 +54,7 @@ class PredictionProblemGenerator:
 
         def iter_over_ops():
             for ag, filter in itertools.product(
-                agg_ops.AGGREGATION_OPS, filter_ops.FILTER_OPS):
+                    agg_ops.AGGREGATION_OPS, filter_ops.FILTER_OPS):
 
                 filter_cols = [None] if filter == "AllFilterOp" else self.table_meta.get_columns()
                 ag_cols = [None] if ag == "CountAggregationOp" else self.table_meta.get_columns()
@@ -93,5 +91,5 @@ class PredictionProblemGenerator:
         and label_col. Errors if types don't match up.
         """
         assert(self.table_meta.get_type(self.entity_col)
-           in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
-               TableMeta.TYPE_CATEGORY])
+               in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
+                   TableMeta.TYPE_CATEGORY])

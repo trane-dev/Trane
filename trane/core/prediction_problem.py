@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import warnings
 
 import dill
 import numpy as np
@@ -113,7 +112,7 @@ class PredictionProblem:
                 res_list.append((entity_name, cutoff_st, cutoff_ed, label))
 
         res = pd.DataFrame(data=res_list,
-            columns=[self.entity_col, 'cutoff_st', 'cutoff_ed', 'label'])
+                           columns=[self.entity_col, 'cutoff_st', 'cutoff_ed', 'label'])
         res.set_index([self.entity_col, 'cutoff_st', 'cutoff_ed'], inplace=True)
         return res
 
@@ -148,7 +147,6 @@ class PredictionProblem:
         description: str natural language description of the problem
 
         """
-        desc_arr = []
         description = 'For each <' + self.entity_col + '> predict'
         # cycle through each operation to create dataops
         # dataops are a series of operations containing one and only one
@@ -173,21 +171,21 @@ class PredictionProblem:
         return description
 
     def _describe_aggop(self, op):
-            agg_op_str_dict = {
-                # FirstAggregationOp: " <{}> in the first record",
-                # LastAggregationOp: " <{}> in the last record",
-                CountAggregationOp: " the number in all records related to this entity",
-                SumAggregationOp: " the total <{}> in all the records related to this entity",
-                AvgAggregationOp: " the average of <{}> in all the records related to this entity",
-                MajorityAggregationOp: " the majority of <{}> in all the records related to this entity"
-            }
-            if op.input_type == TableMeta.TYPE_BOOL and isinstance(
-                    op, SumAggregationOp):
-                return " the number of records"
-            if isinstance(op, CountAggregationOp):
-                return " the number of records"
-            if type(op) in agg_op_str_dict:
-                return agg_op_str_dict[type(op)].format(op.column_name)
+        agg_op_str_dict = {
+            # FirstAggregationOp: " <{}> in the first record",
+            # LastAggregationOp: " <{}> in the last record",
+            CountAggregationOp: " the number in all records related to this entity",
+            SumAggregationOp: " the total <{}> in all the records related to this entity",
+            AvgAggregationOp: " the average of <{}> in all the records related to this entity",
+            MajorityAggregationOp: " the majority of <{}> in all the records related to this entity"
+        }
+        if op.input_type == TableMeta.TYPE_BOOL and isinstance(
+                op, SumAggregationOp):
+            return " the number of records"
+        if isinstance(op, CountAggregationOp):
+            return " the number of records"
+        if type(op) in agg_op_str_dict:
+            return agg_op_str_dict[type(op)].format(op.column_name)
 
     def _describe_filter(self, op):
         filter_op_str_dict = {
@@ -361,7 +359,7 @@ class PredictionProblem:
         """
 
         # only tries json.loads if json_data is not a dict
-        if type(json_data) != dict:
+        if not isinstance(json_data, dict):
             json_data = json.loads(json_data)
 
         operations = [

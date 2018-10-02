@@ -1,5 +1,6 @@
 import numpy as np
 from pandas import DataFrame
+
 from trane.ops.filter_ops import *  # noqa
 from trane.utils.table_meta import TableMeta as TM
 

@@ -2,6 +2,7 @@ import sys
 import unittest
 
 from mock import MagicMock, patch
+
 from trane.core.prediction_problem import PredictionProblem
 
 

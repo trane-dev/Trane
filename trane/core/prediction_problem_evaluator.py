@@ -50,10 +50,10 @@ class PredictionProblemEvaluator(object):
     def threshold_recommend(self, problem):
         filter_op = problem.operations[0]
         if len(filter_op.REQUIRED_PARAMETERS) == 0:
-            yield copy.deepcopy(problem), ""
+            yield copy.deepcopy(problem), "no threshold"
         else:
             if filter_op.input_type == TM.TYPE_CATEGORY:
-                for item in set(self.sampled_df[filter_op.column_name]):
+                for item in list(set(self.sampled_df[filter_op.column_name]))[:3]:
                     problem_final = copy.deepcopy(problem)
                     problem_final.operations[0].set_hyper_parameter(item)
                     yield problem_final, "threshold: {}".format(item)
@@ -104,7 +104,7 @@ class PredictionProblemEvaluator(object):
                     X_train.append(sample_feature)
                     Y_train.append(label)
 
-        if problem_type == "classification" and len(X_train) > 0:
+        if problem_type == "classification" and len(X_train) > 0 and len(X_test) > 0:
             enc = OneHotEncoder(sparse=False,
                 categorical_features=[-i-1 for i in range(self.previous_k_as_feature)])
             enc.fit(X_train + X_test)

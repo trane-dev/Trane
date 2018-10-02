@@ -79,7 +79,6 @@ class PredictionProblemGenerator:
 
             problem = PredictionProblem(
                 operations=operations, entity_col=self.entity_col,
-                label_col=ag_col,
                 table_meta=self.table_meta, cutoff_strategy=None)
 
             if problem.is_valid():

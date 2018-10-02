@@ -61,40 +61,6 @@ class AggregationOpBase(OpBase):
                 return output_type
         return None
 
-class FirstAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-               (TM.TYPE_BOOL, TM.TYPE_BOOL),
-               (TM.TYPE_ORDERED, TM.TYPE_ORDERED),
-               (TM.TYPE_TEXT, TM.TYPE_TEXT),
-               (TM.TYPE_INTEGER, TM.TYPE_INTEGER),
-               (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-               (TM.TYPE_TIME, TM.TYPE_TIME),
-               (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
-
-    def execute(self, dataframe):
-        if len(dataframe) > 0:
-            return dataframe.head(1)[self.column_name]
-        return None
-
-
-class LastAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-               (TM.TYPE_BOOL, TM.TYPE_BOOL),
-               (TM.TYPE_ORDERED, TM.TYPE_ORDERED),
-               (TM.TYPE_TEXT, TM.TYPE_TEXT),
-               (TM.TYPE_INTEGER, TM.TYPE_INTEGER),
-               (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-               (TM.TYPE_TIME, TM.TYPE_TIME),
-               (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
-
-    def execute(self, dataframe):
-        if len(dataframe) > 0:
-            return dataframe.last(1)[self.column_name]
-        return None
-
-
 class CountAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
     IOTYPES = None

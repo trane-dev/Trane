@@ -24,7 +24,7 @@ class PredictionProblem:
     """
 
     def __init__(self, operations, entity_col,
-                 label_col, table_meta=None, cutoff_strategy=None):
+                 table_meta=None, cutoff_strategy=None):
         """
         Parameters
         ----------
@@ -37,7 +37,6 @@ class PredictionProblem:
         """
         self.operations = operations
         self.entity_col = entity_col
-        self.label_col = label_col
         self.table_meta = table_meta
         self.cutoff_strategy = cutoff_strategy
         self.label_type = None
@@ -344,7 +343,6 @@ class PredictionProblem:
             {"operations": [
                 json.loads(op_to_json(op)) for op in self.operations],
              "entity_col": self.entity_col,
-             "label_col": self.label_col,
              "table_meta": table_meta_json})
 
     @classmethod
@@ -369,13 +367,11 @@ class PredictionProblem:
         operations = [
             op_from_json(json.dumps(item)) for item in json_data['operations']]
         entity_col = json_data['entity_col']
-        label_col = json_data['label_col']
         table_meta = TableMeta.from_json(json_data.get('table_meta'))
 
         problem = PredictionProblem(
             operations=operations,
             entity_col=entity_col,
-            label_col=label_col,
             table_meta=table_meta,
             cutoff_strategy=None)
         return problem

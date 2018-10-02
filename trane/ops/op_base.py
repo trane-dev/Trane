@@ -122,11 +122,12 @@ class OpBase(object):
         if len(self.REQUIRED_PARAMETERS) == 0:
             return None
 
-        hyperaparam = self.find_threshhold_by_diversity(
-            df=df, label_col=label_col,
-            entity_col=entity_col,
-            num_random_samples=num_random_samples,
-            num_rows_to_execute_on=num_rows_to_execute_on)
+        hyperaparam = 0
+        # hyperaparam = self.find_threshhold_by_diversity(
+        #     df=df, label_col=label_col,
+        #     entity_col=entity_col,
+        #     num_random_samples=num_random_samples,
+        #     num_rows_to_execute_on=num_rows_to_execute_on)
 
         self.set_hyper_parameter(hyperaparam)
         return hyperaparam

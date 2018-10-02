@@ -3,7 +3,7 @@ import numpy as np
 from trane.ops import *  # noqa
 from trane.utils.table_meta import TableMeta as TM
 
-ALL_OPS = AGGREGATION_OPS + FILTER_OPS + ROW_OPS + TRANSFORMATION_OPS
+ALL_OPS = AGGREGATION_OPS + FILTER_OPS
 
 
 def test_save_load_before_op_type_check():
@@ -42,5 +42,5 @@ def test_save_load_after_op_type_check():
         op2 = op_from_json(op_json)
         assert isinstance(op2, globals()[op_type])
         assert op2.column_name == 'col'
-        assert op2.input_type == TM.TYPE_FLOAT and op2.output_type == op.output_type
+        assert op2.input_type == op.input_type and op2.output_type == op.output_type
         assert isinstance(op2.hyper_parameter_settings, dict)

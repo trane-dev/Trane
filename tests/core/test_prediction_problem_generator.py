@@ -7,14 +7,11 @@ Function: generate(self)
 """
 import unittest
 
-import pandas as pd
 from mock import MagicMock, call, patch
 
 from trane.core.prediction_problem_generator import PredictionProblemGenerator
 from trane.ops.aggregation_ops import *  # noqa
 from trane.ops.filter_ops import *  # noqa
-from trane.ops.row_ops import *  # noqa
-from trane.ops.transformation_ops import *  # noqa
 from trane.utils.table_meta import TableMeta
 
 
@@ -23,17 +20,13 @@ class TestPredictionProblemGenerator(unittest.TestCase):
     def setUp(self):
         self.table_meta_mock = MagicMock()
         self.entity_col = "taxi_id"
-        self.label_col = "fare"
-        self.filter_col = "taxi_id"
 
         self.ensure_valid_inputs_patch = self.create_patch(
             'trane.core.PredictionProblemGenerator.ensure_valid_inputs')
 
         self.generator = PredictionProblemGenerator(
             table_meta=self.table_meta_mock,
-            entity_col=self.entity_col,
-            label_col=self.label_col,
-            filter_col=self.filter_col)
+            entity_col=self.entity_col)
 
     def prep_for_integration(self):
         '''
@@ -57,18 +50,10 @@ class TestPredictionProblemGenerator(unittest.TestCase):
                  ]}]}'
 
         self.table_meta = TableMeta.from_json(meta_json_str)
-        self.df = pd.DataFrame(
-            [(0, 0, 0, 5.32, 19.7, 53.89, 1),
-             (0, 0, 1, 1.08, 6.78, 18.89, 2),
-             (0, 0, 2, 4.69, 14.11, 41.35, 4)],
-            columns=["vendor_id", "taxi_id", "trip_id", "distance", "duration",
-                     "fare", "num_passengers"])
 
         self.generator = PredictionProblemGenerator(
             table_meta=self.table_meta,
-            entity_col=self.entity_col,
-            label_col=self.label_col,
-            filter_col=self.filter_col)
+            entity_col=self.entity_col)
 
     def create_patch(self, name, return_value=None):
         '''helper method for creating patches'''
@@ -84,7 +69,7 @@ class TestPredictionProblemGenerator(unittest.TestCase):
     def test_generate(self):
         self.prep_for_integration()
         self.assertIsNotNone(self.generator.generate)
-        self.generator.generate(self.df)
+        self.generator.generate()
 
 
 class TestPredictionProblemGeneratorValidation(unittest.TestCase):
@@ -107,8 +92,6 @@ class TestPredictionProblemGeneratorValidation(unittest.TestCase):
     def test_ensure_valid_imputs(self):
         table_meta_mock = MagicMock()
         entity_col = "taxi_id"
-        label_col = "fare"
-        filter_col = "taxi_id"
 
         # set up table_meta types
         table_meta_mock.get_type.return_value = True
@@ -121,11 +104,8 @@ class TestPredictionProblemGeneratorValidation(unittest.TestCase):
         # create generator
         generator = PredictionProblemGenerator(
             table_meta=table_meta_mock,
-            entity_col=entity_col,
-            label_col=label_col,
-            filter_col=filter_col)
+            entity_col=entity_col)
 
         self.assertIsNotNone(generator.ensure_valid_inputs)
         table_meta_mock.get_type.assert_has_calls([
-            call(entity_col),
-            call(label_col)], any_order=True)
+            call(entity_col)], any_order=True)

@@ -78,32 +78,27 @@ class AllFilterOp(FilterOpBase):
                (TM.TYPE_TIME, TM.TYPE_TIME),
                (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
 
+    def op_type_check(self, table_meta):
+        return table_meta
+
     def execute(self, dataframe):
         return dataframe
 
 
 class EqFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(
-        TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
-                                      TM.TYPE_INTEGER), (
-                                          TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
+    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY)]
 
     def execute(self, dataframe):
-        dataframe = dataframe.copy()
         return dataframe[dataframe[self.column_name] ==
                          self.hyper_parameter_settings["threshold"]]
 
 
 class NeqFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(
-        TM.TYPE_BOOL, TM.TYPE_BOOL), (TM.TYPE_INTEGER,
-                                      TM.TYPE_INTEGER), (
-                                          TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
+    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY)]
 
     def execute(self, dataframe):
-        dataframe = dataframe.copy()
         return dataframe[dataframe[self.column_name] !=
                          self.hyper_parameter_settings["threshold"]]
 
@@ -116,7 +111,6 @@ class GreaterFilterOp(FilterOpBase):
                                           TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
-        dataframe = dataframe.copy()
         return dataframe[dataframe[self.column_name] >
                          self.hyper_parameter_settings["threshold"]]
 
@@ -129,6 +123,5 @@ class LessFilterOp(FilterOpBase):
                                           TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
-        dataframe = dataframe.copy()
         return dataframe[dataframe[self.column_name] <
                          self.hyper_parameter_settings["threshold"]]

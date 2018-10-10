@@ -147,7 +147,10 @@ class PredictionProblem:
         description: str natural language description of the problem
 
         """
-        description = 'For each <' + self.entity_col + '> predict'
+        if self.entity_col != "__fake_root_entity__":
+            description = 'For each <' + self.entity_col + '> predict'
+        else:
+            description = 'Predict'
         # cycle through each operation to create dataops
         # dataops are a series of operations containing one and only one
         # aggregation op at its end
@@ -172,16 +175,11 @@ class PredictionProblem:
 
     def _describe_aggop(self, op):
         agg_op_str_dict = {
-            # FirstAggregationOp: " <{}> in the first record",
-            # LastAggregationOp: " <{}> in the last record",
-            CountAggregationOp: " the number in all records related to this entity",
-            SumAggregationOp: " the total <{}> in all the records related to this entity",
-            AvgAggregationOp: " the average of <{}> in all the records related to this entity",
-            MajorityAggregationOp: " the majority of <{}> in all the records related to this entity"
+            SumAggregationOp: " the total <{}> in all related records",
+            AvgAggregationOp: " the average of <{}> in all related records",
+            MajorityAggregationOp: " the majority of <{}> in all related records"
         }
-        if op.input_type == TableMeta.TYPE_BOOL and isinstance(
-                op, SumAggregationOp):
-            return " the number of records"
+
         if isinstance(op, CountAggregationOp):
             return " the number of records"
         if type(op) in agg_op_str_dict:

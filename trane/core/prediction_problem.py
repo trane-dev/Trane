@@ -22,7 +22,7 @@ class PredictionProblem:
     each operation.
     """
 
-    def __init__(self, operations, entity_col,
+    def __init__(self, operations, entity_col, time_col,
                  table_meta=None, cutoff_strategy=None):
         """
         Parameters
@@ -36,6 +36,7 @@ class PredictionProblem:
         """
         self.operations = operations
         self.entity_col = entity_col
+        self.time_col = time_col
         self.table_meta = table_meta
         self.cutoff_strategy = cutoff_strategy
         self.label_type = None
@@ -103,7 +104,7 @@ class PredictionProblem:
                 cutoff_ed = row['cutoff_ed']
 
                 df_labeling = sub_df.loc[
-                    (sub_df['trending_date'] >= cutoff_st) & (sub_df['trending_date'] < cutoff_ed)]
+                    (sub_df[self.time_col] >= cutoff_st) & (sub_df[self.time_col] < cutoff_ed)]
 
                 label = self._execute_operations_on_df(
                     df_labeling)

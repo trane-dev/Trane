@@ -13,7 +13,7 @@ class PredictionProblemGenerator:
     Object for generating prediction problems on data.
     """
 
-    def __init__(self, table_meta, entity_col):
+    def __init__(self, table_meta, entity_col, time_col):
         """
         Parameters
         ----------
@@ -34,6 +34,7 @@ class PredictionProblemGenerator:
         """
         self.table_meta = table_meta
         self.entity_col = entity_col
+        self.time_col = time_col
         self.ensure_valid_inputs()
 
     def generate(self):
@@ -76,7 +77,7 @@ class PredictionProblemGenerator:
             operations = [filter_op_obj, agg_op_obj]
 
             problem = PredictionProblem(
-                operations=operations, entity_col=self.entity_col,
+                operations=operations, entity_col=self.entity_col, time_col=self.time_col,
                 table_meta=self.table_meta, cutoff_strategy=None)
 
             if problem.is_valid():

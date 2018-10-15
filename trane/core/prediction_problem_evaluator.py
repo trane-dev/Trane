@@ -90,7 +90,7 @@ class PredictionProblemEvaluator(object):
                     if problem_type == "classification":
                         sample_feature.append(label_to_index[prev_label])
                     else:
-                        if np.isnan(prev_label):
+                        if prev_label is None or np.isnan(prev_label):
                             sample_feature += [False, 0]
                         else:
                             sample_feature += [True, prev_label]
@@ -125,14 +125,17 @@ class PredictionProblemEvaluator(object):
                 "description": "unknown problem type"
             }
 
+        template_res = {
+            "problem_type": problem_type,
+            "template_nl": str(problem)
+        }
         evaluations = []
         for problem_final, threshold_description in self.threshold_recommend(problem):
             problem_final.cutoff_strategy = self.cutoff_strategy
             labels = problem_final.execute(self.df)
             problem_result = {
                 "description": threshold_description,
-                "problem": problem_final,
-                "labels": labels
+                "problem": str(problem_final),
             }
 
             X_train, X_test, Y_train, Y_test = self.split_dataset(
@@ -158,8 +161,5 @@ class PredictionProblemEvaluator(object):
                     problem_result['Accuracy'][classifier['name']] = score
 
             evaluations.append(problem_result)
-        return {
-            "status": "success",
-            "problem_type": problem_type,
-            "evaluations": evaluations
-        }
+        template_res['evaluations'] = evaluations
+        return template_res

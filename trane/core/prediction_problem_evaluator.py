@@ -114,7 +114,7 @@ class PredictionProblemEvaluator(object):
 
         return X_train, X_test, Y_train, Y_test
 
-    def evalute(self, problem, features):
+    def evaluate(self, problem, features):
         if problem.label_type in [TM.TYPE_INTEGER, TM.TYPE_FLOAT]:
             problem_type = "regression"
         elif problem.label_type in [TM.TYPE_CATEGORY]:

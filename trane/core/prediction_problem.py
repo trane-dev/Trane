@@ -178,6 +178,8 @@ class PredictionProblem:
         agg_op_str_dict = {
             SumAggregationOp: " the total <{}> in all related records",
             AvgAggregationOp: " the average of <{}> in all related records",
+            MaxAggregationOp: " the maximum of <{}> in all related records",
+            MinAggregationOp: " the minimum of <{}> in all related records",
             MajorityAggregationOp: " the majority of <{}> in all related records"
         }
 

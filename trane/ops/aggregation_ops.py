@@ -3,7 +3,9 @@ from .op_base import OpBase
 
 AGGREGATION_OPS = [
     "CountAggregationOp", "SumAggregationOp",
-    "AvgAggregationOp", "MajorityAggregationOp"]
+    "AvgAggregationOp",
+    "MaxAggregationOp", "MinAggregationOp",
+    "MajorityAggregationOp"]
 __all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
 
 
@@ -77,7 +79,7 @@ class CountAggregationOp(AggregationOpBase):
 
 class SumAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_FLOAT),
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
                (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
@@ -88,7 +90,7 @@ class SumAggregationOp(AggregationOpBase):
 
 class AvgAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_FLOAT),
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
                (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
@@ -97,9 +99,32 @@ class AvgAggregationOp(AggregationOpBase):
         return float(dataframe[self.column_name].mean())
 
 
+class MaxAggregationOp(AggregationOpBase):
+    REQUIRED_PARAMETERS = []
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
+               (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
+
+    def execute(self, dataframe):
+        if len(dataframe) == 0:
+            return None
+        return float(dataframe[self.column_name].max())
+
+
+class MinAggregationOp(AggregationOpBase):
+    REQUIRED_PARAMETERS = []
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
+               (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
+
+    def execute(self, dataframe):
+        if len(dataframe) == 0:
+            return None
+        return float(dataframe[self.column_name].min())
+
+
 class MajorityAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY)]
+    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
+                (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
 
     def execute(self, dataframe):
         if len(dataframe) == 0:

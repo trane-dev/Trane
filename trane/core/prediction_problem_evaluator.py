@@ -48,13 +48,26 @@ class PredictionProblemEvaluator(object):
             }
         ]
 
+    def _categorical_threshold(self, df_col, k=3):
+        counter = {}
+        for item in df_col:
+            try:
+                counter[item] += 1
+            except:
+                counter[item] = 1
+
+        counter_tuple = list(counter.items())
+        counter_tuple = sorted(counter_tuple, key=lambda x: -x[1])
+        counter_tuple = counter_tuple[:3]
+        return [item[0] for item in counter_tuple]
+
     def threshold_recommend(self, problem):
         filter_op = problem.operations[0]
         if len(filter_op.REQUIRED_PARAMETERS) == 0:
             yield copy.deepcopy(problem), "no threshold"
         else:
             if filter_op.input_type == TM.TYPE_CATEGORY:
-                for item in list(set(self.sampled_df[filter_op.column_name]))[:3]:
+                for item in self._categorical_threshold(self.sampled_df[filter_op.column_name]):
                     problem_final = copy.deepcopy(problem)
                     problem_final.operations[0].set_hyper_parameter(item)
                     yield problem_final, "threshold: {}".format(item)
@@ -117,7 +130,7 @@ class PredictionProblemEvaluator(object):
     def evaluate(self, problem, features):
         if problem.label_type in [TM.TYPE_INTEGER, TM.TYPE_FLOAT]:
             problem_type = "regression"
-        elif problem.label_type in [TM.TYPE_CATEGORY]:
+        elif problem.label_type in [TM.TYPE_CATEGORY, TM.TYPE_IDENTIFIER]:
             problem_type = "classification"
         else:
             return {

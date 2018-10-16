@@ -22,7 +22,7 @@ class PredictionProblem:
     each operation.
     """
 
-    def __init__(self, operations, entity_col,
+    def __init__(self, operations, entity_col, time_col,
                  table_meta=None, cutoff_strategy=None):
         """
         Parameters
@@ -36,6 +36,7 @@ class PredictionProblem:
         """
         self.operations = operations
         self.entity_col = entity_col
+        self.time_col = time_col
         self.table_meta = table_meta
         self.cutoff_strategy = cutoff_strategy
         self.label_type = None
@@ -103,7 +104,7 @@ class PredictionProblem:
                 cutoff_ed = row['cutoff_ed']
 
                 df_labeling = sub_df.loc[
-                    (sub_df['trending_date'] >= cutoff_st) & (sub_df['trending_date'] < cutoff_ed)]
+                    (sub_df[self.time_col] >= cutoff_st) & (sub_df[self.time_col] < cutoff_ed)]
 
                 label = self._execute_operations_on_df(
                     df_labeling)
@@ -147,7 +148,10 @@ class PredictionProblem:
         description: str natural language description of the problem
 
         """
-        description = 'For each <' + self.entity_col + '> predict'
+        if self.entity_col != "__fake_root_entity__":
+            description = 'For each <' + self.entity_col + '> predict'
+        else:
+            description = 'Predict'
         # cycle through each operation to create dataops
         # dataops are a series of operations containing one and only one
         # aggregation op at its end
@@ -172,16 +176,13 @@ class PredictionProblem:
 
     def _describe_aggop(self, op):
         agg_op_str_dict = {
-            # FirstAggregationOp: " <{}> in the first record",
-            # LastAggregationOp: " <{}> in the last record",
-            CountAggregationOp: " the number in all records related to this entity",
-            SumAggregationOp: " the total <{}> in all the records related to this entity",
-            AvgAggregationOp: " the average of <{}> in all the records related to this entity",
-            MajorityAggregationOp: " the majority of <{}> in all the records related to this entity"
+            SumAggregationOp: " the total <{}> in all related records",
+            AvgAggregationOp: " the average of <{}> in all related records",
+            MaxAggregationOp: " the maximum of <{}> in all related records",
+            MinAggregationOp: " the minimum of <{}> in all related records",
+            MajorityAggregationOp: " the majority of <{}> in all related records"
         }
-        if op.input_type == TableMeta.TYPE_BOOL and isinstance(
-                op, SumAggregationOp):
-            return " the number of records"
+
         if isinstance(op, CountAggregationOp):
             return " the number of records"
         if type(op) in agg_op_str_dict:
@@ -341,6 +342,7 @@ class PredictionProblem:
             {"operations": [
                 json.loads(op_to_json(op)) for op in self.operations],
              "entity_col": self.entity_col,
+             "time_col": self.time_col,
              "table_meta": table_meta_json})
 
     @classmethod
@@ -365,11 +367,13 @@ class PredictionProblem:
         operations = [
             op_from_json(json.dumps(item)) for item in json_data['operations']]
         entity_col = json_data['entity_col']
+        time_col = json_data['time_col']
         table_meta = TableMeta.from_json(json_data.get('table_meta'))
 
         problem = PredictionProblem(
             operations=operations,
             entity_col=entity_col,
+            time_col=time_col,
             table_meta=table_meta,
             cutoff_strategy=None)
         return problem

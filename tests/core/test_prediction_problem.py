@@ -17,10 +17,11 @@ class TestPredictionProblemMethods(unittest.TestCase):
             'trane.core.FixWindowCutoffStrategy')
 
         self.entity_col = 'entity_col'
+        self.time_col = 'time'
 
         self.problem = PredictionProblem(
             operations=self.operations, entity_col=self.entity_col,
-            cutoff_strategy=self.mock_cutoff_strategy)
+            time_col=self.time_col, cutoff_strategy=self.mock_cutoff_strategy)
 
     def create_patch(self, name):
         # helper method for creating patches
@@ -37,17 +38,18 @@ class TestPredictionProblemMethods(unittest.TestCase):
 
     def test_equality_false(self):
         entity_col = 'entity_col'
+        time_col = 'time'
         mock_op = MagicMock()
         operations = [mock_op for x in range(2)]
         mock_cutoff_strategy = MagicMock()
         problem_1 = PredictionProblem(
             operations=operations, entity_col=entity_col,
-            cutoff_strategy=mock_cutoff_strategy)
+            time_col=time_col, cutoff_strategy=mock_cutoff_strategy)
 
         # add a different magicmock for cutoff strategy
         problem_2 = PredictionProblem(
             operations=operations, entity_col=entity_col,
-            cutoff_strategy=MagicMock())
+            time_col=time_col, cutoff_strategy=MagicMock())
         self.assertFalse(problem_1 == problem_2)
 
     def test_equality_false_diff_types(self):
@@ -56,16 +58,17 @@ class TestPredictionProblemMethods(unittest.TestCase):
 
     def test_equality_true(self):
         entity_col = 'entity_col'
+        time_col = 'time'
         mock_op = MagicMock()
         operations = [mock_op for x in range(2)]
         mock_cutoff_strategy = MagicMock()
         problem_1 = PredictionProblem(
             operations=operations, entity_col=entity_col,
-            cutoff_strategy=mock_cutoff_strategy)
+            time_col=time_col, cutoff_strategy=mock_cutoff_strategy)
 
         problem_2 = PredictionProblem(
             operations=operations, entity_col=entity_col,
-            cutoff_strategy=mock_cutoff_strategy)
+            time_col=time_col, cutoff_strategy=mock_cutoff_strategy)
         self.assertTrue(problem_1 == problem_2)
 
     def test_cutoff_strategy_exists(self):
@@ -159,10 +162,11 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
         self.table_meta = MagicMock(name='table_meta')
 
         self.entity_col = 'entity_col'
+        self.time_col = 'time_col'
 
         self.problem = PredictionProblem(
             operations=self.operations, entity_col=self.entity_col,
-            table_meta=self.table_meta,
+            table_meta=self.table_meta, time_col=self.time_col,
             cutoff_strategy=self.mock_cutoff_strategy)
 
     def create_patch(self, name):
@@ -206,6 +210,7 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
         # mock out json_data['operations']
         attr_dict = {'operations': [1, 2, 3],
                      'entity_col': 'entity_col',
+                     'time_col': 'time',
                      'table_meta': 'table_meta'}
         data.__getitem__.side_effect = attr_dict.__getitem__
 
@@ -295,10 +300,11 @@ class TestPredictionProblemDescription(unittest.TestCase):
             'trane.core.FixWindowCutoffStrategy')
 
         self.entity_col = 'entity_col'
+        self.time_col = "time"
 
         self.problem = PredictionProblem(
             operations=self.operations, entity_col=self.entity_col,
-            cutoff_strategy=self.mock_cutoff_strategy)
+            time_col=self.time_col, cutoff_strategy=self.mock_cutoff_strategy)
 
     def create_patch(self, name):
         # helper method for creating patches

@@ -55,6 +55,11 @@ class TableMeta(object):
                     'properties': field['properties'] if 'properties' in field else None
                 }
 
+    def add_column(self, field_name, field_type):
+        self.all_columns[field_name] = {
+            "type": field_type
+        }
+
     def get_type(self, column_name):
         """
         Get type of a column

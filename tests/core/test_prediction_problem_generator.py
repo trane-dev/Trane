@@ -20,12 +20,14 @@ class TestPredictionProblemGenerator(unittest.TestCase):
     def setUp(self):
         self.table_meta_mock = MagicMock()
         self.entity_col = "taxi_id"
+        self.time_col = "time"
 
         self.ensure_valid_inputs_patch = self.create_patch(
             'trane.core.PredictionProblemGenerator.ensure_valid_inputs')
 
         self.generator = PredictionProblemGenerator(
             table_meta=self.table_meta_mock,
+            time_col=self.time_col,
             entity_col=self.entity_col)
 
     def prep_for_integration(self):
@@ -53,7 +55,8 @@ class TestPredictionProblemGenerator(unittest.TestCase):
 
         self.generator = PredictionProblemGenerator(
             table_meta=self.table_meta,
-            entity_col=self.entity_col)
+            entity_col=self.entity_col,
+            time_col=self.time_col)
 
     def create_patch(self, name, return_value=None):
         '''helper method for creating patches'''
@@ -92,6 +95,7 @@ class TestPredictionProblemGeneratorValidation(unittest.TestCase):
     def test_ensure_valid_imputs(self):
         table_meta_mock = MagicMock()
         entity_col = "taxi_id"
+        time_col = "time"
 
         # set up table_meta types
         table_meta_mock.get_type.return_value = True
@@ -104,7 +108,8 @@ class TestPredictionProblemGeneratorValidation(unittest.TestCase):
         # create generator
         generator = PredictionProblemGenerator(
             table_meta=table_meta_mock,
-            entity_col=entity_col)
+            entity_col=entity_col,
+            time_col=time_col)
 
         self.assertIsNotNone(generator.ensure_valid_inputs)
         table_meta_mock.get_type.assert_has_calls([

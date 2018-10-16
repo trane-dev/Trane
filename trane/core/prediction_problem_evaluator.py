@@ -48,13 +48,26 @@ class PredictionProblemEvaluator(object):
             }
         ]
 
+    def _categorical_threshold(self, df_col, k=3):
+        counter = {}
+        for item in df_col:
+            try:
+                counter[item] += 1
+            except BaseException:
+                counter[item] = 1
+
+        counter_tuple = list(counter.items())
+        counter_tuple = sorted(counter_tuple, key=lambda x: -x[1])
+        counter_tuple = counter_tuple[:3]
+        return [item[0] for item in counter_tuple]
+
     def threshold_recommend(self, problem):
         filter_op = problem.operations[0]
         if len(filter_op.REQUIRED_PARAMETERS) == 0:
             yield copy.deepcopy(problem), "no threshold"
         else:
             if filter_op.input_type == TM.TYPE_CATEGORY:
-                for item in list(set(self.sampled_df[filter_op.column_name]))[:3]:
+                for item in self._categorical_threshold(self.sampled_df[filter_op.column_name]):
                     problem_final = copy.deepcopy(problem)
                     problem_final.operations[0].set_hyper_parameter(item)
                     yield problem_final, "threshold: {}".format(item)
@@ -90,7 +103,7 @@ class PredictionProblemEvaluator(object):
                     if problem_type == "classification":
                         sample_feature.append(label_to_index[prev_label])
                     else:
-                        if np.isnan(prev_label):
+                        if prev_label is None or np.isnan(prev_label):
                             sample_feature += [False, 0]
                         else:
                             sample_feature += [True, prev_label]
@@ -114,10 +127,10 @@ class PredictionProblemEvaluator(object):
 
         return X_train, X_test, Y_train, Y_test
 
-    def evalute(self, problem, features):
+    def evaluate(self, problem, features):
         if problem.label_type in [TM.TYPE_INTEGER, TM.TYPE_FLOAT]:
             problem_type = "regression"
-        elif problem.label_type in [TM.TYPE_CATEGORY]:
+        elif problem.label_type in [TM.TYPE_CATEGORY, TM.TYPE_IDENTIFIER]:
             problem_type = "classification"
         else:
             return {
@@ -125,14 +138,17 @@ class PredictionProblemEvaluator(object):
                 "description": "unknown problem type"
             }
 
+        template_res = {
+            "problem_type": problem_type,
+            "template_nl": str(problem)
+        }
         evaluations = []
         for problem_final, threshold_description in self.threshold_recommend(problem):
             problem_final.cutoff_strategy = self.cutoff_strategy
             labels = problem_final.execute(self.df)
             problem_result = {
                 "description": threshold_description,
-                "problem": problem_final,
-                "labels": labels
+                "problem": str(problem_final),
             }
 
             X_train, X_test, Y_train, Y_test = self.split_dataset(
@@ -158,8 +174,5 @@ class PredictionProblemEvaluator(object):
                     problem_result['Accuracy'][classifier['name']] = score
 
             evaluations.append(problem_result)
-        return {
-            "status": "success",
-            "problem_type": problem_type,
-            "evaluations": evaluations
-        }
+        template_res['evaluations'] = evaluations
+        return template_res

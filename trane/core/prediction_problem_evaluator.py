@@ -53,7 +53,7 @@ class PredictionProblemEvaluator(object):
         for item in df_col:
             try:
                 counter[item] += 1
-            except:
+            except BaseException:
                 counter[item] = 1
 
         counter_tuple = list(counter.items())

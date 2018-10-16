@@ -342,6 +342,7 @@ class PredictionProblem:
             {"operations": [
                 json.loads(op_to_json(op)) for op in self.operations],
              "entity_col": self.entity_col,
+             "time_col": self.time_col,
              "table_meta": table_meta_json})
 
     @classmethod
@@ -366,11 +367,13 @@ class PredictionProblem:
         operations = [
             op_from_json(json.dumps(item)) for item in json_data['operations']]
         entity_col = json_data['entity_col']
+        time_col = json_data['time_col']
         table_meta = TableMeta.from_json(json_data.get('table_meta'))
 
         problem = PredictionProblem(
             operations=operations,
             entity_col=entity_col,
+            time_col=time_col,
             table_meta=table_meta,
             cutoff_strategy=None)
         return problem

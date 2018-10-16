@@ -124,7 +124,7 @@ class MinAggregationOp(AggregationOpBase):
 class MajorityAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
     IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-                (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
+               (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
 
     def execute(self, dataframe):
         if len(dataframe) == 0:

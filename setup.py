@@ -18,7 +18,8 @@ requirements = [
     'python_dateutil>=2.6.0',
     'scipy>=1.0.0',
     'sklearn',
-    'featuretools>=0.3.0'
+    'featuretools>=0.3.0',
+    'tqdm'
 ]
 
 setup_requirements = ['pytest-runner', ]

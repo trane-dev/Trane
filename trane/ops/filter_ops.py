@@ -81,7 +81,7 @@ class AllFilterOp(FilterOpBase):
 class EqFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
     IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-                (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
+               (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
 
     def execute(self, dataframe):
         return dataframe[dataframe[self.column_name] ==
@@ -91,7 +91,7 @@ class EqFilterOp(FilterOpBase):
 class NeqFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
     IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-                (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
+               (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
 
     def execute(self, dataframe):
         return dataframe[dataframe[self.column_name] !=
@@ -101,7 +101,7 @@ class NeqFilterOp(FilterOpBase):
 class GreaterFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
     IOTYPES = [(TM.TYPE_INTEGER, TM.TYPE_INTEGER),
-                (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+               (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
         return dataframe[dataframe[self.column_name] >
@@ -111,7 +111,7 @@ class GreaterFilterOp(FilterOpBase):
 class LessFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
     IOTYPES = [(TM.TYPE_INTEGER, TM.TYPE_INTEGER),
-                (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+               (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
         return dataframe[dataframe[self.column_name] <

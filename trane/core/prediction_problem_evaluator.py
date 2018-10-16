@@ -48,6 +48,34 @@ class PredictionProblemEvaluator(object):
             }
         ]
 
+    def _get_label_stats(self, labels, problem_type):
+        labels = labels.reset_index()
+        labels = labels[labels['label'].notnull()]
+
+        if problem_type == "classification":
+            majority_ratio = (labels['label'].groupby(labels['label']).count() / len(labels)).max()
+
+            label_entity_count = labels['label'].groupby([labels[self.entity_col], labels['label']]).count()
+            entity_majority_ratio = label_entity_count.groupby(level=0).apply(lambda x: (x / x.sum()).max())
+            entity_majority_ratio = entity_majority_ratio.mean()
+
+            return {
+                "majority_ratio": majority_ratio,
+                "entity_majority_ratio": entity_majority_ratio
+            }
+
+        elif problem_type == "regression":
+            overall_mean = labels['label'].mean()
+            overall_std = labels['label'].std(ddof=0)
+            entity_std = labels['label'].groupby(labels[self.entity_col]).std(ddof=0).mean()
+            return {
+                "overall_mean": overall_mean,
+                "overall_std": overall_std,
+                "entity_std": entity_std
+            }
+        else:
+            assert 0
+
     def _categorical_threshold(self, df_col, k=3):
         counter = {}
         for item in df_col:
@@ -149,6 +177,7 @@ class PredictionProblemEvaluator(object):
             problem_result = {
                 "description": threshold_description,
                 "problem": str(problem_final),
+                "label_stats": self._get_label_stats(labels, problem_type)
             }
 
             X_train, X_test, Y_train, Y_test = self.split_dataset(

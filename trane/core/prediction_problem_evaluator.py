@@ -43,7 +43,7 @@ class PredictionProblemEvaluator(object):
             },
             {
                 "name": "LinearSVR",
-                "model": LinearSVR(max_iter=100)
+                "model": LinearSVR(max_iter=1000)
             }
         ]
 
@@ -62,7 +62,7 @@ class PredictionProblemEvaluator(object):
             },
             {
                 "name": "LinearSVC",
-                "model": LinearSVC(penalty="l1", max_iter=100)
+                "model": LinearSVC(penalty="l1", max_iter=1000)
             }
         ]
 

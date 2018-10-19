@@ -214,6 +214,8 @@ class PredictionProblemEvaluator(object):
                     score = regressor['model'].score(X_test, Y_test)
                     problem_result['R2'][regressor['name']] = score
             elif problem_type == "classification":
+                if len(set(Y_train)) == 1:
+                    continue
                 problem_result['Accuracy'] = {}
                 for classifier in self.classifier:
                     classifier['model'].fit(X_train, Y_train)

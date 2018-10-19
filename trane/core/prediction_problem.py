@@ -80,6 +80,8 @@ class PredictionProblem:
         Executes the problem's operations on a dataframe. Generates
         '''
 
+        assert df.isnull().sum().sum() == 0
+
         if not self.is_valid(self.table_meta):
             raise ValueError(
                 'Your Problem\'s specified operations do not match with the '

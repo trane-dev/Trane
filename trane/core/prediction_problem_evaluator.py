@@ -5,6 +5,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.ensemble import AdaBoostClassifier, AdaBoostRegressor
+from sklearn.svm import LinearSVC, LinearSVR
 
 from ..utils.table_meta import TableMeta as TM
 
@@ -34,17 +36,33 @@ class PredictionProblemEvaluator(object):
             {
                 "name": "DecisionTreeRegressor",
                 "model": DecisionTreeRegressor(max_depth=5)
+            },
+            {
+                "name": "AdaBoost",
+                "model": AdaBoostRegressor()
+            },
+            {
+                "name": "LinearSVR",
+                "model": LinearSVR(max_iter=100)
             }
         ]
 
         self.classifier = [
             {
                 "name": "KNeighborsClassifier",
-                "model": KNeighborsClassifier(3)
+                "model": KNeighborsClassifier(5)
             },
             {
                 "name": "DecisionTreeClassifier",
                 "model": DecisionTreeClassifier(max_depth=5)
+            },
+            {
+                "name": "AdaBoost",
+                "model": AdaBoostClassifier()
+            },
+            {
+                "name": "LinearSVC",
+                "model": LinearSVC(penalty="l1", max_iter=100)
             }
         ]
 

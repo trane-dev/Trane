@@ -19,7 +19,8 @@ requirements = [
     'scipy>=1.0.0',
     'sklearn',
     'featuretools>=0.3.0',
-    'tqdm'
+    'tqdm',
+    'dill'
 ]
 
 setup_requirements = ['pytest-runner', ]

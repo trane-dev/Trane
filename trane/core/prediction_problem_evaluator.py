@@ -40,10 +40,6 @@ class PredictionProblemEvaluator(object):
             {
                 "name": "AdaBoost",
                 "model": AdaBoostRegressor()
-            },
-            {
-                "name": "LinearSVR",
-                "model": LinearSVR(max_iter=1000, dual=False)
             }
         ]
 
@@ -59,10 +55,6 @@ class PredictionProblemEvaluator(object):
             {
                 "name": "AdaBoost",
                 "model": AdaBoostClassifier()
-            },
-            {
-                "name": "LinearSVC",
-                "model": LinearSVC(penalty="l1", dual=False, max_iter=1000)
             }
         ]
 
@@ -210,16 +202,18 @@ class PredictionProblemEvaluator(object):
             if problem_type == "regression":
                 problem_result['R2'] = {}
                 for regressor in self.regressor:
-                    regressor['model'].fit(X_train, Y_train)
-                    score = regressor['model'].score(X_test, Y_test)
+                    model = copy.deepcopy(regressor['model'])
+                    model.fit(X_train, Y_train)
+                    score = model.score(X_test, Y_test)
                     problem_result['R2'][regressor['name']] = score
             elif problem_type == "classification":
                 if len(set(Y_train)) == 1:
                     continue
                 problem_result['Accuracy'] = {}
                 for classifier in self.classifier:
-                    classifier['model'].fit(X_train, Y_train)
-                    score = classifier['model'].score(X_test, Y_test)
+                    model = copy.deepcopy(classifier['model'])
+                    model.fit(X_train, Y_train)
+                    score = model.score(X_test, Y_test)
                     problem_result['Accuracy'][classifier['name']] = score
 
             evaluations.append(problem_result)

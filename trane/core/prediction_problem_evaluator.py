@@ -115,7 +115,7 @@ class PredictionProblemEvaluator(object):
                         fraction_of_data_target=keep_rate, df=self.sampled_df, col=filter_op.column_name)
                     problem_final = copy.deepcopy(problem)
                     problem_final.operations[0].set_hyper_parameter(threshold)
-                    yield problem_final, "threshold: {} (keep {}%%)".format(threshold, keep_rate * 100)
+                    yield problem_final, "threshold: {} (keep {}%)".format(threshold, keep_rate * 100)
 
     def split_dataset(self, problem, problem_type, labels, features):
         X_train, X_test, Y_train, Y_test = [], [], [], []

@@ -1,13 +1,17 @@
 import json
 import logging
-import random
-import time
-from collections import Counter
+import os
+import warnings
 
+import dill
 import numpy as np
-from scipy import stats
+import pandas as pd
 
+from ..ops.aggregation_ops import *  # noqa
+from ..ops.filter_ops import *  # noqa
 from ..ops.op_saver import op_from_json, op_to_json
+from ..ops.row_ops import *  # noqa
+from ..ops.transformation_ops import *  # noqa
 from ..utils.table_meta import TableMeta
 
 __all__ = ['PredictionProblem']
@@ -21,223 +25,167 @@ class PredictionProblem:
     each operation.
     """
 
-    def __init__(self, operations):
+    def __init__(self, operations, entity_id_col,
+                 label_col, table_meta=None, cutoff_strategy=None):
         """
         Parameters
         ----------
         operations: list of Operations of type op_base
+        cutoff_strategy: a CutoffStrategy object
 
         Returns
         -------
         None
         """
         self.operations = operations
-        self.filter_column_order_of_types = None
-        self.label_generating_column_order_of_types = None
+        self.entity_id_col = entity_id_col
+        self.label_col = label_col
+        self.table_meta = table_meta
+        self.cutoff_strategy = cutoff_strategy
 
-    def is_valid_prediction_problem(
-            self, table_meta, filter_column, label_generating_column):
-        """
-        Checks that a prediction problem is valid. Ensures the input output
-        types of operations match.
+    def is_valid(self, table_meta=None):
+        '''
+        Typechecking for operations. Insures that their input and output types
+        match. Allows a user to use the problem's existing table_meta, or pass
+        in a new one
 
         Parameters
         ----------
-        table_meta: TableMeta object. Contains
-            meta information about the data
-        filter_column: column name of the column
-            to be filtered over
-        label_generating_column: column name of the
-            column of interest in the data
+        table_meta: TableMeta object. Contains meta information about the data
 
         Returns
         -------
-        is_valid: True/False if problem is valid
-        filter_column_order_of_types: a list containing the types expected in the
-            sequence of operations on the filter column
-        label_generating_column_order_of_types: a list containing the types expected
-            in the sequence of operations on the label generating column
-        """
-        logging.debug("Performing is_valid_prediction_problem...")
+        Bool
+        '''
+        # don't contaminate original table_meta
+        if table_meta:
+            temp_meta = table_meta.copy()
+        else:
+            temp_meta = self.table_meta.copy()
 
-        temp_meta = table_meta.copy()
-
-        filter_column_order_of_types = [table_meta.get_type(filter_column)]
-        label_generating_column_order_of_types = [
-            table_meta.get_type(label_generating_column)]
-
-        filter_op = self.operations[0]
-        temp_meta = filter_op.op_type_check(temp_meta)
-        if not temp_meta:
-            return False, None, None
-        filter_column_order_of_types.append(temp_meta.get_type(filter_column))
-
-        for op in self.operations[1:]:
+        # sort each operation in its respective bucket
+        for op in self.operations:
+            # op.type_check returns a modified temp_meta,
+            # which accounts for the operation having taken place
             temp_meta = op.op_type_check(temp_meta)
-            if not temp_meta:
-                return False, None, None
-            label_generating_column_order_of_types.append(
-                temp_meta.get_type(label_generating_column))
+            if temp_meta is None:
+                return False
 
-        self.filter_column_order_of_types = filter_column_order_of_types
-        self.label_generating_column_order_of_types = label_generating_column_order_of_types  # noqa
+        return True
 
-        return (True, filter_column_order_of_types,
-                label_generating_column_order_of_types)
+    def execute(self, df):
+        '''
+        Executes the problem's operations on a dataframe. Generates
+        '''
 
-    def set_hyper_parameters(self, hyper_parameters):
-        """
+        if not self.is_valid(self.table_meta):
+            raise ValueError(
+                'Your Problem\'s specified operations do not match with the '
+                'problem\'s table meta. Therefore, the problem is not '
+                'valid.')
 
-        Parameters
-        ----------
-        hyper_parameters: hyper parameter settings
-            to be set on the operations
+        df = df.copy()
+        grouped = df.groupby(self.entity_id_col)
 
-        Returns
-        -------
-        None
-        """
-        for idx, op in enumerate(self.operations):
-            hyper_parameter = hyper_parameters[idx]
-            op.set_hyper_parameter(hyper_parameter)
+        res_dict = {}
 
-    def generate_and_set_hyper_parameters(self, dataframe, label_generating_column,
-                                          filter_column, entity_id_column):
-        """
-        Generate then set hyper parameters for the operations in this prediction problem.
+        for entity_id, df_group in grouped:
 
-        Parameters
-        ----------
-        dataframe: data
-        label_generating_column: column name of the
-            column of interest in the data
-        filter_column: column name of the column
-            to be filtered over
-        entity_id_column: column name of
-            the column containing entities in the data
+            # generate the a cutoff date if the problem has a cutoff strategy
+            cutoff = None
+            if self.cutoff_strategy:
+                cutoff = self.cutoff_strategy.generate_fn(
+                    df_group, self.entity_id_col)
 
-        Returns
-        -------
-        hyper_parameters: list of hyper parameter settings
-        """
-        logging.debug("Performing generate_and_set_hyper_parameters...")
+            label_series = self._execute_operations_on_df(
+                df_group)[self.label_col]
 
-        hyper_parameters = []
+            # add the label to the results dictionary
+            res_dict = self._insert_single_label_into_dict(
+                entity_id, label_series, cutoff, res_dict)
 
-        dataframe = dataframe.copy()
-        FRACTION_OF_DATA_TARGET = 0.8
-        operation = self.operations[0]
+        res = pd.DataFrame.from_dict(data=res_dict, orient='index')
+        self._rename_columns(res, [self.entity_id_col, 'cutoff', 'label'])
+        return res
 
-        value = select_by_remaining(
-            FRACTION_OF_DATA_TARGET,
-            dataframe, operation, filter_column
-        )
-
-        hyper_parameters.append(value)
-
-        for operation in self.operations[1:]:
-            value, dataframe = select_by_diversity(
-                dataframe, operation,
-                label_generating_column,
-                entity_id_column)
-            hyper_parameters.append(value)
-
-        self.set_hyper_parameters(hyper_parameters)
-        return hyper_parameters
-
-    def execute(self, dataframe, time_column, label_cutoff_time,
-                filter_column_order_of_types,
-                label_generating_column_order_of_types):
-        """
-        This function executes all the operations on the dataframe
-        and returns the output. The output is two values. The
-        first value is the result of executing on all data before
-        the label_cutoff_time. The second value is the result
-        of executing on all data, including that after the
-        label_cutoff_time.
-
-        See paper:
-        "What would a data scientist ask? Automatically
-        formulating and solving predicton problems."
+    def _insert_single_label_into_dict(
+            self, entity_id, label_series, cutoff, res_dict):
+        '''
+        Inserts a single row of a dataframe into the passed dictionary and
+        returns it.
 
         Parameters
         ----------
-        dataframe: data to be executed on
-        time_column: column name of the column
-            containing time information in the data
-        label_cutoff_time: the time at which the data
-            is segmented. data after the time is used for
-            labels during test. data before the time is used
-            for labels during training.
-        filter_column_order_of_types: a list containing the types expected in the
-            sequence of operations on the filter column
-        label_generating_column_order_of_types: a list containing the types expected
-            in the sequence of operations on the label generating column
+        label_df: dataframe
+        cutoff: cutoff time
+        res_dict: dictionary with key entity_id and value a two part tuple:
+            (cutoff time, binary label)
 
         Returns
         -------
-        pre_label_cutoff_time_execution_result: label for training time segment
-        all_data_execution_result: label for testing (all time) time segment
+        dictionary
+        '''
+        num_rows = len(label_series)
+        if num_rows > 1:
+            warnings.warn(
+                "Operations returned more than 1 result for entity " +
+                str(entity_id) + ". This probably means you forgot to " +
+                "add an aggregation operation. Arbitrarily picking the " +
+                "first result.",
+                RuntimeWarning)
+        elif num_rows < 1:
+            warnings.warn(
+                "Operation returned fewer than 1 result for entity " +
+                str(entity_id) + ". Returning an unedited res_dict",
+                RuntimeWarning)
+        if num_rows > 0:
+            group_tuple = (cutoff, label_series.iloc[0])
+            res_dict[entity_id] = group_tuple
 
-        """
-        dataframe = dataframe.sort_values(by=time_column)
-        dataframe = dataframe.copy()
+        return res_dict
 
-        pre_label_cutoff_time_execution_result = dataframe[
-            dataframe[time_column] < label_cutoff_time]
-        all_data_execution_result = dataframe[
-            dataframe[time_column] > label_cutoff_time]
+    def _rename_columns(self, df, column_list):
+        '''
+        Renames columns in a given dataframe, in order, as the column_list.
 
-        continue_executing_on_precutoff_df = True
-        continue_executing_on_all_data_df = True
+        This is required because of support for Python 2.7 and Pandas 0.21
+        A more modern way is to pass columns=df.columns
+            into pd.DataFrame.from_dict.
 
-        for idx, operation in enumerate(self.operations):
+        Parameters
+        ----------
+        df: DataFrame whose columns will be renamed
+        column_list: list of column names
 
-            logging.debug(
-                "Beginning execution of operation: {}".format(operation))
+        Returns
+        -------
+        dataframe with renamed columns
+        '''
+        rename_dict = {}
+        for col_num in df.columns.values:
+            rename_dict[col_num] = column_list[col_num + 1]
 
-            if len(pre_label_cutoff_time_execution_result) == 0:
-                continue_executing_on_precutoff_df = False
+        df.index.names = [column_list[0]]
+        df.rename(columns=rename_dict, inplace=True)
+        return df
 
-            if len(all_data_execution_result) == 0:
-                continue_executing_on_all_data_df = False
+    def _execute_operations_on_df(self, df):
+        '''
+        Execute operations on df. This method assumes that data leakage/cutoff
+            times have already been taken into account, and just blindly
+            executes the operations.
+        Parameters
+        ----------
+        df: dataframe to be operated on
 
-            if continue_executing_on_all_data_df:
-                single_piece_of_data = all_data_execution_result.iloc[
-                    0][operation.column_name]
-
-                if idx == 0:
-                    check_type(
-                        filter_column_order_of_types[idx],
-                        single_piece_of_data)
-                elif idx > 0:
-                    check_type(
-                        label_generating_column_order_of_types[idx - 1],
-                        single_piece_of_data)
-
-                all_data_execution_result = operation.execute(
-                    all_data_execution_result)
-
-                if len(all_data_execution_result) == 0:
-                    continue
-
-                single_piece_of_data = all_data_execution_result.iloc[0][
-                    operation.column_name]
-
-                if idx == 0:
-                    check_type(
-                        filter_column_order_of_types[idx + 1],
-                        single_piece_of_data)
-                elif idx > 0:
-                    check_type(
-                        label_generating_column_order_of_types[idx],
-                        single_piece_of_data)
-
-            if continue_executing_on_precutoff_df:
-                pre_label_cutoff_time_execution_result = operation.execute(
-                    pre_label_cutoff_time_execution_result)
-
-        return pre_label_cutoff_time_execution_result, all_data_execution_result
+        Returns
+        -------
+        df: dataframe after operations
+        '''
+        df = df.copy()
+        for operation in self.operations:
+            df = operation.execute(df)
+        return df
 
     def __str__(self):
         """
@@ -249,20 +197,266 @@ class PredictionProblem:
 
         Returns
         -------
-        description: natural language description
+        description: str natural language description of the problem
 
         """
-        description = ""
-        last_op_idx = len(self.operations) - 1
-        for idx, operation in enumerate(self.operations):
-            description += str(operation)
-            if idx != last_op_idx:
-                description += "->"
+        desc_arr = []
+        description = 'For each ' + self.entity_id_col + ' predict'
+        # cycle through each operation to create dataops
+        # dataops are a series of operations containing one and only one
+        # aggregation op at its end
+        dataop = []
+        for op in self.operations:
+            op_type = type(op)
+            dataop.append(op)
+
+            if issubclass(op_type, AggregationOpBase):
+                # describe each dataop
+                desc_arr = desc_arr + self._describe_dataop(dataop)
+                dataop = []
+
+        # cycle through ops, pick out filters and describe them
+        filterop_desc_arr = []
+        for op in self.operations:
+            if issubclass(type(op), FilterOpBase):
+                filterop_desc_arr.append(self._describe_filter(op))
+
+        # join filter ops with ands and append to the description
+        if len(filterop_desc_arr) > 0:
+            description += ' and '.join(filterop_desc_arr)
+
+        # join the dataops together with ' of '
+        description += ' of '.join(desc_arr)
+
+        # add the cutoff strategy description if it exists
+        if self.cutoff_strategy:
+            description += ' ' + self.cutoff_strategy.description
+
         return description
+
+    def _describe_dataop(self, dataop):
+        """
+        A DataOp is a series of non-aggregation operations ending with one and
+        only one aggregation op.
+
+        In a dataop, filter operations are ignored. (They are dealt with
+        elsewhere.) The NL description puts the agg op first, followed other
+        operations in linear (left to right order.)
+
+        So an operation which is row_op -> trans_op -> agg_op will be written
+        as agg_op OF trans_op OF row_op.
+        """
+        descriptions = []
+
+        agg_op = dataop[-1]
+        if not issubclass(type(agg_op), AggregationOpBase):
+            raise ValueError(
+                'Last operation of dataop must be an aggregation op. '
+                'It is currently a ' + type(agg_op) + '.')
+
+        descriptions.append(self._describe_aggop(agg_op))
+        # remove the last operation (aggregation) and reverse the list
+        dataop = dataop[:-1]
+        dataop.reverse()
+
+        for op in dataop:
+            op_type = type(op)
+            description = ''
+            if issubclass(op_type, FilterOpBase):
+                # filter ops are described seperately
+                break
+            elif issubclass(op_type, AggregationOpBase):
+                raise ValueError(
+                    'There is more than one aggreagation op in your dataop. '
+                    'A dataop must contain one and only one aggregation '
+                    ' at its end.')
+            elif issubclass(op_type, TransformationOpBase):
+                description = self._describe_transop(op)
+            elif issubclass(op_type, RowOpBase):
+                description = self._describe_rowop(op)
+
+            descriptions.append(description)
+
+        # add the cutoff strategy description
+        if self.cutoff_strategy:
+            description += self.cutoff_strategy.description
+
+        return descriptions
+
+    def _describe_aggop(self, op):
+            agg_op_str_dict = {
+                FirstAggregationOp: "the first",
+                LastAggregationOp: "the last",
+                CountAggregationOp: "the number of",
+                SumAggregationOp: "the sum of",
+                LMFAggregationOp: "the last minus first"
+            }
+            if op.input_type == TableMeta.TYPE_BOOL and isinstance(
+                    op, SumAggregationOp):
+                return " the number of records whose"
+            if type(op) in agg_op_str_dict:
+                return agg_op_str_dict[type(op)]
+
+    def _describe_rowop(self, op):
+        row_op_str_dict = {
+            GreaterRowOp: "greater than",
+            EqRowOp: "equal to",
+            NeqRowOp: "not equal to",
+            LessRowOp: "less than"}
+
+        if isinstance(op, IdentityRowOp):
+            # return " {col}".format(col=op.column_name)
+            return ""
+        if isinstance(op, ExpRowOp):
+            return " the exp of {col}".format(col=op.column_name)
+        if type(op) in row_op_str_dict:
+            return " {col} is {op} {threshold}".format(
+                col=op.column_name, op=row_op_str_dict[type(op)],
+                threshold=op.hyper_parameter_settings['threshold'])
+        return " (unknown row op)"
+
+    def _describe_transop(self, op):
+        if isinstance(op, IdentityTransformationOp):
+            return ""
+        if isinstance(op, DiffTransformationOp):
+            return "fluctuation of " + str(op.column_name)
+        if isinstance(op, ObjectFrequencyTransformationOp):
+            return "frequency of " + str(op.column_name)
+
+    def _describe_filter(self, op):
+        filter_op_str_dict = {
+            GreaterFilterOp: "greater than",
+            EqFilterOp: "equal to",
+            NeqFilterOp: "not equal to",
+            LessFilterOp: "less than"}
+
+        filter_ops = [
+            x for x in self.operations if issubclass(type(x), FilterOpBase)]
+
+        # remove AllFilterOp
+        filter_ops = [x for x in filter_ops if not isinstance(x, AllFilterOp)]
+
+        desc = ' with '
+        last_op_idx = len(filter_ops) - 1
+        for idx, op in enumerate(filter_ops):
+            op_desc = '{col} {op} {threshold}'.format(
+                col=op.column_name,
+                op=filter_op_str_dict[type(op)],
+                threshold=op.hyper_parameter_settings.get('threshold', ''))
+            desc += op_desc
+
+            if idx != last_op_idx:
+                desc += ' and '
+
+        return desc
+
+    def save(self, path, problem_name):
+        '''
+        Saves the pediction problem in two files.
+
+        One file is a dill of the cutoff strategy.
+        The other file is the jsonified operations and the relative path to
+        that cutoff strategy.
+
+        Parameters
+        ----------
+        path: str - the directory in which save the problem
+        problem_name: str - the filename to assign the problem
+
+        Returns
+        -------
+        dict
+        {'saved_correctly': bool,
+         'directory_created': bool,
+         'problem_name': str}
+        The new problem_name may have changed due to a filename collision
+
+        '''
+        json_saved = False
+        dill_saved = False
+        created_directory = False
+
+        # create directory if it doesn't exist
+        if not os.path.isdir(path):
+            os.makedirs(path)
+            created_directory = True
+
+        # rename the problem_name if already exists
+        json_file_exists = os.path.exists(
+            os.path.join(path, problem_name + '.json'))
+        dill_file_exists = os.path.exists(
+            os.path.join(path, problem_name + '.dill'))
+
+        i = 1
+        while json_file_exists or dill_file_exists:
+            problem_name += str(i)
+
+            i += 1
+            json_file_exists = os.path.exists(
+                os.path.join(path, problem_name + '.json'))
+            dill_file_exists = os.path.exists(
+                os.path.join(path, problem_name + '.dill'))
+
+        # get the cutoff_strategy bytes
+        cutoff_dill_bytes = self._dill_cutoff_strategy()
+
+        # add a key to the problem json
+        json_dict = json.loads(self.to_json())
+        json_dict['cutoff_dill'] = problem_name + '.dill'
+
+        # write the files
+        with open(os.path.join(path, problem_name + '.json'), 'w') as f:
+            json.dump(obj=json_dict, fp=f, indent=4, sort_keys=True)
+            json_saved = True
+
+        with open(os.path.join(path, problem_name + '.dill'), 'wb') as f:
+            f.write(cutoff_dill_bytes)
+            dill_saved = True
+
+        return({'saved_correctly': json_saved & dill_saved,
+                'created_directory': created_directory,
+                'problem_name': problem_name})
+
+    @classmethod
+    def load(cls, json_file_path):
+        '''
+        Load a prediction problem from json file.
+        If the file links to a dill (binary) cutoff_srategy, also load that
+        and assign it to the prediction problem.
+
+        Parameters
+        ----------
+        json_file_path: str, path and filename for the json file
+
+        Returns
+        -------
+        PredictionProblem
+
+        '''
+        with open(json_file_path, 'r') as f:
+            problem_dict = json.load(f)
+            problem = cls.from_json(problem_dict)
+
+        cutoff_strategy_file_name = problem_dict.get('cutoff_dill', None)
+
+        if cutoff_strategy_file_name:
+            # reconstruct cutoff strategy filename
+            pickle_path = os.path.join(
+                os.path.dirname(json_file_path), cutoff_strategy_file_name)
+
+            # load cutoff strategy from file
+            with open(pickle_path, 'rb') as f:
+                cutoff_strategy = dill.load(f)
+
+            # assign cutoff strategy to problem
+            problem.cutoff_strategy = cutoff_strategy
+
+        return problem
 
     def to_json(self):
         """
-        This function converts Prediction Problems to JSON
+        This function converts Prediction Problems to JSON. It captures the
+        table_meta, but not the cutoff_strategy
 
         Parameters
         ----------
@@ -273,13 +467,16 @@ class PredictionProblem:
         json: JSON representation of the Prediction Problem.
 
         """
+        table_meta_json = None
+        if self.table_meta:
+            table_meta_json = self.table_meta.to_json()
+
         return json.dumps(
-            {"operations": [json.loads(op_to_json(op)
-                                       ) for op in self.operations],
-             "filter_column_order_of_types":
-             self.filter_column_order_of_types,
-             "label_generating_column_order_of_types":
-             self.label_generating_column_order_of_types})
+            {"operations": [
+                json.loads(op_to_json(op)) for op in self.operations],
+             "entity_id_col": self.entity_id_col,
+             "label_col": self.label_col,
+             "table_meta": table_meta_json})
 
     @classmethod
     def from_json(cls, json_data):
@@ -289,21 +486,46 @@ class PredictionProblem:
 
         Parameters
         ----------
-        json_data: JSON code containing the prediction problem.
+        json_data: JSON code or dict containing the prediction problem.
 
         Returns
         -------
         problem: Prediction Problem
         """
-        data = json.loads(json_data)
-        operations = [op_from_json(json.dumps(item))
-                      for item in data['operations']]
-        problem = PredictionProblem(operations)
-        problem.filter_column_order_of_types = data[
-            'filter_column_order_of_types']
-        problem.label_generating_column_order_of_types = data[
-            'label_generating_column_order_of_types']
+
+        # only tries json.loads if json_data is not a dict
+        if type(json_data) != dict:
+            json_data = json.loads(json_data)
+
+        operations = [
+            op_from_json(json.dumps(item)) for item in json_data['operations']]
+        entity_id_col = json_data['entity_id_col']
+        label_col = json_data['label_col']
+        table_meta = TableMeta.from_json(json_data.get('table_meta'))
+
+        problem = PredictionProblem(
+            operations=operations,
+            entity_id_col=entity_id_col,
+            label_col=label_col,
+            table_meta=table_meta,
+            cutoff_strategy=None)
         return problem
+
+    def _dill_cutoff_strategy(self):
+        '''
+        Function creates a dill for the problem's associated cutoff strategy
+
+        This function requires cutoff time to be assigned.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        a dill of the cutoff strategy
+        '''
+        cutoff_dill = dill.dumps(self.cutoff_strategy)
+        return cutoff_dill
 
     def __eq__(self, other):
         """Overrides the default implementation"""
@@ -311,221 +533,60 @@ class PredictionProblem:
             return self.__dict__ == other.__dict__
         return False
 
-
-def select_by_remaining(fraction_of_data_target, dataframe, operation,
-                        filter_column, num_random_samples=10,
-                        num_rows_to_execute_on=2000):
-    """
-    This function selects a parameter setting for the
-    filter operation. The parameter setting that nearest filters
-    fraction_of_data_target data is chosen.
-
-    Parameters
-    ----------
-    fraction_of_data_target: The fraction of the filter operation
-        aims to keep in the dataset.
-    dataframe: the relevant data
-    operation: the filter operation
-    filter_column: the column name of the column intended to be filtered over
-    num_random_samples: if there's more than this many unique values to test,
-        randomly sample this many values from the dataset
-    num_rows_to_execute_on: if the dataframe contains more than this number of rows,
-        randomly select this many rows to use as the dataframe
-
-    Returns
-    ----------
-    best_filter_value: parameter setting for the filter operation.
-    """
-    logging.debug("Performing select_by_remaining...")
-    if len(operation.REQUIRED_PARAMETERS) == 0:
-        return None
-    else:
-        unique_filter_values = set(dataframe[filter_column])
-
-        if len(unique_filter_values) > num_random_samples:
-            unique_filter_values = list(
-                random.sample(unique_filter_values, num_random_samples))
-
-        if len(dataframe) > num_rows_to_execute_on:
-            dataframe = dataframe.sample(num_rows_to_execute_on)
-
+    def _check_type(self, expected_type, actual_data):
+        """
+        Asserts that the expected type matches the actual data's type.
+        Parameters
+        ----------
+        expected_type: the expected type of the data in TableMeta format
+        actual_data: a piece of the actual data
+        Returns
+        ----------
+        None
+        """
         logging.debug(
-            "number of unique filter values: {}".format(len(unique_filter_values)))
+            "Beginning check type. Expected type is: {}, \
+            Actual data is: {}, Actual type is: {}".format(
+                expected_type,
+                actual_data,
+                type(actual_data)))
 
-        best = 1
-        best_filter_value = 0
+        allowed_types_category = [bool, int, str, float]
+        allowed_types_bool = [bool, np.bool_]
+        allowed_types_text = [str]
+        allowed_types_int = [int, np.int64]
+        allowed_types_float = [float, np.float64, np.float32]
+        allowed_types_time = allowed_types_bool + allowed_types_int + \
+            allowed_types_text + allowed_types_float
+        allowed_types_ordered = allowed_types_bool + \
+            allowed_types_int + allowed_types_text + allowed_types_float
+        allowed_types_id = allowed_types_int + allowed_types_text + \
+            allowed_types_float
 
-        for unique_filter_value in unique_filter_values:
-            loop_start_time = time.time()
+        if expected_type == TableMeta.TYPE_CATEGORY:
+            assert(type(actual_data) in allowed_types_category)
 
-            total = len(dataframe)
+        elif expected_type == TableMeta.TYPE_BOOL:
+            assert(type(actual_data) in allowed_types_bool)
 
-            operation.set_hyper_parameter(unique_filter_value)
+        elif expected_type == TableMeta.TYPE_ORDERED:
+            assert(type(actual_data) in allowed_types_ordered)
 
-            filtered_df = operation.execute(dataframe)
-            count = len(filtered_df)
+        elif expected_type == TableMeta.TYPE_TEXT:
+            assert(type(actual_data) in allowed_types_text)
 
-            fraction_of_data_left = count / total
+        elif expected_type == TableMeta.TYPE_INTEGER:
+            assert(type(actual_data) in allowed_types_int)
 
-            score = abs(fraction_of_data_left - fraction_of_data_target)
-            if score < best:
-                best = score
-                best_filter_value = unique_filter_value
+        elif expected_type == TableMeta.TYPE_FLOAT:
+            assert(type(actual_data) in allowed_types_float)
 
-            logging.debug("single loop iteration time: {}".format(
-                time.time() - loop_start_time))
+        elif expected_type == TableMeta.TYPE_TIME:
+            assert(type(actual_data) in allowed_types_time)
 
-        return best_filter_value
+        elif expected_type == TableMeta.TYPE_IDENTIFIER:
+            assert(type(actual_data) in allowed_types_id)
 
-
-def select_by_diversity(dataframe, operation, label_generating_column,
-                        entity_id_column, num_random_samples=10,
-                        num_rows_to_execute_on=2000):
-    """
-    This function selects a parameter setting for the
-    operations, excluding the filter operation.
-    The parameter setting that maximizes the
-    entropy of the output data is chosen.
-
-    Parameters
-    ----------
-    dataframe: the relevant data
-    operation: the filter operation
-    label_generating_column: column name of the
-        column of interest in the data
-    entity_id_column: column name of
-        the column containing entities in the data
-    num_random_samples: if there's more than this many unique values to test,
-        randomly sample this many values from the dataset
-    num_rows_to_execute_on: if the dataframe contains more than this number of
-        rows, randomly select this many rows to use as the dataframe
-
-    Returns
-    -------
-    best_parameter_value: parameter setting for the operation.
-    best_df: the dataframe (possibly filtered depending on
-        num_rows_to_execute_on)
-        after having the operation applied with the chosen parameter value.
-    """
-    logging.debug("Performing select_by_diversity")
-    df = dataframe.copy()
-
-    if len(operation.REQUIRED_PARAMETERS) == 0:
-        logging.debug("no parameters required for this operation")
-        return None, dataframe
-    else:
-        unique_parameter_values = set(dataframe[label_generating_column])
-
-        if len(unique_parameter_values) > num_random_samples:
-            unique_parameter_values = list(random.sample(
-                unique_parameter_values, num_random_samples))
-
-        if len(dataframe) > num_rows_to_execute_on:
-            df = dataframe.sample(num_rows_to_execute_on)
-
-        logging.debug("number of unique parameter values: {}".format(
-            len(unique_parameter_values)))
-
-        best = 0
-        best_parameter_value = 0
-        best_df = df
-
-        for unique_parameter_value in unique_parameter_values:
-            loop_start_time = time.time()
-
-            operation.set_hyper_parameter(unique_parameter_value)
-
-            output_df = df.groupby(entity_id_column).apply(operation.execute)
-
-            entropy = entropy_of_a_list(
-                list(output_df[label_generating_column]))
-            if entropy > best:
-                best = entropy
-                best_parameter_value = unique_parameter_value
-                best_df = output_df
-
-            logging.debug("single loop iteration time: {}".format(
-                time.time() - loop_start_time))
-
-        logging.debug("found optimal parameter setting: {}".format(
-            best_parameter_value))
-
-        return best_parameter_value, best_df
-
-
-def entropy_of_a_list(values):
-    """
-    Calculate the entropy (information) of the list.
-
-    Parameters
-    ----------
-    values: list of values
-
-    Returns
-    ----------
-    entropy: the entropy or information in the list.
-    """
-    counts = Counter(values).values()
-    total = float(sum(counts))
-    probabilities = [val / total for val in counts]
-    entropy = stats.entropy(probabilities)
-    return entropy
-
-
-def check_type(expected_type, actual_data):
-    """
-    Asserts that the expected type matches the actual data's type.
-
-    Parameters
-    ----------
-    expected_type: the expected type of the data in TableMeta format
-    actual_data: a piece of the actual data
-
-    Returns
-    ----------
-    None
-    """
-    logging.debug(
-        "Beginning check type. Expected type is: {}, \
-        Actual data is: {}, Actual type is: {}".format(
-            expected_type,
-            actual_data,
-            type(actual_data)))
-
-    allowed_types_category = [bool, int, str, float]
-    allowed_types_bool = [bool, np.bool_]
-    allowed_types_text = [str]
-    allowed_types_int = [int, np.int64]
-    allowed_types_float = [float, np.float64, np.float32]
-    allowed_types_time = allowed_types_bool + allowed_types_int + \
-        allowed_types_text + allowed_types_float
-    allowed_types_ordered = allowed_types_bool + \
-        allowed_types_int + allowed_types_text + allowed_types_float
-    allowed_types_id = allowed_types_int + allowed_types_text + allowed_types_float
-
-    if expected_type == TableMeta.TYPE_CATEGORY:
-        assert(type(actual_data) in allowed_types_category)
-
-    elif expected_type == TableMeta.TYPE_BOOL:
-        assert(type(actual_data) in allowed_types_bool)
-
-    elif expected_type == TableMeta.TYPE_ORDERED:
-        assert(type(actual_data) in allowed_types_ordered)
-
-    elif expected_type == TableMeta.TYPE_TEXT:
-        assert(type(actual_data) in allowed_types_text)
-
-    elif expected_type == TableMeta.TYPE_INTEGER:
-        assert(type(actual_data) in allowed_types_int)
-
-    elif expected_type == TableMeta.TYPE_FLOAT:
-        assert(type(actual_data) in allowed_types_float)
-
-    elif expected_type == TableMeta.TYPE_TIME:
-        assert(type(actual_data) in allowed_types_time)
-
-    elif expected_type == TableMeta.TYPE_IDENTIFIER:
-        assert(type(actual_data) in allowed_types_id)
-
-    else:
-        logging.critical('check_type function received an unexpected type.')
+        else:
+            logging.critical(
+                'check_type function received an unexpected type.')

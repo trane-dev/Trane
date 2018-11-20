@@ -4,7 +4,7 @@ import pandas as pd
 
 from .table_meta import TableMeta as TM
 
-__all__ = ['df_group_by_entity_id', 'denormalize', 'parse_data']
+__all__ = ['denormalize', 'parse_data']
 
 
 class CsvMerge():
@@ -29,26 +29,6 @@ class CsvMerge():
         csv_names = self.get_csv_names() + other.get_csv_names()
         data = pd.merge(self.get_data(), other.get_data(), left_on=left_key, right_on=right_key)
         return CsvMerge(csv_names, data)
-
-
-def df_group_by_entity_id(dataframe, entity_id_column_name):
-    """
-    Convert a dataframe with an entity_id column to a dictionary mapping entity id's to their relevant data.
-
-    Parameters
-    ----------
-    dataframe: the data
-    entity_id_column: the column name with entity id's
-
-    Returns
-    ----------
-    dict: Mapping from entity id's to a dataframe containing only that entity id's data.
-    """
-
-    df_groupby = dataframe.groupby(entity_id_column_name)
-    entities = df_groupby.groups.keys()
-    entity_id_to_df = [(key, df_groupby.get_group(key)) for key in entities]
-    return dict(entity_id_to_df)
 
 
 def denormalize(relationships):

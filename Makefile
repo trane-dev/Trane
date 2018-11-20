@@ -76,12 +76,11 @@ coverage: ## check code coverage quickly with the default Python
 	$(BROWSER) htmlcov/index.html
 
 clean-docs: ## remove previously built docs
-	rm -f docs/trane.rst
-	rm -f docs/modules.rst
+	rm -rf docs/_modules
 	$(MAKE) -C docs clean
 
 docs: clean-docs ## generate Sphinx HTML documentation, including API docs
-	sphinx-apidoc -o docs/ trane
+	sphinx-apidoc -o docs/_modules trane
 	$(MAKE) -C docs html
 	touch docs/_build/html/.nojekyll
 

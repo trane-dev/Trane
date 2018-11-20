@@ -18,15 +18,14 @@ class Labeler():
     def __init__(self):
         pass
 
-    def execute(self, entity_to_data_and_cutoff_dict,
-                json_prediction_problems_filename):
+    def execute(self, data, cutoff_df, json_prediction_problems_filename):
         """
         Generate the labels.
 
         Parameters
         ----------
-        entity_to_data_and_cutoff_dict: mapping from
-            unique entities to their related data and cutoff times
+        cutoff_df: dataframe. Each row corresponds to an entity.
+            entity_id (indexed) | training_cutoff | test_cutoff
         json_prediction_problems_filename: filename to read
             prediction problems from, structured in JSON.
 
@@ -37,7 +36,10 @@ class Labeler():
 
         """
 
-        (prediction_problems, table_meta, entity_id_column, label_generating_column,
+        (prediction_problems,
+            table_meta,
+            entity_id_column,
+            label_generating_column,
             time_column) = prediction_problems_from_json_file(
                 json_prediction_problems_filename)
 
@@ -48,26 +50,31 @@ class Labeler():
         for idx, prediction_problem in enumerate(prediction_problems):
             start = time.time()
             df_rows = []
-            logging.debug("in labeller and beginning exuection of problem: {} \n".format(
-                prediction_problem))
+            logging.debug(
+                "in labeller and beginning exuection of problem: {} \n".format(
+                    prediction_problem))
 
-            for entity in entity_to_data_and_cutoff_dict:
+            for index, row in cutoff_df.iterrows():
 
-                df_row = []
-                entity_data, training_cutoff, label_cutoff = entity_to_data_and_cutoff_dict[
-                    entity]
+                entity_id = index
+                training_cutoff = row[0]
+                label_cutoff = row[1]
 
-                df_pre_label_cutoff_time_result, df_all_data_result = prediction_problem.execute(
-                    entity_data, time_column, label_cutoff,
-                    prediction_problem.filter_column_order_of_types,
-                    prediction_problem.label_generating_column_order_of_types)
+                entity_data = pd.DataFrame(data.loc[entity_id]).T
+
+                (df_pre_label_cutoff_time_result,
+                    df_all_data_result) = prediction_problem.execute(
+                        entity_data, time_column, label_cutoff,
+                        prediction_problem.filter_column_order_of_types,
+                        prediction_problem.label_generating_column_order_of_types) # noqa
 
                 if len(df_pre_label_cutoff_time_result) == 1:
                     label_precutoff_time = df_pre_label_cutoff_time_result[
                         label_generating_column].values[0]
                 elif len(df_pre_label_cutoff_time_result) > 1:
                     logging.warning("Received output from prediction problem \
-                                    execution on pre-label cutoff data with more than one result.")
+                                    execution on pre-label cutoff data with \
+                                    more than one result.")
                     label_precutoff_time = None
                 else:
                     label_precutoff_time = None
@@ -81,13 +88,14 @@ class Labeler():
                 else:
                     label_postcutoff_time = None
 
-                df_row = [entity, label_precutoff_time,
+                df_row = [entity_id, label_precutoff_time,
                           label_postcutoff_time, training_cutoff, label_cutoff]
                 df_rows.append(df_row)
             df = pd.DataFrame(df_rows, columns=columns)
             end = time.time()
-            logging.info("Finished labelling problem: {} of {}. Time elapsed: {}".format(
-                idx, len(prediction_problems), end - start))
+            logging.info(
+                "Finished labelling problem: {} of {}.Time elapsed: {}".format(
+                    idx, len(prediction_problems), end - start))
             dfs.append(df)
 
         return dfs

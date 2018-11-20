@@ -2,92 +2,130 @@
 Function: generate(self)
 1. Ensure the correct # of problems are generated.
 2. Generated problems are of proper type
-3. Ensure prediction problems are generated in order of Filter->Row->Transformation->Aggregation
+3. Ensure prediction problems are generated in order of
+   Filter->Row->Transformation->Aggregation
 """
-
-import logging
+import unittest
 
 import pandas as pd
+from mock import MagicMock, call, patch
 
-from trane.core.prediction_problem import *  # noqa
-from trane.core.prediction_problem_generator import *  # noqa
+from trane.core.prediction_problem_generator import PredictionProblemGenerator
 from trane.ops.aggregation_ops import *  # noqa
 from trane.ops.filter_ops import *  # noqa
 from trane.ops.row_ops import *  # noqa
 from trane.ops.transformation_ops import *  # noqa
 from trane.utils.table_meta import TableMeta
 
-meta_json_str = '{ "path": "", "tables": [ { "path": "synthetic_taxi_data.csv",\
-    "name": "taxi_data", "fields": [ {"name": "vendor_id", "type": "id"},\
-    {"name": "taxi_id", "type": "id"}, {"name": "trip_id", "type": "datetime"}, \
-    {"name": "distance", "type": "number", "subtype": "float"}, \
-    {"name": "duration", "type": "number", "subtype": "float"}, \
-    {"name": "fare", "type": "number", "subtype": "float"}, \
-    {"name": "num_passengers", "type": "number", "subtype": "float"} ] } ]}'
-dataframe = pd.DataFrame([(0, 0, 0, 5.32, 19.7, 53.89, 1),
-                          (0, 0, 1, 1.08, 6.78, 18.89, 2),
-                          (0, 0, 2, 4.69, 14.11, 41.35, 4)],
-                         columns=["vendor_id", "taxi_id", "trip_id", "distance",
-                                  "duration", "fare", "num_passengers"])
+
+class TestPredictionProblemGenerator(unittest.TestCase):
+
+    def setUp(self):
+        self.table_meta_mock = MagicMock()
+        self.entity_col = "taxi_id"
+        self.label_col = "fare"
+        self.filter_col = "taxi_id"
+
+        self.ensure_valid_inputs_patch = self.create_patch(
+            'trane.core.PredictionProblemGenerator.ensure_valid_inputs')
+
+        self.generator = PredictionProblemGenerator(
+            table_meta=self.table_meta_mock,
+            entity_col=self.entity_col,
+            label_col=self.label_col,
+            filter_col=self.filter_col)
+
+    def prep_for_integration(self):
+        '''
+        Creates a full fledged prediction problem generator without
+        a mocked out ensure_valid_inputs method
+        '''
+        meta_json_str = ' \
+            {"path": "", \
+             "tables": [ \
+                {"path": "synthetic_taxi_data.csv",\
+                 "name": "taxi_data", \
+                 "fields": [ \
+                {"name": "vendor_id", "type": "id"},\
+                {"name": "taxi_id", "type": "id"}, \
+                {"name": "trip_id", "type": "datetime"}, \
+                {"name": "distance", "type": "number", "subtype": "float"}, \
+                {"name": "duration", "type": "number", "subtype": "float"}, \
+                {"name": "fare", "type": "number", "subtype": "float"}, \
+                {"name": "num_passengers", "type": "number", \
+                    "subtype": "float"} \
+                 ]}]}'
+
+        self.table_meta = TableMeta.from_json(meta_json_str)
+        self.df = pd.DataFrame(
+            [(0, 0, 0, 5.32, 19.7, 53.89, 1),
+             (0, 0, 1, 1.08, 6.78, 18.89, 2),
+             (0, 0, 2, 4.69, 14.11, 41.35, 4)],
+            columns=["vendor_id", "taxi_id", "trip_id", "distance", "duration",
+                     "fare", "num_passengers"])
+
+        self.generator = PredictionProblemGenerator(
+            table_meta=self.table_meta,
+            entity_col=self.entity_col,
+            label_col=self.label_col,
+            filter_col=self.filter_col)
+
+    def create_patch(self, name, return_value=None):
+        '''helper method for creating patches'''
+        patcher = patch(name)
+        thing = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        if return_value:
+            thing.return_value = return_value
+
+        return thing
+
+    def test_generate(self):
+        self.prep_for_integration()
+        self.assertIsNotNone(self.generator.generate)
+        self.generator.generate(self.df)
 
 
-def test_number_of_problems_generated():
-    table_meta = TableMeta.from_json(meta_json_str)
-    entity_id_column = "taxi_id"
-    label_generating_column = "fare"
-    time_column = "trip_id"
-    filter_column = "taxi_id"
-    ppg = PredictionProblemGenerator(
-        table_meta, entity_id_column, label_generating_column, time_column, filter_column)
-    generator = ppg.generate(dataframe)
+class TestPredictionProblemGeneratorValidation(unittest.TestCase):
+    '''
+    TestPredictionProblemGeneratorValidation has its own class, because unlike
+    other tests, the ensure_valid_inputs method cannot be mocked out.
+    '''
 
-    expected = 66  # THIS NUMBER WILL CHANGE IF MORE OPERATIONS ARE ADDED OR DECREASE BASED ON TYPE CHECKING
-    found = len(list(generator))
-    assert(expected == found)
+    def create_patch(self, name, return_value=None):
+        '''helper method for creating patches'''
+        patcher = patch(name)
+        thing = patcher.start()
+        self.addCleanup(patcher.stop)
 
+        if return_value:
+            thing.return_value = return_value
 
-def test_generated_types():
-    table_meta = TableMeta.from_json(meta_json_str)
-    entity_id_column = "taxi_id"
-    label_generating_column = "fare"
-    time_column = "trip_id"
-    filter_column = "taxi_id"
-    ppg = PredictionProblemGenerator(
-        table_meta, entity_id_column, label_generating_column, time_column, filter_column)
-    generator = ppg.generate(dataframe)
+        return thing
 
-    expected = PredictionProblem
-    problems = [prob for prob in generator]
+    def test_ensure_valid_imputs(self):
+        table_meta_mock = MagicMock()
+        entity_col = "taxi_id"
+        label_col = "fare"
+        filter_col = "taxi_id"
 
-    for problem in problems:
-        found = problem
-        assert(isinstance(found, expected))
+        # set up table_meta types
+        table_meta_mock.get_type.return_value = True
+        table_meta_patch = self.create_patch(
+            'trane.core.prediction_problem_generator.TableMeta', 'tm_patch')
+        table_meta_patch.TYPE_IDENTIFIER = True
+        table_meta_patch.TYPE_FLOAT = True
+        table_meta_patch.TYPE_TIME = True
 
+        # create generator
+        generator = PredictionProblemGenerator(
+            table_meta=table_meta_mock,
+            entity_col=entity_col,
+            label_col=label_col,
+            filter_col=filter_col)
 
-def test_order_of_operations():
-    table_meta = TableMeta.from_json(meta_json_str)
-    entity_id_column = "taxi_id"
-    label_generating_column = "fare"
-    time_column = "trip_id"
-    filter_column = "taxi_id"
-    ppg = PredictionProblemGenerator(
-        table_meta, entity_id_column, label_generating_column, time_column, filter_column)
-
-    logging.debug(
-        "Dataframe in test_prediction_problem_generator.py: \n{}\n".format(dataframe))
-    generator = ppg.generate(dataframe)
-
-    problems = [prob for prob in generator]
-
-    for problem in problems:
-        ops = problem.operations
-        assert(len(ops) == 4)
-        first_op = ops[0]
-        second_op = ops[1]
-        third_op = ops[2]
-        fourth_op = ops[3]
-
-        assert(issubclass(first_op.__class__, FilterOpBase))
-        assert(issubclass(second_op.__class__, RowOpBase))
-        assert(issubclass(third_op.__class__, TransformationOpBase))
-        assert(issubclass(fourth_op.__class__, AggregationOpBase))
+        self.assertIsNotNone(generator.ensure_valid_inputs)
+        table_meta_mock.get_type.assert_has_calls([
+            call(entity_col),
+            call(label_col)], any_order=True)

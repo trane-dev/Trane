@@ -5,6 +5,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.ensemble import AdaBoostClassifier, AdaBoostRegressor
+from sklearn.svm import LinearSVC, LinearSVR
 
 from ..utils.table_meta import TableMeta as TM
 
@@ -34,19 +36,55 @@ class PredictionProblemEvaluator(object):
             {
                 "name": "DecisionTreeRegressor",
                 "model": DecisionTreeRegressor(max_depth=5)
+            },
+            {
+                "name": "AdaBoost",
+                "model": AdaBoostRegressor()
             }
         ]
 
         self.classifier = [
             {
                 "name": "KNeighborsClassifier",
-                "model": KNeighborsClassifier(3)
+                "model": KNeighborsClassifier(5)
             },
             {
                 "name": "DecisionTreeClassifier",
                 "model": DecisionTreeClassifier(max_depth=5)
+            },
+            {
+                "name": "AdaBoost",
+                "model": AdaBoostClassifier()
             }
         ]
+
+    def _get_label_stats(self, labels, problem_type):
+        labels = labels.reset_index()
+        labels = labels[labels['label'].notnull()]
+
+        if problem_type == "classification":
+            majority_ratio = (labels['label'].groupby(labels['label']).count() / len(labels)).max()
+
+            label_entity_count = labels['label'].groupby([labels[self.entity_col], labels['label']]).count()
+            entity_majority_ratio = label_entity_count.groupby(level=0).apply(lambda x: (x / x.sum()).max())
+            entity_majority_ratio = entity_majority_ratio.mean()
+
+            return {
+                "majority_ratio": majority_ratio,
+                "entity_majority_ratio": entity_majority_ratio
+            }
+
+        elif problem_type == "regression":
+            overall_mean = labels['label'].mean()
+            overall_std = labels['label'].std(ddof=0)
+            entity_std = labels['label'].groupby(labels[self.entity_col]).std(ddof=0).mean()
+            return {
+                "overall_mean": overall_mean,
+                "overall_std": overall_std,
+                "entity_std": entity_std
+            }
+        else:
+            assert 0
 
     def _categorical_threshold(self, df_col, k=3):
         counter = {}
@@ -77,7 +115,7 @@ class PredictionProblemEvaluator(object):
                         fraction_of_data_target=keep_rate, df=self.sampled_df, col=filter_op.column_name)
                     problem_final = copy.deepcopy(problem)
                     problem_final.operations[0].set_hyper_parameter(threshold)
-                    yield problem_final, "threshold: {} (keep {}%%)".format(threshold, keep_rate * 100)
+                    yield problem_final, "threshold: {} (keep {}%)".format(threshold, keep_rate * 100)
 
     def split_dataset(self, problem, problem_type, labels, features):
         X_train, X_test, Y_train, Y_test = [], [], [], []
@@ -149,6 +187,7 @@ class PredictionProblemEvaluator(object):
             problem_result = {
                 "description": threshold_description,
                 "problem": str(problem_final),
+                "label_stats": self._get_label_stats(labels, problem_type)
             }
 
             X_train, X_test, Y_train, Y_test = self.split_dataset(
@@ -163,14 +202,18 @@ class PredictionProblemEvaluator(object):
             if problem_type == "regression":
                 problem_result['R2'] = {}
                 for regressor in self.regressor:
-                    regressor['model'].fit(X_train, Y_train)
-                    score = regressor['model'].score(X_test, Y_test)
+                    model = copy.deepcopy(regressor['model'])
+                    model.fit(X_train, Y_train)
+                    score = model.score(X_test, Y_test)
                     problem_result['R2'][regressor['name']] = score
             elif problem_type == "classification":
+                if len(set(Y_train)) == 1:
+                    continue
                 problem_result['Accuracy'] = {}
                 for classifier in self.classifier:
-                    classifier['model'].fit(X_train, Y_train)
-                    score = classifier['model'].score(X_test, Y_test)
+                    model = copy.deepcopy(classifier['model'])
+                    model.fit(X_train, Y_train)
+                    score = model.score(X_test, Y_test)
                     problem_result['Accuracy'][classifier['name']] = score
 
             evaluations.append(problem_result)

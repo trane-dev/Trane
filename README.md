@@ -1,9 +1,16 @@
-<p align="center">
+<p align="left">
+<img width=15% src="https://dai.lids.mit.edu/wp-content/uploads/2018/06/Logo_DAI_highres.png" alt=“DAI-Lab” />
+<i>An open source project from Data to AI Lab at MIT.</i>
+</p>
+
+
+
+<p align="left">
 <img width=40% src="https://dai.lids.mit.edu/wp-content/uploads/2018/06/Trane-logo-300x180.jpg" alt=“Trane_Logo” />
 </p>
 
-<p align="center">
-<i>Automatically formulating machine learning tasks for temporal datasets"</i>
+<p align="left">
+Automatically formulating machine learning tasks for temporal datasets"
 </p>
 
 [![Build Status](https://travis-ci.org/HDI-Project/Trane.svg?branch=master)](https://travis-ci.org/HDI-Project/Trane)

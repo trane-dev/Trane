@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="5c5b9dd0-bbf5-4582-9667-6ba69b7cec5d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/flight-delay/FlightDelay.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/flight-delay-trane.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/flight-delay-trane.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/flight-delays/airlines.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/flight-delays/airports.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/flight-delays/create meta.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/flight-delays/flight-clean.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/flight-delays/flight-sampled.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/flight-delays/flights.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/flight-delays/meta.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/flight-delays/meta.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/flight-delays/proc-data.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/core/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/core/cutoff_strategy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/core/prediction_problem.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/core/prediction_problem_evaluator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/core/prediction_problem_generator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/libinfo.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/ops/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/ops/aggregation_ops.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/ops/filter_ops.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/ops/op_base.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/ops/op_saver.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/utils/evaluate_tool.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/utils/featuretools_wrapper.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/utils/helper.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/trane/utils/table_meta.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flight-delay/visualize.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Example/Example.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Example/Example.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Trane-Demos/IPYNBs/Attempt to Build End-to-End Pipeline for Many Problems with AUC Scores.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Trane-Demos/IPYNBs/Attempt to Build End-to-End Pipeline for Many Problems with AUC Scores.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Trane-Demos/IPYNBs/Three Datasets Problem Generation.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Trane-Demos/IPYNBs/Three Datasets Problem Generation.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Trane-Demos/IPYNBs/Trane Tutorial.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Trane-Demos/IPYNBs/Trane Tutorial.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Trane-Demos/IPYNBs/trane.log" beforeDir="false" afterPath="$PROJECT_DIR$/Trane-Demos/IPYNBs/trane.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/core/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/core/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/core/cutoff_strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/core/cutoff_strategy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/core/labeler.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/core/labeler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/core/prediction_problem.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/core/prediction_problem.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/core/prediction_problem_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/core/prediction_problem_generator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/core/prediction_problem_saver.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/core/prediction_problem_saver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/libinfo.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/libinfo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/ops/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/ops/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/ops/aggregation_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/ops/aggregation_ops.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/ops/filter_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/ops/filter_ops.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/ops/op_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/ops/op_base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/ops/op_saver.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/ops/op_saver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/ops/row_ops.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/ops/transformation_ops.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/utils/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/utils/data_parser.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/trane/utils/table_meta.py" beforeDir="false" afterPath="$PROJECT_DIR$/trane/utils/table_meta.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Jupyter Notebook" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="26UCdqHaObmON2rz03u0aEvu2Tp" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="org.jetbrains.plugins.notebooks.jupyter.connections.configuration.JupyterServerConfigurable" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/trane/core" />
+      <recent name="$PROJECT_DIR$/trane2/core" />
+      <recent name="$PROJECT_DIR$/Example" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/Trane-Demos/IPYNBs" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Trane3" type="PythonConfigurationType" factoryName="Python">
+      <module name="Trane" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/envs/Trane3.8/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="true" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <module name="Trane" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5c5b9dd0-bbf5-4582-9667-6ba69b7cec5d" name="Default Changelist" comment="" />
+      <created>1647468869975</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1647468869975</updated>
+      <workItem from="1647468873386" duration="5432000" />
+      <workItem from="1647540393386" duration="80932000" />
+      <workItem from="1648216203065" duration="6971000" />
+      <workItem from="1648237124903" duration="30180000" />
+      <workItem from="1649004206386" duration="4407000" />
+      <workItem from="1649516043308" duration="362000" />
+      <workItem from="1650031407917" duration="6471000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$USER_HOME$/anaconda3/envs/Trane3.8/lib/python3.8/site-packages/featuretools/feature_base/api.py</url>
+          <line>1</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

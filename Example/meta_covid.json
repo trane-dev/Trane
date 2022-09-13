@@ -1,0 +1,13 @@
+{"tables":[
+    {"fields":[
+        {"name": "Province/State", "type": "text"},
+        {"name": "Country/Region", "type": "text"},
+        {"name": "Lat", "type": "number", "subtype": "float"},
+        {"name": "Long", "type": "number", "subtype": "float"},
+        {"name": "Date", "type": "datetime"},
+        {"name": "Confirmed", "type": "number", "subtype": "integer"},
+        {"name": "Deaths", "type": "number", "subtype": "integer"},
+        {"name": "Recovered", "type": "number", "subtype": "integer"}
+    ]
+    }
+]}

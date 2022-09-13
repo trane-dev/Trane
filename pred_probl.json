@@ -1,0 +1,322 @@
+{
+    "prediction_problems": [
+        {
+            "operations": [
+                {
+                    "OpType": "FilterOpBase",
+                    "SubopType": "AllFilterOp",
+                    "column_name": null,
+                    "iotype": [
+                        null,
+                        null
+                    ],
+                    "hyper_parameter_settings": {}
+                },
+                {
+                    "OpType": "AggregationOpBase",
+                    "SubopType": "CountAggregationOp",
+                    "column_name": null,
+                    "iotype": [
+                        null,
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                }
+            ],
+            "entity_col": "Country/Region",
+            "time_col": "Date",
+            "table_meta": "{\"tables\": [{\"fields\": [{\"name\": \"Province/State\", \"type\": \"text\"}, {\"name\": \"Country/Region\", \"type\": \"text\"}, {\"name\": \"Lat\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Long\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Date\", \"type\": \"datetime\"}, {\"name\": \"Confirmed\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Deaths\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Recovered\", \"type\": \"number\", \"subtype\": \"integer\"}]}]}"
+        },
+        {
+            "operations": [
+                {
+                    "OpType": "FilterOpBase",
+                    "SubopType": "GreaterFilterOp",
+                    "column_name": "Lat",
+                    "iotype": [
+                        "float",
+                        "float"
+                    ],
+                    "hyper_parameter_settings": {}
+                },
+                {
+                    "OpType": "AggregationOpBase",
+                    "SubopType": "CountAggregationOp",
+                    "column_name": null,
+                    "iotype": [
+                        null,
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                }
+            ],
+            "entity_col": "Country/Region",
+            "time_col": "Date",
+            "table_meta": "{\"tables\": [{\"fields\": [{\"name\": \"Province/State\", \"type\": \"text\"}, {\"name\": \"Country/Region\", \"type\": \"text\"}, {\"name\": \"Lat\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Long\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Date\", \"type\": \"datetime\"}, {\"name\": \"Confirmed\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Deaths\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Recovered\", \"type\": \"number\", \"subtype\": \"integer\"}]}]}"
+        },
+        {
+            "operations": [
+                {
+                    "OpType": "FilterOpBase",
+                    "SubopType": "GreaterFilterOp",
+                    "column_name": "Long",
+                    "iotype": [
+                        "float",
+                        "float"
+                    ],
+                    "hyper_parameter_settings": {}
+                },
+                {
+                    "OpType": "AggregationOpBase",
+                    "SubopType": "CountAggregationOp",
+                    "column_name": null,
+                    "iotype": [
+                        null,
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                }
+            ],
+            "entity_col": "Country/Region",
+            "time_col": "Date",
+            "table_meta": "{\"tables\": [{\"fields\": [{\"name\": \"Province/State\", \"type\": \"text\"}, {\"name\": \"Country/Region\", \"type\": \"text\"}, {\"name\": \"Lat\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Long\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Date\", \"type\": \"datetime\"}, {\"name\": \"Confirmed\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Deaths\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Recovered\", \"type\": \"number\", \"subtype\": \"integer\"}]}]}"
+        },
+        {
+            "operations": [
+                {
+                    "OpType": "FilterOpBase",
+                    "SubopType": "GreaterFilterOp",
+                    "column_name": "Confirmed",
+                    "iotype": [
+                        "integer",
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                },
+                {
+                    "OpType": "AggregationOpBase",
+                    "SubopType": "CountAggregationOp",
+                    "column_name": null,
+                    "iotype": [
+                        null,
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                }
+            ],
+            "entity_col": "Country/Region",
+            "time_col": "Date",
+            "table_meta": "{\"tables\": [{\"fields\": [{\"name\": \"Province/State\", \"type\": \"text\"}, {\"name\": \"Country/Region\", \"type\": \"text\"}, {\"name\": \"Lat\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Long\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Date\", \"type\": \"datetime\"}, {\"name\": \"Confirmed\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Deaths\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Recovered\", \"type\": \"number\", \"subtype\": \"integer\"}]}]}"
+        },
+        {
+            "operations": [
+                {
+                    "OpType": "FilterOpBase",
+                    "SubopType": "GreaterFilterOp",
+                    "column_name": "Deaths",
+                    "iotype": [
+                        "integer",
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                },
+                {
+                    "OpType": "AggregationOpBase",
+                    "SubopType": "CountAggregationOp",
+                    "column_name": null,
+                    "iotype": [
+                        null,
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                }
+            ],
+            "entity_col": "Country/Region",
+            "time_col": "Date",
+            "table_meta": "{\"tables\": [{\"fields\": [{\"name\": \"Province/State\", \"type\": \"text\"}, {\"name\": \"Country/Region\", \"type\": \"text\"}, {\"name\": \"Lat\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Long\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Date\", \"type\": \"datetime\"}, {\"name\": \"Confirmed\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Deaths\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Recovered\", \"type\": \"number\", \"subtype\": \"integer\"}]}]}"
+        },
+        {
+            "operations": [
+                {
+                    "OpType": "FilterOpBase",
+                    "SubopType": "GreaterFilterOp",
+                    "column_name": "Recovered",
+                    "iotype": [
+                        "integer",
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                },
+                {
+                    "OpType": "AggregationOpBase",
+                    "SubopType": "CountAggregationOp",
+                    "column_name": null,
+                    "iotype": [
+                        null,
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                }
+            ],
+            "entity_col": "Country/Region",
+            "time_col": "Date",
+            "table_meta": "{\"tables\": [{\"fields\": [{\"name\": \"Province/State\", \"type\": \"text\"}, {\"name\": \"Country/Region\", \"type\": \"text\"}, {\"name\": \"Lat\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Long\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Date\", \"type\": \"datetime\"}, {\"name\": \"Confirmed\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Deaths\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Recovered\", \"type\": \"number\", \"subtype\": \"integer\"}]}]}"
+        },
+        {
+            "operations": [
+                {
+                    "OpType": "FilterOpBase",
+                    "SubopType": "LessFilterOp",
+                    "column_name": "Lat",
+                    "iotype": [
+                        "float",
+                        "float"
+                    ],
+                    "hyper_parameter_settings": {}
+                },
+                {
+                    "OpType": "AggregationOpBase",
+                    "SubopType": "CountAggregationOp",
+                    "column_name": null,
+                    "iotype": [
+                        null,
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                }
+            ],
+            "entity_col": "Country/Region",
+            "time_col": "Date",
+            "table_meta": "{\"tables\": [{\"fields\": [{\"name\": \"Province/State\", \"type\": \"text\"}, {\"name\": \"Country/Region\", \"type\": \"text\"}, {\"name\": \"Lat\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Long\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Date\", \"type\": \"datetime\"}, {\"name\": \"Confirmed\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Deaths\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Recovered\", \"type\": \"number\", \"subtype\": \"integer\"}]}]}"
+        },
+        {
+            "operations": [
+                {
+                    "OpType": "FilterOpBase",
+                    "SubopType": "LessFilterOp",
+                    "column_name": "Long",
+                    "iotype": [
+                        "float",
+                        "float"
+                    ],
+                    "hyper_parameter_settings": {}
+                },
+                {
+                    "OpType": "AggregationOpBase",
+                    "SubopType": "CountAggregationOp",
+                    "column_name": null,
+                    "iotype": [
+                        null,
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                }
+            ],
+            "entity_col": "Country/Region",
+            "time_col": "Date",
+            "table_meta": "{\"tables\": [{\"fields\": [{\"name\": \"Province/State\", \"type\": \"text\"}, {\"name\": \"Country/Region\", \"type\": \"text\"}, {\"name\": \"Lat\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Long\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Date\", \"type\": \"datetime\"}, {\"name\": \"Confirmed\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Deaths\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Recovered\", \"type\": \"number\", \"subtype\": \"integer\"}]}]}"
+        },
+        {
+            "operations": [
+                {
+                    "OpType": "FilterOpBase",
+                    "SubopType": "LessFilterOp",
+                    "column_name": "Confirmed",
+                    "iotype": [
+                        "integer",
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                },
+                {
+                    "OpType": "AggregationOpBase",
+                    "SubopType": "CountAggregationOp",
+                    "column_name": null,
+                    "iotype": [
+                        null,
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                }
+            ],
+            "entity_col": "Country/Region",
+            "time_col": "Date",
+            "table_meta": "{\"tables\": [{\"fields\": [{\"name\": \"Province/State\", \"type\": \"text\"}, {\"name\": \"Country/Region\", \"type\": \"text\"}, {\"name\": \"Lat\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Long\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Date\", \"type\": \"datetime\"}, {\"name\": \"Confirmed\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Deaths\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Recovered\", \"type\": \"number\", \"subtype\": \"integer\"}]}]}"
+        },
+        {
+            "operations": [
+                {
+                    "OpType": "FilterOpBase",
+                    "SubopType": "LessFilterOp",
+                    "column_name": "Deaths",
+                    "iotype": [
+                        "integer",
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                },
+                {
+                    "OpType": "AggregationOpBase",
+                    "SubopType": "CountAggregationOp",
+                    "column_name": null,
+                    "iotype": [
+                        null,
+                        "integer"
+                    ],
+                    "hyper_parameter_settings": {}
+                }
+            ],
+            "entity_col": "Country/Region",
+            "time_col": "Date",
+            "table_meta": "{\"tables\": [{\"fields\": [{\"name\": \"Province/State\", \"type\": \"text\"}, {\"name\": \"Country/Region\", \"type\": \"text\"}, {\"name\": \"Lat\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Long\", \"type\": \"number\", \"subtype\": \"float\"}, {\"name\": \"Date\", \"type\": \"datetime\"}, {\"name\": \"Confirmed\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Deaths\", \"type\": \"number\", \"subtype\": \"integer\"}, {\"name\": \"Recovered\", \"type\": \"number\", \"subtype\": \"integer\"}]}]}"
+        }
+    ],
+    "table_meta": {
+        "tables": [
+            {
+                "fields": [
+                    {
+                        "name": "Province/State",
+                        "type": "text"
+                    },
+                    {
+                        "name": "Country/Region",
+                        "type": "text"
+                    },
+                    {
+                        "name": "Lat",
+                        "type": "number",
+                        "subtype": "float"
+                    },
+                    {
+                        "name": "Long",
+                        "type": "number",
+                        "subtype": "float"
+                    },
+                    {
+                        "name": "Date",
+                        "type": "datetime"
+                    },
+                    {
+                        "name": "Confirmed",
+                        "type": "number",
+                        "subtype": "integer"
+                    },
+                    {
+                        "name": "Deaths",
+                        "type": "number",
+                        "subtype": "integer"
+                    },
+                    {
+                        "name": "Recovered",
+                        "type": "number",
+                        "subtype": "integer"
+                    }
+                ]
+            }
+        ]
+    },
+    "entity_id_column": "Country/Region",
+    "label_generating_column": "Deaths",
+    "time_column": "Date"
+}

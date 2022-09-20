@@ -103,3 +103,6 @@ ENV/
 
 
 .pred_prob/
+
+.flight-delay/flight-delays/flight-clean.csv
+.flight-delay/flight-delays/flights.csv

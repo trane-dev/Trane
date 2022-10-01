@@ -16,7 +16,10 @@ requirements = [
     'pandas<0.21;python_version<"3.5"',
     'numpy>=1.13.0',
     'python_dateutil>=2.6.0',
-    'scipy>=1.0.0'
+    'scipy>=1.0.0',
+    'composeml',
+    'featuretools', 
+    'dill'
 ]
 
 setup_requirements = ['pytest-runner', ]

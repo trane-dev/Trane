@@ -26,14 +26,16 @@ class CutoffStrategy:
 
 
 class FixWindowCutoffStrategy(CutoffStrategy):
-    def __init__(self, entity_col, cutoff_base, cutoff_end, cutoff_window):
-        self.description = "in next {} days".format(cutoff_window)
-        self.cutoff_base = cutoff_base
-        self.cutoff_end = cutoff_end
-        self.cutoff_window = cutoff_window
-        self.entity_col = entity_col
+    def __init__(self, entity_col, window_size, minimum_data=None, maximum_data=None, gap=None):
+        self.target_dataframe_name = entity_col
+        self.window_size = window_size
+        self.minimum_data = minimum_data
+        self.maximum_data = maximum_data
+        self.gap = gap
+        self.description = "in next {} days".format(window_size)
 
     def generate_cutoffs(self, df):
+        ## DEPRECATED ##
         cutoff_st_ed_pairs = []
 
         current = self.cutoff_base
@@ -50,3 +52,6 @@ class FixWindowCutoffStrategy(CutoffStrategy):
                 entity_cutoffs.append((entity_name, cutoff_st, cutoff_ed))
 
         return pd.DataFrame(entity_cutoffs, columns=[self.entity_col, "cutoff_st", "cutoff_ed"])
+    
+    def kwarg_dict(self):
+        return { k: v for k, v in self.__dict__.items() if v is not None}

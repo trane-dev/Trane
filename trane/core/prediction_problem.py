@@ -5,6 +5,7 @@ import os
 import dill
 import numpy as np
 import pandas as pd
+import composeml as cp
 
 from ..ops.aggregation_ops import *  # noqa
 from ..ops.filter_ops import *  # noqa
@@ -15,14 +16,14 @@ __all__ = ['PredictionProblem']
 
 
 class PredictionProblem:
+
     """
     Prediction Problem is made up of a series of Operations. It also contains
     information about the types expected as the input and output of
     each operation.
     """
 
-    def __init__(self, operations, entity_col, time_col,
-                 table_meta=None, cutoff_strategy=None):
+    def __init__(self, operations, entity_col, time_col, table_meta=None, cutoff_strategy=None):
         """
         Parameters
         ----------
@@ -39,6 +40,13 @@ class PredictionProblem:
         self.table_meta = table_meta
         self.cutoff_strategy = cutoff_strategy
         self.label_type = None
+
+        self._label_maker = cp.LabelMaker(
+            target_datatframe_name=entity_col,
+            time_index=time_col,
+            labeling_function=self._execute_operations_on_df,
+            window_size=cutoff_strategy.window_size
+        )
 
     def is_valid(self, table_meta=None):
         '''
@@ -74,7 +82,7 @@ class PredictionProblem:
         else:
             return False
 
-    def execute(self, df):
+    def execute(self, df, num_examples_per_instance, minimum_data=None, maximum_data=None, gap=None, drop_empty=True, verbose=True, *args, **kwargs):
         '''
         Executes the problem's operations on a dataframe. Generates
         '''
@@ -87,36 +95,26 @@ class PredictionProblem:
                 'problem\'s table meta. Therefore, the problem is not '
                 'valid.')
 
-        assert self.cutoff_strategy is not None
+        default_kwarg = self.cutoff_strategy.kwarg_dict()
+        kwargs = {
+            "minimum_data": minimum_data or default_kwarg.get('minimum_data'),
+            "maximum_data": maximum_data or default_kwarg.get('maximum_data'),
+            "gap": gap or default_kwarg.get('gap')
+        }
 
-        df = df.copy()
-        cutoffs = self.cutoff_strategy.generate_cutoffs(df)
-        cutoffs.set_index([self.entity_col], inplace=True)
+        lt = self._label_maker.search(
+            df=df,
+            num_examples_per_instance=num_examples_per_instance,
+            minimum_data=kwargs['minimum_data'],
+            maximum_data=kwargs['maximum_data'],
+            gap=kwargs['gap'],
+            drop_empty=drop_empty,
+            verbose=verbose,
+            *args,
+            **kwargs
+        )
 
-        res_list = []
-
-        grouped = df.groupby(self.entity_col)
-
-        for entity_name, sub_df in grouped:
-            sub_cutoffs = cutoffs.loc[entity_name]
-
-            for row_id, row in sub_cutoffs.iterrows():
-                cutoff_st = row['cutoff_st']
-                cutoff_ed = row['cutoff_ed']
-
-                df_labeling = sub_df.loc[
-                    (sub_df[self.time_col] >= cutoff_st) & (sub_df[self.time_col] < cutoff_ed)]
-
-                label = self._execute_operations_on_df(
-                    df_labeling)
-
-                # add the label to the results dictionary
-                res_list.append((entity_name, cutoff_st, cutoff_ed, label))
-
-        res = pd.DataFrame(data=res_list,
-                           columns=[self.entity_col, 'cutoff_st', 'cutoff_ed', 'label'])
-        res.set_index([self.entity_col, 'cutoff_st', 'cutoff_ed'], inplace=True)
-        return res
+        return lt
 
     def _execute_operations_on_df(self, df):
         '''
@@ -178,10 +176,10 @@ class PredictionProblem:
     def _describe_aggop(self, op):
         agg_op_str_dict = {
             SumAggregationOp: " the total <{}> in all related records",
-            AvgAggregationOp: " the average of <{}> in all related records",
-            MaxAggregationOp: " the maximum of <{}> in all related records",
-            MinAggregationOp: " the minimum of <{}> in all related records",
-            MajorityAggregationOp: " the majority of <{}> in all related records"
+            AvgAggregationOp: " the average <{}> in all related records",
+            MaxAggregationOp: " the maximum <{}> in all related records",
+            MinAggregationOp: " the minimum <{}> in all related records",
+            MajorityAggregationOp: " the majority <{}> in all related records"
         }
 
         if isinstance(op, CountAggregationOp):
@@ -458,3 +456,10 @@ class PredictionProblem:
         else:
             logging.critical(
                 'check_type function received an unexpected type.')
+
+    def set_parameters(self, **parameters):
+        for operation in self.operations:
+            settings = operation.hyper_parameter_settings
+            for parameter in operation.REQUIRED_PARAMETERS:
+                for key in parameter:
+                    settings[key] = parameters.get(key, 0)

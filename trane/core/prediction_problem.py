@@ -42,7 +42,7 @@ class PredictionProblem:
         self.label_type = None
 
         self._label_maker = cp.LabelMaker(
-            target_datatframe_name=entity_col,
+            target_dataframe_name=entity_col,
             time_index=time_col,
             labeling_function=self._execute_operations_on_df,
             window_size=cutoff_strategy.window_size

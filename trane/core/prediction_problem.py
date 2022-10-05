@@ -96,7 +96,7 @@ class PredictionProblem:
                 'valid.')
 
         default_kwarg = self.cutoff_strategy.kwarg_dict()
-        kwargs = {
+        search_kwargs = {
             "minimum_data": minimum_data or default_kwarg.get('minimum_data'),
             "maximum_data": maximum_data or default_kwarg.get('maximum_data'),
             "gap": gap or default_kwarg.get('gap')
@@ -105,9 +105,9 @@ class PredictionProblem:
         lt = self._label_maker.search(
             df=df,
             num_examples_per_instance=num_examples_per_instance,
-            minimum_data=kwargs['minimum_data'],
-            maximum_data=kwargs['maximum_data'],
-            gap=kwargs['gap'],
+            minimum_data=search_kwargs['minimum_data'],
+            maximum_data=search_kwargs['maximum_data'],
+            gap=search_kwargs['gap'],
             drop_empty=drop_empty,
             verbose=verbose,
             *args,

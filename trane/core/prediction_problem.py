@@ -41,11 +41,13 @@ class PredictionProblem:
         self.cutoff_strategy = cutoff_strategy
         self.label_type = None
 
+        window_size = cutoff_strategy.window_size if cutoff_strategy else None
+
         self._label_maker = cp.LabelMaker(
             target_dataframe_name=entity_col,
             time_index=time_col,
             labeling_function=self._execute_operations_on_df,
-            window_size=cutoff_strategy.window_size
+            window_size=window_size
         )
 
     def is_valid(self, table_meta=None):

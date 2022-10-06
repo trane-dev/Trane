@@ -97,7 +97,7 @@ class PredictionProblem:
                 'problem\'s table meta. Therefore, the problem is not '
                 'valid.')
 
-        default_kwarg = self.cutoff_strategy.kwarg_dict()
+        default_kwarg = self.cutoff_strategy.kwarg_dict() if self.cutoff_strategy else {}
         search_kwargs = {
             "minimum_data": minimum_data or default_kwarg.get('minimum_data'),
             "maximum_data": maximum_data or default_kwarg.get('maximum_data'),

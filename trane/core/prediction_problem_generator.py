@@ -1,4 +1,5 @@
 import itertools
+import copy
 
 from ..ops import aggregation_ops as agg_ops
 from ..ops import filter_ops
@@ -38,7 +39,7 @@ class PredictionProblemGenerator:
         self.cutoff_strategy=cutoff_strategy
         self.ensure_valid_inputs()
 
-    def generate(self):
+    def generate(self, df_sample):
         """
         Generate the prediction problems. The prediction problems operations
         hyper parameters are also set.
@@ -82,8 +83,9 @@ class PredictionProblemGenerator:
                 table_meta=self.table_meta, cutoff_strategy=self.cutoff_strategy)
 
             if problem.is_valid():
-                problems.append(problem)
-                success_attempts += 1
+                for final_problem, _ in self._threshold_recommend(problem, df_sample):
+                    problems.append(final_problem)
+                    success_attempts += 1
         print("\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts))
         return problems
 
@@ -95,3 +97,34 @@ class PredictionProblemGenerator:
         assert(self.table_meta.get_type(self.entity_col)
                in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
                    TableMeta.TYPE_CATEGORY])
+
+    def _categorical_threshold(self, df_col, k=3):
+        counter = {}
+        for item in df_col:
+            try:
+                counter[item] += 1
+            except BaseException:
+                counter[item] = 1
+
+        counter_tuple = list(counter.items())
+        counter_tuple = sorted(counter_tuple, key=lambda x: -x[1])
+        counter_tuple = counter_tuple[:3]
+        return [item[0] for item in counter_tuple]
+    
+    def _threshold_recommend(self, problem, df_sample):
+        filter_op = problem.operations[0]
+        if len(filter_op.REQUIRED_PARAMETERS) == 0:
+            yield copy.deepcopy(problem), "no threshold"
+        else:
+            if filter_op.input_type == TableMeta.TYPE_CATEGORY:
+                for item in self._categorical_threshold(df_sample[filter_op.column_name]):
+                    problem_final = copy.deepcopy(problem)
+                    problem_final.operations[0].set_hyper_parameter(item)
+                    yield problem_final, "threshold: {}".format(item)
+            elif filter_op.input_type in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER]:
+                for keep_rate in [0.25, 0.5, 0.75]:
+                    threshold = filter_op.find_threshhold_by_remaining(
+                        fraction_of_data_target=keep_rate, df=df_sample, col=filter_op.column_name)
+                    problem_final = copy.deepcopy(problem)
+                    problem_final.operations[0].set_hyper_parameter(threshold)
+                    yield problem_final, "threshold: {} (keep {}%)".format(threshold, keep_rate * 100)

@@ -39,7 +39,7 @@ class PredictionProblemGenerator:
         self.cutoff_strategy=cutoff_strategy
         self.ensure_valid_inputs()
 
-    def generate(self, df_sample):
+    def generate(self, df_sample=None, generate_thresholds=False):
         """
         Generate the prediction problems. The prediction problems operations
         hyper parameters are also set.
@@ -51,6 +51,8 @@ class PredictionProblemGenerator:
         -------
         problems: a list of Prediction Problem objects.
         """
+        if generate_thresholds and df_sample is None:
+            raise ValueError('Must provide a dataframe sample to generate thresholds')
 
         # a list of problems that will eventually be returned
         problems = []
@@ -82,12 +84,39 @@ class PredictionProblemGenerator:
                 operations=operations, entity_col=self.entity_col, time_col=self.time_col,
                 table_meta=self.table_meta, cutoff_strategy=self.cutoff_strategy)
 
-            if problem.is_valid():
+            if problem.is_valid() and generate_thresholds:
                 for final_problem, _ in self._threshold_recommend(problem, df_sample):
                     problems.append(final_problem)
                     success_attempts += 1
+            elif problem.is_valid():
+                problems.append(problem)
+                success_attempts += 1
+
         print("\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts))
         return problems
+
+    def generate_thresholds(self, problems, df_sample):
+        '''
+        Generate thresholds for all problems in a list of prediction problems if 
+        thresholds can be generated for them.
+
+        Parameters
+        ----------
+        problems: a list of Prediction Problem objects that may need thresholds
+        to be set
+        df_sample: a sample of the dataframe that will be used to execute the
+        prediction problems to generate thresholds from
+
+        Returns
+        -------
+        problems: a list of Prediction Problem objects with thresholds set or the 
+        original problem if no thresholds are needed. 
+        '''
+        final_problems = []
+        for problem in problems:
+            for final_problem, _ in self._threshold_recommend(problem, df_sample):
+                final_problems.append(final_problem)
+        return final_problems
 
     def ensure_valid_inputs(self):
         """

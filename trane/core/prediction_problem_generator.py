@@ -141,19 +141,28 @@ class PredictionProblemGenerator:
         return [item[0] for item in counter_tuple]
     
     def _threshold_recommend(self, problem, df_sample):
+        yielded_thresholds = []
         filter_op = problem.operations[0]
         if len(filter_op.REQUIRED_PARAMETERS) == 0:
             yield copy.deepcopy(problem), "no threshold"
         else:
             if filter_op.input_type == TableMeta.TYPE_CATEGORY:
                 for item in self._categorical_threshold(df_sample[filter_op.column_name]):
-                    problem_final = copy.deepcopy(problem)
-                    problem_final.operations[0].set_hyper_parameter(item)
-                    yield problem_final, "threshold: {}".format(item)
+                    if item not in yielded_thresholds:
+                        yielded_thresholds.append(item)
+                        problem_final = copy.deepcopy(problem)
+                        problem_final.operations[0].set_hyper_parameter(item)
+                        yield problem_final, "threshold: {}".format(item)
+                    else:
+                        continue
             elif filter_op.input_type in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER]:
                 for keep_rate in [0.25, 0.5, 0.75]:
                     threshold = filter_op.find_threshhold_by_remaining(
                         fraction_of_data_target=keep_rate, df=df_sample, col=filter_op.column_name)
-                    problem_final = copy.deepcopy(problem)
-                    problem_final.operations[0].set_hyper_parameter(threshold)
-                    yield problem_final, "threshold: {} (keep {}%)".format(threshold, keep_rate * 100)
+                    if threshold not in yielded_thresholds:
+                        yielded_thresholds.append(threshold)
+                        problem_final = copy.deepcopy(problem)
+                        problem_final.operations[0].set_hyper_parameter(threshold)
+                        yield problem_final, "threshold: {} (keep {}%)".format(threshold, keep_rate * 100)
+                    else:
+                        continue

@@ -39,13 +39,19 @@ class PredictionProblemGenerator:
         self.cutoff_strategy=cutoff_strategy
         self.ensure_valid_inputs()
 
-    def generate(self, df_sample=None, generate_thresholds=False):
+    def generate(self, df_sample=None, generate_thresholds=False, n_problems=None):
         """
         Generate the prediction problems. The prediction problems operations
         hyper parameters are also set.
 
         Parameters
         ----------
+        df_sample (optional, pd.DataFrame): Dataframe sample to use to generate relevant thresholds.
+            Defaults to None (does not automatically generate thresholds).
+        generate_thresholds (optional, bool): Whether to automatically generate thresholds for problems.
+            Defaults to False.
+        n_problems (optional, int): Maximum number of problems to generate. Defaults to generating all possible
+            problems. 
 
         Returns
         -------
@@ -91,6 +97,8 @@ class PredictionProblemGenerator:
             elif problem.is_valid():
                 problems.append(problem)
                 success_attempts += 1
+            if n_problems and success_attempts > n_problems:
+                break
 
         print("\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts))
         return problems

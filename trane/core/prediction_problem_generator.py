@@ -97,7 +97,7 @@ class PredictionProblemGenerator:
             elif problem.is_valid():
                 problems.append(problem)
                 success_attempts += 1
-            if n_problems and success_attempts > n_problems:
+            if n_problems and success_attempts >= n_problems:
                 break
 
         print("\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts))

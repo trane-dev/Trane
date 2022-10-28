@@ -34,9 +34,15 @@ def test_op_type_check_with_correct_type1():
     """
     meta = TM({
         "tables": [
-            {"fields": [{'name': 'col', 'type': TM.SUPERTYPE[
-                TM.TYPE_FLOAT], 'subtype': TM.TYPE_FLOAT}]}
-        ]})
+            {
+                "fields": [{
+                    'name': 'col', 'type': TM.SUPERTYPE[
+                    TM.TYPE_FLOAT
+                    ], 'subtype': TM.TYPE_FLOAT,
+                }],
+            },
+        ],
+    })
     op = FakeOp('col')
     meta2 = op.op_type_check(meta)
     assert meta2 == meta
@@ -50,8 +56,9 @@ def test_op_type_check_with_correct_type2():
     """
     meta = TM({
         "tables": [
-            {"fields": [{'name': 'col', 'type': TM.TYPE_TEXT}]}
-        ]})
+            {"fields": [{'name': 'col', 'type': TM.TYPE_TEXT}]},
+        ],
+    })
     op = FakeOp('col')
     meta2 = op.op_type_check(meta)
     assert meta2 == meta
@@ -65,8 +72,9 @@ def test_op_type_check_with_wrong_type():
     """
     meta = TM({
         "tables": [
-            {"fields": [{'name': 'col', 'type': TM.TYPE_IDENTIFIER}]}
-        ]})
+            {"fields": [{'name': 'col', 'type': TM.TYPE_IDENTIFIER}]},
+        ],
+    })
     op = FakeOp('col')
     meta2 = op.op_type_check(meta)
     assert meta2 is None
@@ -78,9 +86,9 @@ def test_op_equality():
     column_name = "test"
     id_row_op = IdentityRowOp(column_name)
     id_row_op_clone = IdentityRowOp(column_name)
-    assert(id_row_op == id_row_op_clone)
+    assert (id_row_op == id_row_op_clone)
 
     id_trans_op = IdentityTransformationOp(column_name)
     id_trans_op_clone = IdentityTransformationOp(column_name)
 
-    assert(id_trans_op == id_trans_op_clone)
+    assert (id_trans_op == id_trans_op_clone)

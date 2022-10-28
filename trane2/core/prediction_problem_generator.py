@@ -14,8 +14,10 @@ class PredictionProblemGenerator:
     Object for generating prediction problems on data.
     """
 
-    def __init__(self, table_meta, entity_col, time_col,
-                 label_col, filter_col):
+    def __init__(
+        self, table_meta, entity_col, time_col,
+        label_col, filter_col,
+    ):
         """
         Parameters
         ----------
@@ -55,8 +57,10 @@ class PredictionProblemGenerator:
         problems: a list of Prediction Problem objects.
         """
 
-        op_types = [agg_ops.AGGREGATION_OPS, trans_ops.TRANSFORMATION_OPS,
-                    row_ops.ROW_OPS, filter_ops.FILTER_OPS]
+        op_types = [
+            agg_ops.AGGREGATION_OPS, trans_ops.TRANSFORMATION_OPS,
+            row_ops.ROW_OPS, filter_ops.FILTER_OPS,
+        ]
 
         # a list of problems that will eventually be returned
         problems = []
@@ -80,12 +84,14 @@ class PredictionProblemGenerator:
             for op in operations:
                 op.auto_set_hyperparams(
                     df=df, label_col=self.label_col,
-                    entity_col=self.entity_col, filter_col=self.filter_col)
+                    entity_col=self.entity_col, filter_col=self.filter_col,
+                )
 
             problem = PredictionProblem(
                 operations=operations, entity_id_col=self.entity_col,
                 label_col=self.label_col,
-                table_meta=self.table_meta, cutoff_strategy=None)
+                table_meta=self.table_meta, cutoff_strategy=None,
+            )
 
             if problem.is_valid():
                 problems.append(problem)
@@ -97,9 +103,17 @@ class PredictionProblemGenerator:
         TypeChecking for the problem generator entity_col
         and label_col. Errors if types don't match up.
         """
-        assert(self.table_meta.get_type(self.entity_col)
-               in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
-                   TableMeta.TYPE_CATEGORY])
-        assert(self.table_meta.get_type(self.label_col)
-               in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER,
-                   TableMeta.TYPE_TEXT])
+        assert(
+            self.table_meta.get_type(self.entity_col)
+            in [
+                TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
+                TableMeta.TYPE_CATEGORY,
+            ]
+        )
+        assert(
+            self.table_meta.get_type(self.label_col)
+            in [
+                TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER,
+                TableMeta.TYPE_TEXT,
+            ]
+        )

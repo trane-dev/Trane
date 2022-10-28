@@ -1,10 +1,5 @@
-import logging
-import time
 import copy
 
-import pandas as pd
-
-from .prediction_problem_saver import prediction_problems_from_json_file
 from ..utils.table_meta import TableMeta as TM
 
 __all__ = ['Labeler']
@@ -17,8 +12,10 @@ class Labeler():
     The execute method performs the labelling operation.
     """
 
-    def __init__(self, df, entity_col, cutoff_strategy,
-                 sample=2000):
+    def __init__(
+        self, df, entity_col, cutoff_strategy,
+        sample=2000,
+    ):
         self.df = df
         self.sampled_df = df.sample(sample)
         self.entity_col = entity_col
@@ -37,7 +34,8 @@ class Labeler():
             elif filter_op.input_type in [TM.TYPE_FLOAT, TM.TYPE_INTEGER]:
                 for keep_rate in [0.25, 0.5, 0.75]:
                     threshold = filter_op.find_threshhold_by_remaining(
-                        fraction_of_data_target=keep_rate, df=self.sampled_df, col=filter_op.column_name)
+                        fraction_of_data_target=keep_rate, df=self.sampled_df, col=filter_op.column_name,
+                    )
                     problem_final = copy.deepcopy(problem)
                     problem_final.operations[0].set_hyper_parameter(threshold)
                     yield problem_final, "threshold: {} (keep {}%)".format(threshold, keep_rate * 100)
@@ -60,12 +58,14 @@ class Labeler():
 
         """
         dfs = []
-        columns = [entity_id_column, 'training_labels',
-                   'test_labels', 'training_cutoff_time', 'label_cutoff_time']
+        columns = [
+            entity_id_column, 'training_labels',
+            'test_labels', 'training_cutoff_time', 'label_cutoff_time',
+        ]
         for problem_final, threshold_description in self.threshold_recommend(problem):
             problem_final.cutoff_strategy = self.cutoff_strategy
             labels = problem_final.execute(self.df)
 
-            dfs.append([self.df,labels])
+            dfs.append([self.df, labels])
 
         return dfs

@@ -13,11 +13,13 @@ class TestPredictionProblemMethods(unittest.TestCase):
 
     def setUp(self):
         mock_op = self.create_patch(
-            'trane.ops.OpBase')
+            'trane.ops.OpBase',
+        )
         self.operations = [mock_op for x in range(4)]
 
         self.mock_cutoff_strategy = self.create_patch(
-            'trane.core.CutoffStrategy')
+            'trane.core.CutoffStrategy',
+        )
 
         self.entity_col = 'entity_col'
         self.label_col = 'label_col'
@@ -25,10 +27,12 @@ class TestPredictionProblemMethods(unittest.TestCase):
         self.problem = PredictionProblem(
             operations=self.operations, entity_id_col=self.entity_col,
             label_col=self.label_col,
-            cutoff_strategy=self.mock_cutoff_strategy)
+            cutoff_strategy=self.mock_cutoff_strategy,
+        )
 
         self.mock_dill = self.create_patch(
-            'trane.core.prediction_problem.dill')
+            'trane.core.prediction_problem.dill',
+        )
 
     def create_patch(self, name):
         # helper method for creating patches
@@ -40,8 +44,10 @@ class TestPredictionProblemMethods(unittest.TestCase):
     def test_attributes_assigned(self):
         self.assertEqual(self.problem.operations, self.operations)
         self.assertEqual(self.problem.entity_id_col, self.entity_col)
-        self.assertEqual(self.problem.cutoff_strategy,
-                         self.mock_cutoff_strategy)
+        self.assertEqual(
+            self.problem.cutoff_strategy,
+            self.mock_cutoff_strategy,
+        )
 
     def test_equality_false(self):
         entity_id = 'entity_col'
@@ -51,13 +57,15 @@ class TestPredictionProblemMethods(unittest.TestCase):
         problem_1 = PredictionProblem(
             operations=operations, entity_id_col=entity_id,
             label_col='label_col',
-            cutoff_strategy=mock_cutoff_strategy)
+            cutoff_strategy=mock_cutoff_strategy,
+        )
 
         # add a different magicmock for cutoff strategy
         problem_2 = PredictionProblem(
             operations=operations, entity_id_col=entity_id,
             label_col='label_col',
-            cutoff_strategy=MagicMock())
+            cutoff_strategy=MagicMock(),
+        )
         self.assertFalse(problem_1 == problem_2)
 
     def test_equality_false_diff_types(self):
@@ -72,12 +80,14 @@ class TestPredictionProblemMethods(unittest.TestCase):
         problem_1 = PredictionProblem(
             operations=operations, entity_id_col=entity_id,
             label_col='label_col',
-            cutoff_strategy=mock_cutoff_strategy)
+            cutoff_strategy=mock_cutoff_strategy,
+        )
 
         problem_2 = PredictionProblem(
             operations=operations, entity_id_col=entity_id,
             label_col='label_col',
-            cutoff_strategy=mock_cutoff_strategy)
+            cutoff_strategy=mock_cutoff_strategy,
+        )
         self.assertTrue(problem_1 == problem_2)
 
     def test_cutoff_strategy_exists(self):
@@ -96,13 +106,17 @@ class TestPredictionProblemMethods(unittest.TestCase):
             op.op_type_check.return_value = table_meta_mock
 
         self.assertTrue(
-            self.problem.is_valid(table_meta=table_meta_mock))
+            self.problem.is_valid(table_meta=table_meta_mock),
+        )
 
         self.assertTrue(table_meta_mock.copy.called)
         for op in self.problem.operations:
             self.assertTrue(op.op_type_check.called)
-            self.assertTrue(op.op_type_check.call_args[
-                            0][0] == table_meta_mock)
+            self.assertTrue(
+                op.op_type_check.call_args[
+                0
+                ][0] == table_meta_mock,
+            )
 
     def test_is_valid_fails(self):
         table_meta_mock = MagicMock()
@@ -112,7 +126,8 @@ class TestPredictionProblemMethods(unittest.TestCase):
             op.op_type_check.return_value = None
 
         self.assertFalse(
-            self.problem.is_valid(table_meta=table_meta_mock))
+            self.problem.is_valid(table_meta=table_meta_mock),
+        )
 
         self.assertTrue(table_meta_mock.copy.called)
 
@@ -144,11 +159,13 @@ class TestPredictionProblemMethods(unittest.TestCase):
         # the operation has been called as many times as there are operations
         # remember, all operations are actually the same mock in set_up
         self.assertEqual(
-            self.operations[0].execute.call_count, len(self.operations))
+            self.operations[0].execute.call_count, len(self.operations),
+        )
 
         # the operation is passed the mock_df
         self.assertEqual(
-            self.operations[0].execute.call_args[0][0], mock_df)
+            self.operations[0].execute.call_args[0][0], mock_df,
+        )
 
     def test_rename_columns(self):
         self.assertIsNotNone(self.problem._rename_columns)
@@ -182,12 +199,16 @@ class TestPredictionProblemMethods(unittest.TestCase):
         '''
         self.assertIsNotNone(self.problem.execute)
         df = pd.DataFrame(
-            [(100, 0, 0, 5.32, 19.7, 53.89, 1, np.datetime64('2000-01-01')),
-             (200, 0, 1, 1.08, 6.78, 18.89, 2, np.datetime64('2000-01-01')),
-             (100, 0, 2, 4.69, 14.11, 41.35, 4, np.datetime64('2000-01-01'))],
+            [
+                (100, 0, 0, 5.32, 19.7, 53.89, 1, np.datetime64('2000-01-01')),
+                (200, 0, 1, 1.08, 6.78, 18.89, 2, np.datetime64('2000-01-01')),
+                (100, 0, 2, 4.69, 14.11, 41.35, 4, np.datetime64('2000-01-01')),
+            ],
             columns=[
                 "vendor_id", "taxi_id", "trip_id", "distance",
-                "duration", "fare", "num_passengers", "date"])
+                "duration", "fare", "num_passengers", "date",
+            ],
+        )
 
     #     # set some things on this problem, since it's an integration test
         static_cutoff = np.datetime64('1980-02-25')
@@ -197,13 +218,15 @@ class TestPredictionProblemMethods(unittest.TestCase):
         # operation.execute all return the same thing
         op_mock = MagicMock(name='operation')
         op_mock.execute.return_value = pd.DataFrame(
-            [[1, 2, 0]], columns=[self.entity_col, 'a', 'fare'])
+            [[1, 2, 0]], columns=[self.entity_col, 'a', 'fare'],
+        )
         operations = [op_mock for x in range(4)]
 
         # prediction problem gets new mock operations
         self.problem = PredictionProblem(
             operations=operations, entity_id_col=self.entity_col,
-            label_col='fare', cutoff_strategy=self.mock_cutoff_strategy)
+            label_col='fare', cutoff_strategy=self.mock_cutoff_strategy,
+        )
 
         is_valid_mock = MagicMock()
         self.problem.is_valid = is_valid_mock
@@ -232,7 +255,8 @@ class TestPredictionProblemMethods(unittest.TestCase):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             res_dict = self.problem._insert_single_label_into_dict(
-                entity_id, label_series, cutoff, res_dict)
+                entity_id, label_series, cutoff, res_dict,
+            )
             assert len(w) == 0
 
         self.assertEqual(res_dict[entity_id][0], cutoff)
@@ -251,7 +275,8 @@ class TestPredictionProblemMethods(unittest.TestCase):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             res_dict = self.problem._insert_single_label_into_dict(
-                entity_id, label_series, cutoff, res_dict)
+                entity_id, label_series, cutoff, res_dict,
+            )
             assert len(w) == 1
 
         self.assertEqual(res_dict[entity_id][0], cutoff)
@@ -271,7 +296,8 @@ class TestPredictionProblemMethods(unittest.TestCase):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             res_dict = self.problem._insert_single_label_into_dict(
-                entity_id, label_df, cutoff, res_dict)
+                entity_id, label_df, cutoff, res_dict,
+            )
             assert len(w) == 1
 
         # assert that the results dict is untouched
@@ -282,11 +308,13 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
 
     def setUp(self):
         mock_op = self.create_patch(
-            'trane.ops.OpBase')
+            'trane.ops.OpBase',
+        )
         self.operations = [mock_op for x in range(4)]
 
         self.mock_cutoff_strategy = self.create_patch(
-            'trane.core.CutoffStrategy')
+            'trane.core.CutoffStrategy',
+        )
         self.table_meta = MagicMock(name='table_meta')
 
         self.entity_col = 'entity_col'
@@ -295,10 +323,12 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
         self.problem = PredictionProblem(
             operations=self.operations, entity_id_col=self.entity_col,
             label_col=self.label_col, table_meta=self.table_meta,
-            cutoff_strategy=self.mock_cutoff_strategy)
+            cutoff_strategy=self.mock_cutoff_strategy,
+        )
 
         self.mock_dill = self.create_patch(
-            'trane.core.prediction_problem.dill')
+            'trane.core.prediction_problem.dill',
+        )
 
     def create_patch(self, name):
         # helper method for creating patches
@@ -312,7 +342,8 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
         json_patch = self.create_patch('trane.core.prediction_problem.json')
 
         op_to_json_patch = self.create_patch(
-            'trane.core.prediction_problem.op_to_json')
+            'trane.core.prediction_problem.op_to_json',
+        )
         op_to_json_patch.return_value = {'op': 'exists'}
 
         self.problem.table_meta.to_json.return_value = {'table_meta': 'exists'}
@@ -324,25 +355,31 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
 
     def test_from_json(self):
         json_loads_patch = self.create_patch(
-            'trane.core.prediction_problem.json.loads')
+            'trane.core.prediction_problem.json.loads',
+        )
         json_dumps_patch = self.create_patch(
-            'trane.core.prediction_problem.json.dumps')
+            'trane.core.prediction_problem.json.dumps',
+        )
         op_from_json_patch = self.create_patch(
-            'trane.core.prediction_problem.op_from_json')
+            'trane.core.prediction_problem.op_from_json',
+        )
         op_from_json_patch.return_value = op_from_json_patch
 
         table_meta_from_json_patch = self.create_patch(
-            'trane.core.prediction_problem.TableMeta.from_json')
+            'trane.core.prediction_problem.TableMeta.from_json',
+        )
         table_meta_from_json_patch.return_value = table_meta_from_json_patch
 
         data = MagicMock(name='data')
         json_loads_patch.return_value = data
 
         # mock out json_data['operations']
-        attr_dict = {'operations': [1, 2, 3],
-                     'entity_id_col': 'entity_id_col',
-                     'label_col': 'label_col',
-                     'table_meta': 'table_meta'}
+        attr_dict = {
+            'operations': [1, 2, 3],
+            'entity_id_col': 'entity_id_col',
+            'label_col': 'label_col',
+            'table_meta': 'table_meta',
+        }
         data.__getitem__.side_effect = attr_dict.__getitem__
 
         json_dumps_patch.return_value = MagicMock(name='op')
@@ -357,22 +394,29 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
         self.assertIsNotNone(self.problem.save)
 
         dill_cutoff_strategy_patch = self.create_patch(
-            'trane.core.PredictionProblem._dill_cutoff_strategy')
+            'trane.core.PredictionProblem._dill_cutoff_strategy',
+        )
         os_path_exists_patch = self.create_patch(
-            'trane.core.prediction_problem.os.path.exists')
+            'trane.core.prediction_problem.os.path.exists',
+        )
         os_path_exists_patch.return_value = False
         to_json_patch = self.create_patch(
-            'trane.core.PredictionProblem.to_json')
+            'trane.core.PredictionProblem.to_json',
+        )
         dill_cutoff_strategy_patch = self.create_patch(
-            'trane.core.PredictionProblem._dill_cutoff_strategy')
+            'trane.core.PredictionProblem._dill_cutoff_strategy',
+        )
         json_patch = self.create_patch(
-            'trane.core.prediction_problem.json')
+            'trane.core.prediction_problem.json',
+        )
 
         path_patch = self.create_patch(
-            'trane.core.prediction_problem.os.path.isdir')
+            'trane.core.prediction_problem.os.path.isdir',
+        )
         path_patch.return_value = False
         makedirs_patch = self.create_patch(
-            'trane.core.prediction_problem.os.makedirs')
+            'trane.core.prediction_problem.os.makedirs',
+        )
 
         path = '../Data'
         problem_name = 'problem_name'
@@ -404,13 +448,17 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
             open_patch = self.create_patch('__builtin__.open')
 
         json_patch = self.create_patch(
-            'trane.core.prediction_problem.json')
+            'trane.core.prediction_problem.json',
+        )
         from_json_patch = self.create_patch(
-            'trane.core.PredictionProblem.from_json')
+            'trane.core.PredictionProblem.from_json',
+        )
         os_path_patch = self.create_patch(
-            'trane.core.prediction_problem.os.path')
+            'trane.core.prediction_problem.os.path',
+        )
         dill_patch = self.create_patch(
-            'trane.core.prediction_problem.dill')
+            'trane.core.prediction_problem.dill',
+        )
 
         PredictionProblem.load('filepath.json')
         self.assertTrue(open_patch.called)
@@ -425,18 +473,21 @@ class TestPredictionProblemSaveLoad(unittest.TestCase):
         cutoff_dill = self.problem._dill_cutoff_strategy()
 
         self.assertEqual(
-            cutoff_dill, self.mock_dill.dumps(self.mock_cutoff_strategy))
+            cutoff_dill, self.mock_dill.dumps(self.mock_cutoff_strategy),
+        )
 
 
 class TestPredictionProblemDescription(unittest.TestCase):
 
     def setUp(self):
         mock_op = self.create_patch(
-            'trane.ops.OpBase')
+            'trane.ops.OpBase',
+        )
         self.operations = [mock_op for x in range(4)]
 
         self.mock_cutoff_strategy = self.create_patch(
-            'trane.core.CutoffStrategy')
+            'trane.core.CutoffStrategy',
+        )
 
         self.entity_col = 'entity_col'
         self.label_col = 'label_col'
@@ -444,10 +495,12 @@ class TestPredictionProblemDescription(unittest.TestCase):
         self.problem = PredictionProblem(
             operations=self.operations, entity_id_col=self.entity_col,
             label_col=self.label_col,
-            cutoff_strategy=self.mock_cutoff_strategy)
+            cutoff_strategy=self.mock_cutoff_strategy,
+        )
 
         self.mock_dill = self.create_patch(
-            'trane.core.prediction_problem.dill')
+            'trane.core.prediction_problem.dill',
+        )
 
     def create_patch(self, name):
         # helper method for creating patches

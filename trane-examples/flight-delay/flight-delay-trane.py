@@ -5,13 +5,13 @@
 
 
 import json
-
-import pandas as pd
 from datetime import datetime, timedelta
 
-import trane
 import featuretools as ft
 import numpy as np
+import pandas as pd
+
+import trane
 
 
 def solve(entity_col):
@@ -48,33 +48,38 @@ def solve(entity_col):
     cutoff_end = datetime.strptime("2015-01-31", "%Y-%m-%d")
     cutoff_strategy = trane.FixWindowCutoffStrategy(entity_col, cutoff_base, cutoff_end, 1)
 
-    features = trane.FeaturetoolsWrapper(df_ft, entity_col, 'DATE',
-                                            {'DAY_OF_WEEK': ft.variable_types.Categorical,
-                                             'AIRLINE': ft.variable_types.Categorical,
-                                             'FLIGHT_NUMBER': ft.variable_types.Categorical,
-                                             'TAIL_NUMBER': ft.variable_types.Categorical,
-                                             'ORIGIN_AIRPORT': ft.variable_types.Categorical,
-                                             'DESTINATION_AIRPORT': ft.variable_types.Categorical,
-                                             'CANCELLED': ft.variable_types.Categorical,
-                                             'CANCELLATION_REASON': ft.variable_types.Categorical
-                                            }, 'flights')
+    features = trane.FeaturetoolsWrapper(
+        df_ft, entity_col, 'DATE',
+        {
+            'DAY_OF_WEEK': ft.variable_types.Categorical,
+             'AIRLINE': ft.variable_types.Categorical,
+             'FLIGHT_NUMBER': ft.variable_types.Categorical,
+             'TAIL_NUMBER': ft.variable_types.Categorical,
+             'ORIGIN_AIRPORT': ft.variable_types.Categorical,
+             'DESTINATION_AIRPORT': ft.variable_types.Categorical,
+             'CANCELLED': ft.variable_types.Categorical,
+             'CANCELLATION_REASON': ft.variable_types.Categorical,
+        }, 'flights',
+    )
     features.compute_features(df_ft, cutoff_strategy, 5)
 
 
     problem_generator = trane.PredictionProblemGenerator(
-        table_meta=meta, entity_col=entity_col, time_col="DATE")
+        table_meta=meta, entity_col=entity_col, time_col="DATE",
+    )
 
     problems = problem_generator.generate()
 
 
-    evaluator = trane.PredictionProblemEvaluator(df,
-                                                 entity_col=entity_col,
-                                                 cutoff_strategy=cutoff_strategy,
-                                                 min_train_set=20,
-                                                 min_test_set=20,
-                                                 previous_k_as_feature=2,
-                                                 latest_k_as_test=8
-                                                 )
+    evaluator = trane.PredictionProblemEvaluator(
+        df,
+        entity_col=entity_col,
+        cutoff_strategy=cutoff_strategy,
+        min_train_set=20,
+        min_test_set=20,
+        previous_k_as_feature=2,
+        latest_k_as_test=8,
+    )
 
 
     result = trane.multi_process_evaluation(evaluator, problems, features)

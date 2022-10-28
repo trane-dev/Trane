@@ -7,9 +7,15 @@ from trane.utils.table_meta import TableMeta as TM
 df = DataFrame({'col': [1, 2, 3, 4, 5]})
 meta = TM({
     "tables": [
-        {"fields": [{'name': 'col', 'type': TM.SUPERTYPE[
-            TM.TYPE_FLOAT], 'subtype': TM.TYPE_FLOAT}]}
-    ]})
+        {
+            "fields": [{
+                'name': 'col', 'type': TM.SUPERTYPE[
+                TM.TYPE_FLOAT
+                ], 'subtype': TM.TYPE_FLOAT,
+            }],
+        },
+    ],
+})
 
 # ObjectFrequencyTransformationOp('hi')
 
@@ -29,17 +35,27 @@ def test_diff_transformation_op_input_value():
 
 
 def test_ObjectFrequencyTransformationOp():
-    df = DataFrame([(1.0, 100), (2.0, 70), (3.0, 100),
-                    (4.0, 70), (5.0, 70)], columns=["id", "height"])
+    df = DataFrame(
+        [
+            (1.0, 100), (2.0, 70), (3.0, 100),
+            (4.0, 70), (5.0, 70),
+        ], columns=["id", "height"],
+    )
     op = ObjectFrequencyTransformationOp('height')
     op2 = ObjectFrequencyTransformationOp('id')
 
     output = op(df.copy())
     output2 = op2(df.copy())
 
-    expected = DataFrame([(1.0, 3), (2.0, 2)],
-                         columns=["id", "height"])
-    expected2 = DataFrame([(1, 100), (1, 70), (1, 100),
-                           (1, 70), (1, 70)], columns=["id", "height"])
-    assert(output.equals(expected))
-    assert(output2.equals(expected2))
+    expected = DataFrame(
+        [(1.0, 3), (2.0, 2)],
+        columns=["id", "height"],
+    )
+    expected2 = DataFrame(
+        [
+            (1, 100), (1, 70), (1, 100),
+            (1, 70), (1, 70),
+        ], columns=["id", "height"],
+    )
+    assert (output.equals(expected))
+    assert (output2.equals(expected2))

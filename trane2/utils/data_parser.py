@@ -98,5 +98,6 @@ def parse_data(dataframe, table_meta):
     for column in columns:
         if table_meta.get_type(column) == TM.TYPE_TIME:
             dataframe[column] = dataframe[column].apply(
-                lambda x: datetime.strptime(x, table_meta.get_property(column, "format")))
+                lambda x: datetime.strptime(x, table_meta.get_property(column, "format")),
+            )
     return dataframe

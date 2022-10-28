@@ -25,8 +25,10 @@ class PredictionProblem:
     each operation.
     """
 
-    def __init__(self, operations, entity_id_col,
-                 label_col, table_meta=None, cutoff_strategy=None):
+    def __init__(
+        self, operations, entity_id_col,
+        label_col, table_meta=None, cutoff_strategy=None,
+    ):
         """
         Parameters
         ----------
@@ -82,7 +84,8 @@ class PredictionProblem:
             raise ValueError(
                 'Your Problem\'s specified operations do not match with the '
                 'problem\'s table meta. Therefore, the problem is not '
-                'valid.')
+                'valid.',
+            )
 
         df = df.copy()
         grouped = df.groupby(self.entity_id_col)
@@ -95,21 +98,25 @@ class PredictionProblem:
             cutoff = None
             if self.cutoff_strategy:
                 cutoff = self.cutoff_strategy.generate_fn(
-                    df_group, self.entity_id_col)
+                    df_group, self.entity_id_col,
+                )
 
             label_series = self._execute_operations_on_df(
-                df_group)[self.label_col]
+                df_group,
+            )[self.label_col]
 
             # add the label to the results dictionary
             res_dict = self._insert_single_label_into_dict(
-                entity_id, label_series, cutoff, res_dict)
+                entity_id, label_series, cutoff, res_dict,
+            )
 
         res = pd.DataFrame.from_dict(data=res_dict, orient='index')
         self._rename_columns(res, [self.entity_id_col, 'cutoff', 'label'])
         return res
 
     def _insert_single_label_into_dict(
-            self, entity_id, label_series, cutoff, res_dict):
+            self, entity_id, label_series, cutoff, res_dict,
+    ):
         '''
         Inserts a single row of a dataframe into the passed dictionary and
         returns it.
@@ -132,12 +139,14 @@ class PredictionProblem:
                 str(entity_id) + ". This probably means you forgot to " +
                 "add an aggregation operation. Arbitrarily picking the " +
                 "first result.",
-                RuntimeWarning)
+                RuntimeWarning,
+            )
         elif num_rows < 1:
             warnings.warn(
                 "Operation returned fewer than 1 result for entity " +
                 str(entity_id) + ". Returning an unedited res_dict",
-                RuntimeWarning)
+                RuntimeWarning,
+            )
         if num_rows > 0:
             group_tuple = (cutoff, label_series.iloc[0])
             res_dict[entity_id] = group_tuple
@@ -252,7 +261,8 @@ class PredictionProblem:
         if not issubclass(type(agg_op), AggregationOpBase):
             raise ValueError(
                 'Last operation of dataop must be an aggregation op. '
-                'It is currently a ' + type(agg_op) + '.')
+                'It is currently a ' + type(agg_op) + '.',
+            )
 
         descriptions.append(self._describe_aggop(agg_op))
         # remove the last operation (aggregation) and reverse the list
@@ -269,7 +279,8 @@ class PredictionProblem:
                 raise ValueError(
                     'There is more than one aggreagation op in your dataop. '
                     'A dataop must contain one and only one aggregation '
-                    ' at its end.')
+                    ' at its end.',
+                )
             elif issubclass(op_type, TransformationOpBase):
                 description = self._describe_transop(op)
             elif issubclass(op_type, RowOpBase):
@@ -289,10 +300,11 @@ class PredictionProblem:
                 LastAggregationOp: "the last",
                 CountAggregationOp: "the number of",
                 SumAggregationOp: "the sum of",
-                LMFAggregationOp: "the last minus first"
+                LMFAggregationOp: "the last minus first",
             }
             if op.input_type == TableMeta.TYPE_BOOL and isinstance(
-                    op, SumAggregationOp):
+                    op, SumAggregationOp,
+            ):
                 return " the number of records whose"
             if type(op) in agg_op_str_dict:
                 return agg_op_str_dict[type(op)]
@@ -302,7 +314,8 @@ class PredictionProblem:
             GreaterRowOp: "greater than",
             EqRowOp: "equal to",
             NeqRowOp: "not equal to",
-            LessRowOp: "less than"}
+            LessRowOp: "less than",
+        }
 
         if isinstance(op, IdentityRowOp):
             # return " {col}".format(col=op.column_name)
@@ -312,7 +325,8 @@ class PredictionProblem:
         if type(op) in row_op_str_dict:
             return " {col} is {op} {threshold}".format(
                 col=op.column_name, op=row_op_str_dict[type(op)],
-                threshold=op.hyper_parameter_settings['threshold'])
+                threshold=op.hyper_parameter_settings['threshold'],
+            )
         return " (unknown row op)"
 
     def _describe_transop(self, op):
@@ -328,10 +342,12 @@ class PredictionProblem:
             GreaterFilterOp: "greater than",
             EqFilterOp: "equal to",
             NeqFilterOp: "not equal to",
-            LessFilterOp: "less than"}
+            LessFilterOp: "less than",
+        }
 
         filter_ops = [
-            x for x in self.operations if issubclass(type(x), FilterOpBase)]
+            x for x in self.operations if issubclass(type(x), FilterOpBase)
+        ]
 
         # remove AllFilterOp
         filter_ops = [x for x in filter_ops if not isinstance(x, AllFilterOp)]
@@ -342,7 +358,8 @@ class PredictionProblem:
             op_desc = '{col} {op} {threshold}'.format(
                 col=op.column_name,
                 op=filter_op_str_dict[type(op)],
-                threshold=op.hyper_parameter_settings.get('threshold', ''))
+                threshold=op.hyper_parameter_settings.get('threshold', ''),
+            )
             desc += op_desc
 
             if idx != last_op_idx:
@@ -383,9 +400,11 @@ class PredictionProblem:
 
         # rename the problem_name if already exists
         json_file_exists = os.path.exists(
-            os.path.join(path, problem_name + '.json'))
+            os.path.join(path, problem_name + '.json'),
+        )
         dill_file_exists = os.path.exists(
-            os.path.join(path, problem_name + '.dill'))
+            os.path.join(path, problem_name + '.dill'),
+        )
 
         i = 1
         while json_file_exists or dill_file_exists:
@@ -393,9 +412,11 @@ class PredictionProblem:
 
             i += 1
             json_file_exists = os.path.exists(
-                os.path.join(path, problem_name + '.json'))
+                os.path.join(path, problem_name + '.json'),
+            )
             dill_file_exists = os.path.exists(
-                os.path.join(path, problem_name + '.dill'))
+                os.path.join(path, problem_name + '.dill'),
+            )
 
         # get the cutoff_strategy bytes
         cutoff_dill_bytes = self._dill_cutoff_strategy()
@@ -413,9 +434,11 @@ class PredictionProblem:
             f.write(cutoff_dill_bytes)
             dill_saved = True
 
-        return({'saved_correctly': json_saved & dill_saved,
-                'created_directory': created_directory,
-                'problem_name': problem_name})
+        return({
+            'saved_correctly': json_saved & dill_saved,
+            'created_directory': created_directory,
+            'problem_name': problem_name,
+        })
 
     @classmethod
     def load(cls, json_file_path):
@@ -442,7 +465,8 @@ class PredictionProblem:
         if cutoff_strategy_file_name:
             # reconstruct cutoff strategy filename
             pickle_path = os.path.join(
-                os.path.dirname(json_file_path), cutoff_strategy_file_name)
+                os.path.dirname(json_file_path), cutoff_strategy_file_name,
+            )
 
             # load cutoff strategy from file
             with open(pickle_path, 'rb') as f:
@@ -472,11 +496,15 @@ class PredictionProblem:
             table_meta_json = self.table_meta.to_json()
 
         return json.dumps(
-            {"operations": [
-                json.loads(op_to_json(op)) for op in self.operations],
-             "entity_id_col": self.entity_id_col,
-             "label_col": self.label_col,
-             "table_meta": table_meta_json})
+            {
+                "operations": [
+                   json.loads(op_to_json(op)) for op in self.operations
+                ],
+                "entity_id_col": self.entity_id_col,
+                "label_col": self.label_col,
+                "table_meta": table_meta_json,
+            },
+        )
 
     @classmethod
     def from_json(cls, json_data):
@@ -498,7 +526,8 @@ class PredictionProblem:
             json_data = json.loads(json_data)
 
         operations = [
-            op_from_json(json.dumps(item)) for item in json_data['operations']]
+            op_from_json(json.dumps(item)) for item in json_data['operations']
+        ]
         entity_id_col = json_data['entity_id_col']
         label_col = json_data['label_col']
         table_meta = TableMeta.from_json(json_data.get('table_meta'))
@@ -508,7 +537,8 @@ class PredictionProblem:
             entity_id_col=entity_id_col,
             label_col=label_col,
             table_meta=table_meta,
-            cutoff_strategy=None)
+            cutoff_strategy=None,
+        )
         return problem
 
     def _dill_cutoff_strategy(self):
@@ -549,7 +579,9 @@ class PredictionProblem:
             Actual data is: {}, Actual type is: {}".format(
                 expected_type,
                 actual_data,
-                type(actual_data)))
+                type(actual_data),
+            ),
+        )
 
         allowed_types_category = [bool, int, str, float]
         allowed_types_bool = [bool, np.bool_]
@@ -589,4 +621,5 @@ class PredictionProblem:
 
         else:
             logging.critical(
-                'check_type function received an unexpected type.')
+                'check_type function received an unexpected type.',
+            )

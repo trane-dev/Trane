@@ -52,6 +52,6 @@ class FixWindowCutoffStrategy(CutoffStrategy):
                 entity_cutoffs.append((entity_name, cutoff_st, cutoff_ed))
 
         return pd.DataFrame(entity_cutoffs, columns=[self.entity_col, "cutoff_st", "cutoff_ed"])
-    
+
     def kwarg_dict(self):
-        return { k: v for k, v in self.__dict__.items() if v is not None}
+        return {k: v for k, v in self.__dict__.items() if v is not None}

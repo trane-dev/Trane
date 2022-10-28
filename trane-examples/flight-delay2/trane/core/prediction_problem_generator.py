@@ -55,7 +55,8 @@ class PredictionProblemGenerator:
 
         def iter_over_ops():
             for ag, filter in itertools.product(
-                    agg_ops.AGGREGATION_OPS, filter_ops.FILTER_OPS):
+                    agg_ops.AGGREGATION_OPS, filter_ops.FILTER_OPS,
+            ):
 
                 filter_cols = [None] if filter == "AllFilterOp" else self.table_meta.get_columns()
                 ag_cols = [None] if ag == "CountAggregationOp" else self.table_meta.get_columns()
@@ -78,7 +79,8 @@ class PredictionProblemGenerator:
 
             problem = PredictionProblem(
                 operations=operations, entity_col=self.entity_col, time_col=self.time_col,
-                table_meta=self.table_meta, cutoff_strategy=None)
+                table_meta=self.table_meta, cutoff_strategy=None,
+            )
 
             if problem.is_valid():
                 problems.append(problem)
@@ -91,6 +93,10 @@ class PredictionProblemGenerator:
         TypeChecking for the problem generator entity_col
         and label_col. Errors if types don't match up.
         """
-        assert(self.table_meta.get_type(self.entity_col)
-               in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
-                   TableMeta.TYPE_CATEGORY])
+        assert(
+            self.table_meta.get_type(self.entity_col)
+            in [
+                TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
+                TableMeta.TYPE_CATEGORY,
+            ]
+        )

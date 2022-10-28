@@ -1,12 +1,12 @@
 import copy
 
 import numpy as np
+from sklearn.ensemble import AdaBoostClassifier, AdaBoostRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from sklearn.ensemble import AdaBoostClassifier, AdaBoostRegressor
 from sklearn.svm import LinearSVC, LinearSVR
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 from ..utils.table_meta import TableMeta as TM
 
@@ -16,9 +16,11 @@ __all__ = ["PredictionProblemEvaluator"]
 class PredictionProblemEvaluator(object):
     """docstring for PredictionProblemEvaluator."""
 
-    def __init__(self, df, entity_col, cutoff_strategy,
-                 sample=2000, previous_k_as_feature=2, latest_k_as_test=2,
-                 min_train_set=100, min_test_set=100):
+    def __init__(
+        self, df, entity_col, cutoff_strategy,
+        sample=2000, previous_k_as_feature=2, latest_k_as_test=2,
+        min_train_set=100, min_test_set=100,
+    ):
         self.df = df
         self.sampled_df = df.sample(sample)
         self.entity_col = entity_col
@@ -31,31 +33,31 @@ class PredictionProblemEvaluator(object):
         self.regressor = [
             {
                 "name": "LinearRegression",
-                "model": LinearRegression()
+                "model": LinearRegression(),
             },
             {
                 "name": "DecisionTreeRegressor",
-                "model": DecisionTreeRegressor(max_depth=5)
+                "model": DecisionTreeRegressor(max_depth=5),
             },
             {
                 "name": "AdaBoost",
-                "model": AdaBoostRegressor()
-            }
+                "model": AdaBoostRegressor(),
+            },
         ]
 
         self.classifier = [
             {
                 "name": "KNeighborsClassifier",
-                "model": KNeighborsClassifier(5)
+                "model": KNeighborsClassifier(5),
             },
             {
                 "name": "DecisionTreeClassifier",
-                "model": DecisionTreeClassifier(max_depth=5)
+                "model": DecisionTreeClassifier(max_depth=5),
             },
             {
                 "name": "AdaBoost",
-                "model": AdaBoostClassifier()
-            }
+                "model": AdaBoostClassifier(),
+            },
         ]
 
     def _get_label_stats(self, labels, problem_type):
@@ -71,7 +73,7 @@ class PredictionProblemEvaluator(object):
 
             return {
                 "majority_ratio": majority_ratio,
-                "entity_majority_ratio": entity_majority_ratio
+                "entity_majority_ratio": entity_majority_ratio,
             }
 
         elif problem_type == "regression":
@@ -81,7 +83,7 @@ class PredictionProblemEvaluator(object):
             return {
                 "overall_mean": overall_mean,
                 "overall_std": overall_std,
-                "entity_std": entity_std
+                "entity_std": entity_std,
             }
         else:
             assert 0
@@ -112,7 +114,8 @@ class PredictionProblemEvaluator(object):
             elif filter_op.input_type in [TM.TYPE_FLOAT, TM.TYPE_INTEGER]:
                 for keep_rate in [0.25, 0.5, 0.75]:
                     threshold = filter_op.find_threshhold_by_remaining(
-                        fraction_of_data_target=keep_rate, df=self.sampled_df, col=filter_op.column_name)
+                        fraction_of_data_target=keep_rate, df=self.sampled_df, col=filter_op.column_name,
+                    )
                     problem_final = copy.deepcopy(problem)
                     problem_final.operations[0].set_hyper_parameter(threshold)
                     yield problem_final, "threshold: {} (keep {}%)".format(threshold, keep_rate * 100)
@@ -158,8 +161,10 @@ class PredictionProblemEvaluator(object):
 
         if problem_type == "classification" and len(X_train) > 0 and len(X_test) > 0:
             print('classification prob')
-            enc = OneHotEncoder(sparse=False,
-                                categorical_features=[-i - 1 for i in range(self.previous_k_as_feature)])
+            enc = OneHotEncoder(
+                sparse=False,
+                categorical_features=[-i - 1 for i in range(self.previous_k_as_feature)],
+            )
             #from sklearn.compose import ColumnTransformer
             #ct = ColumnTransformer([(OneHotEncoder(), [-i - 1 for i in range(self.previous_k_as_feature)])], remainder='passthrough')
 
@@ -177,12 +182,12 @@ class PredictionProblemEvaluator(object):
         else:
             return {
                 "status": "fail",
-                "description": "unknown problem type"
+                "description": "unknown problem type",
             }
 
         template_res = {
             "problem_type": problem_type,
-            "template_nl": str(problem)
+            "template_nl": str(problem),
         }
         evaluations = []
         for problem_final, threshold_description in self.threshold_recommend(problem):
@@ -191,11 +196,12 @@ class PredictionProblemEvaluator(object):
             problem_result = {
                 "description": threshold_description,
                 "problem": str(problem_final),
-                "label_stats": self._get_label_stats(labels, problem_type)
+                "label_stats": self._get_label_stats(labels, problem_type),
             }
 
             X_train, X_test, Y_train, Y_test = self.split_dataset(
-                problem_final, problem_type, labels, features)
+                problem_final, problem_type, labels, features,
+            )
 
             if len(X_train) < self.min_train_set or len(X_test) < self.min_test_set:
                 continue

@@ -36,23 +36,30 @@ class Labeler():
 
         """
 
-        (prediction_problems,
+        (
+            prediction_problems,
             table_meta,
             entity_id_column,
             label_generating_column,
-            time_column) = prediction_problems_from_json_file(
-                json_prediction_problems_filename)
+            time_column,
+        ) = prediction_problems_from_json_file(
+                json_prediction_problems_filename,
+        )
 
         dfs = []
-        columns = [entity_id_column, 'training_labels',
-                   'test_labels', 'training_cutoff_time', 'label_cutoff_time']
+        columns = [
+            entity_id_column, 'training_labels',
+            'test_labels', 'training_cutoff_time', 'label_cutoff_time',
+        ]
 
         for idx, prediction_problem in enumerate(prediction_problems):
             start = time.time()
             df_rows = []
             logging.debug(
                 "in labeller and beginning exuection of problem: {} \n".format(
-                    prediction_problem))
+                    prediction_problem,
+                ),
+            )
 
             for index, row in cutoff_df.iterrows():
 
@@ -62,15 +69,19 @@ class Labeler():
 
                 entity_data = pd.DataFrame(data.loc[entity_id]).T
 
-                (df_pre_label_cutoff_time_result,
-                    df_all_data_result) = prediction_problem.execute(
+                (
+                    df_pre_label_cutoff_time_result,
+                    df_all_data_result,
+                ) = prediction_problem.execute(
                         entity_data, time_column, label_cutoff,
                         prediction_problem.filter_column_order_of_types,
-                        prediction_problem.label_generating_column_order_of_types) # noqa
+                        prediction_problem.label_generating_column_order_of_types,
+                ) # noqa
 
                 if len(df_pre_label_cutoff_time_result) == 1:
                     label_precutoff_time = df_pre_label_cutoff_time_result[
-                        label_generating_column].values[0]
+                        label_generating_column
+                    ].values[0]
                 elif len(df_pre_label_cutoff_time_result) > 1:
                     logging.warning("Received output from prediction problem \
                                     execution on pre-label cutoff data with \
@@ -80,7 +91,8 @@ class Labeler():
                     label_precutoff_time = None
                 if len(df_all_data_result) == 1:
                     label_postcutoff_time = df_all_data_result[
-                        label_generating_column].values[0]
+                        label_generating_column
+                    ].values[0]
                 elif len(df_all_data_result) > 1:
                     logging.warning("Received output from prediction problem execution \
                                      on all data with more than one result.")
@@ -88,14 +100,18 @@ class Labeler():
                 else:
                     label_postcutoff_time = None
 
-                df_row = [entity_id, label_precutoff_time,
-                          label_postcutoff_time, training_cutoff, label_cutoff]
+                df_row = [
+                    entity_id, label_precutoff_time,
+                    label_postcutoff_time, training_cutoff, label_cutoff,
+                ]
                 df_rows.append(df_row)
             df = pd.DataFrame(df_rows, columns=columns)
             end = time.time()
             logging.info(
                 "Finished labelling problem: {} of {}.Time elapsed: {}".format(
-                    idx, len(prediction_problems), end - start))
+                    idx, len(prediction_problems), end - start,
+                ),
+            )
             dfs.append(df)
 
         return dfs

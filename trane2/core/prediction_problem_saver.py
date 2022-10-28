@@ -3,12 +3,16 @@ import json
 from ..utils.table_meta import TableMeta
 from .prediction_problem import PredictionProblem
 
-__all__ = ["prediction_problems_to_json_file",
-           "prediction_problems_from_json_file"]
+__all__ = [
+    "prediction_problems_to_json_file",
+    "prediction_problems_from_json_file",
+]
 
 
-def prediction_problems_to_json_file(prediction_problems, table_meta,
-                                     entity_id_column, label_generating_column, time_column, filename):
+def prediction_problems_to_json_file(
+    prediction_problems, table_meta,
+    entity_id_column, label_generating_column, time_column, filename,
+):
     """
     Convert a list of prediction problems to a JSON file
 
@@ -37,7 +41,7 @@ def prediction_problems_to_json_file(prediction_problems, table_meta,
         "table_meta": json.loads(table_meta.to_json()),
         "entity_id_column": entity_id_column,
         "label_generating_column": label_generating_column,
-        "time_column": time_column
+        "time_column": time_column,
     })
 
     with open(filename, "w") as f:
@@ -69,8 +73,11 @@ def prediction_problems_from_json_file(filename):
 
     data = json.loads(json_data)
     prediction_problems = data['prediction_problems']
-    prediction_problems = [PredictionProblem.from_json(
-        json.dumps(prob)) for prob in prediction_problems]
+    prediction_problems = [
+        PredictionProblem.from_json(
+        json.dumps(prob),
+        ) for prob in prediction_problems
+    ]
     table_meta = TableMeta.from_json(json.dumps(data['table_meta']))
     entity_id_column = data['entity_id_column']
     label_generating_column = data['label_generating_column']

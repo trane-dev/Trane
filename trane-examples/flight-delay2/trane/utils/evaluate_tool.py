@@ -14,7 +14,13 @@ def multi_process_evaluation(evaluator, problems, features, processes=8):
 
     p = Pool(processes)
     result = []
-    for _ in tqdm.tqdm(p.imap(partial(solve, evaluator=evaluator,
-                                      features=features), problems), total=len(problems)):
+    for _ in tqdm.tqdm(
+        p.imap(
+            partial(
+                solve, evaluator=evaluator,
+                features=features,
+            ), problems,
+        ), total=len(problems),
+    ):
         result.append(_)
     return result

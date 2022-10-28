@@ -1,5 +1,5 @@
-import itertools
 import copy
+import itertools
 
 from ..ops import aggregation_ops as agg_ops
 from ..ops import filter_ops
@@ -36,7 +36,7 @@ class PredictionProblemGenerator:
         self.table_meta = table_meta
         self.entity_col = entity_col
         self.time_col = time_col
-        self.cutoff_strategy=cutoff_strategy
+        self.cutoff_strategy = cutoff_strategy
         self.ensure_valid_inputs()
 
     def generate(self, df_sample=None, generate_thresholds=False, n_problems=None):
@@ -51,7 +51,7 @@ class PredictionProblemGenerator:
         generate_thresholds (optional, bool): Whether to automatically generate thresholds for problems.
             Defaults to False.
         n_problems (optional, int): Maximum number of problems to generate. Defaults to generating all possible
-            problems. 
+            problems.
 
         Returns
         -------
@@ -65,7 +65,8 @@ class PredictionProblemGenerator:
 
         def iter_over_ops():
             for ag, filter in itertools.product(
-                    agg_ops.AGGREGATION_OPS, filter_ops.FILTER_OPS):
+                    agg_ops.AGGREGATION_OPS, filter_ops.FILTER_OPS,
+            ):
 
                 filter_cols = [None] if filter == "AllFilterOp" else self.table_meta.get_columns()
                 ag_cols = [None] if ag == "CountAggregationOp" else self.table_meta.get_columns()
@@ -88,7 +89,8 @@ class PredictionProblemGenerator:
 
             problem = PredictionProblem(
                 operations=operations, entity_col=self.entity_col, time_col=self.time_col,
-                table_meta=self.table_meta, cutoff_strategy=self.cutoff_strategy)
+                table_meta=self.table_meta, cutoff_strategy=self.cutoff_strategy,
+            )
 
             if problem.is_valid() and generate_thresholds:
                 for final_problem, _ in self._threshold_recommend(problem, df_sample):
@@ -105,7 +107,7 @@ class PredictionProblemGenerator:
 
     def generate_thresholds(self, problems, df_sample):
         '''
-        Generate thresholds for all problems in a list of prediction problems if 
+        Generate thresholds for all problems in a list of prediction problems if
         thresholds can be generated for them.
 
         Parameters
@@ -117,8 +119,8 @@ class PredictionProblemGenerator:
 
         Returns
         -------
-        problems: a list of Prediction Problem objects with thresholds set or the 
-        original problem if no thresholds are needed. 
+        problems: a list of Prediction Problem objects with thresholds set or the
+        original problem if no thresholds are needed.
         '''
         final_problems = []
         for problem in problems:
@@ -131,9 +133,13 @@ class PredictionProblemGenerator:
         TypeChecking for the problem generator entity_col
         and label_col. Errors if types don't match up.
         """
-        assert(self.table_meta.get_type(self.entity_col)
-               in [TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
-                   TableMeta.TYPE_CATEGORY])
+        assert (
+            self.table_meta.get_type(self.entity_col)
+            in [
+                TableMeta.TYPE_IDENTIFIER, TableMeta.TYPE_TEXT,
+                TableMeta.TYPE_CATEGORY,
+            ]
+        )
 
     def _categorical_threshold(self, df_col, k=3):
         counter = {}
@@ -147,7 +153,7 @@ class PredictionProblemGenerator:
         counter_tuple = sorted(counter_tuple, key=lambda x: -x[1])
         counter_tuple = counter_tuple[:3]
         return [item[0] for item in counter_tuple]
-    
+
     def _threshold_recommend(self, problem, df_sample):
         yielded_thresholds = []
         filter_op = problem.operations[0]
@@ -166,7 +172,8 @@ class PredictionProblemGenerator:
             elif filter_op.input_type in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER]:
                 for keep_rate in [0.25, 0.5, 0.75]:
                     threshold = filter_op.find_threshhold_by_remaining(
-                        fraction_of_data_target=keep_rate, df=df_sample, col=filter_op.column_name)
+                        fraction_of_data_target=keep_rate, df=df_sample, col=filter_op.column_name,
+                    )
                     if threshold not in yielded_thresholds:
                         yielded_thresholds.append(threshold)
                         problem_final = copy.deepcopy(problem)

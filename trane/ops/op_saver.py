@@ -24,7 +24,7 @@ def op_to_json(op):
         "SubopType": type(op).__name__,
         "column_name": op.column_name,
         "iotype": (op.input_type, op.output_type),
-        "hyper_parameter_settings": op.hyper_parameter_settings
+        "hyper_parameter_settings": op.hyper_parameter_settings,
     })
 
 

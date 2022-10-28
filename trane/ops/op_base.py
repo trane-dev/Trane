@@ -95,7 +95,8 @@ class OpBase(object):
 
     def auto_set_hyperparams(
             self, df, label_col, entity_col, filter_col=None,
-            num_random_samples=10, num_rows_to_execute_on=2000):
+            num_random_samples=10, num_rows_to_execute_on=2000,
+    ):
         """
         Sets hyperparameters for the operation. In most cases (as implemented
         here), this is done by finding threshhold values that maximize column
@@ -134,7 +135,8 @@ class OpBase(object):
 
     def find_threshhold_by_remaining(
             self, fraction_of_data_target, df, col, num_random_samples=10,
-            num_rows_to_execute_on=2000):
+            num_rows_to_execute_on=2000,
+    ):
         """
         This function finds and returns a parameter setting for the
         op. The parameter setting that comes closest to the
@@ -163,7 +165,8 @@ class OpBase(object):
 
         df, unique_vals = self._sample_df_and_uniqe_values(
             df=df, col=col, max_num_unique_values=num_random_samples,
-            max_num_rows=num_rows_to_execute_on)
+            max_num_rows=num_rows_to_execute_on,
+        )
 
         # best score is the fraction of data that remains after data is
         # truncated at a given value
@@ -198,7 +201,8 @@ class OpBase(object):
 
     def find_threshhold_by_diversity(
             self, df, label_col, entity_col,
-            num_random_samples=10, num_rows_to_execute_on=2000):
+            num_random_samples=10, num_rows_to_execute_on=2000,
+    ):
         """
         This function selects a parameter setting for the
         operations, excluding the filter operation.
@@ -228,7 +232,8 @@ class OpBase(object):
 
         df, unique_vals = self._sample_df_and_uniqe_values(
             df=df, col=label_col, max_num_unique_values=num_random_samples,
-            max_num_rows=num_rows_to_execute_on)
+            max_num_rows=num_rows_to_execute_on,
+        )
 
         best_entropy = 0
         best_parameter_value = 0
@@ -243,7 +248,8 @@ class OpBase(object):
             output_df = df.groupby(entity_col).apply(self.execute)
 
             current_entropy = self._entropy_of_a_list(
-                list(output_df[label_col]))
+                list(output_df[label_col]),
+            )
 
             if current_entropy > best_entropy:
                 best_entropy = current_entropy
@@ -253,7 +259,8 @@ class OpBase(object):
         return best_parameter_value
 
     def _sample_df_and_uniqe_values(
-            self, df, col, max_num_unique_values, max_num_rows):
+            self, df, col, max_num_unique_values, max_num_rows,
+    ):
         """
         Helper methods
 
@@ -280,7 +287,8 @@ class OpBase(object):
 
         if len(unique_vals) > max_num_unique_values:
             unique_vals = list(
-                random.sample(unique_vals, max_num_unique_values))
+                random.sample(unique_vals, max_num_unique_values),
+            )
 
         if len(df) > max_num_rows:
             df = df.sample(max_num_rows)
@@ -308,13 +316,15 @@ class OpBase(object):
 
     def __repr__(self):
         hyper_param_str = ','.join(
-            [str(x) for x in list(self.hyper_parameter_settings.values())])
+            [str(x) for x in list(self.hyper_parameter_settings.values())],
+        )
 
         if len(hyper_param_str) > 0:
             hyper_param_str = '@' + hyper_param_str
 
         return "%s(%s%s)" % (
-            type(self).__name__, self.column_name, hyper_param_str)
+            type(self).__name__, self.column_name, hyper_param_str,
+        )
 
     def __eq__(self, other):
         """Overrides the default implementation"""

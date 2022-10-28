@@ -6,9 +6,15 @@ from trane.utils.table_meta import TableMeta as TM
 df = DataFrame({'col': [1, 2, 3, 4, 5]})
 meta = TM({
     "tables": [
-        {"fields": [{'name': 'col', 'type': TM.SUPERTYPE[
-            TM.TYPE_FLOAT], 'subtype': TM.TYPE_FLOAT}]}
-    ]})
+        {
+            "fields": [{
+                'name': 'col', 'type': TM.SUPERTYPE[
+                TM.TYPE_FLOAT
+                ], 'subtype': TM.TYPE_FLOAT,
+            }],
+        },
+    ],
+})
 
 
 def test_first_aggregation_op_input_value():

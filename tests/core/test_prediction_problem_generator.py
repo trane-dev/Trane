@@ -27,13 +27,15 @@ class TestPredictionProblemGenerator(unittest.TestCase):
         self.filter_col = "taxi_id"
 
         self.ensure_valid_inputs_patch = self.create_patch(
-            'trane.core.PredictionProblemGenerator.ensure_valid_inputs')
+            'trane.core.PredictionProblemGenerator.ensure_valid_inputs',
+        )
 
         self.generator = PredictionProblemGenerator(
             table_meta=self.table_meta_mock,
             entity_col=self.entity_col,
             label_col=self.label_col,
-            filter_col=self.filter_col)
+            filter_col=self.filter_col,
+        )
 
     def prep_for_integration(self):
         '''
@@ -58,17 +60,23 @@ class TestPredictionProblemGenerator(unittest.TestCase):
 
         self.table_meta = TableMeta.from_json(meta_json_str)
         self.df = pd.DataFrame(
-            [(0, 0, 0, 5.32, 19.7, 53.89, 1),
-             (0, 0, 1, 1.08, 6.78, 18.89, 2),
-             (0, 0, 2, 4.69, 14.11, 41.35, 4)],
-            columns=["vendor_id", "taxi_id", "trip_id", "distance", "duration",
-                     "fare", "num_passengers"])
+            [
+                (0, 0, 0, 5.32, 19.7, 53.89, 1),
+                (0, 0, 1, 1.08, 6.78, 18.89, 2),
+                (0, 0, 2, 4.69, 14.11, 41.35, 4),
+            ],
+            columns=[
+                "vendor_id", "taxi_id", "trip_id", "distance", "duration",
+                "fare", "num_passengers",
+            ],
+        )
 
         self.generator = PredictionProblemGenerator(
             table_meta=self.table_meta,
             entity_col=self.entity_col,
             label_col=self.label_col,
-            filter_col=self.filter_col)
+            filter_col=self.filter_col,
+        )
 
     def create_patch(self, name, return_value=None):
         '''helper method for creating patches'''
@@ -113,7 +121,8 @@ class TestPredictionProblemGeneratorValidation(unittest.TestCase):
         # set up table_meta types
         table_meta_mock.get_type.return_value = True
         table_meta_patch = self.create_patch(
-            'trane.core.prediction_problem_generator.TableMeta', 'tm_patch')
+            'trane.core.prediction_problem_generator.TableMeta', 'tm_patch',
+        )
         table_meta_patch.TYPE_IDENTIFIER = True
         table_meta_patch.TYPE_FLOAT = True
         table_meta_patch.TYPE_TIME = True
@@ -123,9 +132,13 @@ class TestPredictionProblemGeneratorValidation(unittest.TestCase):
             table_meta=table_meta_mock,
             entity_col=entity_col,
             label_col=label_col,
-            filter_col=filter_col)
+            filter_col=filter_col,
+        )
 
         self.assertIsNotNone(generator.ensure_valid_inputs)
-        table_meta_mock.get_type.assert_has_calls([
+        table_meta_mock.get_type.assert_has_calls(
+            [
             call(entity_col),
-            call(label_col)], any_order=True)
+            call(label_col),
+            ], any_order=True,
+        )

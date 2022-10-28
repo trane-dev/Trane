@@ -1,11 +1,12 @@
 import json
-
-import pandas as pd
 from datetime import datetime, timedelta
 
-import trane
 import featuretools as ft
 import numpy as np
+import pandas as pd
+
+import trane
+
 
 def solve(entity_col):
     df = pd.read_csv("data/bike-sampled.csv")
@@ -40,29 +41,34 @@ def solve(entity_col):
     cutoff_end = datetime.strptime("2017-01-31", "%Y-%m-%d")
     cutoff_strategy = trane.FixWindowCutoffStrategy(entity_col, cutoff_base, cutoff_end, 1)
 
-    features = trane.FeaturetoolsWrapper(df_ft, entity_col, 'date',
-                                            {'hour': ft.variable_types.Categorical,
-                                             'usertype': ft.variable_types.Categorical,
-                                             'gender': ft.variable_types.Categorical,
-                                             'from_station_id': ft.variable_types.Categorical,
-                                             'to_station_id': ft.variable_types.Categorical,
-                                            }, 'bikes')
+    features = trane.FeaturetoolsWrapper(
+        df_ft, entity_col, 'date',
+        {
+            'hour': ft.variable_types.Categorical,
+             'usertype': ft.variable_types.Categorical,
+             'gender': ft.variable_types.Categorical,
+             'from_station_id': ft.variable_types.Categorical,
+             'to_station_id': ft.variable_types.Categorical,
+        }, 'bikes',
+    )
     features.compute_features(df_ft, cutoff_strategy, 5)
 
 
     problem_generator = trane.PredictionProblemGenerator(
-        table_meta=meta, entity_col=entity_col, time_col="date")
+        table_meta=meta, entity_col=entity_col, time_col="date",
+    )
 
     problems = problem_generator.generate()
 
-    evaluator = trane.PredictionProblemEvaluator(df,
-                                                 entity_col=entity_col,
-                                                 cutoff_strategy=cutoff_strategy,
-                                                 min_train_set=5,
-                                                 min_test_set=5,
-                                                 previous_k_as_feature=2,
-                                                 latest_k_as_test=8
-                                                 )
+    evaluator = trane.PredictionProblemEvaluator(
+        df,
+        entity_col=entity_col,
+        cutoff_strategy=cutoff_strategy,
+        min_train_set=5,
+        min_test_set=5,
+        previous_k_as_feature=2,
+        latest_k_as_test=8,
+    )
 
     result = trane.multi_process_evaluation(evaluator, problems, features)
     return result

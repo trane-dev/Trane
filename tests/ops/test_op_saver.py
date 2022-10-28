@@ -20,8 +20,10 @@ def test_save_load_before_op_type_check():
         assert op2.column_name == 'col'
         assert op2.input_type is None and op2.output_type is None
         assert isinstance(
-            op2.hyper_parameter_settings, dict) and len(
-            op2.hyper_parameter_settings) == 0
+            op2.hyper_parameter_settings, dict,
+        ) and len(
+            op2.hyper_parameter_settings,
+        ) == 0
 
 
 def test_save_load_after_op_type_check():
@@ -31,9 +33,15 @@ def test_save_load_after_op_type_check():
     for i in range(10):
         meta = TM({
             "tables": [
-                {"fields": [{'name': 'col', 'type': TM.SUPERTYPE[
-                    TM.TYPE_FLOAT], 'subtype': TM.TYPE_FLOAT}]}
-            ]})
+                {
+                    "fields": [{
+                        'name': 'col', 'type': TM.SUPERTYPE[
+                        TM.TYPE_FLOAT
+                        ], 'subtype': TM.TYPE_FLOAT,
+                    }],
+                },
+            ],
+        })
         op_type = np.random.choice(ALL_OPS)
         op = globals()[op_type]('col')
         op.op_type_check(meta)

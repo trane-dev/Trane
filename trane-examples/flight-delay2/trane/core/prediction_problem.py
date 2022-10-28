@@ -22,8 +22,10 @@ class PredictionProblem:
     each operation.
     """
 
-    def __init__(self, operations, entity_col, time_col,
-                 table_meta=None, cutoff_strategy=None):
+    def __init__(
+        self, operations, entity_col, time_col,
+        table_meta=None, cutoff_strategy=None,
+    ):
         """
         Parameters
         ----------
@@ -86,7 +88,8 @@ class PredictionProblem:
             raise ValueError(
                 'Your Problem\'s specified operations do not match with the '
                 'problem\'s table meta. Therefore, the problem is not '
-                'valid.')
+                'valid.',
+            )
 
         assert self.cutoff_strategy is not None
 
@@ -106,16 +109,20 @@ class PredictionProblem:
                 cutoff_ed = row['cutoff_ed']
 
                 df_labeling = sub_df.loc[
-                    (sub_df[self.time_col] >= cutoff_st) & (sub_df[self.time_col] < cutoff_ed)]
+                    (sub_df[self.time_col] >= cutoff_st) & (sub_df[self.time_col] < cutoff_ed)
+                ]
 
                 label = self._execute_operations_on_df(
-                    df_labeling)
+                    df_labeling,
+                )
 
                 # add the label to the results dictionary
                 res_list.append((entity_name, cutoff_st, cutoff_ed, label))
 
-        res = pd.DataFrame(data=res_list,
-                           columns=[self.entity_col, 'cutoff_st', 'cutoff_ed', 'label'])
+        res = pd.DataFrame(
+            data=res_list,
+            columns=[self.entity_col, 'cutoff_st', 'cutoff_ed', 'label'],
+        )
         res.set_index([self.entity_col, 'cutoff_st', 'cutoff_ed'], inplace=True)
         return res
 
@@ -182,7 +189,7 @@ class PredictionProblem:
             AvgAggregationOp: " the average of <{}> in all related records",
             MaxAggregationOp: " the maximum of <{}> in all related records",
             MinAggregationOp: " the minimum of <{}> in all related records",
-            MajorityAggregationOp: " the majority of <{}> in all related records"
+            MajorityAggregationOp: " the majority of <{}> in all related records",
         }
 
         if isinstance(op, CountAggregationOp):
@@ -195,10 +202,12 @@ class PredictionProblem:
             GreaterFilterOp: "greater than",
             EqFilterOp: "equal to",
             NeqFilterOp: "not equal to",
-            LessFilterOp: "less than"}
+            LessFilterOp: "less than",
+        }
 
         filter_ops = [
-            x for x in self.operations if issubclass(type(x), FilterOpBase)]
+            x for x in self.operations if issubclass(type(x), FilterOpBase)
+        ]
 
         # remove AllFilterOp
         filter_ops = [x for x in filter_ops if not isinstance(x, AllFilterOp)]
@@ -211,7 +220,8 @@ class PredictionProblem:
             op_desc = '<{col}> {op} {threshold}'.format(
                 col=op.column_name,
                 op=filter_op_str_dict[type(op)],
-                threshold=op.hyper_parameter_settings.get('threshold', '__'))
+                threshold=op.hyper_parameter_settings.get('threshold', '__'),
+            )
             desc += op_desc
 
             if idx != last_op_idx:
@@ -252,9 +262,11 @@ class PredictionProblem:
 
         # rename the problem_name if already exists
         json_file_exists = os.path.exists(
-            os.path.join(path, problem_name + '.json'))
+            os.path.join(path, problem_name + '.json'),
+        )
         dill_file_exists = os.path.exists(
-            os.path.join(path, problem_name + '.dill'))
+            os.path.join(path, problem_name + '.dill'),
+        )
 
         i = 1
         while json_file_exists or dill_file_exists:
@@ -262,9 +274,11 @@ class PredictionProblem:
 
             i += 1
             json_file_exists = os.path.exists(
-                os.path.join(path, problem_name + '.json'))
+                os.path.join(path, problem_name + '.json'),
+            )
             dill_file_exists = os.path.exists(
-                os.path.join(path, problem_name + '.dill'))
+                os.path.join(path, problem_name + '.dill'),
+            )
 
         # get the cutoff_strategy bytes
         cutoff_dill_bytes = self._dill_cutoff_strategy()
@@ -282,9 +296,11 @@ class PredictionProblem:
             f.write(cutoff_dill_bytes)
             dill_saved = True
 
-        return({'saved_correctly': json_saved & dill_saved,
-                'created_directory': created_directory,
-                'problem_name': problem_name})
+        return({
+            'saved_correctly': json_saved & dill_saved,
+            'created_directory': created_directory,
+            'problem_name': problem_name,
+        })
 
     @classmethod
     def load(cls, json_file_path):
@@ -311,7 +327,8 @@ class PredictionProblem:
         if cutoff_strategy_file_name:
             # reconstruct cutoff strategy filename
             pickle_path = os.path.join(
-                os.path.dirname(json_file_path), cutoff_strategy_file_name)
+                os.path.dirname(json_file_path), cutoff_strategy_file_name,
+            )
 
             # load cutoff strategy from file
             with open(pickle_path, 'rb') as f:
@@ -341,11 +358,15 @@ class PredictionProblem:
             table_meta_json = self.table_meta.to_json()
 
         return json.dumps(
-            {"operations": [
-                json.loads(op_to_json(op)) for op in self.operations],
-             "entity_col": self.entity_col,
-             "time_col": self.time_col,
-             "table_meta": table_meta_json})
+            {
+                "operations": [
+                   json.loads(op_to_json(op)) for op in self.operations
+                ],
+                "entity_col": self.entity_col,
+                "time_col": self.time_col,
+                "table_meta": table_meta_json,
+            },
+        )
 
     @classmethod
     def from_json(cls, json_data):
@@ -367,7 +388,8 @@ class PredictionProblem:
             json_data = json.loads(json_data)
 
         operations = [
-            op_from_json(json.dumps(item)) for item in json_data['operations']]
+            op_from_json(json.dumps(item)) for item in json_data['operations']
+        ]
         entity_col = json_data['entity_col']
         time_col = json_data['time_col']
         table_meta = TableMeta.from_json(json_data.get('table_meta'))
@@ -377,7 +399,8 @@ class PredictionProblem:
             entity_col=entity_col,
             time_col=time_col,
             table_meta=table_meta,
-            cutoff_strategy=None)
+            cutoff_strategy=None,
+        )
         return problem
 
     def _dill_cutoff_strategy(self):
@@ -418,7 +441,9 @@ class PredictionProblem:
             Actual data is: {}, Actual type is: {}".format(
                 expected_type,
                 actual_data,
-                type(actual_data)))
+                type(actual_data),
+            ),
+        )
 
         allowed_types_category = [bool, int, str, float]
         allowed_types_bool = [bool, np.bool_]
@@ -458,4 +483,5 @@ class PredictionProblem:
 
         else:
             logging.critical(
-                'check_type function received an unexpected type.')
+                'check_type function received an unexpected type.',
+            )

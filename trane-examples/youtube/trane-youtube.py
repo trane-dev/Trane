@@ -5,14 +5,13 @@
 
 
 import json
-
-import pandas as pd
 from datetime import datetime, timedelta
 
-import trane
 import featuretools as ft
 import numpy as np
+import pandas as pd
 
+import trane
 
 # In[2]:
 
@@ -45,7 +44,8 @@ def solve(entity_col, window, fwindow):
 
 
     problem_generator = trane.PredictionProblemGenerator(
-        table_meta=meta, time_col="trending_date", entity_col=entity_col)
+        table_meta=meta, time_col="trending_date", entity_col=entity_col,
+    )
 
     problems = problem_generator.generate()
 

@@ -29,8 +29,10 @@ class TableMeta(object):
     # id
     TYPE_IDENTIFIER = 'id'
 
-    TYPES = [TYPE_CATEGORY, TYPE_BOOL, TYPE_ORDERED, TYPE_TEXT,
-             TYPE_INTEGER, TYPE_FLOAT, TYPE_TIME, TYPE_IDENTIFIER]
+    TYPES = [
+        TYPE_CATEGORY, TYPE_BOOL, TYPE_ORDERED, TYPE_TEXT,
+        TYPE_INTEGER, TYPE_FLOAT, TYPE_TIME, TYPE_IDENTIFIER,
+    ]
 
     def __init__(self, table_meta):
         """
@@ -52,7 +54,7 @@ class TableMeta(object):
                     'table_id': table_id,
                     'field_id': field_id,
                     'type': field['subtype'] if 'subtype' in field else field['type'],
-                    'properties': field['properties'] if 'properties' in field else None
+                    'properties': field['properties'] if 'properties' in field else None,
                 }
 
     def get_type(self, column_name):
@@ -88,9 +90,11 @@ class TableMeta(object):
         # TODO Remove the hierarchical structure of Types.
         try:
             del self.table_meta['tables'][column_data['table_id']][
-                'fields'][column_data['field_id']]['type']
+                'fields'
+            ][column_data['field_id']]['type']
             del self.table_meta['tables'][column_data['table_id']][
-                'fields'][column_data['field_id']]['subtype']
+                'fields'
+            ][column_data['field_id']]['subtype']
         except BaseException:
             pass
         if dtype in TableMeta.SUPERTYPE:
@@ -100,7 +104,8 @@ class TableMeta(object):
             self.table_meta['tables'][table_id]['fields'][field_id]['subtype'] = dtype
         else:
             self.table_meta['tables'][column_data['table_id']][
-                'fields'][column_data['field_id']]['type'] = dtype
+                'fields'
+            ][column_data['field_id']]['type'] = dtype
 
     def get_property(self, column_name, property_name):
         """

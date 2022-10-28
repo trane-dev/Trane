@@ -23,10 +23,15 @@ meta_json_str = '{ "path": "", "tables": [ { "path": "synthetic_taxi_data.csv",\
     {"name": "fare", "type": "number", "subtype": "float"}, \
     {"name": "num_passengers", "type": "number", "subtype": "float"} ] } ]}'
 
-dataframe = pd.DataFrame([
+dataframe = pd.DataFrame(
+    [
     (0, 0, 0, 5.32, 19.7, 53.89, 1, np.datetime64('1990-12-31')),
     (0, 0, 1, 1.08, 6.78, 18.89, 2, np.datetime64('1995-12-31')),
-    (0, 0, 2, 4.69, 4.11, 41.35, 4, np.datetime64('2000-12-31'))],
-    columns=["vendor_id", "taxi_id", "trip_id", "distance",
-             "duration", "fare", "num_passengers",
-             "date"])
+    (0, 0, 2, 4.69, 4.11, 41.35, 4, np.datetime64('2000-12-31')),
+    ],
+    columns=[
+        "vendor_id", "taxi_id", "trip_id", "distance",
+        "duration", "fare", "num_passengers",
+        "date",
+    ],
+)

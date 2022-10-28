@@ -36,6 +36,7 @@ class TestPredictionProblemGenerator(unittest.TestCase):
             entity_col=self.entity_col,
             label_col=self.label_col,
             filter_col=self.filter_col,
+            time_col='trip_id',
         )
 
     def prep_for_integration(self):
@@ -77,6 +78,7 @@ class TestPredictionProblemGenerator(unittest.TestCase):
             entity_col=self.entity_col,
             label_col=self.label_col,
             filter_col=self.filter_col,
+            time_col='trip_id',
         )
 
     def create_patch(self, name, return_value=None):
@@ -134,6 +136,7 @@ class TestPredictionProblemGeneratorValidation(unittest.TestCase):
             entity_col=entity_col,
             label_col=label_col,
             filter_col=filter_col,
+            time_col='trip_id',
         )
 
         self.assertIsNotNone(generator.ensure_valid_inputs)

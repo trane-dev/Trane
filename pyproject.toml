@@ -1,0 +1,135 @@
+[project]
+name = "trane"
+readme = "README.md"
+description = "automatically generate prediction problems and labels for supervised learning."
+dynamic = ["version"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development",
+    "Topic :: Scientific/Engineering",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+]
+authors = [
+    {name="MIT Data to AI Lab", email="dai-lab-trane@mit.edu"}
+]
+maintainers = [
+    {name="MIT Data to AI Lab", email="dai-lab-trane@mit.edu"}
+]
+keywords = ["trane", "data science", "machine learning"]
+license = {text = "MIT License"}
+requires-python = ">=3.8,<4"
+dependencies = [
+    "pandas >= 0.21.0",
+    "numpy >= 1.13.0",
+    "dill >= 0.2.8.2",
+    "python_dateutil >= 2.6.0",
+    "scipy >= 1.0.0",
+    "py >= 1.5.2",
+    "scipy >= 1.0.0",
+    "tornado>=6.2",
+    "featuretools",
+    "matplotlib",
+    "scikit-learn",
+    "scikit-plot",
+]
+
+[project.urls]
+"Source Code"= "https://github.com/HDI-Project/Trane/"
+"Issue Tracker" = "https://github.com/HDI-Project/Trane/issues"
+"Twitter" = "https://twitter.com/lab_dai"
+
+[project.optional-dependencies]
+test = [
+    "pytest >= 3.4.2",
+    "pytest-cov >= 2.5.1",
+    "pytest-xdist",
+    "pytest-runner >= 2.11.1",
+    "tox >= 3.0.0",
+]
+dev = [
+    "isort",
+    "black",
+]
+
+[tool.setuptools]
+include-package-data = true
+license-files = [
+    "LICENSE",
+]
+
+[tool.setuptools.packages.find]
+namespaces = true
+
+[tool.setuptools.package-data]
+"*" = [
+    "*.txt",
+    "*.md",
+    "*.rst",
+    "README.md",
+    "docs/*",
+    "Makefile",
+    "make.bat",
+    "*.jpg",
+    "*.png", 
+    "*.gif",
+]
+
+[tool.setuptools.exclude-package-data]
+"*" = [
+    "* __pycache__",
+    "*.py[co]",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "trane.version.__version__"}
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests/*"
+]
+
+[tool.isort]
+profile = "black"
+forced_separate = "trane"
+known_first_party = "trane"
+skip = "__init__.py"
+multi_line_output = 3
+
+[tool.black]
+target-version = ['py311']
+
+[tool.coverage.run]
+source = ["trane"]
+
+[tool.coverage.report]
+exclude_lines =[
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if self._verbose:",
+    "if verbose:",
+    "if profile:",
+    "pytest.skip"
+]
+
+[build-system]
+requires = [
+    "setuptools >= 61.0.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"

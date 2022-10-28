@@ -1,8 +1,5 @@
-from datetime import timedelta
-
+import numpy as np
 import pandas as pd
-
-__all__ = ["FixWindowCutoffStrategy"]
 
 
 class CutoffStrategy:
@@ -24,34 +21,52 @@ class CutoffStrategy:
         self.generate_fn = generate_fn
         self.description = description
 
+    def generate_cutoffs(self, df, entity_id_col):
+        """
+        generate a cutoff dataframe. Takes about 10 sec to load, but then runs
+        inNlogN time. (probably. Haven't checked numpy and pandas code. That's
+        just what anecdotally seen in testing)
 
-class FixWindowCutoffStrategy(CutoffStrategy):
-    def __init__(self, entity_col, window_size, minimum_data=None, maximum_data=None, gap=None):
-        self.target_dataframe_name = entity_col
-        self.window_size = window_size
-        self.minimum_data = minimum_data
-        self.maximum_data = maximum_data
-        self.gap = gap
-        self.description = "in next {} days".format(window_size)
+        Parameters
+        ----------
+        df: Pandas.DataFrame that problems are generated from
+        entity_id_col: str name of the entity_id_column
 
-    def generate_cutoffs(self, df):
-        ## DEPRECATED ##
-        cutoff_st_ed_pairs = []
+        Returns
+        -------
+        DF with three columns:
+        entity_id (indexed) | training_cutoff | test_cutoff
 
-        current = self.cutoff_base
-        while True:
-            current_end = current + timedelta(days=self.cutoff_window)
-            if current_end > self.cutoff_end:
-                break
-            cutoff_st_ed_pairs.append((current, current_end))
-            current = current_end
+        training_cutoff and test_cutoff are of type np.datetime64
+        """
 
-        entity_cutoffs = []
-        for entity_name in set(df[self.entity_col]):
-            for cutoff_st, cutoff_ed in cutoff_st_ed_pairs:
-                entity_cutoffs.append((entity_name, cutoff_st, cutoff_ed))
+        # group by the entity id column
+        grouped = df.groupby(entity_id_col)
 
-        return pd.DataFrame(entity_cutoffs, columns=[self.entity_col, "cutoff_st", "cutoff_ed"])
+        val_arr = []
 
-    def kwarg_dict(self):
-        return {k: v for k, v in self.__dict__.items() if v is not None}
+        # for each group, compute the training and test cutoff
+        for entity_id, df_group in grouped:
+
+            # we re-index by the entity_id column because
+            # a user's generate_fn may expect it
+            df_group.set_index(entity_id_col, inplace=True)
+
+            cutoff = None
+
+            if self.generate_fn:
+                cutoff = self.generate_fn(
+                    df_group, entity_id,
+                )
+
+            # add this data to a long array
+            val_arr.extend((entity_id, cutoff))
+
+        # reshape the array so that it has 3 columns.
+        # -1 indicates that the number of rows is inferred
+        data = np.array(val_arr).reshape(-1, 2)
+        cutoff_df = pd.DataFrame(data)
+        cutoff_df.rename(columns={0: entity_id_col, 1: 'cutoff'}, inplace=True)
+        cutoff_df.set_index(entity_id_col, inplace=True)
+
+        return cutoff_df

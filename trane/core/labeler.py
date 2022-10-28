@@ -1,6 +1,9 @@
-import copy
+import logging
+import time
 
-from ..utils.table_meta import TableMeta as TM
+import pandas as pd
+
+from .prediction_problem_saver import prediction_problems_from_json_file
 
 __all__ = ['Labeler']
 
@@ -12,35 +15,10 @@ class Labeler():
     The execute method performs the labelling operation.
     """
 
-    def __init__(
-        self, df, entity_col, cutoff_strategy,
-        sample=2000,
-    ):
-        self.df = df
-        self.sampled_df = df.sample(sample)
-        self.entity_col = entity_col
-        self.cutoff_strategy = cutoff_strategy
+    def __init__(self):
+        pass
 
-    def threshold_recommend(self, problem):
-        filter_op = problem.operations[0]
-        if len(filter_op.REQUIRED_PARAMETERS) == 0:
-            yield copy.deepcopy(problem), "no threshold"
-        else:
-            if filter_op.input_type == TM.TYPE_CATEGORY:
-                for item in self._categorical_threshold(self.sampled_df[filter_op.column_name]):
-                    problem_final = copy.deepcopy(problem)
-                    problem_final.operations[0].set_hyper_parameter(item)
-                    yield problem_final, "threshold: {}".format(item)
-            elif filter_op.input_type in [TM.TYPE_FLOAT, TM.TYPE_INTEGER]:
-                for keep_rate in [0.25, 0.5, 0.75]:
-                    threshold = filter_op.find_threshhold_by_remaining(
-                        fraction_of_data_target=keep_rate, df=self.sampled_df, col=filter_op.column_name,
-                    )
-                    problem_final = copy.deepcopy(problem)
-                    problem_final.operations[0].set_hyper_parameter(threshold)
-                    yield problem_final, "threshold: {} (keep {}%)".format(threshold, keep_rate * 100)
-
-    def execute(self, problem, entity_id_column):
+    def execute(self, data, cutoff_df, json_prediction_problems_filename):
         """
         Generate the labels.
 
@@ -57,15 +35,83 @@ class Labeler():
             Each dataframe contains entities, cutoff times and labels.
 
         """
+
+        (
+            prediction_problems,
+            table_meta,
+            entity_id_column,
+            label_generating_column,
+            time_column,
+        ) = prediction_problems_from_json_file(
+                json_prediction_problems_filename,
+        )
+
         dfs = []
         columns = [
             entity_id_column, 'training_labels',
             'test_labels', 'training_cutoff_time', 'label_cutoff_time',
         ]
-        for problem_final, threshold_description in self.threshold_recommend(problem):
-            problem_final.cutoff_strategy = self.cutoff_strategy
-            labels = problem_final.execute(self.df)
 
-            dfs.append([self.df, labels])
+        for idx, prediction_problem in enumerate(prediction_problems):
+            start = time.time()
+            df_rows = []
+            logging.debug(
+                "in labeller and beginning exuection of problem: {} \n".format(
+                    prediction_problem,
+                ),
+            )
+
+            for index, row in cutoff_df.iterrows():
+
+                entity_id = index
+                training_cutoff = row[0]
+                label_cutoff = row[1]
+
+                entity_data = pd.DataFrame(data.loc[entity_id]).T
+
+                (
+                    df_pre_label_cutoff_time_result,
+                    df_all_data_result,
+                ) = prediction_problem.execute(
+                        entity_data, time_column, label_cutoff,
+                        prediction_problem.filter_column_order_of_types,
+                        prediction_problem.label_generating_column_order_of_types,
+                ) # noqa
+
+                if len(df_pre_label_cutoff_time_result) == 1:
+                    label_precutoff_time = df_pre_label_cutoff_time_result[
+                        label_generating_column
+                    ].values[0]
+                elif len(df_pre_label_cutoff_time_result) > 1:
+                    logging.warning("Received output from prediction problem \
+                                    execution on pre-label cutoff data with \
+                                    more than one result.")
+                    label_precutoff_time = None
+                else:
+                    label_precutoff_time = None
+                if len(df_all_data_result) == 1:
+                    label_postcutoff_time = df_all_data_result[
+                        label_generating_column
+                    ].values[0]
+                elif len(df_all_data_result) > 1:
+                    logging.warning("Received output from prediction problem execution \
+                                     on all data with more than one result.")
+                    label_postcutoff_time = None
+                else:
+                    label_postcutoff_time = None
+
+                df_row = [
+                    entity_id, label_precutoff_time,
+                    label_postcutoff_time, training_cutoff, label_cutoff,
+                ]
+                df_rows.append(df_row)
+            df = pd.DataFrame(df_rows, columns=columns)
+            end = time.time()
+            logging.info(
+                "Finished labelling problem: {} of {}.Time elapsed: {}".format(
+                    idx, len(prediction_problems), end - start,
+                ),
+            )
+            dfs.append(df)
 
         return dfs

@@ -4,8 +4,8 @@ import pandas as pd
 
 from .table_meta import TableMeta as TM
 
-__all__ = ['denormalize', 'parse_data']
-
+# __all__ = ['denormalize', 'parse_data']
+/Users/gaurav/Trane/trane2/utils/data_parser.py
 
 class CsvMerge():
     """

@@ -1,14 +1,17 @@
 import json
 import logging
 import os
+import warnings
 
-import composeml as cp
 import dill
 import numpy as np
+import pandas as pd
 
 from ..ops.aggregation_ops import *  # noqa
 from ..ops.filter_ops import *  # noqa
 from ..ops.op_saver import op_from_json, op_to_json
+from ..ops.row_ops import *  # noqa
+from ..ops.transformation_ops import *  # noqa
 from ..utils.table_meta import TableMeta
 
 __all__ = ['PredictionProblem']
@@ -22,7 +25,10 @@ class PredictionProblem:
     each operation.
     """
 
-    def __init__(self, operations, entity_col, time_col, table_meta=None, cutoff_strategy=None):
+    def __init__(
+        self, operations, entity_id_col,
+        label_col, table_meta=None, cutoff_strategy=None,
+    ):
         """
         Parameters
         ----------
@@ -34,20 +40,10 @@ class PredictionProblem:
         None
         """
         self.operations = operations
-        self.entity_col = entity_col
-        self.time_col = time_col
+        self.entity_id_col = entity_id_col
+        self.label_col = label_col
         self.table_meta = table_meta
         self.cutoff_strategy = cutoff_strategy
-        self.label_type = None
-
-        window_size = cutoff_strategy.window_size if cutoff_strategy else None
-
-        self._label_maker = cp.LabelMaker(
-            target_dataframe_name=entity_col,
-            time_index=time_col,
-            labeling_function=self._execute_operations_on_df,
-            window_size=window_size,
-        )
 
     def is_valid(self, table_meta=None):
         '''
@@ -77,21 +73,12 @@ class PredictionProblem:
             if temp_meta is None:
                 return False
 
-        if temp_meta in TableMeta.TYPES:
-            self.label_type = temp_meta
-            return True
-        else:
-            return False
+        return True
 
-    def execute(
-        self, df, num_examples_per_instance, minimum_data=None, maximum_data=None,
-        gap=None, drop_empty=True, verbose=True, *args, **kwargs
-    ):
+    def execute(self, df):
         '''
         Executes the problem's operations on a dataframe. Generates
         '''
-
-        assert df.isnull().sum().sum() == 0
 
         if not self.is_valid(self.table_meta):
             raise ValueError(
@@ -100,26 +87,96 @@ class PredictionProblem:
                 'valid.',
             )
 
-        default_kwarg = self.cutoff_strategy.kwarg_dict() if self.cutoff_strategy else {}
-        search_kwargs = {
-            "minimum_data": minimum_data or default_kwarg.get('minimum_data'),
-            "maximum_data": maximum_data or default_kwarg.get('maximum_data'),
-            "gap": gap or default_kwarg.get('gap'),
-        }
+        df = df.copy()
+        grouped = df.groupby(self.entity_id_col)
 
-        lt = self._label_maker.search(
-            df=df,
-            num_examples_per_instance=num_examples_per_instance,
-            minimum_data=search_kwargs['minimum_data'],
-            maximum_data=search_kwargs['maximum_data'],
-            gap=search_kwargs['gap'],
-            drop_empty=drop_empty,
-            verbose=verbose,
-            *args,
-            **kwargs
-        )
+        res_dict = {}
 
-        return lt
+        for entity_id, df_group in grouped:
+
+            # generate the a cutoff date if the problem has a cutoff strategy
+            cutoff = None
+            if self.cutoff_strategy:
+                cutoff = self.cutoff_strategy.generate_fn(
+                    df_group, self.entity_id_col,
+                )
+
+            label_series = self._execute_operations_on_df(
+                df_group,
+            )[self.label_col]
+
+            # add the label to the results dictionary
+            res_dict = self._insert_single_label_into_dict(
+                entity_id, label_series, cutoff, res_dict,
+            )
+
+        res = pd.DataFrame.from_dict(data=res_dict, orient='index')
+        self._rename_columns(res, [self.entity_id_col, 'cutoff', 'label'])
+        return res
+
+    def _insert_single_label_into_dict(
+            self, entity_id, label_series, cutoff, res_dict,
+    ):
+        '''
+        Inserts a single row of a dataframe into the passed dictionary and
+        returns it.
+
+        Parameters
+        ----------
+        label_df: dataframe
+        cutoff: cutoff time
+        res_dict: dictionary with key entity_id and value a two part tuple:
+            (cutoff time, binary label)
+
+        Returns
+        -------
+        dictionary
+        '''
+        num_rows = len(label_series)
+        if num_rows > 1:
+            warnings.warn(
+                "Operations returned more than 1 result for entity " +
+                str(entity_id) + ". This probably means you forgot to " +
+                "add an aggregation operation. Arbitrarily picking the " +
+                "first result.",
+                RuntimeWarning,
+            )
+        elif num_rows < 1:
+            warnings.warn(
+                "Operation returned fewer than 1 result for entity " +
+                str(entity_id) + ". Returning an unedited res_dict",
+                RuntimeWarning,
+            )
+        if num_rows > 0:
+            group_tuple = (cutoff, label_series.iloc[0])
+            res_dict[entity_id] = group_tuple
+
+        return res_dict
+
+    def _rename_columns(self, df, column_list):
+        '''
+        Renames columns in a given dataframe, in order, as the column_list.
+
+        This is required because of support for Python 2.7 and Pandas 0.21
+        A more modern way is to pass columns=df.columns
+            into pd.DataFrame.from_dict.
+
+        Parameters
+        ----------
+        df: DataFrame whose columns will be renamed
+        column_list: list of column names
+
+        Returns
+        -------
+        dataframe with renamed columns
+        '''
+        rename_dict = {}
+        for col_num in df.columns.values:
+            rename_dict[col_num] = column_list[col_num + 1]
+
+        df.index.names = [column_list[0]]
+        df.rename(columns=rename_dict, inplace=True)
+        return df
 
     def _execute_operations_on_df(self, df):
         '''
@@ -152,15 +209,20 @@ class PredictionProblem:
         description: str natural language description of the problem
 
         """
-        if self.entity_col != "__fake_root_entity__":
-            description = 'For each <' + self.entity_col + '> predict'
-        else:
-            description = 'Predict'
+        desc_arr = []
+        description = 'For each ' + self.entity_id_col + ' predict'
         # cycle through each operation to create dataops
         # dataops are a series of operations containing one and only one
         # aggregation op at its end
+        dataop = []
+        for op in self.operations:
+            op_type = type(op)
+            dataop.append(op)
 
-        description += self._describe_aggop(self.operations[-1])
+            if issubclass(op_type, AggregationOpBase):
+                # describe each dataop
+                desc_arr = desc_arr + self._describe_dataop(dataop)
+                dataop = []
 
         # cycle through ops, pick out filters and describe them
         filterop_desc_arr = []
@@ -172,25 +234,108 @@ class PredictionProblem:
         if len(filterop_desc_arr) > 0:
             description += ' and '.join(filterop_desc_arr)
 
+        # join the dataops together with ' of '
+        description += ' of '.join(desc_arr)
+
         # add the cutoff strategy description if it exists
         if self.cutoff_strategy:
             description += ' ' + self.cutoff_strategy.description
 
         return description
 
+    def _describe_dataop(self, dataop):
+        """
+        A DataOp is a series of non-aggregation operations ending with one and
+        only one aggregation op.
+
+        In a dataop, filter operations are ignored. (They are dealt with
+        elsewhere.) The NL description puts the agg op first, followed other
+        operations in linear (left to right order.)
+
+        So an operation which is row_op -> trans_op -> agg_op will be written
+        as agg_op OF trans_op OF row_op.
+        """
+        descriptions = []
+
+        agg_op = dataop[-1]
+        if not issubclass(type(agg_op), AggregationOpBase):
+            raise ValueError(
+                'Last operation of dataop must be an aggregation op. '
+                'It is currently a ' + type(agg_op) + '.',
+            )
+
+        descriptions.append(self._describe_aggop(agg_op))
+        # remove the last operation (aggregation) and reverse the list
+        dataop = dataop[:-1]
+        dataop.reverse()
+
+        for op in dataop:
+            op_type = type(op)
+            description = ''
+            if issubclass(op_type, FilterOpBase):
+                # filter ops are described seperately
+                break
+            elif issubclass(op_type, AggregationOpBase):
+                raise ValueError(
+                    'There is more than one aggreagation op in your dataop. '
+                    'A dataop must contain one and only one aggregation '
+                    ' at its end.',
+                )
+            elif issubclass(op_type, TransformationOpBase):
+                description = self._describe_transop(op)
+            elif issubclass(op_type, RowOpBase):
+                description = self._describe_rowop(op)
+
+            descriptions.append(description)
+
+        # add the cutoff strategy description
+        if self.cutoff_strategy:
+            description += self.cutoff_strategy.description
+
+        return descriptions
+
     def _describe_aggop(self, op):
-        agg_op_str_dict = {
-            SumAggregationOp: " the total <{}> in all related records",
-            AvgAggregationOp: " the average <{}> in all related records",
-            MaxAggregationOp: " the maximum <{}> in all related records",
-            MinAggregationOp: " the minimum <{}> in all related records",
-            MajorityAggregationOp: " the majority <{}> in all related records",
+            agg_op_str_dict = {
+                FirstAggregationOp: "the first",
+                LastAggregationOp: "the last",
+                CountAggregationOp: "the number of",
+                SumAggregationOp: "the sum of",
+                LMFAggregationOp: "the last minus first",
+            }
+            if op.input_type == TableMeta.TYPE_BOOL and isinstance(
+                    op, SumAggregationOp,
+            ):
+                return " the number of records whose"
+            if type(op) in agg_op_str_dict:
+                return agg_op_str_dict[type(op)]
+
+    def _describe_rowop(self, op):
+        row_op_str_dict = {
+            GreaterRowOp: "greater than",
+            EqRowOp: "equal to",
+            NeqRowOp: "not equal to",
+            LessRowOp: "less than",
         }
 
-        if isinstance(op, CountAggregationOp):
-            return " the number of records"
-        if type(op) in agg_op_str_dict:
-            return agg_op_str_dict[type(op)].format(op.column_name)
+        if isinstance(op, IdentityRowOp):
+            # return " {col}".format(col=op.column_name)
+            return ""
+        if isinstance(op, ExpRowOp):
+            return " the exp of {col}".format(col=op.column_name)
+        if type(op) in row_op_str_dict:
+            return " {col} is {op} {threshold}".format(
+                col=op.column_name, op=row_op_str_dict[type(op)],
+                threshold=op.hyper_parameter_settings['threshold'],
+            )
+        return " (unknown row op)"
+
+    def _describe_transop(self, op):
+        if isinstance(op, IdentityTransformationOp):
+            return ""
+        if isinstance(op, DiffTransformationOp):
+            return "fluctuation of " + str(op.column_name)
+        if isinstance(op, ObjectFrequencyTransformationOp):
+            return "frequency of " + str(op.column_name)
 
     def _describe_filter(self, op):
         filter_op_str_dict = {
@@ -206,16 +351,14 @@ class PredictionProblem:
 
         # remove AllFilterOp
         filter_ops = [x for x in filter_ops if not isinstance(x, AllFilterOp)]
-        if len(filter_ops) == 0:
-            return ""
 
         desc = ' with '
         last_op_idx = len(filter_ops) - 1
         for idx, op in enumerate(filter_ops):
-            op_desc = '<{col}> {op} {threshold}'.format(
+            op_desc = '{col} {op} {threshold}'.format(
                 col=op.column_name,
                 op=filter_op_str_dict[type(op)],
-                threshold=op.hyper_parameter_settings.get('threshold', '__'),
+                threshold=op.hyper_parameter_settings.get('threshold', ''),
             )
             desc += op_desc
 
@@ -291,10 +434,10 @@ class PredictionProblem:
             f.write(cutoff_dill_bytes)
             dill_saved = True
 
-        return ({
+        return({
             'saved_correctly': json_saved & dill_saved,
             'created_directory': created_directory,
-             'problem_name': problem_name,
+            'problem_name': problem_name,
         })
 
     @classmethod
@@ -357,8 +500,8 @@ class PredictionProblem:
                 "operations": [
                    json.loads(op_to_json(op)) for op in self.operations
                 ],
-                "entity_col": self.entity_col,
-                "time_col": self.time_col,
+                "entity_id_col": self.entity_id_col,
+                "label_col": self.label_col,
                 "table_meta": table_meta_json,
             },
         )
@@ -379,20 +522,20 @@ class PredictionProblem:
         """
 
         # only tries json.loads if json_data is not a dict
-        if not isinstance(json_data, dict):
+        if type(json_data) != dict:
             json_data = json.loads(json_data)
 
         operations = [
             op_from_json(json.dumps(item)) for item in json_data['operations']
         ]
-        entity_col = json_data['entity_col']
-        time_col = json_data['time_col']
+        entity_id_col = json_data['entity_id_col']
+        label_col = json_data['label_col']
         table_meta = TableMeta.from_json(json_data.get('table_meta'))
 
         problem = PredictionProblem(
             operations=operations,
-            entity_col=entity_col,
-            time_col=time_col,
+            entity_id_col=entity_id_col,
+            label_col=label_col,
             table_meta=table_meta,
             cutoff_strategy=None,
         )
@@ -453,37 +596,30 @@ class PredictionProblem:
             allowed_types_float
 
         if expected_type == TableMeta.TYPE_CATEGORY:
-            assert (type(actual_data) in allowed_types_category)
+            assert(type(actual_data) in allowed_types_category)
 
         elif expected_type == TableMeta.TYPE_BOOL:
-            assert (type(actual_data) in allowed_types_bool)
+            assert(type(actual_data) in allowed_types_bool)
 
         elif expected_type == TableMeta.TYPE_ORDERED:
-            assert (type(actual_data) in allowed_types_ordered)
+            assert(type(actual_data) in allowed_types_ordered)
 
         elif expected_type == TableMeta.TYPE_TEXT:
-            assert (type(actual_data) in allowed_types_text)
+            assert(type(actual_data) in allowed_types_text)
 
         elif expected_type == TableMeta.TYPE_INTEGER:
-            assert (type(actual_data) in allowed_types_int)
+            assert(type(actual_data) in allowed_types_int)
 
         elif expected_type == TableMeta.TYPE_FLOAT:
-            assert (type(actual_data) in allowed_types_float)
+            assert(type(actual_data) in allowed_types_float)
 
         elif expected_type == TableMeta.TYPE_TIME:
-            assert (type(actual_data) in allowed_types_time)
+            assert(type(actual_data) in allowed_types_time)
 
         elif expected_type == TableMeta.TYPE_IDENTIFIER:
-            assert (type(actual_data) in allowed_types_id)
+            assert(type(actual_data) in allowed_types_id)
 
         else:
             logging.critical(
                 'check_type function received an unexpected type.',
             )
-
-    def set_parameters(self, **parameters):
-        for operation in self.operations:
-            settings = operation.hyper_parameter_settings
-            for parameter in operation.REQUIRED_PARAMETERS:
-                for key in parameter:
-                    settings[key] = parameters.get(key, 0)

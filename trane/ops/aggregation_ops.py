@@ -2,10 +2,8 @@ from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
 
 AGGREGATION_OPS = [
-    "CountAggregationOp", "SumAggregationOp",
-    "AvgAggregationOp",
-    "MaxAggregationOp", "MinAggregationOp",
-    "MajorityAggregationOp",
+    "FirstAggregationOp", "CountAggregationOp", "SumAggregationOp",
+    "LastAggregationOp", "LMFAggregationOp",
 ]
 __all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
 
@@ -38,107 +36,90 @@ class AggregationOpBase(OpBase):
 
     """
 
-    def op_type_check(self, table_meta):
-        """
-        Data type check for the operation.
-        Operations may change the data type of a column, eg. int -> bool.
-        One operation can only be applied on a few data types, eg. `greater`
-        can be applied on int but can't be applied on bool.
-        This function checks whether the current operation can be applied on
-        the data.
-        It returns the updated TableMeta for next operation or None if it's not
-        valid.
 
-        Parameters
-        ----------
-        table_meta: table meta before this operation.
+class FirstAggregationOp(AggregationOpBase):
+    REQUIRED_PARAMETERS = []
+    IOTYPES = [
+        (TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
+        (TM.TYPE_BOOL, TM.TYPE_BOOL),
+        (TM.TYPE_ORDERED, TM.TYPE_ORDERED),
+        (TM.TYPE_TEXT, TM.TYPE_TEXT),
+        (TM.TYPE_INTEGER, TM.TYPE_INTEGER),
+        (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
+        (TM.TYPE_TIME, TM.TYPE_TIME),
+        (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER),
+    ]
 
-        Returns
-        -------
-        table_meta: table meta after this operation. None if not compatable.
+    def execute(self, dataframe):
+        dataframe = dataframe.copy()
+        return dataframe.head(1)
 
-        """
-        self.input_type = table_meta.get_type(self.column_name)
-        for idx, (input_type, output_type) in enumerate(self.IOTYPES):
-            if self.input_type == input_type:
-                self.output_type = output_type
-                return output_type
-        return None
+
+class LastAggregationOp(AggregationOpBase):
+    REQUIRED_PARAMETERS = []
+    IOTYPES = [
+        (TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
+        (TM.TYPE_BOOL, TM.TYPE_BOOL),
+        (TM.TYPE_ORDERED, TM.TYPE_ORDERED),
+        (TM.TYPE_TEXT, TM.TYPE_TEXT),
+        (TM.TYPE_INTEGER, TM.TYPE_INTEGER),
+        (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
+        (TM.TYPE_TIME, TM.TYPE_TIME),
+        (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER),
+    ]
+
+    def execute(self, dataframe):
+        dataframe = dataframe.copy()
+        return dataframe.tail(1)
+
+
+class LMFAggregationOp(AggregationOpBase):
+    REQUIRED_PARAMETERS = []
+    IOTYPES = [
+        (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
+        (TM.TYPE_INTEGER, TM.TYPE_INTEGER),
+    ]
+
+    def execute(self, dataframe):
+        dataframe = dataframe.copy()
+        last = dataframe.tail(1)
+        first = dataframe.head(1)
+        last.at[
+            last.index[0],
+            self.column_name,
+        ] -= first.at[first.index[0], self.column_name]
+        return last
 
 
 class CountAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = None
-
-    def op_type_check(self, table_meta):
-        self.output_type = TM.TYPE_INTEGER
-        return TM.TYPE_INTEGER
+    IOTYPES = [
+        (TM.TYPE_CATEGORY, TM.TYPE_INTEGER),
+        (TM.TYPE_BOOL, TM.TYPE_INTEGER),
+        (TM.TYPE_ORDERED, TM.TYPE_INTEGER),
+        (TM.TYPE_TEXT, TM.TYPE_INTEGER),
+        (TM.TYPE_INTEGER, TM.TYPE_INTEGER),
+        (TM.TYPE_FLOAT, TM.TYPE_INTEGER),
+        (TM.TYPE_TIME, TM.TYPE_INTEGER),
+        (TM.TYPE_IDENTIFIER, TM.TYPE_INTEGER),
+    ]
 
     def execute(self, dataframe):
-        return len(dataframe)
+        head = dataframe.head(1).copy()
+        count = int(dataframe.shape[0])
+        head[self.column_name] = count
+        return head
 
 
 class SumAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
     IOTYPES = [
-        (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
+        (TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_BOOL, TM.TYPE_FLOAT),
         (TM.TYPE_INTEGER, TM.TYPE_FLOAT),
     ]
 
     def execute(self, dataframe):
-        if len(dataframe) == 0:
-            return None
-        return float(dataframe[self.column_name].sum())
-
-
-class AvgAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [
-        (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-        (TM.TYPE_INTEGER, TM.TYPE_FLOAT),
-    ]
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
-            return None
-        return float(dataframe[self.column_name].mean())
-
-
-class MaxAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [
-        (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-        (TM.TYPE_INTEGER, TM.TYPE_FLOAT),
-    ]
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
-            return None
-        return float(dataframe[self.column_name].max())
-
-
-class MinAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [
-        (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-        (TM.TYPE_INTEGER, TM.TYPE_FLOAT),
-    ]
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
-            return None
-        return float(dataframe[self.column_name].min())
-
-
-class MajorityAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [
-        (TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-        (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER),
-    ]
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
-            return None
-
-        return str(dataframe[self.column_name].mode()[0])
+        head = dataframe.head(1).copy()
+        total = float(dataframe[self.column_name].sum())
+        head[self.column_name] = total
+        return head

@@ -11,8 +11,7 @@ __all__ = [
 
 def prediction_problems_to_json_file(
     prediction_problems, table_meta,
-    entity_id_column, label_generating_column, time_column,
-    filename,
+    entity_id_column, label_generating_column, time_column, filename,
 ):
     """
     Convert a list of prediction problems to a JSON file
@@ -36,6 +35,7 @@ def prediction_problems_to_json_file(
     """
 
     prediction_problems_json = [prob.to_json() for prob in prediction_problems]
+
     json_str = json.dumps({
         "prediction_problems": [json.loads(prob_json) for prob_json in prediction_problems_json],
         "table_meta": json.loads(table_meta.to_json()),

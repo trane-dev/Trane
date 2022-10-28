@@ -55,16 +55,16 @@ class TestCutoffStrategy(unittest.TestCase):
         cutoff_df = self.cutoff_strategy.generate_cutoffs(
             df=test_data, entity_id_col='entity_id',
         )
-
+        # import pdb;pdb.set_trace()
         # test_cutoff should be a different date
         self.assertEqual(
             cutoff_df.loc['a'].cutoff,
-            np.datetime64('1980-02-06'),
+            pd.to_datetime('1980-02-06'),
         )
 
         self.assertEqual(
             cutoff_df.loc['b'].cutoff,
-            np.datetime64('1980-03-06'),
+            pd.to_datetime('1980-03-06'),
         )
 
     def test_cutoff_times_returned_as_expected_without_cutoff_strategy(self):

@@ -13,8 +13,9 @@ from mock import MagicMock, call, patch
 from trane.core.prediction_problem_generator import PredictionProblemGenerator
 from trane.ops.aggregation_ops import *  # noqa
 from trane.ops.filter_ops import *  # noqa
-from trane.ops.row_ops import *  # noqa
-from trane.ops.transformation_ops import *  # noqa
+
+# from trane.ops.row_ops import *  # noqa
+# from trane.ops.transformation_ops import *  # noqa
 from trane.utils.table_meta import TableMeta
 
 

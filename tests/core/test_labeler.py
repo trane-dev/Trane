@@ -5,8 +5,9 @@ from trane.core.labeler import *  # noqa
 from trane.core.prediction_problem_saver import *  # noqa
 from trane.ops.aggregation_ops import *  # noqa
 from trane.ops.filter_ops import *  # noqa
-from trane.ops.row_ops import *  # noqa
-from trane.ops.transformation_ops import *  # noqa
+
+# from trane.ops.row_ops import *  # noqa
+# from trane.ops.transformation_ops import *  # noqa
 
 """TESTING STRATEGY:
 Function: execute()

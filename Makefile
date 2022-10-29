@@ -103,3 +103,22 @@ dist: clean ## builds source and wheel package
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
+
+.PHONY: upgradepip
+upgradepip:
+	python -m pip install --upgrade pip
+
+.PHONY: upgradebuild
+upgradebuild:
+	python -m pip install --upgrade build
+
+.PHONY: upgradesetuptools
+upgradesetuptools:
+	python -m pip install --upgrade setuptools
+
+.PHONY: package
+package: upgradepip upgradebuild upgradesetuptools
+	python -m build
+	$(eval PACKAGE=$(shell python -c "from pep517.meta import load; metadata = load('.'); print(metadata.version)"))
+	tar -zxvf "dist/trane-${PACKAGE}.tar.gz"
+	mv "trane-${PACKAGE}" unpacked_sdist

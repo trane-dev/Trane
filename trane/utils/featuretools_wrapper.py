@@ -14,7 +14,7 @@ class FeaturetoolsWrapper(object):
 
         self.entity_col = entity_col
         self.es = ft.EntitySet(id=name)
-        self.es = self.es.entity_from_dataframe(entity_id=name,
+        self.es = self.es.add_dataframe(entity_id=name,
                                                 dataframe=df,
                                                 time_index=time_col,
                                                 index="__id__",
@@ -23,7 +23,7 @@ class FeaturetoolsWrapper(object):
                                                 )
 
         entity_df = pd.DataFrame([[i] for i in set(df[entity_col])], columns=[entity_col])
-        self.es = self.es.entity_from_dataframe(entity_id=entity_col,
+        self.es = self.es.add_dataframe(entity_id=entity_col,
                                                 dataframe=entity_df,
                                                 index=entity_col
                                                 )

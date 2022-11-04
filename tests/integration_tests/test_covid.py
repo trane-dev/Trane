@@ -1,7 +1,7 @@
 import pandas as pd 
 import numpy as np
 import os 
-from datetime import datetime, timedelta
+from datetime import datetime
 import json 
 import pytest
 
@@ -13,16 +13,18 @@ def current_dir():
 
 @pytest.fixture
 def df(current_dir):
-	df = pd.read_csv(os.path.join(current_dir, 'covid19.csv'))
-	df['Date'] = pd.to_datetime(df['Date'], format="%m/%d/%y")
-	# df['Date'] = df['Date'].apply(lambda x: datetime.strptime(x, "%m/%d/%y"))
-	df = df.sort_values(by=['Date'])
+    datetime_col = 'trending_date'
+    filename = 'covid19.csv'
+	df = pd.read_csv(os.path.join(current_dir, filename))
+	df[datetime_col] = pd.to_datetime(df[datetime_col], format="%m/%d/%y")
+	df = df.sort_values(by=[datetime_col])
 	df = df.fillna(0)
 	return df
 
 @pytest.fixture
 def meta_covid(current_dir):
-	meta_fp = os.path.join(current_dir, 'meta_covid.json')
+	filename = 'meta_covid.json'
+	meta_fp = os.path.join(current_dir, filename)
 	meta_covid = trane.TableMeta(json.loads(open(meta_fp).read()))
 	return meta_covid
 

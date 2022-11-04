@@ -165,7 +165,7 @@ class PredictionProblemEvaluator(object):
 
         return X_train, X_test, Y_train, Y_test
 
-    def evaluate(self, problem, features):
+    def evaluate(self, problem, features, labels):
         if problem.label_type in [TM.TYPE_INTEGER, TM.TYPE_FLOAT]:
             problem_type = "regression"
         elif problem.label_type in [TM.TYPE_CATEGORY, TM.TYPE_IDENTIFIER]:
@@ -181,42 +181,43 @@ class PredictionProblemEvaluator(object):
             "template_nl": str(problem)
         }
         evaluations = []
-        for problem_final, threshold_description in self.threshold_recommend(problem):
-            problem_final.cutoff_strategy = self.cutoff_strategy
-            labels = problem_final.execute(self.df)
-            problem_result = {
-                "description": threshold_description,
-                "problem": str(problem_final),
-                "label_stats": self._get_label_stats(labels, problem_type)
-            }
+        #for problem_final, threshold_description in self.threshold_recommend(problem):
+        problem_final = problem
+        problem_final.cutoff_strategy = self.cutoff_strategy
+        labels = labels#problem_final.execute(self.df)
+        problem_result = {
+            #"description": threshold_description,
+            "problem": str(problem_final),
+            "label_stats": self._get_label_stats(labels, problem_type)
+        }
 
-            X_train, X_test, Y_train, Y_test = self.split_dataset(
-                problem_final, problem_type, labels, features)
+        X_train, X_test, Y_train, Y_test = self.split_dataset(
+            problem_final, problem_type, labels, features)
 
-            if len(X_train) < self.min_train_set or len(X_test) < self.min_test_set:
+        if len(X_train) < self.min_train_set or len(X_test) < self.min_test_set:
+            continue
+
+        problem_result["N_train"] = len(X_train)
+        problem_result["N_test"] = len(X_test)
+
+        if problem_type == "regression":
+            problem_result['R2'] = {}
+            for regressor in self.regressor:
+                model = copy.deepcopy(regressor['model'])
+                model.fit(X_train, Y_train)
+                score = model.score(X_test, Y_test)
+                problem_result['R2'][regressor['name']] = score
+        elif problem_type == "classification":
+            if len(set(Y_train)) == 1:
                 continue
+            problem_result['Accuracy'] = {}
+            for classifier in self.classifier:
+                model = copy.deepcopy(classifier['model'])
+                model.fit(X_train, Y_train)
+                score = model.score(X_test, Y_test)
+                problem_result['Accuracy'][classifier['name']] = score
 
-            problem_result["N_train"] = len(X_train)
-            problem_result["N_test"] = len(X_test)
-
-            if problem_type == "regression":
-                problem_result['R2'] = {}
-                for regressor in self.regressor:
-                    model = copy.deepcopy(regressor['model'])
-                    model.fit(X_train, Y_train)
-                    score = model.score(X_test, Y_test)
-                    problem_result['R2'][regressor['name']] = score
-            elif problem_type == "classification":
-                if len(set(Y_train)) == 1:
-                    continue
-                problem_result['Accuracy'] = {}
-                for classifier in self.classifier:
-                    model = copy.deepcopy(classifier['model'])
-                    model.fit(X_train, Y_train)
-                    score = model.score(X_test, Y_test)
-                    problem_result['Accuracy'][classifier['name']] = score
-
-            evaluations.append(problem_result)
+        evaluations.append(problem_result)
         template_res['evaluations'] = evaluations
         return template_res
 

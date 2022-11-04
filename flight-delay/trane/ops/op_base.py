@@ -280,7 +280,7 @@ class OpBase(object):
 
         if len(unique_vals) > max_num_unique_values:
             unique_vals = list(
-                random.sample(unique_vals, max_num_unique_values))
+                random.sample(list(unique_vals), max_num_unique_values))
 
         if len(df) > max_num_rows:
             df = df.sample(max_num_rows)

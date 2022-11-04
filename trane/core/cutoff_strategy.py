@@ -53,5 +53,6 @@ class FixWindowCutoffStrategy(CutoffStrategy):
 
     #     return pd.DataFrame(entity_cutoffs, columns=[self.entity_col, "cutoff_st", "cutoff_ed"])
     
-    # def kwarg_dict(self):
-    #     return { k: v for k, v in self.__dict__.items() if v is not None}
+    def kwarg_dict(self):
+        # NOT DEPRECATED, still used
+        return { k: v for k, v in self.__dict__.items() if v is not None}

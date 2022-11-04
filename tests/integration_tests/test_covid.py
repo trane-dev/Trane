@@ -35,9 +35,9 @@ def test_covid_dataset(df, meta_covid):
 
 	cutoff_strategy = trane.FixWindowCutoffStrategy(entity, cutoff, cutoff_base, cutoff_end, cutoff)
 	problem_generator = trane.PredictionProblemGenerator(table_meta=meta_covid,
-														entity_col=entity,
-														time_col=time,
-														cutoff_strategy=cutoff_strategy)
+														 entity_col=entity,
+														 time_col=time,
+														 cutoff_strategy=cutoff_strategy)
 	problems = problem_generator.generate(df, generate_thresholds=True)
 	for p in problems:
 		try:

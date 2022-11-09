@@ -1,0 +1,55 @@
+{
+    "tables": [
+        {
+            "fields": [
+                {
+                    "name": "date",
+                    "type": "time"
+                },
+                {
+                    "name": "hour",
+                    "subtype": "categorical",
+                    "type": "categorical"
+                },
+                {
+                    "name": "usertype",
+                    "subtype": "categorical",
+                    "type": "categorical"
+                },
+                {
+                    "name": "gender",
+                    "subtype": "categorical",
+                    "type": "categorical"
+                },
+                {
+                    "name": "tripduration",
+                    "subtype": "float",
+                    "type": "number"
+                },
+                {
+                    "name": "temperature",
+                    "subtype": "float",
+                    "type": "number"
+                },
+                {
+                    "name": "from_station_id",
+                    "type": "id"
+                },
+                {
+                    "name": "dpcapacity_start",
+                    "subtype": "integer",
+                    "type": "number"
+                },
+                {
+                    "name": "to_station_id",
+                    "type": "id"
+                },
+                {
+                    "name": "dpcapacity_end",
+                    "subtype": "integer",
+                    "type": "number"
+                }
+            ]
+        }
+    ]
+}

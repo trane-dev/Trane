@@ -1,5 +1,6 @@
 import random
 from collections import Counter
+import heapq
 
 from scipy import stats
 
@@ -279,8 +280,10 @@ class OpBase(object):
         unique_vals = set(df[col])
 
         if len(unique_vals) > max_num_unique_values:
-            unique_vals = list(
-                random.sample(unique_vals, max_num_unique_values))
+            sample = heapq.nlargest(max_num_unique_values, unique_vals, key=lambda L: random.random())
+            # Fixes DeprecationWarning: Sampling from a set deprecated since Python 3.9 and will be removed in a subsequent version.
+            # unique_vals = list(
+                # random.sample(unique_vals, max_num_unique_values))
 
         if len(df) > max_num_rows:
             df = df.sample(max_num_rows)

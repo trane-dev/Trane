@@ -31,12 +31,14 @@ jobs:
           python -m pip install unpacked_sdist/[test]
   unit_tests:
     needs: setup_env
+    runs-on: ubuntu-latest
     steps:
       - name: Install test requirements
         run: |
           make test
   integration_tests:
     needs: setup_env
+    runs-on: ubuntu-latest
     steps:
       - name: Install test requirements
         run: |

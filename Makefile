@@ -8,7 +8,7 @@ clean:
 
 .PHONY: test
 test:
-	python -m pytest -n auto -s -vv -x test --ignore=tests/integration_tests
+	python -m pytest -n auto -s -vv -x tests/ --ignore=tests/integration_tests
 
 .PHONY: integration-tests
 integration-tests:

@@ -7,7 +7,7 @@ on:
       - main
   workflow_dispatch:
 jobs:
-  tests:
+  setup_env:
     name: ${{ matrix.python_version }} ${{ matrix.directories }} tests
     runs-on: ubuntu-latest
     strategy:
@@ -29,6 +29,15 @@ jobs:
       - name: Install core and test requirements
         run: |
           python -m pip install unpacked_sdist/[test]
+  unit_tests:
+    needs: setup_env
+    steps:
       - name: Install test requirements
         run: |
           make test
+  integration_tests:
+    needs: setup_env
+    steps:
+      - name: Install test requirements
+        run: |
+          make integration-tests

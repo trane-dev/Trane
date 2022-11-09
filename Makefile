@@ -63,8 +63,9 @@ fixlint: ## fix lint issues using autoflake, autopep8, and isort
 	autopep8 --in-place --recursive --aggressive tests
 	isort --apply --atomic --recursive tests
 
-test: ## run tests quickly with the default Python
-	pytest
+.PHONY: test
+test:
+	pytest -n auto -s -vv -x test --ignore=tests/integration_tests
 
 test-all: ## run tests on every Python version with tox
 	tox
@@ -103,6 +104,10 @@ dist: clean ## builds source and wheel package
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
+
+.PHONY: integration-tests
+integration-tests:
+	python -m pytest -s -vv -x tests/integration_tests
 
 .PHONY: upgradepip
 upgradepip:

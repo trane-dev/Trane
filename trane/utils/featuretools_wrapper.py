@@ -9,7 +9,7 @@ __all__ = ["FeaturetoolsWrapper"]
 class FeaturetoolsWrapper(object):
     """docstring for FeaturetoolsWrapper."""
 
-    def __init__(self, df, entity_col, time_col, variable_types, name):
+    def __init__(self, df, entity_col, time_col, name):
         assert name != entity_col
 
         self.entity_col = entity_col

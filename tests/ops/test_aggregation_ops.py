@@ -18,15 +18,43 @@ meta = TM({
     ]})
 
 
-def test_count_aggregation_op_input_value():
+def test_count_aggregation_op():
     op = CountAggregationOp('col')
     op.op_type_check(meta)
     output = op(df.copy())
     assert output == 5
 
 
-def test_sum_aggregation_op_input_value():
+def test_sum_aggregation_op():
     op = SumAggregationOp('col')
     op.op_type_check(meta)
     output = op(df.copy())
     assert output == 15
+
+
+def test_agg_aggregation_op():
+    op = AvgAggregationOp('col')
+    op.op_type_check(meta)
+    output = op(df.copy())
+    assert output == 3.00
+
+
+def test_max_aggregation_op():
+    op = MaxAggregationOp('col')
+    op.op_type_check(meta)
+    output = op(df.copy())
+    assert output == 5
+
+
+def test_min_aggregation_op():
+    op = MinAggregationOp('col')
+    op.op_type_check(meta)
+    output = op(df.copy())
+    assert output == 1
+
+
+def test_majority_aggregation_op():
+    op = MajorityAggregationOp('col')
+    op.op_type_check(meta)
+    output = op(df.copy())
+    assert output == str(1)

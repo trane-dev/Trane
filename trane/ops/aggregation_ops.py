@@ -1,12 +1,12 @@
 from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
 
-AGGREGATION_OPS = [
-    "CountAggregationOp", "SumAggregationOp",
-    "AvgAggregationOp",
-    "MaxAggregationOp", "MinAggregationOp",
-    "MajorityAggregationOp"]
-__all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
+# AGGREGATION_OPS = [
+#     "CountAggregationOp", "SumAggregationOp",
+#     "AvgAggregationOp",
+#     "MaxAggregationOp", "MinAggregationOp",
+#     "MajorityAggregationOp"]
+# __all__ = ["AggregationOpBase", "AGGREGATION_OPS"] + AGGREGATION_OPS
 
 
 class AggregationOpBase(OpBase):

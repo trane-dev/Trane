@@ -1,6 +1,13 @@
 from pandas import DataFrame
 
-from trane.ops.aggregation_ops import *  # noqa
+from trane.ops.aggregation_ops import (
+    CountAggregationOp,
+    SumAggregationOp,
+    AvgAggregationOp,
+    MaxAggregationOp,
+    MinAggregationOp,
+    MajorityAggregationOp
+)
 from trane.utils.table_meta import TableMeta as TM
 
 df = DataFrame({'col': [1, 2, 3, 4, 5]})
@@ -11,41 +18,15 @@ meta = TM({
     ]})
 
 
-def test_first_aggregation_op_input_value():
-    op = FirstAggregationOp('col')
-    op.op_type_check(meta)
-    output = op(df.copy())
-    assert len(output) == 1
-    assert output.values[0, 0] == 1
-
-
-def test_last_aggregation_op_input_value():
-    op = LastAggregationOp('col')
-    op.op_type_check(meta)
-    output = op(df.copy())
-    assert len(output) == 1
-    assert output.values[0, 0] == 5
-
-
-def test_lmf_aggregation_op_input_value():
-    op = LMFAggregationOp('col')
-    op.op_type_check(meta)
-    output = op(df.copy())
-    assert len(output) == 1
-    assert output.values[0, 0] == 4
-
-
 def test_count_aggregation_op_input_value():
     op = CountAggregationOp('col')
     op.op_type_check(meta)
     output = op(df.copy())
-    assert len(output) == 1
-    assert output.values[0, 0] == 5
+    assert output == 5
 
 
 def test_sum_aggregation_op_input_value():
     op = SumAggregationOp('col')
     op.op_type_check(meta)
     output = op(df.copy())
-    assert len(output) == 1
-    assert output.values[0, 0] == 15
+    assert output == 15

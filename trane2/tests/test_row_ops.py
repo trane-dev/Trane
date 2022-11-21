@@ -1,3 +1,5 @@
+# Moved from tests/ops/test_row_ops.py since RowOps does not exist in trane 
+# trane2 does have it though, and this file may be useful in the future 
 import numpy as np
 from pandas import DataFrame
 

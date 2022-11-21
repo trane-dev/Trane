@@ -73,10 +73,13 @@ class PredictionProblemGenerator:
                 for filter_col, ag_col in itertools.product(filter_cols, ag_cols):
                     if filter_col != self.entity_col and ag_col != self.entity_col:
                         yield ag_col, filter_col, ag, filter
-
+        from tqdm import tqdm
+        # might be inefficent
+        total_attempts = sum(1 for _ in iter_over_ops())
         all_attempts = 0
         success_attempts = 0
-        for op_col_combo in iter_over_ops():
+        for op_col_combo in tqdm(iter_over_ops(), total=total_attempts):
+        # for op_col_combo in iter_over_ops():
             print("\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts), end="")
             all_attempts += 1
             ag_col, filter_col, agg_op_name, filter_op_name = op_col_combo

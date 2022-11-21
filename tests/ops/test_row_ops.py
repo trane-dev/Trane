@@ -2,6 +2,14 @@ import numpy as np
 from pandas import DataFrame
 
 from trane.ops.row_ops import *  # noqa
+from trane.ops.row_ops import (
+    IdentityRowOp, 
+    GreaterRowOp,
+    EqRowOp,
+    NeqRowOp,
+    LessRowOp,
+    ExpRowO,
+)
 from trane.utils.table_meta import TableMeta as TM
 
 df = DataFrame({'col': [1, 2, 3, 4, 5]})

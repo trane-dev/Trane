@@ -3,9 +3,9 @@ import numpy as np
 from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
 
-ROW_OPS = ["IdentityRowOp", "GreaterRowOp",
-           "EqRowOp", "NeqRowOp", "LessRowOp", "ExpRowOp"]
-__all__ = ["RowOpBase", "ROW_OPS"] + ROW_OPS
+# ROW_OPS = ["IdentityRowOp", "GreaterRowOp",
+#            "EqRowOp", "NeqRowOp", "LessRowOp", "ExpRowOp"]
+# __all__ = ["RowOpBase", "ROW_OPS"] + ROW_OPS
 
 
 class RowOpBase(OpBase):

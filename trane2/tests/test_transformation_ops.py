@@ -1,3 +1,6 @@
+# Moved from tests/ops/test_transformation_ops.py since TransformationOps does not exist in trane 
+# trane2 does have it though, and this file may be useful in the future 
+
 import numpy as np
 from pandas import DataFrame
 

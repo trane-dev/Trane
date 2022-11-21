@@ -2,7 +2,7 @@ import numpy as np
 
 from trane.ops import *  # noqa
 from trane.utils.table_meta import TableMeta as TM
-
+from trane.ops.aggregation_ops import AGGREGATION_OPS
 
 ALL_OPS = AGGREGATION_OPS + FILTER_OPS
 

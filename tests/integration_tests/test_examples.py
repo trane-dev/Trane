@@ -93,7 +93,7 @@ def meta_chicago(current_dir):
     return meta_covid
 
 
-def test_youtube(df_youtube, meta_youtube):
+def test_youtube(df_youtube, meta_youtube, sample):
     entity_col = "category_id"
     time_col = "trending_date"
     cutoff = "4d"
@@ -111,11 +111,11 @@ def test_youtube(df_youtube, meta_youtube):
         entity_col=entity_col,
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
-        sample=100
+        sample=sample
     )
 
 
-def test_covid(df_covid, meta_covid):
+def test_covid(df_covid, meta_covid, sample):
     entity_col = "Country/Region"
     time_col = "Date"
     cutoff = "2d"
@@ -133,11 +133,11 @@ def test_covid(df_covid, meta_covid):
         entity_col=entity_col,
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
-        sample=100
+        sample=sample
     )
 
 
-def test_chicago(df_chicago, meta_chicago):
+def test_chicago(df_chicago, meta_chicago, sample):
     entity_col = "usertype"
     time_col = "date"
     cutoff = "1h"
@@ -155,5 +155,5 @@ def test_chicago(df_chicago, meta_chicago):
         entity_col=entity_col,
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
-        sample=100
+        sample=sample
     )

@@ -59,6 +59,8 @@ def df_covid(current_dir):
     filename = "covid19.csv"
     df = pd.read_csv(os.path.join(current_dir, filename))
     df[datetime_col] = pd.to_datetime(df[datetime_col], format="%m/%d/%y")
+    # to speed up things as covid dataset takes awhile
+    df = df.sample(frac=0.5, random_state=1)
     df = df.sort_values(by=[datetime_col])
     df = df.fillna(0)
     return df

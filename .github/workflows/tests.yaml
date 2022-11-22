@@ -1,13 +1,16 @@
 name: Tests
 on:
   pull_request:
-    types: [opened, synchronize]
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
   push:
     branches:
       - main
   workflow_dispatch:
 jobs:
-  setup_env:
+  tests:
     name: ${{ matrix.python_version }} ${{ matrix.type_of_tests }}
     runs-on: ubuntu-latest
     strategy:
@@ -17,6 +20,7 @@ jobs:
         exclude:
           - python_version: "3.8"
             type_of_tests: "integration tests"
+    if: github.event.pull_request.draft == false
     steps:
       - name: Set up python ${{ matrix.python_version }}
         uses: actions/setup-python@v4

@@ -1,3 +1,4 @@
+import random
 from composeml import LabelMaker
 
 import trane
@@ -39,7 +40,8 @@ filter_op_str_dict = {
 
 
 def generate_and_verify_prediction_problem(
-    df, meta, entity_col, time_col, cutoff_strategy
+    df, meta, entity_col, time_col, cutoff_strategy,
+    sample=None
 ):
     cutoff = cutoff_strategy.window_size
     problem_generator = trane.PredictionProblemGenerator(
@@ -49,6 +51,9 @@ def generate_and_verify_prediction_problem(
         time_col=time_col,
     )
     problems = problem_generator.generate(df, generate_thresholds=True)
+    if sample:
+        random.seed(1)
+        problems = random.sample(problems, k=sample)
     unique_entity_ids = df[entity_col].nunique()
     for p in problems:
         assert p.entity_col == entity_col

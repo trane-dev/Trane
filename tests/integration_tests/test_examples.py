@@ -111,6 +111,7 @@ def test_youtube(df_youtube, meta_youtube):
         entity_col=entity_col,
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
+        sample=100
     )
 
 
@@ -132,7 +133,7 @@ def test_covid(df_covid, meta_covid):
         entity_col=entity_col,
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
-        sample=150
+        sample=100
     )
 
 
@@ -154,4 +155,5 @@ def test_chicago(df_chicago, meta_chicago):
         entity_col=entity_col,
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
+        sample=100
     )

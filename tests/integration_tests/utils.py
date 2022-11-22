@@ -49,6 +49,7 @@ def generate_and_verify_prediction_problem(
         time_col=time_col,
     )
     problems = problem_generator.generate(df, generate_thresholds=True)
+    unique_entity_ids = df[entity_col].nunique()
     for p in problems:
         assert p.entity_col == entity_col
         assert p.time_col == time_col
@@ -58,6 +59,9 @@ def generate_and_verify_prediction_problem(
         p_str = str(p)
         assert p_str.startswith(expected_problem_pre)
         assert p_str.endswith(expected_problem_end)
+        agg_column_name = None
+        filter_column_name = None
+        filter_threshold_value = None    
         for op in p.operations:
             if isinstance(op, AggregationOpBase):
                 expected_agg_str = agg_op_str_dict[op.__class__]
@@ -65,14 +69,38 @@ def generate_and_verify_prediction_problem(
                     "<{}>", f"<{op.column_name}>"
                 )
                 assert expected_agg_str in p_str
+                if op.column_name:
+                    agg_column_name = op.column_name
             elif isinstance(op, FilterOpBase):
                 expected_filter_str = filter_op_str_dict[op.__class__]
+                threshold = op.hyper_parameter_settings.get('threshold', None)
                 assert expected_filter_str in p_str
+                if op.column_name:
+                    filter_column_name = op.column_name
+                if threshold:
+                    filter_threshold_value = threshold
             else:
-                print(p_str)
-                print(p.operations)
-
-
+                raise ValueError(f'Unexpected prediction problem generated: {p_str}: {p.operations}')
+        label_times = p.execute(df, -1)
+        assert label_times.target_dataframe_name == entity_col
+        # TODO: fix bug with Filter Operation results in labels that has _execute_operations_on_df == 0
+        # Below is not an ideal way to check the prediction problems (because it has less than, rather than exact number of unique instances)
+        if not label_times.empty:
+            assert label_times[entity_col].nunique() <= unique_entity_ids
+        # if filter_column_name and filter_threshold_value:
+            # if 'greater than' in p_str:
+            #     df_expected_instances = df[df[filter_column_name] > filter_threshold_value]
+            # else:
+            #     df_expected_instances = df[df[filter_column_name] < filter_threshold_value]label_times.empty()
+            # expected_instances = 0
+            # for instance_id in label_times[entity_col].unique():
+            #     if (label_times[label_times[entity_col] == instance_id]['_execute_operations_on_df'] > 1).any():
+            #         expected_instances += 1
+            #     else:
+            #         pass
+            # assert label_times[entity_col].nunique() == expected_instances
+        # else:
+        #     assert label_times[entity_col].nunique() == unique_entity_ids
 # for p in problems:
 # 	try:
 # 		x = p.execute(df,-1)

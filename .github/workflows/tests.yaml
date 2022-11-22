@@ -8,11 +8,12 @@ on:
   workflow_dispatch:
 jobs:
   setup_env:
-    name: ${{ matrix.python_version }} ${{ matrix.directories }} tests
+    name: ${{ matrix.python_version }} ${{ matrix.type_of_tests }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python_version: ["3.8", "3.11"]
+        type_of_tests: ["unit tests", "integration tests"]
     steps:
       - name: Set up python ${{ matrix.python_version }}
         uses: actions/setup-python@v4
@@ -29,9 +30,11 @@ jobs:
       - name: Install core and test requirements
         run: |
           python -m pip install unpacked_sdist/[test]
-      - name: Run unit tests
+      - if: ${{ matrix.type_of_tests == 'unit tests' }}
+        name: Run unit tests
         run: |
           make test
-      - name: Run integration tests
+      - if: ${{ matrix.type_of_tests == 'integration tests' }}
+        name: Run integration tests
         run: |
           make integration-tests

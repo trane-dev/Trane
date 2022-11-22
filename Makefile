@@ -12,7 +12,7 @@ test:
 
 .PHONY: integration-tests
 integration-tests:
-	python -m pytest -s -vv -x tests/integration_tests
+	python -m pytest -n auto -s -vv -x tests/integration_tests
 
 .PHONY: upgradepip
 upgradepip:

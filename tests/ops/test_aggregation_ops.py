@@ -2,12 +2,12 @@ import pandas as pd
 import pytest
 
 from trane.ops.aggregation_ops import (
-    CountAggregationOp,
-    SumAggregationOp,
     AvgAggregationOp,
+    CountAggregationOp,
+    MajorityAggregationOp,
     MaxAggregationOp,
     MinAggregationOp,
-    MajorityAggregationOp
+    SumAggregationOp,
 )
 from trane.utils.table_meta import TableMeta
 

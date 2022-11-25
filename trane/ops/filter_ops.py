@@ -55,7 +55,7 @@ class FilterOpBase(OpBase):
 
         Returns
         -------
-        hyperparameter: But this has already been set to the operation
+        filter_hyperparam: But this has already been set to the operation
 
         """
         # If the operator has no required parameters, return None
@@ -67,8 +67,8 @@ class FilterOpBase(OpBase):
             df=df, 
             col=filter_col,
             num_random_samples=num_random_samples,
-            num_rows_to_execute_on=num_rows_to_execute_on)
-
+            num_rows_to_execute_on=num_rows_to_execute_on
+        )
         self.set_hyper_parameter(filter_hyperparam)
         return filter_hyperparam
 

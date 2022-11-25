@@ -1,0 +1,8 @@
+exclude: ^LICENSE/|\.(html|csv|svg|md|txt|json)$
+default_stages: [commit]
+repos:
+  - repo: https://github.com/MarcoGorelli/absolufy-imports
+    rev: v0.3.1
+    hooks:
+      - id: absolufy-imports
+        files: ^trane/

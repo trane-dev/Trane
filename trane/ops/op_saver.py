@@ -1,7 +1,7 @@
 import json
 
-from .aggregation_ops import *  # noqa
-from .filter_ops import *  # noqa
+from trane.ops.aggregation_ops import *  # noqa
+from trane.ops.filter_ops import *  # noqa
 
 __all__ = ["op_to_json", "op_from_json"]
 

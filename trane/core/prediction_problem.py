@@ -7,10 +7,10 @@ import numpy as np
 import pandas as pd
 import composeml as cp
 
-from ..ops.aggregation_ops import *  # noqa
-from ..ops.filter_ops import *  # noqa
-from ..ops.op_saver import op_from_json, op_to_json
-from ..utils.table_meta import TableMeta
+from trane.ops.aggregation_ops import *  # noqa
+from trane.ops.filter_ops import *  # noqa
+from trane.ops.op_saver import op_from_json, op_to_json
+from trane.utils.table_meta import TableMeta
 
 __all__ = ['PredictionProblem']
 

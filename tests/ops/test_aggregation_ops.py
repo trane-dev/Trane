@@ -43,15 +43,15 @@ def test_agg_ops(df, meta, agg_operation, expected_output):
     output = op(df)
     assert output == expected_output
     
-@pytest.mark.parametrize("agg_operation,expected_output", [
-    (SumAggregationOp, None), 
-    (AvgAggregationOp, None), 
-    (MaxAggregationOp, None), 
-    (MinAggregationOp, None), 
-    (MajorityAggregationOp, None),
+@pytest.mark.parametrize("agg_operation", [
+    (SumAggregationOp), 
+    (AvgAggregationOp), 
+    (MaxAggregationOp), 
+    (MinAggregationOp), 
+    (MajorityAggregationOp),
 ])
-def test_sum_agg_none(agg_operation, expected_output):
+def test_sum_agg_none(agg_operation):
     op = agg_operation('col')
     df = pd.DataFrame()
     output = op(df)
-    assert output is expected_output
+    assert output is None

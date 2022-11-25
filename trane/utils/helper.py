@@ -1,4 +1,4 @@
-from .table_meta import TableMeta as TM
+from trane.utils.table_meta import TableMeta as TM
 
 
 def overall_prediction_helper(df, meta):

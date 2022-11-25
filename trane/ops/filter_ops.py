@@ -1,5 +1,5 @@
-from ..utils.table_meta import TableMeta as TM
-from .op_base import OpBase
+from trane.utils.table_meta import TableMeta as TM
+from trane.ops.op_base import OpBase
 
 FILTER_OPS = [
     "AllFilterOp", 
@@ -63,7 +63,9 @@ class FilterOpBase(OpBase):
             return None
 
         filter_hyperparam = self.find_threshhold_by_remaining(
-            fraction_of_data_target=0.8, df=df, col=filter_col,
+            fraction_of_data_target=0.8, 
+            df=df, 
+            col=filter_col,
             num_random_samples=num_random_samples,
             num_rows_to_execute_on=num_rows_to_execute_on)
 

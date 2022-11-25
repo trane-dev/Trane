@@ -1,5 +1,5 @@
-from .core import *  # noqa
-from .utils import *  # noqa
+from trane.core import *  # noqa
+from trane.utils import *  # noqa
 
 import logging
 logname = 'trane.log'

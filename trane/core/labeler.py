@@ -4,8 +4,8 @@ import copy
 
 import pandas as pd
 
-from .prediction_problem_saver import prediction_problems_from_json_file
-from ..utils.table_meta import TableMeta as TM
+from trane.core.prediction_problem_saver import prediction_problems_from_json_file
+from trane.utils.table_meta import TableMeta as TM
 
 __all__ = ['Labeler']
 

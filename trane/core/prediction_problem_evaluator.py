@@ -8,7 +8,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.ensemble import AdaBoostClassifier, AdaBoostRegressor
 from sklearn.svm import LinearSVC, LinearSVR
 
-from ..utils.table_meta import TableMeta as TM
+from trane.utils.table_meta import TableMeta as TM
 
 __all__ = ["PredictionProblemEvaluator"]
 

@@ -1,10 +1,10 @@
 import itertools
 import copy
 
-from ..ops import aggregation_ops as agg_ops
-from ..ops import filter_ops
-from ..utils.table_meta import TableMeta
-from .prediction_problem import PredictionProblem
+from trane.ops import aggregation_ops as agg_ops
+from trane.ops import filter_ops
+from trane.utils.table_meta import TableMeta
+from trane.core.prediction_problem import PredictionProblem
 
 __all__ = ['PredictionProblemGenerator']
 

@@ -41,7 +41,8 @@ class FeaturetoolsWrapper(object):
         fm_encoded, features_encoded = ft.encode_features(feature_matrix,
                                                           features)
 
-        self.features = fm_encoded.fillna(0)
+        features = fm_encoded.fillna(0)
+        return features
 
     def get_feature(self, entity_name, cutoff_st):
         return list(self.features.loc[entity_name, cutoff_st - timedelta(days=1)])

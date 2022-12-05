@@ -46,13 +46,3 @@ def test_agg_ops(df, meta, filter_operation, expected_values):
     output = output.reset_index(drop=True)
     expected_df = pd.DataFrame({'col': expected_values})
     assert output.equals(expected_df)
-
-@pytest.mark.parametrize("filter_operation,expected_value", [
-    (AllFilterOp, None), 
-    (GreaterFilterOp, 1),
-])
-def test_autoset_none(df, meta, filter_operation, expected_value):
-    op = filter_operation('col')
-    op.op_type_check(meta)
-    output = op.auto_set_hyperparams(df, filter_col='col')
-    assert output == expected_value

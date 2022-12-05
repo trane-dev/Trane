@@ -94,45 +94,6 @@ class OpBase(object):
     def execute(self, dataframe):
         raise NotImplementedError
 
-    def auto_set_hyperparams(
-            self, df, label_col, entity_col, filter_col=None,
-            num_random_samples=10, num_rows_to_execute_on=2000):
-        """
-        Sets hyperparameters for the operation. In most cases (as implemented
-        here), this is done by finding threshhold values that maximize column
-        diversity. This can be overrideen in subclasses, as it is for
-        filter ops.
-
-        Parameters
-        ----------
-        df: Dataframe to be tuned to
-        label_col: str, name of the column of interest in the data
-        entity_col: str, name of the column containing entities ids in the data
-        num_random_samples: if there's more than this many unique values to
-            test, randomly sample this many values from the dataset
-        num_rows_to_execute_on: if the dataframe contains more than this number
-            of rows, randomly select this many rows to use as the dataframe
-
-        Returns
-        -------
-        hyperparameter: But this has already been set to the operation
-
-        """
-
-        # If the operator has no required parameters, return None
-        if len(self.REQUIRED_PARAMETERS) == 0:
-            return None
-
-        hyperaparam = 0
-        # hyperaparam = self.find_threshhold_by_diversity(
-        #     df=df, label_col=label_col,
-        #     entity_col=entity_col,
-        #     num_random_samples=num_random_samples,
-        #     num_rows_to_execute_on=num_rows_to_execute_on)
-
-        self.set_hyper_parameter(hyperaparam)
-        return hyperaparam
-
     def find_threshhold_by_remaining(
             self, fraction_of_data_target, df, col, num_random_samples=10,
             num_rows_to_execute_on=2000):

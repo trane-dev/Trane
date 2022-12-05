@@ -1,8 +1,7 @@
+import pandas as pd
 import pytest
 
 from trane.ops.op_base import OpBase
-# from trane.ops.row_ops import *  # noqa
-# from trane.ops.transformation_ops import *  # noqa
 from trane.utils.table_meta import TableMeta as TM
 
 
@@ -13,7 +12,15 @@ class FakeOp(OpBase):
     """
     PARAMS = [{'param': TM.TYPE_FLOAT}, {'param': TM.TYPE_TEXT}]
     IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_BOOL), (TM.TYPE_TEXT, TM.TYPE_BOOL)]
+    
+class FakeOpNone(OpBase):
+    REQUIRED_PARAMETERS = []
+    IOTYPES = None
 
+@pytest.fixture
+def df():
+    df = pd.DataFrame({'col': [1, 2, 3, 4, 5]})
+    return df
 
 def test_op_base_init():
     """

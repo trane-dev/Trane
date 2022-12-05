@@ -12,16 +12,11 @@ class FakeOp(OpBase):
     """
     PARAMS = [{'param': TM.TYPE_FLOAT}, {'param': TM.TYPE_TEXT}]
     IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_BOOL), (TM.TYPE_TEXT, TM.TYPE_BOOL)]
-    
-class FakeOpNone(OpBase):
-    REQUIRED_PARAMETERS = []
+
+class FakeOpRequired(OpBase):
+    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
     IOTYPES = None
-
-@pytest.fixture
-def df():
-    df = pd.DataFrame({'col': [1, 2, 3, 4, 5]})
-    return df
-
+    
 def test_op_base_init():
     """
     Check if FakeOp is initialized correctly.
@@ -80,7 +75,16 @@ def test_op_type_check_with_wrong_type():
     assert meta.get_type('col') == TM.TYPE_IDENTIFIER
     assert op.input_type is TM.TYPE_IDENTIFIER and op.output_type is None
 
+def test_set_hyper_parameter():
+    op = FakeOpRequired('col')
+    op.set_hyper_parameter(parameter_name='threshold', parameter_value=5)
+    assert op.hyper_parameter_settings["threshold"] == 5
 
+def test_set_hyper_parameter_raises():
+    op = FakeOpRequired('col')
+    with pytest.raises(ValueError):
+        op.set_hyper_parameter(parameter_name='invalid_param', parameter_value=5)
+    
 # def test_op_equality():
 #     column_name = "test"
 #     id_row_op = IdentityRowOp(column_name)

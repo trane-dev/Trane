@@ -173,7 +173,7 @@ class PredictionProblemGenerator:
                     if threshold not in yielded_thresholds:
                         yielded_thresholds.append(threshold)
                         problem_final = copy.deepcopy(problem)
-                        problem_final.operations[0].set_hyper_parameter(threshold)
+                        problem_final.operations[0].set_hyper_parameter(parameter_name='threshold', parameter_value=threshold)
                         yield problem_final, "threshold: {} (keep {}%)".format(threshold, keep_rate * 100)
                     else:
                         continue

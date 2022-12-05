@@ -71,7 +71,14 @@ class OpBase(object):
                 return table_meta
         return None
 
-    def set_hyper_parameter(self, hyper_parameter):
+    def get_parameter_names(self):
+        names = []
+        for param_dict in self.REQUIRED_PARAMETERS:
+            for name, _ in param_dict.items():
+                names.append(name)
+        return names
+    
+    def set_hyper_parameter(self, parameter_name, parameter_value):
         """
         Set the hyper parameter of the operation.
 
@@ -84,9 +91,10 @@ class OpBase(object):
         None
 
         """
-        for parameter_requirement in self.REQUIRED_PARAMETERS:
-            for parameter_name, parameter_type in parameter_requirement.items():  # noqa
-                self.hyper_parameter_settings[parameter_name] = hyper_parameter
+        valid_param_names = self.get_parameter_names()
+        if parameter_name not in valid_param_names:
+            raise ValueError(f"Invalid parameter name for operation. Valid names:{valid_param_names}")
+        self.hyper_parameter_settings[parameter_name] = parameter_value
 
     def __call__(self, dataframe):
         return self.execute(dataframe)
@@ -140,7 +148,7 @@ class OpBase(object):
             # apply the operation to the sampled df and see what happens
             # this overwrites existing hyperparams. They will need to be
             # reset later
-            self.set_hyper_parameter(unique_val)
+            self.set_hyper_parameter(parameter_name='threshold', parameter_value=unique_val)
             filtered_df = self.execute(df)
 
             # see how many items remain. Score based on how close we are to
@@ -200,7 +208,7 @@ class OpBase(object):
         unique_vals = set(df[label_col])
         for unique_val in unique_vals:
 
-            self.set_hyper_parameter(unique_val)
+            self.set_hyper_parameter(parameter_name='threshold', parameter_value=unique_val)
 
             output_df = df.groupby(entity_col).apply(self.execute)
 

@@ -84,6 +84,10 @@ def test_set_hyper_parameter_raises():
     op = FakeOpRequired('col')
     with pytest.raises(ValueError):
         op.set_hyper_parameter(parameter_name='invalid_param', parameter_value=5)
+
+def test_set_hyper_parameter():
+    op = FakeOpRequired('col')
+    op.set_hyper_parameter(parameter_name='threshold', parameter_value=5)
     
 # def test_op_equality():
 #     column_name = "test"

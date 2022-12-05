@@ -8,7 +8,11 @@ clean:
 
 .PHONY: test
 test:
-	python -m pytest -n auto -s -vv -x tests/ --ignore=tests/integration_tests
+	python -m pytest -n auto -s -vv -x tests/ --sample 100
+
+.PHONY: unit-tests
+unit-tests:
+	python -m pytest -n auto -s -vv -x tests/ --ignore=tests/integration_tests --cov=trane/ --cov-report term-missing
 
 .PHONY: integration-tests
 integration-tests:

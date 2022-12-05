@@ -1,8 +1,6 @@
 import pytest
 
 from trane.ops.op_base import OpBase
-# from trane.ops.row_ops import *  # noqa
-# from trane.ops.transformation_ops import *  # noqa
 from trane.utils.table_meta import TableMeta as TM
 
 
@@ -24,6 +22,7 @@ def test_op_base_init():
     assert op.input_type is None
     assert op.output_type is None
     assert isinstance(op.hyper_parameter_settings, dict)
+    assert len(op.hyper_parameter_settings) == 0
     with pytest.raises(NotImplementedError):
         op(None)
 

@@ -10,19 +10,22 @@ class FakeOp(OpBase):
     Make a fake operation for testing.
     It has PARAMS and IOTYPES, but execute is not implemented
     """
-    PARAMS = [{'param': TM.TYPE_FLOAT}, {'param': TM.TYPE_TEXT}]
+
+    PARAMS = [{"param": TM.TYPE_FLOAT}, {"param": TM.TYPE_TEXT}]
     IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_BOOL), (TM.TYPE_TEXT, TM.TYPE_BOOL)]
+
 
 class FakeOpRequired(OpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
     IOTYPES = None
-    
+
+
 def test_op_base_init():
     """
     Check if FakeOp is initialized correctly.
     Check if NotImplementedError is raised.
     """
-    op = FakeOp('col')
+    op = FakeOp("col")
     assert op.input_type is None
     assert op.output_type is None
     assert isinstance(op.hyper_parameter_settings, dict)
@@ -34,15 +37,25 @@ def test_op_type_check_with_correct_type1():
     """
     With input type TYPE_FLOAT, check if input_type and output_type are correct.
     """
-    meta = TM({
-        "tables": [
-            {"fields": [{'name': 'col', 'type': TM.SUPERTYPE[
-                TM.TYPE_FLOAT], 'subtype': TM.TYPE_FLOAT}]}
-        ]})
-    op = FakeOp('col')
+    meta = TM(
+        {
+            "tables": [
+                {
+                    "fields": [
+                        {
+                            "name": "col",
+                            "type": TM.SUPERTYPE[TM.TYPE_FLOAT],
+                            "subtype": TM.TYPE_FLOAT,
+                        }
+                    ]
+                }
+            ]
+        }
+    )
+    op = FakeOp("col")
     meta2 = op.op_type_check(meta)
     assert meta2 == meta
-    assert meta.get_type('col') == TM.TYPE_BOOL
+    assert meta.get_type("col") == TM.TYPE_BOOL
     assert op.input_type == TM.TYPE_FLOAT and op.output_type == TM.TYPE_BOOL
 
 
@@ -50,14 +63,11 @@ def test_op_type_check_with_correct_type2():
     """
     With input type TYPE_TEXT, check if input_type and output_type are correct.
     """
-    meta = TM({
-        "tables": [
-            {"fields": [{'name': 'col', 'type': TM.TYPE_TEXT}]}
-        ]})
-    op = FakeOp('col')
+    meta = TM({"tables": [{"fields": [{"name": "col", "type": TM.TYPE_TEXT}]}]})
+    op = FakeOp("col")
     meta2 = op.op_type_check(meta)
     assert meta2 == meta
-    assert meta.get_type('col') == TM.TYPE_BOOL
+    assert meta.get_type("col") == TM.TYPE_BOOL
     assert op.input_type == TM.TYPE_TEXT and op.output_type == TM.TYPE_BOOL
 
 
@@ -65,30 +75,31 @@ def test_op_type_check_with_wrong_type():
     """
     with input type TYPE_IDENTIFIER, check if None is returned by op_type_check.
     """
-    meta = TM({
-        "tables": [
-            {"fields": [{'name': 'col', 'type': TM.TYPE_IDENTIFIER}]}
-        ]})
-    op = FakeOp('col')
+    meta = TM({"tables": [{"fields": [{"name": "col", "type": TM.TYPE_IDENTIFIER}]}]})
+    op = FakeOp("col")
     meta2 = op.op_type_check(meta)
     assert meta2 is None
-    assert meta.get_type('col') == TM.TYPE_IDENTIFIER
+    assert meta.get_type("col") == TM.TYPE_IDENTIFIER
     assert op.input_type is TM.TYPE_IDENTIFIER and op.output_type is None
 
+
 def test_set_hyper_parameter():
-    op = FakeOpRequired('col')
-    op.set_hyper_parameter(parameter_name='threshold', parameter_value=5)
+    op = FakeOpRequired("col")
+    op.set_hyper_parameter(parameter_name="threshold", parameter_value=5)
     assert op.hyper_parameter_settings["threshold"] == 5
 
+
 def test_set_hyper_parameter_raises():
-    op = FakeOpRequired('col')
+    op = FakeOpRequired("col")
     with pytest.raises(ValueError):
-        op.set_hyper_parameter(parameter_name='invalid_param', parameter_value=5)
+        op.set_hyper_parameter(parameter_name="invalid_param", parameter_value=5)
+
 
 def test_set_hyper_parameter():
-    op = FakeOpRequired('col')
-    op.set_hyper_parameter(parameter_name='threshold', parameter_value=5)
-    
+    op = FakeOpRequired("col")
+    op.set_hyper_parameter(parameter_name="threshold", parameter_value=5)
+
+
 # def test_op_equality():
 #     column_name = "test"
 #     id_row_op = IdentityRowOp(column_name)

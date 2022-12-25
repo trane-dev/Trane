@@ -100,13 +100,12 @@ def test_sample_df_and_unique_values():
     df = pd.DataFrame({'col': values})
     op = FakeOpRequired("col")
     max_num_rows = 3
-    max_num_unique_values = 2
+    max_num_unique_values = len(set(values))
     sample_df, unique_vals = op._sample_df_and_unique_values(df=df, 
                                                       col='col',
                                                       max_num_unique_values=max_num_unique_values,
                                                       max_num_rows=max_num_rows)
-    print(sample_df)
-    assert len(sample_df['col'].unique()) == max_num_unique_values
+    assert len(sample_df['col'].unique()) <= max_num_unique_values
     assert sample_df.shape == (max_num_rows, 1)
     assert unique_vals == set(values)
 

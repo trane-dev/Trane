@@ -19,9 +19,9 @@ installdeps-test:
 installdeps-docs:
 	python -m pip install ".[docs]"
 
-.PHONY: test
-test:
-	python -m pytest -n auto -s -vv -x tests/ --sample 100
+.PHONY: tests
+tests:
+	python -m pytest -n auto -s -vv -x tests/ --sample 100 --cov=trane/ --cov-report term-missing
 
 .PHONY: unit-tests
 unit-tests:
@@ -29,7 +29,7 @@ unit-tests:
 
 .PHONY: integration-tests
 integration-tests:
-	python -m pytest -n auto -s -vv -x tests/integration_tests --sample 100
+	python -m pytest -n auto -s -vv -x tests/integration_tests --sample 100 --cov=trane/ --cov-report term-missing
 
 .PHONY: upgradepip
 upgradepip:

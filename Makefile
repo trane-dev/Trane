@@ -6,6 +6,19 @@ clean:
 	find . -name '*~' -delete
 	find . -name '.coverage.*' -delete
 
+.PHONY: installdeps-dev
+installdeps-dev:
+	python -m pip install ".[dev]"
+	pre-commit install
+
+.PHONY: installdeps-test
+installdeps-test:
+	python -m pip install ".[test]"
+
+.PHONY: installdeps-docs
+installdeps-docs:
+	python -m pip install ".[docs]"
+
 .PHONY: test
 test:
 	python -m pytest -n auto -s -vv -x tests/ --sample 100

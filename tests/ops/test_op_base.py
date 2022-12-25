@@ -95,10 +95,20 @@ def test_set_hyper_parameter_raises():
         op.set_hyper_parameter(parameter_name="invalid_param", parameter_value=5)
 
 
-def test_set_hyper_parameter():
+def test_sample_df_and_unique_values():
+    values = [1, 2, 2, 4, 4, 5]
+    df = pd.DataFrame({'col': values})
     op = FakeOpRequired("col")
-    op.set_hyper_parameter(parameter_name="threshold", parameter_value=5)
-
+    max_num_rows = 3
+    max_num_unique_values = 2
+    sample_df, unique_vals = op._sample_df_and_unique_values(df=df, 
+                                                      col='col',
+                                                      max_num_unique_values=max_num_unique_values,
+                                                      max_num_rows=max_num_rows)
+    print(sample_df)
+    assert len(sample_df['col'].unique()) == max_num_unique_values
+    assert sample_df.shape == (max_num_rows, 1)
+    assert unique_vals == set(values)
 
 # def test_op_equality():
 #     column_name = "test"

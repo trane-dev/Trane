@@ -138,7 +138,7 @@ class OpBase(object):
         # record the original settings to prevent side effects
         original_hyperparam_settings = self.hyper_parameter_settings
 
-        df, unique_vals = self._sample_df_and_uniqe_values(
+        df, unique_vals = self._sample_df_and_unique_values(
             df=df,
             col=col,
             max_num_unique_values=num_random_samples,
@@ -195,8 +195,7 @@ class OpBase(object):
         ----------
         df: the relevant data
         label_col: column name of the column of interest in the data
-        entity_col: column name of
-            the column containing entities in the data
+        entity_col: the column containing entities in the data
         num_random_samples: if there's more than this many unique values to
             test, randomly sample this many values from the dataset
         num_rows_to_execute_on: if the dataframe contains more than this number
@@ -213,7 +212,7 @@ class OpBase(object):
         # record the original settings to prevent side effects
         original_hyperparam_settings = self.hyper_parameter_settings
 
-        df, unique_vals = self._sample_df_and_uniqe_values(
+        df, unique_vals = self._sample_df_and_unique_values(
             df=df,
             col=label_col,
             max_num_unique_values=num_random_samples,
@@ -243,7 +242,7 @@ class OpBase(object):
         self.hyper_parameter_settings = original_hyperparam_settings
         return best_parameter_value
 
-    def _sample_df_and_uniqe_values(self, df, col, max_num_unique_values, max_num_rows):
+    def _sample_df_and_unique_values(self, df, col, max_num_unique_values, max_num_rows):
         """
         Helper methods
 
@@ -266,6 +265,7 @@ class OpBase(object):
         df: sampled dataframe which is a subset of the original dataframe
         unique_vals: a list of unique values
         """
+        # unique_vals = df[col].unique().tolist()
         unique_vals = set(df[col])
 
         if len(unique_vals) > max_num_unique_values:

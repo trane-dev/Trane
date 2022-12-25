@@ -1,0 +1,98 @@
+{
+    "tables": [
+        {
+            "fields": [
+                {
+                    "name": "DATE",
+                    "type": "time"
+                },
+                {
+                    "name": "DAY_OF_WEEK",
+                    "subtype": "categorical",
+                    "type": "categorical"
+                },
+                {
+                    "name": "AIRLINE",
+                    "subtype": "categorical",
+                    "type": "categorical"
+                },
+                {
+                    "name": "FLIGHT_NUMBER",
+                    "type": "id"
+                },
+                {
+                    "name": "TAIL_NUMBER",
+                    "type": "id"
+                },
+                {
+                    "name": "ORIGIN_AIRPORT",
+                    "type": "id"
+                },
+                {
+                    "name": "DESTINATION_AIRPORT",
+                    "type": "id"
+                },
+                {
+                    "name": "SCHEDULED_DEPARTURE_HOUR",
+                    "subtype": "integer",
+                    "type": "number"
+                },
+                {
+                    "name": "SCHEDULED_TIME",
+                    "subtype": "float",
+                    "type": "number"
+                },
+                {
+                    "name": "ELAPSED_TIME",
+                    "subtype": "float",
+                    "type": "number"
+                },
+                {
+                    "name": "DEPARTURE_DELAY",
+                    "subtype": "float",
+                    "type": "number"
+                },
+                {
+                    "name": "ARRIVAL_DELAY",
+                    "subtype": "float",
+                    "type": "number"
+                },
+                {
+                    "name": "CANCELLED",
+                    "subtype": "categorical",
+                    "type": "categorical"
+                },
+                {
+                    "name": "CANCELLATION_REASON",
+                    "subtype": "categorical",
+                    "type": "categorical"
+                },
+                {
+                    "name": "AIR_SYSTEM_DELAY",
+                    "subtype": "float",
+                    "type": "number"
+                },
+                {
+                    "name": "SECURITY_DELAY",
+                    "subtype": "float",
+                    "type": "number"
+                },
+                {
+                    "name": "AIRLINE_DELAY",
+                    "subtype": "float",
+                    "type": "number"
+                },
+                {
+                    "name": "LATE_AIRCRAFT_DELAY",
+                    "subtype": "float",
+                    "type": "number"
+                },
+                {
+                    "name": "WEATHER_DELAY",
+                    "subtype": "float",
+                    "type": "number"
+                }
+            ]
+        }
+    ]
+}

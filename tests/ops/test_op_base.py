@@ -29,6 +29,7 @@ def test_op_base_init():
     assert op.input_type is None
     assert op.output_type is None
     assert isinstance(op.hyper_parameter_settings, dict)
+    assert len(op.hyper_parameter_settings) == 0
     with pytest.raises(NotImplementedError):
         op(None)
 

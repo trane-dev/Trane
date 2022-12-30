@@ -22,20 +22,27 @@ jobs:
             type_of_tests: "integration tests"
     if: github.event.pull_request.draft == false
     steps:
-      - name: Set up python ${{ matrix.python_version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python_version }}
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 2
-      - name: Build package
-        run: make package
-      - name: Install core and test requirements
-        run: |
+      - name: Set up python ${{ matrix.python_version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python_version }}
+          cache: 'pip'
+          cache-dependency-path: pyproject.toml
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ env.pythonLocation }}
+          key: python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-tests-v01
+      - name: Build package and install core & test requirements
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: | 
+          make package
           python -m pip install unpacked_sdist/[test]
       - if: ${{ matrix.type_of_tests == 'unit tests' }}
         name: Run unit tests

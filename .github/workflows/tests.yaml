@@ -33,12 +33,12 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
           cache: 'pip'
-          cache-dependency-path: pyproject.toml
+          cache-dependency-path: "pyproject.toml"
       - uses: actions/cache@v3
         id: cache
         with:
-          path: ${{ env.pythonLocation }}
-          key: python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-tests-v01
+          path: ~/.cache/pip
+          key: python-deps-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-tests-v01
       - name: Build package and install core & test requirements
         if: steps.cache.outputs.cache-hit != 'true'
         run: |

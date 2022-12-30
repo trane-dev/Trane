@@ -41,7 +41,7 @@ jobs:
           key: python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-tests-v01
       - name: Build package and install core & test requirements
         if: steps.cache.outputs.cache-hit != 'true'
-        run: | 
+        run: |
           make package
           python -m pip install unpacked_sdist/[test]
       - if: ${{ matrix.type_of_tests == 'unit tests' }}

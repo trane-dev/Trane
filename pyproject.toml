@@ -14,6 +14,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
     "Operating System :: Unix",
@@ -44,6 +45,7 @@ dependencies = [
     "matplotlib",
     "scikit-learn",
     "scikit-plot",
+    "tqdm"
 ]
 
 [project.urls]
@@ -57,8 +59,6 @@ test = [
     "pytest-cov >= 2.5.1",
     "pytest-xdist",
     "pytest-runner >= 2.11.1",
-    "tox >= 3.0.0",
-    "mock"
 ]
 dev = [
     "flake8",

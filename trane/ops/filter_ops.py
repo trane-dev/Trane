@@ -1,9 +1,13 @@
 from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
 
-FILTER_OPS = ["AllFilterOp", "GreaterFilterOp",
-              "EqFilterOp", "NeqFilterOp", "LessFilterOp"]
-__all__ = ["FilterOpBase", "FILTER_OPS"] + FILTER_OPS
+FILTER_OPS = [
+    "AllFilterOp", 
+    "GreaterFilterOp",
+    "EqFilterOp", 
+    "NeqFilterOp", 
+    "LessFilterOp"
+]
 
 
 class FilterOpBase(OpBase):

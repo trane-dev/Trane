@@ -41,7 +41,10 @@ class PredictionProblem:
         self.cutoff_strategy = cutoff_strategy
         self.label_type = None
 
-        window_size = cutoff_strategy.window_size if cutoff_strategy else None
+        if cutoff_strategy:
+            window_size = cutoff_strategy.window_size
+        else:
+            window_size = None
 
         self._label_maker = cp.LabelMaker(
             target_dataframe_name=entity_col,
@@ -86,7 +89,8 @@ class PredictionProblem:
 
     def execute(self, df, num_examples_per_instance, minimum_data=None, maximum_data=None, gap=None, drop_empty=True, verbose=True, *args, **kwargs):
         '''
-        Executes the problem's operations on a dataframe. Generates
+        Executes the problem's operations on a dataframe. Generates the training examples (lable_times).
+        The label_times contains the 
         '''
 
         assert df.isnull().sum().sum() == 0
@@ -103,7 +107,6 @@ class PredictionProblem:
             "maximum_data": maximum_data or default_kwarg.get('maximum_data'),
             "gap": gap or default_kwarg.get('gap')
         }
-
         lt = self._label_maker.search(
             df=df,
             num_examples_per_instance=num_examples_per_instance,
@@ -398,7 +401,13 @@ class PredictionProblem:
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(self, other.__class__):
-            return self.__dict__ == other.__dict__
+            if self.operations == other.operations and \
+                self.entity_col == other.entity_col and \
+                self.time_col == other.time_col and \
+                self.table_meta == other.table_meta and \
+                self.cutoff_strategy == other.cutoff_strategy:
+                return True
+            return False
         return False
 
     def _check_type(self, expected_type, actual_data):

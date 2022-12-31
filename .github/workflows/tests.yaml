@@ -11,22 +11,22 @@ on:
   workflow_dispatch:
 jobs:
   tests:
-    name: ${{ matrix.python_version }} ${{ matrix.type_of_tests }}
+    name: ${{ matrix.python-version }} ${{ matrix.type_of_tests }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python_version: ["3.8", "3.11"]
+        python-version: ["3.8", "3.11"]
         type_of_tests: ["unit tests", "integration tests"]
         exclude:
-          - python_version: "3.8"
+          - python-version: "3.8"
             type_of_tests: "integration tests"
     if: github.event.pull_request.draft == false
     steps:
       - uses: actions/checkout@v3
-      - name: Set up python ${{ matrix.python_version }}
+      - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python_version }}
+          python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: "pyproject.toml"
       - uses: actions/cache@v3

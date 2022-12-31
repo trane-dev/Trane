@@ -1,5 +1,22 @@
-from trane.ops import FILTER_OPS, op_from_json, op_to_json
-from trane.ops.aggregation_ops import AGGREGATION_OPS
+from trane.ops import (
+    FILTER_OPS,
+    AllFilterOp,  # noqa
+    EqFilterOp,  # noqa
+    GreaterFilterOp,  # noqa
+    LessFilterOp,  # noqa
+    NeqFilterOp,  # noqa
+    op_from_json,
+    op_to_json,
+)
+from trane.ops.aggregation_ops import (
+    AGGREGATION_OPS,
+    AvgAggregationOp,  # noqa
+    CountAggregationOp,  # noqa
+    MajorityAggregationOp,  # noqa
+    MaxAggregationOp,  # noqa
+    MinAggregationOp,  # noqa
+    SumAggregationOp,  # noqa
+)
 from trane.utils.table_meta import TableMeta as TM
 
 ALL_OPS = AGGREGATION_OPS + FILTER_OPS

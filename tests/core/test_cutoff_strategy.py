@@ -13,12 +13,12 @@
 # def df():
 #     df = pd.DataFrame({
 #         "user_id": [1, 1, 2, 1, 1, 1, 2],
-#         "date": [datetime(2015), 
-#                  datetime(2015), 
-#                  datetime(2015), 
-#                  datetime(2016), 
-#                  datetime(2017), 
-#                  datetime(2017), 
+#         "date": [datetime(2015),
+#                  datetime(2015),
+#                  datetime(2015),
+#                  datetime(2016),
+#                  datetime(2017),
+#                  datetime(2017),
 #                  datetime(2017)],
 #         "amount": [10, 200, 50, 10, 1000, 20, 10]
 #     })
@@ -28,7 +28,7 @@
 #     # entity_col / entity
 #     target_dataframe_name = 'user_id'
 #     cutoff = '
-#     window_size = 
+#     window_size =
 #     cutoff_strategy = FixWindowCutoffStrategy(entity,
 
 
@@ -48,10 +48,10 @@
 
 # #         # self.cutoff_strategy = FixWindowCutoffStrategy(
 # #         #     generate_fn=self.generate_fn, description=self.description)
-# # 	    self.cutoff_strategy = FixWindowCutoffStrategy(entity, 
+# # 	    self.cutoff_strategy = FixWindowCutoffStrategy(entity,
 # #                                                        cutoff,
-# #                                                        cutoff_base, 
-# #                                                        cutoff_end, 
+# #                                                        cutoff_base,
+# #                                                        cutoff_end,
 # #                                                        cutoff)
 
 # #     def create_patch(self, name):

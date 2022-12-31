@@ -1,32 +1,13 @@
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
-import numpy as np
 import pandas as pd
 import pytest
-from composeml import LabelMaker
-
-from .utils import generate_and_verify_prediction_problem
 
 import trane
-from trane.ops.aggregation_ops import (
-    AggregationOpBase,
-    AvgAggregationOp,
-    CountAggregationOp,
-    MajorityAggregationOp,
-    MaxAggregationOp,
-    MinAggregationOp,
-    SumAggregationOp,
-)
-from trane.ops.filter_ops import (
-    AllFilterOp,
-    EqFilterOp,
-    FilterOpBase,
-    GreaterFilterOp,
-    LessFilterOp,
-    NeqFilterOp,
-)
+
+from .utils import generate_and_verify_prediction_problem
 
 
 @pytest.fixture
@@ -111,7 +92,7 @@ def test_youtube(df_youtube, meta_youtube, sample):
         entity_col=entity_col,
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
-        sample=sample
+        sample=sample,
     )
 
 
@@ -133,7 +114,7 @@ def test_covid(df_covid, meta_covid, sample):
         entity_col=entity_col,
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
-        sample=sample
+        sample=sample,
     )
 
 
@@ -155,5 +136,5 @@ def test_chicago(df_chicago, meta_chicago, sample):
         entity_col=entity_col,
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
-        sample=sample
+        sample=sample,
     )

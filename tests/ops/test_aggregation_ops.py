@@ -29,11 +29,11 @@ def meta():
                             "name": "col",
                             "type": TableMeta.SUPERTYPE[TableMeta.TYPE_FLOAT],
                             "subtype": TableMeta.TYPE_FLOAT,
-                        }
-                    ]
-                }
-            ]
-        }
+                        },
+                    ],
+                },
+            ],
+        },
     )
     return meta
 

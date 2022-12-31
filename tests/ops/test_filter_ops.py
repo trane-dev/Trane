@@ -1,11 +1,9 @@
-import numpy as np
 import pandas as pd
 import pytest
 
 from trane.ops.filter_ops import (
     AllFilterOp,
     EqFilterOp,
-    FilterOpBase,
     GreaterFilterOp,
     LessFilterOp,
     NeqFilterOp,
@@ -30,11 +28,11 @@ def meta():
                             "name": "col",
                             "type": TableMeta.SUPERTYPE[TableMeta.TYPE_FLOAT],
                             "subtype": TableMeta.TYPE_FLOAT,
-                        }
-                    ]
-                }
-            ]
-        }
+                        },
+                    ],
+                },
+            ],
+        },
     )
     return meta
 

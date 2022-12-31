@@ -8,13 +8,13 @@ clean:
 
 .PHONY: lint
 lint:
-	black trane/ -t py311 --check
-	ruff trane/
+	black trane/ tests/ -t py311 --check
+	ruff trane/ tests/
 
 .PHONY: lint-fix
 lint-fix:
-	black trane/ -t py311
-	ruff trane/ --fix
+	black trane/ tests/ -t py311
+	ruff trane/ tests/ --fix
 
 .PHONY: installdeps-dev
 installdeps-dev:

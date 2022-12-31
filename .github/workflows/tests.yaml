@@ -45,7 +45,7 @@ jobs:
       - if: ${{ matrix.type_of_tests == 'unit tests' }}
         name: Run unit tests
         run: |
-          make tests
+          make unit-tests
       - if: ${{ matrix.type_of_tests == 'integration tests' }}
         name: Run integration tests
         run: |

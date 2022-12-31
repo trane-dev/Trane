@@ -6,13 +6,30 @@ clean:
 	find . -name '*~' -delete
 	find . -name '.coverage.*' -delete
 
-.PHONY: test
-test:
-	python -m pytest -n auto -s -vv -x tests/ --ignore=tests/integration_tests
+.PHONY: installdeps-dev
+installdeps-dev:
+	python -m pip install ".[dev]"
+	pre-commit install
+
+.PHONY: installdeps-test
+installdeps-test:
+	python -m pip install ".[test]"
+
+.PHONY: installdeps-docs
+installdeps-docs:
+	python -m pip install ".[docs]"
+
+.PHONY: tests
+tests:
+	python -m pytest -n auto -s -vv -x tests/ --sample 100 --cov=trane/ --cov-report term-missing
+
+.PHONY: unit-tests
+unit-tests:
+	python -m pytest -n auto -s -vv -x tests/ --ignore=tests/integration_tests --cov=trane/ --cov-report term-missing
 
 .PHONY: integration-tests
 integration-tests:
-	python -m pytest -n auto -s -vv -x tests/integration_tests --sample 100
+	python -m pytest -n auto -s -vv -x tests/integration_tests --sample 100 --cov=trane/ --cov-report term-missing
 
 .PHONY: upgradepip
 upgradepip:

@@ -1,60 +1,73 @@
-from pandas import DataFrame
+import pandas as pd
+import pytest
 
 from trane.ops.aggregation_ops import (
-    CountAggregationOp,
-    SumAggregationOp,
     AvgAggregationOp,
+    CountAggregationOp,
+    MajorityAggregationOp,
     MaxAggregationOp,
     MinAggregationOp,
-    MajorityAggregationOp
+    SumAggregationOp,
 )
-from trane.utils.table_meta import TableMeta as TM
-
-df = DataFrame({'col': [1, 2, 3, 4, 5]})
-meta = TM({
-    "tables": [
-        {"fields": [{'name': 'col', 'type': TM.SUPERTYPE[
-            TM.TYPE_FLOAT], 'subtype': TM.TYPE_FLOAT}]}
-    ]})
+from trane.utils.table_meta import TableMeta
 
 
-def test_count_aggregation_op():
-    op = CountAggregationOp('col')
+@pytest.fixture
+def df():
+    df = pd.DataFrame({"col": [1, 2, 3, 4, 5]})
+    return df
+
+
+@pytest.fixture
+def meta():
+    meta = TableMeta(
+        {
+            "tables": [
+                {
+                    "fields": [
+                        {
+                            "name": "col",
+                            "type": TableMeta.SUPERTYPE[TableMeta.TYPE_FLOAT],
+                            "subtype": TableMeta.TYPE_FLOAT,
+                        }
+                    ]
+                }
+            ]
+        }
+    )
+    return meta
+
+
+@pytest.mark.parametrize(
+    "agg_operation,expected_output",
+    [
+        (CountAggregationOp, 5),
+        (SumAggregationOp, 15),
+        (AvgAggregationOp, 3.00),
+        (MaxAggregationOp, 5),
+        (MinAggregationOp, 1),
+        (MajorityAggregationOp, str(1)),
+    ],
+)
+def test_agg_ops(df, meta, agg_operation, expected_output):
+    op = agg_operation("col")
     op.op_type_check(meta)
-    output = op(df.copy())
-    assert output == 5
+    output = op(df)
+    assert output == expected_output
 
 
-def test_sum_aggregation_op():
-    op = SumAggregationOp('col')
-    op.op_type_check(meta)
-    output = op(df.copy())
-    assert output == 15
-
-
-def test_agg_aggregation_op():
-    op = AvgAggregationOp('col')
-    op.op_type_check(meta)
-    output = op(df.copy())
-    assert output == 3.00
-
-
-def test_max_aggregation_op():
-    op = MaxAggregationOp('col')
-    op.op_type_check(meta)
-    output = op(df.copy())
-    assert output == 5
-
-
-def test_min_aggregation_op():
-    op = MinAggregationOp('col')
-    op.op_type_check(meta)
-    output = op(df.copy())
-    assert output == 1
-
-
-def test_majority_aggregation_op():
-    op = MajorityAggregationOp('col')
-    op.op_type_check(meta)
-    output = op(df.copy())
-    assert output == str(1)
+@pytest.mark.parametrize(
+    "agg_operation",
+    [
+        (SumAggregationOp),
+        (AvgAggregationOp),
+        (MaxAggregationOp),
+        (MinAggregationOp),
+        (MajorityAggregationOp),
+    ],
+)
+def test_sum_agg_none(agg_operation):
+    op = agg_operation("col")
+    df = pd.DataFrame()
+    output = op(df)
+    assert output is None

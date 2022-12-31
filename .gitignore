@@ -1,5 +1,9 @@
 .DS_Store
 unpacked_sdist/
+group.csv
+hire_date.csv
+skills.csv
+supervisor.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

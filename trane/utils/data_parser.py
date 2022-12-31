@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from .table_meta import TableMeta as TM
+from trane.utils.table_meta import TableMeta as TM
 
 __all__ = ['denormalize', 'parse_data']
 

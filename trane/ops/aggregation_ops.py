@@ -1,5 +1,5 @@
-from ..utils.table_meta import TableMeta as TM
-from .op_base import OpBase
+from trane.utils.table_meta import TableMeta as TM
+from trane.ops.op_base import OpBase
 
 AGGREGATION_OPS = [
     "CountAggregationOp", 

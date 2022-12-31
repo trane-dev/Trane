@@ -8,7 +8,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.ensemble import AdaBoostClassifier, AdaBoostRegressor
 from sklearn.svm import LinearSVC, LinearSVR
 
-from ..utils.table_meta import TableMeta as TM
+from trane.utils.table_meta import TableMeta as TM
 
 __all__ = ["PredictionProblemEvaluator"]
 
@@ -107,14 +107,14 @@ class PredictionProblemEvaluator(object):
             if filter_op.input_type == TM.TYPE_CATEGORY:
                 for item in self._categorical_threshold(self.sampled_df[filter_op.column_name]):
                     problem_final = copy.deepcopy(problem)
-                    problem_final.operations[0].set_hyper_parameter(item)
+                    problem_final.operations[0].set_hyper_parameter(parameter_name='threshold', parameter_value=item)
                     yield problem_final, "threshold: {}".format(item)
             elif filter_op.input_type in [TM.TYPE_FLOAT, TM.TYPE_INTEGER]:
                 for keep_rate in [0.25, 0.5, 0.75]:
                     threshold = filter_op.find_threshhold_by_remaining(
                         fraction_of_data_target=keep_rate, df=self.sampled_df, col=filter_op.column_name)
                     problem_final = copy.deepcopy(problem)
-                    problem_final.operations[0].set_hyper_parameter(threshold)
+                    problem_final.operations[0].set_hyper_parameter(parameter_name='threshold', parameter_value=threshold)
                     yield problem_final, "threshold: {} (keep {}%)".format(threshold, keep_rate * 100)
 
     def split_dataset(self, problem, problem_type, labels, features):

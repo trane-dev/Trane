@@ -1,10 +1,10 @@
 import itertools
 import copy
 
-from ..ops import aggregation_ops as agg_ops
-from ..ops import filter_ops
-from ..utils.table_meta import TableMeta
-from .prediction_problem import PredictionProblem
+from trane.ops import aggregation_ops as agg_ops
+from trane.ops import filter_ops
+from trane.utils.table_meta import TableMeta
+from trane.core.prediction_problem import PredictionProblem
 
 __all__ = ['PredictionProblemGenerator']
 
@@ -162,7 +162,7 @@ class PredictionProblemGenerator:
                     if item not in yielded_thresholds:
                         yielded_thresholds.append(item)
                         problem_final = copy.deepcopy(problem)
-                        problem_final.operations[0].set_hyper_parameter(item)
+                        problem_final.operations[0].set_hyper_parameter(parameter_name='threshold', parameter_value=item)
                         yield problem_final, "threshold: {}".format(item)
                     else:
                         continue
@@ -173,7 +173,7 @@ class PredictionProblemGenerator:
                     if threshold not in yielded_thresholds:
                         yielded_thresholds.append(threshold)
                         problem_final = copy.deepcopy(problem)
-                        problem_final.operations[0].set_hyper_parameter(threshold)
+                        problem_final.operations[0].set_hyper_parameter(parameter_name='threshold', parameter_value=threshold)
                         yield problem_final, "threshold: {} (keep {}%)".format(threshold, keep_rate * 100)
                     else:
                         continue

@@ -1,7 +1,7 @@
 import json
 
-from ..utils.table_meta import TableMeta
-from .prediction_problem import PredictionProblem
+from trane.utils.table_meta import TableMeta
+from trane.core.prediction_problem import PredictionProblem
 
 __all__ = ["prediction_problems_to_json_file",
            "prediction_problems_from_json_file"]

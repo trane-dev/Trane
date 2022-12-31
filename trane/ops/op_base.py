@@ -4,7 +4,7 @@ import heapq
 
 from scipy import stats
 
-__all__ = ['OpBase']
+__all__ = ["OpBase"]
 
 
 class OpBase(object):
@@ -71,7 +71,14 @@ class OpBase(object):
                 return table_meta
         return None
 
-    def set_hyper_parameter(self, hyper_parameter):
+    def get_parameter_names(self):
+        names = []
+        for param_dict in self.REQUIRED_PARAMETERS:
+            for name, _ in param_dict.items():
+                names.append(name)
+        return names
+
+    def set_hyper_parameter(self, parameter_name, parameter_value):
         """
         Set the hyper parameter of the operation.
 
@@ -84,9 +91,12 @@ class OpBase(object):
         None
 
         """
-        for parameter_requirement in self.REQUIRED_PARAMETERS:
-            for parameter_name, parameter_type in parameter_requirement.items():  # noqa
-                self.hyper_parameter_settings[parameter_name] = hyper_parameter
+        valid_param_names = self.get_parameter_names()
+        if parameter_name not in valid_param_names:
+            raise ValueError(
+                f"Invalid parameter name for operation. Valid names:{valid_param_names}"
+            )
+        self.hyper_parameter_settings[parameter_name] = parameter_value
 
     def __call__(self, dataframe):
         return self.execute(dataframe)
@@ -94,48 +104,14 @@ class OpBase(object):
     def execute(self, dataframe):
         raise NotImplementedError
 
-    def auto_set_hyperparams(
-            self, df, label_col, entity_col, filter_col=None,
-            num_random_samples=10, num_rows_to_execute_on=2000):
-        """
-        Sets hyperparameters for the operation. In most cases (as implemented
-        here), this is done by finding threshhold values that maximize column
-        diversity. This can be overrideen in subclasses, as it is for
-        filter ops.
-
-        Parameters
-        ----------
-        df: Dataframe to be tuned to
-        label_col: str, name of the column of interest in the data
-        entity_col: str, name of the column containing entities ids in the data
-        num_random_samples: if there's more than this many unique values to
-            test, randomly sample this many values from the dataset
-        num_rows_to_execute_on: if the dataframe contains more than this number
-            of rows, randomly select this many rows to use as the dataframe
-
-        Returns
-        -------
-        hyperparameter: But this has already been set to the operation
-
-        """
-
-        # If the operator has no required parameters, return None
-        if len(self.REQUIRED_PARAMETERS) == 0:
-            return None
-
-        hyperaparam = 0
-        # hyperaparam = self.find_threshhold_by_diversity(
-        #     df=df, label_col=label_col,
-        #     entity_col=entity_col,
-        #     num_random_samples=num_random_samples,
-        #     num_rows_to_execute_on=num_rows_to_execute_on)
-
-        self.set_hyper_parameter(hyperaparam)
-        return hyperaparam
-
     def find_threshhold_by_remaining(
-            self, fraction_of_data_target, df, col, num_random_samples=10,
-            num_rows_to_execute_on=2000):
+        self,
+        fraction_of_data_target,
+        df,
+        col,
+        num_random_samples=10,
+        num_rows_to_execute_on=2000,
+    ):
         """
         This function finds and returns a parameter setting for the
         op. The parameter setting that comes closest to the
@@ -162,9 +138,12 @@ class OpBase(object):
         # record the original settings to prevent side effects
         original_hyperparam_settings = self.hyper_parameter_settings
 
-        df, unique_vals = self._sample_df_and_uniqe_values(
-            df=df, col=col, max_num_unique_values=num_random_samples,
-            max_num_rows=num_rows_to_execute_on)
+        df, unique_vals = self._sample_df_and_unique_values(
+            df=df,
+            col=col,
+            max_num_unique_values=num_random_samples,
+            max_num_rows=num_rows_to_execute_on,
+        )
 
         # best score is the fraction of data that remains after data is
         # truncated at a given value
@@ -179,7 +158,9 @@ class OpBase(object):
             # apply the operation to the sampled df and see what happens
             # this overwrites existing hyperparams. They will need to be
             # reset later
-            self.set_hyper_parameter(unique_val)
+            self.set_hyper_parameter(
+                parameter_name="threshold", parameter_value=unique_val
+            )
             filtered_df = self.execute(df)
 
             # see how many items remain. Score based on how close we are to
@@ -198,8 +179,13 @@ class OpBase(object):
         return best_val
 
     def find_threshhold_by_diversity(
-            self, df, label_col, entity_col,
-            num_random_samples=10, num_rows_to_execute_on=2000):
+        self,
+        df,
+        label_col,
+        entity_col,
+        num_random_samples=10,
+        num_rows_to_execute_on=2000,
+    ):
         """
         This function selects a parameter setting for the
         operations, excluding the filter operation.
@@ -209,8 +195,7 @@ class OpBase(object):
         ----------
         df: the relevant data
         label_col: column name of the column of interest in the data
-        entity_col: column name of
-            the column containing entities in the data
+        entity_col: the column containing entities in the data
         num_random_samples: if there's more than this many unique values to
             test, randomly sample this many values from the dataset
         num_rows_to_execute_on: if the dataframe contains more than this number
@@ -227,9 +212,12 @@ class OpBase(object):
         # record the original settings to prevent side effects
         original_hyperparam_settings = self.hyper_parameter_settings
 
-        df, unique_vals = self._sample_df_and_uniqe_values(
-            df=df, col=label_col, max_num_unique_values=num_random_samples,
-            max_num_rows=num_rows_to_execute_on)
+        df, unique_vals = self._sample_df_and_unique_values(
+            df=df,
+            col=label_col,
+            max_num_unique_values=num_random_samples,
+            max_num_rows=num_rows_to_execute_on,
+        )
 
         best_entropy = 0
         best_parameter_value = 0
@@ -239,12 +227,13 @@ class OpBase(object):
         unique_vals = set(df[label_col])
         for unique_val in unique_vals:
 
-            self.set_hyper_parameter(unique_val)
+            self.set_hyper_parameter(
+                parameter_name="threshold", parameter_value=unique_val
+            )
 
             output_df = df.groupby(entity_col).apply(self.execute)
 
-            current_entropy = self._entropy_of_a_list(
-                list(output_df[label_col]))
+            current_entropy = self._entropy_of_a_list(list(output_df[label_col]))
 
             if current_entropy > best_entropy:
                 best_entropy = current_entropy
@@ -253,8 +242,7 @@ class OpBase(object):
         self.hyper_parameter_settings = original_hyperparam_settings
         return best_parameter_value
 
-    def _sample_df_and_uniqe_values(
-            self, df, col, max_num_unique_values, max_num_rows):
+    def _sample_df_and_unique_values(self, df, col, max_num_unique_values, max_num_rows):
         """
         Helper methods
 
@@ -277,13 +265,16 @@ class OpBase(object):
         df: sampled dataframe which is a subset of the original dataframe
         unique_vals: a list of unique values
         """
+        # unique_vals = df[col].unique().tolist()
         unique_vals = set(df[col])
 
         if len(unique_vals) > max_num_unique_values:
-            sample = heapq.nlargest(max_num_unique_values, unique_vals, key=lambda L: random.random())
+            sample = heapq.nlargest(
+                max_num_unique_values, unique_vals, key=lambda L: random.random()
+            )
             # Fixes DeprecationWarning: Sampling from a set deprecated since Python 3.9 and will be removed in a subsequent version.
             # unique_vals = list(
-                # random.sample(unique_vals, max_num_unique_values))
+            # random.sample(unique_vals, max_num_unique_values))
 
         if len(df) > max_num_rows:
             df = df.sample(max_num_rows)
@@ -310,14 +301,14 @@ class OpBase(object):
         return hash((type(self).__name__, self.column_name))
 
     def __repr__(self):
-        hyper_param_str = ','.join(
-            [str(x) for x in list(self.hyper_parameter_settings.values())])
+        hyper_param_str = ",".join(
+            [str(x) for x in list(self.hyper_parameter_settings.values())]
+        )
 
         if len(hyper_param_str) > 0:
-            hyper_param_str = '@' + hyper_param_str
+            hyper_param_str = "@" + hyper_param_str
 
-        return "%s(%s%s)" % (
-            type(self).__name__, self.column_name, hyper_param_str)
+        return "%s(%s%s)" % (type(self).__name__, self.column_name, hyper_param_str)
 
     def __eq__(self, other):
         """Overrides the default implementation"""

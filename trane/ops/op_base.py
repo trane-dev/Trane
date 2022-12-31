@@ -1,6 +1,6 @@
+import heapq
 import random
 from collections import Counter
-import heapq
 
 from scipy import stats
 
@@ -94,7 +94,7 @@ class OpBase(object):
         valid_param_names = self.get_parameter_names()
         if parameter_name not in valid_param_names:
             raise ValueError(
-                f"Invalid parameter name for operation. Valid names:{valid_param_names}"
+                f"Invalid parameter name for operation. Valid names:{valid_param_names}",
             )
         self.hyper_parameter_settings[parameter_name] = parameter_value
 
@@ -159,7 +159,8 @@ class OpBase(object):
             # this overwrites existing hyperparams. They will need to be
             # reset later
             self.set_hyper_parameter(
-                parameter_name="threshold", parameter_value=unique_val
+                parameter_name="threshold",
+                parameter_value=unique_val,
             )
             filtered_df = self.execute(df)
 
@@ -228,7 +229,8 @@ class OpBase(object):
         for unique_val in unique_vals:
 
             self.set_hyper_parameter(
-                parameter_name="threshold", parameter_value=unique_val
+                parameter_name="threshold",
+                parameter_value=unique_val,
             )
 
             output_df = df.groupby(entity_col).apply(self.execute)
@@ -242,7 +244,13 @@ class OpBase(object):
         self.hyper_parameter_settings = original_hyperparam_settings
         return best_parameter_value
 
-    def _sample_df_and_unique_values(self, df, col, max_num_unique_values, max_num_rows):
+    def _sample_df_and_unique_values(
+        self,
+        df,
+        col,
+        max_num_unique_values,
+        max_num_rows,
+    ):
         """
         Helper methods
 
@@ -269,8 +277,10 @@ class OpBase(object):
         unique_vals = set(df[col])
 
         if len(unique_vals) > max_num_unique_values:
-            sample = heapq.nlargest(
-                max_num_unique_values, unique_vals, key=lambda L: random.random()
+            unique_vals = heapq.nlargest(
+                max_num_unique_values,
+                unique_vals,
+                key=lambda L: random.random(),
             )
             # Fixes DeprecationWarning: Sampling from a set deprecated since Python 3.9 and will be removed in a subsequent version.
             # unique_vals = list(
@@ -302,7 +312,7 @@ class OpBase(object):
 
     def __repr__(self):
         hyper_param_str = ",".join(
-            [str(x) for x in list(self.hyper_parameter_settings.values())]
+            [str(x) for x in list(self.hyper_parameter_settings.values())],
         )
 
         if len(hyper_param_str) > 0:

@@ -6,6 +6,16 @@ clean:
 	find . -name '*~' -delete
 	find . -name '.coverage.*' -delete
 
+.PHONY: lint
+lint:
+	black trane/ -t py311 --check
+	ruff trane/
+
+.PHONY: lint-fix
+lint-fix:
+	black trane/ -t py311
+	ruff trane/ --fix
+
 .PHONY: installdeps-dev
 installdeps-dev:
 	python -m pip install ".[dev]"

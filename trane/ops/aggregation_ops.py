@@ -1,13 +1,14 @@
-from trane.utils.table_meta import TableMeta as TM
 from trane.ops.op_base import OpBase
+from trane.utils.table_meta import TableMeta as TM
 
 AGGREGATION_OPS = [
-    "CountAggregationOp", 
+    "CountAggregationOp",
     "SumAggregationOp",
     "AvgAggregationOp",
-    "MaxAggregationOp", 
+    "MaxAggregationOp",
     "MinAggregationOp",
-    "MajorityAggregationOp"]
+    "MajorityAggregationOp",
+]
 
 
 class AggregationOpBase(OpBase):
@@ -80,8 +81,7 @@ class CountAggregationOp(AggregationOpBase):
 
 class SumAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-               (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
         if len(dataframe) == 0:
@@ -91,8 +91,7 @@ class SumAggregationOp(AggregationOpBase):
 
 class AvgAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-               (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
         if len(dataframe) == 0:
@@ -102,8 +101,7 @@ class AvgAggregationOp(AggregationOpBase):
 
 class MaxAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-               (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
         if len(dataframe) == 0:
@@ -113,8 +111,7 @@ class MaxAggregationOp(AggregationOpBase):
 
 class MinAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT),
-               (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
+    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
 
     def execute(self, dataframe):
         if len(dataframe) == 0:
@@ -124,8 +121,10 @@ class MinAggregationOp(AggregationOpBase):
 
 class MajorityAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-               (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
+    IOTYPES = [
+        (TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
+        (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER),
+    ]
 
     def execute(self, dataframe):
         if len(dataframe) == 0:

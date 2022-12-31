@@ -19,13 +19,15 @@ def op_to_json(op):
     str: a JSON string representing the operation
 
     """
-    return json.dumps({
-        "OpType": op.__class__.__bases__[-1].__name__,
-        "SubopType": type(op).__name__,
-        "column_name": op.column_name,
-        "iotype": (op.input_type, op.output_type),
-        "hyper_parameter_settings": op.hyper_parameter_settings
-    })
+    return json.dumps(
+        {
+            "OpType": op.__class__.__bases__[-1].__name__,
+            "SubopType": type(op).__name__,
+            "column_name": op.column_name,
+            "iotype": (op.input_type, op.output_type),
+            "hyper_parameter_settings": op.hyper_parameter_settings,
+        },
+    )
 
 
 def op_from_json(json_data):
@@ -43,7 +45,7 @@ def op_from_json(json_data):
 
     """
     data = json.loads(json_data)
-    op = globals()[data['SubopType']](data['column_name'])
-    op.input_type, op.output_type = data['iotype']
-    op.hyper_parameter_settings = data['hyper_parameter_settings']
+    op = globals()[data["SubopType"]](data["column_name"])
+    op.input_type, op.output_type = data["iotype"]
+    op.hyper_parameter_settings = data["hyper_parameter_settings"]
     return op

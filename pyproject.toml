@@ -61,11 +61,8 @@ test = [
     "pytest-runner >= 2.11.1",
 ]
 dev = [
-    "flake8",
-    "isort",
+    "ruff",
     "black[jupyter]",
-    "autoflake",
-    "autopep8",
     "pre-commit == 2.20.0"
 ]
 
@@ -106,13 +103,6 @@ testpaths = [
     "trane/tests/*"
 ]
 
-[tool.isort]
-profile = "black"
-forced_separate = "trane"
-known_first_party = "trane"
-skip = "__init__.py"
-multi_line_output = 3
-
 [tool.black]
 target-version = ['py311']
 
@@ -138,3 +128,25 @@ requires = [
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+# Never enforce `E501` (line length violations), lines cannot be > 79 chars
+ignore = ["E501"]
+select = [
+    # Pyflakes
+    "F",
+    # Pycodestyle
+    "E",
+    "W",
+    # flake8-quotes
+    "Q",
+    # isort
+    "I001"
+]
+src = ["trane"]
+
+[tool.ruff.isort]
+known-first-party = ["trane"]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401", "E402", "F403", "F405", "E501", "I001"]

@@ -20,7 +20,7 @@ class CutoffStrategy:
     CutoffStrategy Instance
     """
 
-    def __init__(self, generate_fn, description='undescribed cutoff strategy'):
+    def __init__(self, generate_fn, description="undescribed cutoff strategy"):
         self.generate_fn = generate_fn
         self.description = description
 
@@ -49,4 +49,7 @@ class FixWindowCutoffStrategy(CutoffStrategy):
             for cutoff_st, cutoff_ed in cutoff_st_ed_pairs:
                 entity_cutoffs.append((entity_name, cutoff_st, cutoff_ed))
 
-        return pd.DataFrame(entity_cutoffs, columns=[self.entity_col, "cutoff_st", "cutoff_ed"])
+        return pd.DataFrame(
+            entity_cutoffs,
+            columns=[self.entity_col, "cutoff_st", "cutoff_ed"],
+        )

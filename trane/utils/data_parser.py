@@ -4,10 +4,10 @@ import pandas as pd
 
 from trane.utils.table_meta import TableMeta as TM
 
-__all__ = ['denormalize', 'parse_data']
+__all__ = ["denormalize", "parse_data"]
 
 
-class CsvMerge():
+class CsvMerge:
     """
     Simple class for helping with csv merge operations.
     """
@@ -27,7 +27,12 @@ class CsvMerge():
 
     def merge_objects(self, other, left_key, right_key):
         csv_names = self.get_csv_names() + other.get_csv_names()
-        data = pd.merge(self.get_data(), other.get_data(), left_on=left_key, right_on=right_key)
+        data = pd.merge(
+            self.get_data(),
+            other.get_data(),
+            left_on=left_key,
+            right_on=right_key,
+        )
         return CsvMerge(csv_names, data)
 
 
@@ -66,7 +71,11 @@ def denormalize(relationships):
                 child_merge_obj = csv_merge_obj
                 child_from_list = True
 
-        new_merge_obj = parent_merge_obj.merge_objects(child_merge_obj, parent_key, child_key)
+        new_merge_obj = parent_merge_obj.merge_objects(
+            child_merge_obj,
+            parent_key,
+            child_key,
+        )
 
         if parent_from_list:
             csv_merge_objs.remove(parent_merge_obj)
@@ -75,7 +84,7 @@ def denormalize(relationships):
 
         csv_merge_objs.append(new_merge_obj)
 
-    assert(len(csv_merge_objs) == 1)
+    assert len(csv_merge_objs) == 1
 
     return csv_merge_objs[0].get_data()
 
@@ -98,5 +107,9 @@ def parse_data(dataframe, table_meta):
     for column in columns:
         if table_meta.get_type(column) == TM.TYPE_TIME:
             dataframe[column] = dataframe[column].apply(
-                lambda x: datetime.strptime(x, table_meta.get_property(column, "format")))
+                lambda x: datetime.strptime(
+                    x,
+                    table_meta.get_property(column, "format"),
+                ),
+            )
     return dataframe

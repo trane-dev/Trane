@@ -1,8 +1,23 @@
-import numpy as np
-
-from trane.ops import *  # noqa
+from trane.ops import (
+    FILTER_OPS,
+    AllFilterOp,  # noqa
+    EqFilterOp,  # noqa
+    GreaterFilterOp,  # noqa
+    LessFilterOp,  # noqa
+    NeqFilterOp,  # noqa
+    op_from_json,
+    op_to_json,
+)
+from trane.ops.aggregation_ops import (
+    AGGREGATION_OPS,
+    AvgAggregationOp,  # noqa
+    CountAggregationOp,  # noqa
+    MajorityAggregationOp,  # noqa
+    MaxAggregationOp,  # noqa
+    MinAggregationOp,  # noqa
+    SumAggregationOp,  # noqa
+)
 from trane.utils.table_meta import TableMeta as TM
-from trane.ops.aggregation_ops import AGGREGATION_OPS
 
 ALL_OPS = AGGREGATION_OPS + FILTER_OPS
 
@@ -39,11 +54,11 @@ def test_save_load_after_op_type_check():
                                 "name": "col",
                                 "type": TM.SUPERTYPE[TM.TYPE_FLOAT],
                                 "subtype": TM.TYPE_FLOAT,
-                            }
-                        ]
-                    }
-                ]
-            }
+                            },
+                        ],
+                    },
+                ],
+            },
         )
         op = globals()[op_type]("col")
         op.op_type_check(meta)

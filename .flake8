@@ -1,4 +1,0 @@
-[flake8]
-max-line-length = 110
-exclude = docs, .git, __pycache__, .ipynb_checkpoints
-ignore = F405

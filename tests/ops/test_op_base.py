@@ -47,11 +47,11 @@ def test_op_type_check_with_correct_type1():
                             "name": "col",
                             "type": TM.SUPERTYPE[TM.TYPE_FLOAT],
                             "subtype": TM.TYPE_FLOAT,
-                        }
-                    ]
-                }
-            ]
-        }
+                        },
+                    ],
+                },
+            ],
+        },
     )
     op = FakeOp("col")
     meta2 = op.op_type_check(meta)
@@ -98,17 +98,20 @@ def test_set_hyper_parameter_raises():
 
 def test_sample_df_and_unique_values():
     values = [1, 2, 2, 4, 4, 5]
-    df = pd.DataFrame({'col': values})
+    df = pd.DataFrame({"col": values})
     op = FakeOpRequired("col")
     max_num_rows = 3
     max_num_unique_values = len(set(values))
-    sample_df, unique_vals = op._sample_df_and_unique_values(df=df, 
-                                                      col='col',
-                                                      max_num_unique_values=max_num_unique_values,
-                                                      max_num_rows=max_num_rows)
-    assert len(sample_df['col'].unique()) <= max_num_unique_values
+    sample_df, unique_vals = op._sample_df_and_unique_values(
+        df=df,
+        col="col",
+        max_num_unique_values=max_num_unique_values,
+        max_num_rows=max_num_rows,
+    )
+    assert len(sample_df["col"].unique()) <= max_num_unique_values
     assert sample_df.shape == (max_num_rows, 1)
     assert unique_vals == set(values)
+
 
 # def test_op_equality():
 #     column_name = "test"

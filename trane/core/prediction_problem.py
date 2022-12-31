@@ -2,17 +2,30 @@ import json
 import logging
 import os
 
+import composeml as cp
 import dill
 import numpy as np
-import pandas as pd
-import composeml as cp
 
-from trane.ops.aggregation_ops import *  # noqa
-from trane.ops.filter_ops import *  # noqa
+from trane.ops.aggregation_ops import (
+    AvgAggregationOp,
+    CountAggregationOp,
+    MajorityAggregationOp,
+    MaxAggregationOp,
+    MinAggregationOp,
+    SumAggregationOp,
+)
+from trane.ops.filter_ops import (
+    AllFilterOp,
+    EqFilterOp,
+    FilterOpBase,
+    GreaterFilterOp,
+    LessFilterOp,
+    NeqFilterOp,
+)
 from trane.ops.op_saver import op_from_json, op_to_json
 from trane.utils.table_meta import TableMeta
 
-__all__ = ['PredictionProblem']
+__all__ = ["PredictionProblem"]
 
 
 class PredictionProblem:
@@ -23,7 +36,14 @@ class PredictionProblem:
     each operation.
     """
 
-    def __init__(self, operations, entity_col, time_col, table_meta=None, cutoff_strategy=None):
+    def __init__(
+        self,
+        operations,
+        entity_col,
+        time_col,
+        table_meta=None,
+        cutoff_strategy=None,
+    ):
         """
         Parameters
         ----------
@@ -50,11 +70,11 @@ class PredictionProblem:
             target_dataframe_name=entity_col,
             time_index=time_col,
             labeling_function=self._execute_operations_on_df,
-            window_size=window_size
+            window_size=window_size,
         )
 
     def is_valid(self, table_meta=None):
-        '''
+        """
         Typechecking for operations. Insures that their input and output types
         match. Allows a user to use the problem's existing table_meta, or pass
         in a new one
@@ -66,7 +86,7 @@ class PredictionProblem:
         Returns
         -------
         Bool
-        '''
+        """
         # don't contaminate original table_meta
         if table_meta:
             temp_meta = table_meta.copy()
@@ -87,42 +107,56 @@ class PredictionProblem:
         else:
             return False
 
-    def execute(self, df, num_examples_per_instance, minimum_data=None, maximum_data=None, gap=None, drop_empty=True, verbose=True, *args, **kwargs):
-        '''
+    def execute(
+        self,
+        df,
+        num_examples_per_instance,
+        minimum_data=None,
+        maximum_data=None,
+        gap=None,
+        drop_empty=True,
+        verbose=True,
+        *args,
+        **kwargs,
+    ):
+        """
         Executes the problem's operations on a dataframe. Generates the training examples (lable_times).
-        The label_times contains the 
-        '''
+        The label_times contains the
+        """
 
         assert df.isnull().sum().sum() == 0
 
         if not self.is_valid(self.table_meta):
             raise ValueError(
-                'Your Problem\'s specified operations do not match with the '
-                'problem\'s table meta. Therefore, the problem is not '
-                'valid.')
+                "Your Problem's specified operations do not match with the "
+                "problem's table meta. Therefore, the problem is not "
+                "valid.",
+            )
 
-        default_kwarg = self.cutoff_strategy.kwarg_dict() if self.cutoff_strategy else {}
+        default_kwarg = (
+            self.cutoff_strategy.kwarg_dict() if self.cutoff_strategy else {}
+        )
         search_kwargs = {
-            "minimum_data": minimum_data or default_kwarg.get('minimum_data'),
-            "maximum_data": maximum_data or default_kwarg.get('maximum_data'),
-            "gap": gap or default_kwarg.get('gap')
+            "minimum_data": minimum_data or default_kwarg.get("minimum_data"),
+            "maximum_data": maximum_data or default_kwarg.get("maximum_data"),
+            "gap": gap or default_kwarg.get("gap"),
         }
         lt = self._label_maker.search(
             df=df,
             num_examples_per_instance=num_examples_per_instance,
-            minimum_data=search_kwargs['minimum_data'],
-            maximum_data=search_kwargs['maximum_data'],
-            gap=search_kwargs['gap'],
+            minimum_data=search_kwargs["minimum_data"],
+            maximum_data=search_kwargs["maximum_data"],
+            gap=search_kwargs["gap"],
             drop_empty=drop_empty,
             verbose=verbose,
             *args,
-            **kwargs
+            **kwargs,
         )
 
         return lt
 
     def _execute_operations_on_df(self, df):
-        '''
+        """
         Execute operations on df. This method assumes that data leakage/cutoff
             times have already been taken into account, and just blindly
             executes the operations.
@@ -133,7 +167,7 @@ class PredictionProblem:
         Returns
         -------
         df: dataframe after operations
-        '''
+        """
         df = df.copy()
         for operation in self.operations:
             df = operation.execute(df)
@@ -153,9 +187,9 @@ class PredictionProblem:
 
         """
         if self.entity_col != "__fake_root_entity__":
-            description = 'For each <' + self.entity_col + '> predict'
+            description = "For each <" + self.entity_col + "> predict"
         else:
-            description = 'Predict'
+            description = "Predict"
         # cycle through each operation to create dataops
         # dataops are a series of operations containing one and only one
         # aggregation op at its end
@@ -170,11 +204,11 @@ class PredictionProblem:
 
         # join filter ops with ands and append to the description
         if len(filterop_desc_arr) > 0:
-            description += ' and '.join(filterop_desc_arr)
+            description += " and ".join(filterop_desc_arr)
 
         # add the cutoff strategy description if it exists
         if self.cutoff_strategy:
-            description += ' ' + self.cutoff_strategy.description
+            description += " " + self.cutoff_strategy.description
 
         return description
 
@@ -184,7 +218,7 @@ class PredictionProblem:
             AvgAggregationOp: " the average <{}> in all related records",
             MaxAggregationOp: " the maximum <{}> in all related records",
             MinAggregationOp: " the minimum <{}> in all related records",
-            MajorityAggregationOp: " the majority <{}> in all related records"
+            MajorityAggregationOp: " the majority <{}> in all related records",
         }
 
         if isinstance(op, CountAggregationOp):
@@ -197,32 +231,33 @@ class PredictionProblem:
             GreaterFilterOp: "greater than",
             EqFilterOp: "equal to",
             NeqFilterOp: "not equal to",
-            LessFilterOp: "less than"}
+            LessFilterOp: "less than",
+        }
 
-        filter_ops = [
-            x for x in self.operations if issubclass(type(x), FilterOpBase)]
+        filter_ops = [x for x in self.operations if issubclass(type(x), FilterOpBase)]
 
         # remove AllFilterOp
         filter_ops = [x for x in filter_ops if not isinstance(x, AllFilterOp)]
         if len(filter_ops) == 0:
             return ""
 
-        desc = ' with '
+        desc = " with "
         last_op_idx = len(filter_ops) - 1
         for idx, op in enumerate(filter_ops):
-            op_desc = '<{col}> {op} {threshold}'.format(
+            op_desc = "<{col}> {op} {threshold}".format(
                 col=op.column_name,
                 op=filter_op_str_dict[type(op)],
-                threshold=op.hyper_parameter_settings.get('threshold', '__'))
+                threshold=op.hyper_parameter_settings.get("threshold", "__"),
+            )
             desc += op_desc
 
             if idx != last_op_idx:
-                desc += ' and '
+                desc += " and "
 
         return desc
 
     def save(self, path, problem_name):
-        '''
+        """
         Saves the pediction problem in two files.
 
         One file is a dill of the cutoff strategy.
@@ -242,7 +277,7 @@ class PredictionProblem:
          'problem_name': str}
         The new problem_name may have changed due to a filename collision
 
-        '''
+        """
         json_saved = False
         dill_saved = False
         created_directory = False
@@ -253,10 +288,8 @@ class PredictionProblem:
             created_directory = True
 
         # rename the problem_name if already exists
-        json_file_exists = os.path.exists(
-            os.path.join(path, problem_name + '.json'))
-        dill_file_exists = os.path.exists(
-            os.path.join(path, problem_name + '.dill'))
+        json_file_exists = os.path.exists(os.path.join(path, problem_name + ".json"))
+        dill_file_exists = os.path.exists(os.path.join(path, problem_name + ".dill"))
 
         i = 1
         while json_file_exists or dill_file_exists:
@@ -264,33 +297,37 @@ class PredictionProblem:
 
             i += 1
             json_file_exists = os.path.exists(
-                os.path.join(path, problem_name + '.json'))
+                os.path.join(path, problem_name + ".json"),
+            )
             dill_file_exists = os.path.exists(
-                os.path.join(path, problem_name + '.dill'))
+                os.path.join(path, problem_name + ".dill"),
+            )
 
         # get the cutoff_strategy bytes
         cutoff_dill_bytes = self._dill_cutoff_strategy()
 
         # add a key to the problem json
         json_dict = json.loads(self.to_json())
-        json_dict['cutoff_dill'] = problem_name + '.dill'
+        json_dict["cutoff_dill"] = problem_name + ".dill"
 
         # write the files
-        with open(os.path.join(path, problem_name + '.json'), 'w') as f:
+        with open(os.path.join(path, problem_name + ".json"), "w") as f:
             json.dump(obj=json_dict, fp=f, indent=4, sort_keys=True)
             json_saved = True
 
-        with open(os.path.join(path, problem_name + '.dill'), 'wb') as f:
+        with open(os.path.join(path, problem_name + ".dill"), "wb") as f:
             f.write(cutoff_dill_bytes)
             dill_saved = True
 
-        return({'saved_correctly': json_saved & dill_saved,
-                'created_directory': created_directory,
-                'problem_name': problem_name})
+        return {
+            "saved_correctly": json_saved & dill_saved,
+            "created_directory": created_directory,
+            "problem_name": problem_name,
+        }
 
     @classmethod
     def load(cls, json_file_path):
-        '''
+        """
         Load a prediction problem from json file.
         If the file links to a dill (binary) cutoff_srategy, also load that
         and assign it to the prediction problem.
@@ -303,20 +340,22 @@ class PredictionProblem:
         -------
         PredictionProblem
 
-        '''
-        with open(json_file_path, 'r') as f:
+        """
+        with open(json_file_path, "r") as f:
             problem_dict = json.load(f)
             problem = cls.from_json(problem_dict)
 
-        cutoff_strategy_file_name = problem_dict.get('cutoff_dill', None)
+        cutoff_strategy_file_name = problem_dict.get("cutoff_dill", None)
 
         if cutoff_strategy_file_name:
             # reconstruct cutoff strategy filename
             pickle_path = os.path.join(
-                os.path.dirname(json_file_path), cutoff_strategy_file_name)
+                os.path.dirname(json_file_path),
+                cutoff_strategy_file_name,
+            )
 
             # load cutoff strategy from file
-            with open(pickle_path, 'rb') as f:
+            with open(pickle_path, "rb") as f:
                 cutoff_strategy = dill.load(f)
 
             # assign cutoff strategy to problem
@@ -343,11 +382,13 @@ class PredictionProblem:
             table_meta_json = self.table_meta.to_json()
 
         return json.dumps(
-            {"operations": [
-                json.loads(op_to_json(op)) for op in self.operations],
-             "entity_col": self.entity_col,
-             "time_col": self.time_col,
-             "table_meta": table_meta_json})
+            {
+                "operations": [json.loads(op_to_json(op)) for op in self.operations],
+                "entity_col": self.entity_col,
+                "time_col": self.time_col,
+                "table_meta": table_meta_json,
+            },
+        )
 
     @classmethod
     def from_json(cls, json_data):
@@ -369,21 +410,23 @@ class PredictionProblem:
             json_data = json.loads(json_data)
 
         operations = [
-            op_from_json(json.dumps(item)) for item in json_data['operations']]
-        entity_col = json_data['entity_col']
-        time_col = json_data['time_col']
-        table_meta = TableMeta.from_json(json_data.get('table_meta'))
+            op_from_json(json.dumps(item)) for item in json_data["operations"]
+        ]
+        entity_col = json_data["entity_col"]
+        time_col = json_data["time_col"]
+        table_meta = TableMeta.from_json(json_data.get("table_meta"))
 
         problem = PredictionProblem(
             operations=operations,
             entity_col=entity_col,
             time_col=time_col,
             table_meta=table_meta,
-            cutoff_strategy=None)
+            cutoff_strategy=None,
+        )
         return problem
 
     def _dill_cutoff_strategy(self):
-        '''
+        """
         Function creates a dill for the problem's associated cutoff strategy
 
         This function requires cutoff time to be assigned.
@@ -394,18 +437,20 @@ class PredictionProblem:
         Returns
         -------
         a dill of the cutoff strategy
-        '''
+        """
         cutoff_dill = dill.dumps(self.cutoff_strategy)
         return cutoff_dill
 
     def __eq__(self, other):
         """Overrides the default implementation"""
         if isinstance(self, other.__class__):
-            if self.operations == other.operations and \
-                self.entity_col == other.entity_col and \
-                self.time_col == other.time_col and \
-                self.table_meta == other.table_meta and \
-                self.cutoff_strategy == other.cutoff_strategy:
+            if (
+                self.operations == other.operations
+                and self.entity_col == other.entity_col
+                and self.time_col == other.time_col
+                and self.table_meta == other.table_meta
+                and self.cutoff_strategy == other.cutoff_strategy
+            ):
                 return True
             return False
         return False
@@ -426,47 +471,55 @@ class PredictionProblem:
             Actual data is: {}, Actual type is: {}".format(
                 expected_type,
                 actual_data,
-                type(actual_data)))
+                type(actual_data),
+            ),
+        )
 
         allowed_types_category = [bool, int, str, float]
         allowed_types_bool = [bool, np.bool_]
         allowed_types_text = [str]
         allowed_types_int = [int, np.int64]
         allowed_types_float = [float, np.float64, np.float32]
-        allowed_types_time = allowed_types_bool + allowed_types_int + \
-            allowed_types_text + allowed_types_float
-        allowed_types_ordered = allowed_types_bool + \
-            allowed_types_int + allowed_types_text + allowed_types_float
-        allowed_types_id = allowed_types_int + allowed_types_text + \
-            allowed_types_float
+        allowed_types_time = (
+            allowed_types_bool
+            + allowed_types_int
+            + allowed_types_text
+            + allowed_types_float
+        )
+        allowed_types_ordered = (
+            allowed_types_bool
+            + allowed_types_int
+            + allowed_types_text
+            + allowed_types_float
+        )
+        allowed_types_id = allowed_types_int + allowed_types_text + allowed_types_float
 
         if expected_type == TableMeta.TYPE_CATEGORY:
-            assert(type(actual_data) in allowed_types_category)
+            assert type(actual_data) in allowed_types_category
 
         elif expected_type == TableMeta.TYPE_BOOL:
-            assert(type(actual_data) in allowed_types_bool)
+            assert type(actual_data) in allowed_types_bool
 
         elif expected_type == TableMeta.TYPE_ORDERED:
-            assert(type(actual_data) in allowed_types_ordered)
+            assert type(actual_data) in allowed_types_ordered
 
         elif expected_type == TableMeta.TYPE_TEXT:
-            assert(type(actual_data) in allowed_types_text)
+            assert type(actual_data) in allowed_types_text
 
         elif expected_type == TableMeta.TYPE_INTEGER:
-            assert(type(actual_data) in allowed_types_int)
+            assert type(actual_data) in allowed_types_int
 
         elif expected_type == TableMeta.TYPE_FLOAT:
-            assert(type(actual_data) in allowed_types_float)
+            assert type(actual_data) in allowed_types_float
 
         elif expected_type == TableMeta.TYPE_TIME:
-            assert(type(actual_data) in allowed_types_time)
+            assert type(actual_data) in allowed_types_time
 
         elif expected_type == TableMeta.TYPE_IDENTIFIER:
-            assert(type(actual_data) in allowed_types_id)
+            assert type(actual_data) in allowed_types_id
 
         else:
-            logging.critical(
-                'check_type function received an unexpected type.')
+            logging.critical("check_type function received an unexpected type.")
 
     def set_parameters(self, **parameters):
         for operation in self.operations:

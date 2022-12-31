@@ -1,8 +1,13 @@
 from ..utils.table_meta import TableMeta as TM
 from .op_base import OpBase
 
-FILTER_OPS = ["AllFilterOp", "GreaterFilterOp",
-              "EqFilterOp", "NeqFilterOp", "LessFilterOp"]
+FILTER_OPS = [
+    "AllFilterOp",
+    "GreaterFilterOp",
+    "EqFilterOp",
+    "NeqFilterOp",
+    "LessFilterOp",
+]
 __all__ = ["FilterOpBase", "FILTER_OPS"] + FILTER_OPS
 
 
@@ -31,8 +36,14 @@ class FilterOpBase(OpBase):
     """
 
     def auto_set_hyperparams(
-            self, df, filter_col, label_col=None, entity_col=None,
-            num_random_samples=10, num_rows_to_execute_on=2000):
+        self,
+        df,
+        filter_col,
+        label_col=None,
+        entity_col=None,
+        num_random_samples=10,
+        num_rows_to_execute_on=2000,
+    ):
         """
         Overridden method of op_base. Sets operation hyperparams.
         Unnecessary variables are passed so that the method call is uniform
@@ -59,9 +70,12 @@ class FilterOpBase(OpBase):
             return None
 
         filter_hyperparam = self.find_threshhold_by_remaining(
-            fraction_of_data_target=0.8, df=df, col=filter_col,
+            fraction_of_data_target=0.8,
+            df=df,
+            col=filter_col,
             num_random_samples=num_random_samples,
-            num_rows_to_execute_on=num_rows_to_execute_on)
+            num_rows_to_execute_on=num_rows_to_execute_on,
+        )
 
         self.set_hyper_parameter(filter_hyperparam)
         return filter_hyperparam
@@ -80,39 +94,51 @@ class AllFilterOp(FilterOpBase):
 
 class EqFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
-    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-               (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
+    IOTYPES = [
+        (TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
+        (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER),
+    ]
 
     def execute(self, dataframe):
-        return dataframe[dataframe[self.column_name] ==
-                         self.hyper_parameter_settings["threshold"]]
+        return dataframe[
+            dataframe[self.column_name] == self.hyper_parameter_settings["threshold"]
+        ]
 
 
 class NeqFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
-    IOTYPES = [(TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-               (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER)]
+    IOTYPES = [
+        (TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
+        (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER),
+    ]
 
     def execute(self, dataframe):
-        return dataframe[dataframe[self.column_name] !=
-                         self.hyper_parameter_settings["threshold"]]
+        return dataframe[
+            dataframe[self.column_name] != self.hyper_parameter_settings["threshold"]
+        ]
 
 
 class GreaterFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_INTEGER, TM.TYPE_INTEGER),
-               (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    IOTYPES = [
+        (TM.TYPE_INTEGER, TM.TYPE_INTEGER),
+        (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
+    ]
 
     def execute(self, dataframe):
-        return dataframe[dataframe[self.column_name] >
-                         self.hyper_parameter_settings["threshold"]]
+        return dataframe[
+            dataframe[self.column_name] > self.hyper_parameter_settings["threshold"]
+        ]
 
 
 class LessFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_INTEGER, TM.TYPE_INTEGER),
-               (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    IOTYPES = [
+        (TM.TYPE_INTEGER, TM.TYPE_INTEGER),
+        (TM.TYPE_FLOAT, TM.TYPE_FLOAT),
+    ]
 
     def execute(self, dataframe):
-        return dataframe[dataframe[self.column_name] <
-                         self.hyper_parameter_settings["threshold"]]
+        return dataframe[
+            dataframe[self.column_name] < self.hyper_parameter_settings["threshold"]
+        ]

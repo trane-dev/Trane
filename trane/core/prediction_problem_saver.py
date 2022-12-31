@@ -1,15 +1,19 @@
 import json
 
-from trane.utils.table_meta import TableMeta
 from trane.core.prediction_problem import PredictionProblem
+from trane.utils.table_meta import TableMeta
 
-__all__ = ["prediction_problems_to_json_file",
-           "prediction_problems_from_json_file"]
+__all__ = ["prediction_problems_to_json_file", "prediction_problems_from_json_file"]
 
 
-def prediction_problems_to_json_file(prediction_problems, table_meta,
-                                     entity_id_column, label_generating_column, time_column,
-                                     filename):
+def prediction_problems_to_json_file(
+    prediction_problems,
+    table_meta,
+    entity_id_column,
+    label_generating_column,
+    time_column,
+    filename,
+):
     """
     Convert a list of prediction problems to a JSON file
 
@@ -32,16 +36,20 @@ def prediction_problems_to_json_file(prediction_problems, table_meta,
     """
 
     prediction_problems_json = [prob.to_json() for prob in prediction_problems]
-    json_str = json.dumps({
-        "prediction_problems": [json.loads(prob_json) for prob_json in prediction_problems_json],
-        "table_meta": json.loads(table_meta.to_json()),
-        "entity_id_column": entity_id_column,
-        "label_generating_column": label_generating_column,
-        "time_column": time_column,
-    })
+    json_str = json.dumps(
+        {
+            "prediction_problems": [
+                json.loads(prob_json) for prob_json in prediction_problems_json
+            ],
+            "table_meta": json.loads(table_meta.to_json()),
+            "entity_id_column": entity_id_column,
+            "label_generating_column": label_generating_column,
+            "time_column": time_column,
+        },
+    )
 
     with open(filename, "w") as f:
-        json.dump(json.loads(json_str), f, indent=4, separators=(',', ': '))
+        json.dump(json.loads(json_str), f, indent=4, separators=(",", ": "))
 
 
 def prediction_problems_from_json_file(filename):
@@ -68,11 +76,18 @@ def prediction_problems_from_json_file(filename):
         json_data = f.read()
 
     data = json.loads(json_data)
-    prediction_problems = data['prediction_problems']
-    prediction_problems = [PredictionProblem.from_json(
-        json.dumps(prob)) for prob in prediction_problems]
-    table_meta = TableMeta.from_json(json.dumps(data['table_meta']))
-    entity_id_column = data['entity_id_column']
-    label_generating_column = data['label_generating_column']
-    time_column = data['time_column']
-    return prediction_problems, table_meta, entity_id_column, label_generating_column, time_column
+    prediction_problems = data["prediction_problems"]
+    prediction_problems = [
+        PredictionProblem.from_json(json.dumps(prob)) for prob in prediction_problems
+    ]
+    table_meta = TableMeta.from_json(json.dumps(data["table_meta"]))
+    entity_id_column = data["entity_id_column"]
+    label_generating_column = data["label_generating_column"]
+    time_column = data["time_column"]
+    return (
+        prediction_problems,
+        table_meta,
+        entity_id_column,
+        label_generating_column,
+        time_column,
+    )

@@ -1,7 +1,3 @@
-from datetime import timedelta
-
-import pandas as pd
-
 __all__ = ["FixWindowCutoffStrategy"]
 
 
@@ -20,13 +16,20 @@ class CutoffStrategy:
     CutoffStrategy Instance
     """
 
-    def __init__(self, generate_fn, description='undescribed cutoff strategy'):
+    def __init__(self, generate_fn, description="undescribed cutoff strategy"):
         self.generate_fn = generate_fn
         self.description = description
 
 
 class FixWindowCutoffStrategy(CutoffStrategy):
-    def __init__(self, entity_col, window_size, minimum_data=None, maximum_data=None, n=None):
+    def __init__(
+        self,
+        entity_col,
+        window_size,
+        minimum_data=None,
+        maximum_data=None,
+        n=None,
+    ):
         self.target_dataframe_name = entity_col
         self.window_size = window_size
         self.minimum_data = minimum_data
@@ -52,7 +55,7 @@ class FixWindowCutoffStrategy(CutoffStrategy):
     #             entity_cutoffs.append((entity_name, cutoff_st, cutoff_ed))
 
     #     return pd.DataFrame(entity_cutoffs, columns=[self.entity_col, "cutoff_st", "cutoff_ed"])
-    
+
     def kwarg_dict(self):
         # NOT DEPRECATED, still used
-        return { k: v for k, v in self.__dict__.items() if v is not None}
+        return {k: v for k, v in self.__dict__.items() if v is not None}

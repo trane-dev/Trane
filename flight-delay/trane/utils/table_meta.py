@@ -1,7 +1,7 @@
 import copy
 import json
 
-__all__ = ['TableMeta']
+__all__ = ["TableMeta"]
 
 
 class TableMeta(object):
@@ -9,28 +9,37 @@ class TableMeta(object):
     Meta data object of a database table.
     More information available here: https://hdi-project.github.io/MetaData.json/index
     """
+
     SUPERTYPE = {}
     # categorical
-    TYPE_CATEGORY = 'categorical'
-    TYPE_BOOL = 'boolean'
-    TYPE_ORDERED = 'ordered'
-    SUPERTYPE['categorical'] = 'categorical'
-    SUPERTYPE['boolean'] = 'categorical'
-    SUPERTYPE['ordered'] = 'categorical'
+    TYPE_CATEGORY = "categorical"
+    TYPE_BOOL = "boolean"
+    TYPE_ORDERED = "ordered"
+    SUPERTYPE["categorical"] = "categorical"
+    SUPERTYPE["boolean"] = "categorical"
+    SUPERTYPE["ordered"] = "categorical"
     # text
-    TYPE_TEXT = 'text'
+    TYPE_TEXT = "text"
     # number
-    TYPE_INTEGER = 'integer'
-    TYPE_FLOAT = 'float'
-    SUPERTYPE['integer'] = 'number'
-    SUPERTYPE['float'] = 'number'
+    TYPE_INTEGER = "integer"
+    TYPE_FLOAT = "float"
+    SUPERTYPE["integer"] = "number"
+    SUPERTYPE["float"] = "number"
     # datetime
-    TYPE_TIME = 'datetime'
+    TYPE_TIME = "datetime"
     # id
-    TYPE_IDENTIFIER = 'id'
+    TYPE_IDENTIFIER = "id"
 
-    TYPES = [TYPE_CATEGORY, TYPE_BOOL, TYPE_ORDERED, TYPE_TEXT,
-             TYPE_INTEGER, TYPE_FLOAT, TYPE_TIME, TYPE_IDENTIFIER]
+    TYPES = [
+        TYPE_CATEGORY,
+        TYPE_BOOL,
+        TYPE_ORDERED,
+        TYPE_TEXT,
+        TYPE_INTEGER,
+        TYPE_FLOAT,
+        TYPE_TIME,
+        TYPE_IDENTIFIER,
+    ]
 
     def __init__(self, table_meta):
         """
@@ -46,18 +55,20 @@ class TableMeta(object):
         """
         self.table_meta = table_meta.copy()
         self.all_columns = {}
-        for table_id, table in enumerate(self.table_meta['tables']):
-            for field_id, field in enumerate(table['fields']):
-                self.all_columns[field['name']] = {
-                    'table_id': table_id,
-                    'field_id': field_id,
-                    'type': field['subtype'] if 'subtype' in field else field['type'],
-                    'properties': field['properties'] if 'properties' in field else None
+        for table_id, table in enumerate(self.table_meta["tables"]):
+            for field_id, field in enumerate(table["fields"]):
+                self.all_columns[field["name"]] = {
+                    "table_id": table_id,
+                    "field_id": field_id,
+                    "type": field["subtype"] if "subtype" in field else field["type"],
+                    "properties": field["properties"]
+                    if "properties" in field
+                    else None,
                 }
 
     def add_column(self, field_name, field_type):
         self.all_columns[field_name] = {
-            "type": field_type
+            "type": field_type,
         }
 
     def get_type(self, column_name):
@@ -72,7 +83,7 @@ class TableMeta(object):
         -------
         type: the type of the data in the column
         """
-        return self.all_columns[column_name]['type']
+        return self.all_columns[column_name]["type"]
 
     def set_type(self, column_name, dtype):
         """
@@ -87,25 +98,30 @@ class TableMeta(object):
         -------
         None
         """
-        self.all_columns[column_name]['type'] = dtype
+        self.all_columns[column_name]["type"] = dtype
         column_data = self.all_columns[column_name]
 
         # TODO Remove the hierarchical structure of Types.
         try:
-            del self.table_meta['tables'][column_data['table_id']][
-                'fields'][column_data['field_id']]['type']
-            del self.table_meta['tables'][column_data['table_id']][
-                'fields'][column_data['field_id']]['subtype']
+            del self.table_meta["tables"][column_data["table_id"]]["fields"][
+                column_data["field_id"]
+            ]["type"]
+            del self.table_meta["tables"][column_data["table_id"]]["fields"][
+                column_data["field_id"]
+            ]["subtype"]
         except BaseException:
             pass
         if dtype in TableMeta.SUPERTYPE:
-            table_id = column_data['table_id']
-            field_id = column_data['field_id']
-            self.table_meta['tables'][table_id]['fields'][field_id]['type'] = TableMeta.SUPERTYPE[dtype]
-            self.table_meta['tables'][table_id]['fields'][field_id]['subtype'] = dtype
+            table_id = column_data["table_id"]
+            field_id = column_data["field_id"]
+            self.table_meta["tables"][table_id]["fields"][field_id][
+                "type"
+            ] = TableMeta.SUPERTYPE[dtype]
+            self.table_meta["tables"][table_id]["fields"][field_id]["subtype"] = dtype
         else:
-            self.table_meta['tables'][column_data['table_id']][
-                'fields'][column_data['field_id']]['type'] = dtype
+            self.table_meta["tables"][column_data["table_id"]]["fields"][
+                column_data["field_id"]
+            ]["type"] = dtype
 
     def get_property(self, column_name, property_name):
         """
@@ -120,7 +136,7 @@ class TableMeta(object):
         -------
         propery: the property
         """
-        return self.all_columns[column_name]['properties'][property_name]
+        return self.all_columns[column_name]["properties"][property_name]
 
     def get_columns(self):
         """

@@ -59,3 +59,7 @@ package: upgradepip upgradebuild upgradesetuptools
 	$(eval PACKAGE=$(shell python -c "from pep517.meta import load; metadata = load('.'); print(metadata.version)"))
 	tar -zxvf "dist/trane-${PACKAGE}.tar.gz"
 	mv "trane-${PACKAGE}" unpacked_sdist
+
+.PHONY: docs
+docs: clean
+	make -C docs/ -e "SPHINXOPTS=-j auto" clean html

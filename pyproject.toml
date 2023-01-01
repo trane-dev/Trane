@@ -65,6 +65,18 @@ dev = [
     "black[jupyter]",
     "pre-commit == 2.20.0"
 ]
+docs = [
+    "Sphinx",
+    "nbsphinx",
+    "pydata-sphinx-theme",
+    "sphinx-inline-tabs",
+    "sphinx-copybutton",
+    "myst-parser",
+    "nbconvert",
+    "ipython",
+    "jupyter",
+    "pandoc",
+]
 
 [tool.setuptools]
 include-package-data = true

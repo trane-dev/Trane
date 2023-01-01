@@ -41,17 +41,6 @@ Whether you are a novice or experienced software developer, all contributions an
   make lint-fix
   ```
 
-* If you made changes to the documentation, build the documentation locally.
-
-  ```bash
-  # go to docs and build
-  cd docs
-  make html
-
-  # view docs locally
-  open _build/html/index.html
-  ```
-
 * Before you commit, a few lint fixing hooks will run. You can also manually run these.
   ```bash
   # run linting hooks only on changed files

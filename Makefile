@@ -59,3 +59,8 @@ package: upgradepip upgradebuild upgradesetuptools
 	$(eval PACKAGE=$(shell python -c "from pep517.meta import load; metadata = load('.'); print(metadata.version)"))
 	tar -zxvf "dist/trane-${PACKAGE}.tar.gz"
 	mv "trane-${PACKAGE}" unpacked_sdist
+
+.PHONY: checkdeps
+checkdeps:
+	$(eval allow_list='numpy|pandas|dill|scikit|dateutil|scipy|py|tornado|composeml|featuretools|matplotlib|tqdm')
+	pip freeze | grep -v "Trane.git" | grep -E $(allow_list) > $(OUTPUT_FILEPATH)

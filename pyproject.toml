@@ -103,9 +103,6 @@ testpaths = [
     "trane/tests/*"
 ]
 
-[tool.black]
-target-version = ['py311']
-
 [tool.coverage.run]
 source = ["trane"]
 

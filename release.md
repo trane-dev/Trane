@@ -45,7 +45,7 @@ Checklist before merging:
 
 ## 2. Create GitHub Release
 
-After the release pull request has been merged into the `main` branch, it is time draft [the GitHub release](https://github.com/HDI-Project/Tranes/releases)
+After the release pull request has been merged into the `main` branch, it is time draft [the GitHub release](https://github.com/HDI-Project/Trane/releases/new)
 
 - The target should be the `main` branch
 - The tag should be the version number with a v prefix (e.g. v0.13.3)

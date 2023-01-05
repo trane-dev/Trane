@@ -52,7 +52,6 @@ dependencies = [
 "Changes" = "https://github.com/HDI-Project/Trane/blob/main/docs/changelog.md"
 "Issue Tracker" = "https://github.com/HDI-Project/Trane/issues"
 "Twitter" = "https://twitter.com/lab_dai"
-"LinkedIn" = "https://www.linkedin.com/company/data-to-ai-lab-mit/"
 
 [project.optional-dependencies]
 test = [

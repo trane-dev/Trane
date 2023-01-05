@@ -49,6 +49,7 @@ dependencies = [
 
 [project.urls]
 "Source Code"= "https://github.com/HDI-Project/Trane/"
+"Changes" = "https://github.com/HDI-Project/Trane/blob/main/docs/changelog.md"
 "Issue Tracker" = "https://github.com/HDI-Project/Trane/issues"
 "Twitter" = "https://twitter.com/lab_dai"
 
@@ -101,9 +102,6 @@ version = {attr = "trane.version.__version__"}
 testpaths = [
     "trane/tests/*"
 ]
-
-[tool.black]
-target-version = ['py311']
 
 [tool.coverage.run]
 source = ["trane"]

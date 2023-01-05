@@ -15,7 +15,7 @@ Trane uses [semantic versioning](https://semver.org/). Every release has a major
 
 #### Create Release Branch
 
-1. Branch off of Trane main. For the branch name, please use "release_vX.Y.Z" as the naming scheme (e.g. "release_v1.2.3"). 
+1. Branch off of Trane main. For the branch name, please use "release_vX.Y.Z" as the naming scheme (e.g. "release_v0.3.1"). 
 
 #### Bump Version Number
 
@@ -26,7 +26,7 @@ Trane uses [semantic versioning](https://semver.org/). Every release has a major
 1. Replace top most "What’s new in" in `docs/changelog.rst` with the current date
 
     ```
-    What’s new in 0.3.0 (January 4, 2023)
+    What’s new in 0.3.1 (January 4, 2023)
     =====================================
     ```
 
@@ -48,7 +48,7 @@ Checklist before merging:
 After the release pull request has been merged into the `main` branch, it is time draft [the GitHub release](https://github.com/HDI-Project/Trane/releases/new)
 
 - The target should be the `main` branch
-- The tag should be the version number with a v prefix (e.g. v0.13.3)
+- The tag should be the version number with a v prefix (e.g. v0.3.1)
 - Release title is the same as the tag
 - This is not a pre-release
 - Publishing the release will automatically upload the package to PyPI

@@ -15,7 +15,7 @@ What’s new in 0.3.0 (MONTH DAY, YEAR)
         * Add tqdm as a req to show progress bar for prediction problem generation [#41][#41]
         * Improve unit tests, add pre-commit, add install commands to Makefile [#42][#42]
         * Add release workflow, move all examples under Examples folder, remove docs folder [#44][#44]
-        * Clean up READM.md [#45][#45]
+        * Clean up README.md and add badges [#46][#46]
     * Fixes
         * Cleaned up Makefile [#41][#41]
         * Modified existing logic to allow unit tests to pass [#41][#41]
@@ -28,3 +28,4 @@ What’s new in 0.3.0 (MONTH DAY, YEAR)
         [#41]: <https://github.com/HDI-Project/Trane/pull/41>
         [#44]: <https://github.com/HDI-Project/Trane/pull/44>
         [#45]: <https://github.com/HDI-Project/Trane/pull/45>
+        [#46]: <https://github.com/HDI-Project/Trane/pull/46>

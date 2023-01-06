@@ -11,7 +11,7 @@ jobs:
       - name: Set up python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: 3.10
+          python-version: '3.10'
       - name: Check package version (compare package version with tag)
         id: check_package_version
         shell: python

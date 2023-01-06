@@ -30,7 +30,7 @@ Trane is a software package for automatically generating prediction problems and
 To install Trane, run the following command:
 
 ```shell
-python -m pip install Trane
+python -m pip install trane
 ```
 
 ## Prediction Problems

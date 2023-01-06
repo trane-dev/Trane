@@ -1,9 +1,10 @@
 <p align="center">
-<img width=40% src="https://dai.lids.mit.edu/wp-content/uploads/2018/06/Trane-logo-300x180.jpg" alt=“Trane_Logo” />
+<img width=30% src="https://dai.lids.mit.edu/wp-content/uploads/2018/06/Trane-logo-300x180.jpg" alt=“Trane_Logo” />
+</p>
 
 <p align="center">
-    <a href="https://github.com/HDI-Project/Trane/actions/workflows/tests.yaml?query=branch%3Amain+workflow%3ATests" target="_blank">
-      <img src="https://github.com/HDI-Project/Trane/actions/workflows/tests.yaml/badge.svgbranch=main" alt="Tests" />
+    <a href="https://github.com/HDI-Project/Trane/actions/workflows/tests.yaml" target="_blank">
+      <img src="https://github.com/HDI-Project/Trane/actions/workflows/tests.yaml/badge.svg" alt="Tests" />
     </a>
     <a href="https://badge.fury.io/py/Trane" target="_blank">
         <img src="https://badge.fury.io/py/Trane.svg?maxAge=2592000" alt="PyPI Version" />

@@ -5,7 +5,7 @@ Trane is available for Python 3.7, 3.8, 3.9 and 3.10. It can be installed from P
 To install Trane, run the following command:
 
 ```shell
-$ python -m pip install Trane
+python -m pip install trane
 ```
 
 ## Source

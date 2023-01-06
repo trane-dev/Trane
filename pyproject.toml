@@ -79,14 +79,8 @@ namespaces = true
 "*" = [
     "*.txt",
     "*.md",
-    "*.rst",
     "README.md",
-    "docs/*",
     "Makefile",
-    "make.bat",
-    "*.jpg",
-    "*.png",
-    "*.gif",
 ]
 
 [tool.setuptools.exclude-package-data]

@@ -27,7 +27,9 @@ jobs:
             print('version match')
             exit(0)
       - name: Create whl and tar.gz files in sdist
-        run: make package
+        run: |
+          rm -rf docs/ Examples/ tests/
+          make package
       - name: Publish a Python distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:

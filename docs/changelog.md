@@ -27,7 +27,10 @@ What’s new in 0.3.0 (MONTH DAY, YEAR)
 
     [#39]: <https://github.com/HDI-Project/Trane/pull/39>
     [#41]: <https://github.com/HDI-Project/Trane/pull/41>
+    [#42]: <https://github.com/HDI-Project/Trane/pull/42>
+    [#43]: <https://github.com/HDI-Project/Trane/pull/43>
     [#44]: <https://github.com/HDI-Project/Trane/pull/44>
     [#45]: <https://github.com/HDI-Project/Trane/pull/45>
     [#46]: <https://github.com/HDI-Project/Trane/pull/46>
+    [#51]: <https://github.com/HDI-Project/Trane/pull/51>
     [#52]: <https://github.com/HDI-Project/Trane/pull/52>

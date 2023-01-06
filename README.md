@@ -10,7 +10,7 @@
         <img src="https://badge.fury.io/py/Trane.svg?maxAge=2592000" alt="PyPI Version" />
     </a>
     <a href="https://pepy.tech/project/Trane" target="_blank">
-        <img src="https://pepy.tech/badge/Trane/month" alt="PyPI Downloads" />
+        <img src="https://static.pepy.tech/badge/tran" alt="PyPI Downloads" />
     </a>
 </p>
 <hr>
@@ -22,9 +22,17 @@
 Trane is a software package for automatically generating prediction problems and generating labels for supervised learning. Trane is a system designed to advance the automation of the machine learning problem solving pipeline.
 
 <p align="center">
-  <a href="https://www.youtube-nocookie.com/embed/TrK5Tm9ic28"><img src="https://img.youtube.com/vi/TrK5Tm9ic28/0.jpg" width="70%" alt="Trane About Video"></a>
+  <a href="https://www.youtube-nocookie.com/embed/TrK5Tm9ic28"><img src="https://img.youtube.com/vi/TrK5Tm9ic28/0.jpg" width="70%" target="_blank" alt="Trane About Video"></a>
 </p>
 
+# Install
+
+Trane is available for Python 3.7, 3.8, 3.9 and 3.10.
+To install Trane, run the following command:
+
+```shell
+$ python -m pip install Trane
+```
 
 ## Prediction Problems
 In data science, people usually have a few records of an entity and want to predict what will happen to that entity in the future. Trane is designed to generate time-related prediction problems. Trane transforms data meta information into lists of relevant prediction problems and cutoff times. Prediction problems are structured in a formal language described in Operations below. Cutoff times are defined as the last time in the data used for training the classifier. Data after the cutoff time is used for evaluating the classifiers accuracy. Cutoff times are necessary to prevent the classifier from training to test data.
@@ -68,7 +76,6 @@ The workflow of using Trane on a database is as follows:
 - The data scientist can change parameters to the prediction problems in `problems.json`.
 - The `labeler` applies prediction problems in `problems.json` to the database `data.csv`
 
-
 ## Built-in Operations
 - FilterOp
     - IdentityFilterOp
@@ -86,27 +93,8 @@ The workflow of using Trane on a database is as follows:
     - LastAggregationOp
     - LMFAggregationOp
 
-## Unit Testing
-We use `pytest` to automatically collecting unit testings and `pytest-cov` to measure the coverage of unit testing. The application code is in `Trane/trane/`. The unit testing code is in `Trane/tests/`. To run all unit testing, change directory to `Trane` and execute
-
-```
-> pytest --cov=trane tests
-```
-
-
-## Setup/Install
-### Clone from Git
-```
-> git clone https://github.com/HDI-Project/Trane.git
-```
-### Run pip install
-```
-> pip3 install Trane/
-```
-
 ## Quick Usage
 We have [tutorial notebooks here](https://github.com/HDI-Project/Trane-Demos/tree/master/IPYNBs).
-
 
 ## History
 We started working on Trane in 2015. In its first iteration in 2016, we showed that it is possible to formally specify prediction problems using a language and then also created algorithms to generate prediction problems automatically. With other tools to synthesize features and generate models given a prediction problem - we were able to solve problems end-to-end. You can read our paper [here](https://dai.lids.mit.edu/wp-content/uploads/2017/10/Trane1.pdf). Ben Schreck's [thesis](https://dspace.mit.edu/bitstream/handle/1721.1/105963/965551096-MIT.pdf) goes even further to see if we can learn and filter uninteresting problems.
@@ -138,10 +126,3 @@ BibTeX entry:
   organization={IEEE}
 }
 ```
-
-## TODO
-- Need an easier way to add customize operations. Currently, external plugin operations are not allowed. The bottleneck is we need to maintain a list of operations so that we can save, load, and iterate over operations. It's not easy to add an external operation into operation list.
-- Currently, all operations are in-place operations. The aggregation ops simply take a record, change the value in the column and return. May not be a good design.
-- API for setting thresholds.
-- Some NotImplementedError.
-- NL system should be independent of Trane. Seems better to generate NL from JSON.

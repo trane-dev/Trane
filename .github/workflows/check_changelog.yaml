@@ -28,4 +28,4 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
       - if: ${{ steps.branch.outputs.is_dev == 'True' }}
         name: Check if changelog was updated
-        run: cat docs/changelog.md | grep "Trane/pull/39/${{ github.event.number }}`"
+        run: cat docs/changelog.md | grep "Trane/pull/${{ github.event.number }}`"

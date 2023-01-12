@@ -35,14 +35,10 @@ dependencies = [
     "numpy >= 1.13.0",
     "pandas >= 0.21.0",
     "dill >= 0.2.8.2",
-    "python_dateutil >= 2.6.0",
     "scipy >= 1.0.0",
-    "tornado>=6.2",
     "composeml >= 0.10.1",
     "featuretools",
-    "matplotlib",
     "scikit-learn",
-    "scikit-plot",
     "tqdm"
 ]
 

@@ -36,7 +36,7 @@ class FeaturetoolsWrapper(object):
 
     def compute_features(self, df, cutoff_df, feature_window):
         feature_matrix, features = ft.dfs(
-            target_dataframe_name=self.entity_col,
+            target_dataframe_index=self.entity_col,
             cutoff_time=cutoff_df,
             entityset=self.es,
             cutoff_time_in_index=True,

@@ -2,6 +2,14 @@
 
 Changelog
 ---------
+What’s new in 0.3.0 (MONTH, DAY, YEAR)
+=====================================
+
+* Enhancements
+* Fixes
+    * Update to use new compose argument [#56][#56]
+* Changes
+    [#56]: <https://github.com/HDI-Project/Trane/pull/56>
 
 What’s new in 0.2.0 (January 5, 2023)
 =====================================

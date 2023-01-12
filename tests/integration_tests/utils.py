@@ -98,7 +98,7 @@ def generate_and_verify_prediction_problem(
                     f"Unexpected prediction problem generated: {p_str}: {p.operations}",
                 )
         label_times = p.execute(df, -1)
-        assert label_times.target_dataframe_name == entity_col
+        assert label_times.target_dataframe_index == entity_col
         # TODO: fix bug with Filter Operation results in labels that has _execute_operations_on_df == 0
         # Below is not an ideal way to check the prediction problems
         # (because it has less than, rather than exact number of unique instances)

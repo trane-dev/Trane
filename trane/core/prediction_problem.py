@@ -67,7 +67,7 @@ class PredictionProblem:
             window_size = None
 
         self._label_maker = cp.LabelMaker(
-            target_dataframe_name=entity_col,
+            target_dataframe_index=entity_col,
             time_index=time_col,
             labeling_function=self._execute_operations_on_df,
             window_size=window_size,

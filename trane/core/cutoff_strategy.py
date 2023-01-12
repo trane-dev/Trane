@@ -30,7 +30,7 @@ class FixWindowCutoffStrategy(CutoffStrategy):
         maximum_data=None,
         n=None,
     ):
-        self.target_dataframe_name = entity_col
+        self.target_dataframe_index = entity_col
         self.window_size = window_size
         self.minimum_data = minimum_data
         self.maximum_data = maximum_data

@@ -26,7 +26,7 @@
 
 # def test_cutoff_strategy(df):
 #     # entity_col / entity
-#     target_dataframe_name = 'user_id'
+#     target_dataframe_index = 'user_id'
 #     cutoff = '
 #     window_size =
 #     cutoff_strategy = FixWindowCutoffStrategy(entity,

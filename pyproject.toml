@@ -64,7 +64,6 @@ dev = [
     "ruff >= 0.0.218" ,
     "black[jupyter] >= 22.12.0",
     "pre-commit == 2.20.0",
-    "trane[test]",
 ]
 
 [tool.setuptools]

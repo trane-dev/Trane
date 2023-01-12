@@ -56,7 +56,7 @@ upgradesetuptools:
 .PHONY: package
 package: upgradepip upgradebuild upgradesetuptools
 	python -m build
-	$(eval PACKAGE=$(shell python -c "from pep517.meta import load; metadata = load('.'); print(metadata.version)"))
+	$(eval PACKAGE=$(shell python -c 'import setuptools; setuptools.setup()' --version))
 	tar -zxvf "dist/trane-${PACKAGE}.tar.gz"
 	mv "trane-${PACKAGE}" unpacked_sdist
 

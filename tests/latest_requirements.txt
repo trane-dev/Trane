@@ -1,4 +1,4 @@
-composeml==0.9.1
+composeml==0.10.1
 contourpy==1.0.6
 dill==0.3.6
 featuretools==1.20.0

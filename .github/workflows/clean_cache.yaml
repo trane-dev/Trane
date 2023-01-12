@@ -1,7 +1,5 @@
 name: cleanup caches by a branch
 on:
-  pull_request:
-    types: [opened, closed, reopened, synchronize]
   push:
     branches:
       - main
@@ -26,12 +24,12 @@ jobs:
           cacheKeysForPR=$(gh actions-cache list -R $REPO | cut -f 1 )
 
           echo "Select all caches except for latest cache"
-          cacheKeysForPR_except_latest=${cacheKeysForPR[@]:1}
+          cacheKeysForPR_except_6=${cacheKeysForPR[@]:6}
 
           ## Setting this to not fail the workflow while deleting cache keys.
           set +e
           echo "Deleting caches..."
-          for cacheKey in $cacheKeysForPR_except_latest
+          for cacheKey in $cacheKeysForPR_except_6
           do
               gh actions-cache delete $cacheKey -R $REPO --confirm
           done

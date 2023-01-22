@@ -8,13 +8,13 @@ clean:
 
 .PHONY: lint
 lint:
-	black trane/ tests/ --check
-	ruff trane/ tests/
+	black trane/ tests/ --check --config=./pyproject.toml
+	ruff trane/ tests/ --config=./pyproject.toml
 
 .PHONY: lint-fix
 lint-fix:
-	black trane/ tests/
-	ruff trane/ tests/ --fix
+	black trane/ tests/ --config=./pyproject.toml
+	ruff trane/ tests/ --fix --config=./pyproject.toml
 
 .PHONY: installdeps-dev
 installdeps-dev:

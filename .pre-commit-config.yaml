@@ -33,7 +33,6 @@ repos:
         types_or: [python, jupyter]
         args:
           - --config=./pyproject.toml
-          - --preview
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.230
     hooks:

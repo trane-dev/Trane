@@ -94,7 +94,10 @@ class OpBase(object):
         valid_param_names = self.get_parameter_names()
         if parameter_name not in valid_param_names:
             raise ValueError(
-                f"Invalid parameter name for operation. Valid names:{valid_param_names}",
+                (
+                    "Invalid parameter name for operation. Valid"
+                    f" names:{valid_param_names}"
+                ),
             )
         self.hyper_parameter_settings[parameter_name] = parameter_value
 
@@ -152,7 +155,6 @@ class OpBase(object):
         # cycle through unique values for the parameter
         unique_vals = set(df[col])
         for unique_val in unique_vals:
-
             total = len(df)
 
             # apply the operation to the sampled df and see what happens
@@ -227,7 +229,6 @@ class OpBase(object):
         # return the one that results in the most entropy
         unique_vals = set(df[label_col])
         for unique_val in unique_vals:
-
             self.set_hyper_parameter(
                 parameter_name="threshold",
                 parameter_value=unique_val,

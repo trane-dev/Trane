@@ -128,9 +128,11 @@ class PredictionProblem:
 
         if not self.is_valid(self.table_meta):
             raise ValueError(
-                "Your Problem's specified operations do not match with the "
-                "problem's table meta. Therefore, the problem is not "
-                "valid.",
+                (
+                    "Your Problem's specified operations do not match with the "
+                    "problem's table meta. Therefore, the problem is not "
+                    "valid."
+                ),
             )
 
         default_kwarg = (
@@ -467,8 +469,8 @@ class PredictionProblem:
         None
         """
         logging.debug(
-            "Beginning check type. Expected type is: {}, \
-            Actual data is: {}, Actual type is: {}".format(
+            "Beginning check type. Expected type is: {},             Actual data is:"
+            " {}, Actual type is: {}".format(
                 expected_type,
                 actual_data,
                 type(actual_data),

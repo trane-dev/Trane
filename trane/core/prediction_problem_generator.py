@@ -1,6 +1,8 @@
 import copy
 import itertools
 
+from tqdm.notebook import tqdm
+
 from trane.core.prediction_problem import PredictionProblem
 from trane.ops import aggregation_ops as agg_ops
 from trane.ops import filter_ops
@@ -22,12 +24,8 @@ class PredictionProblemGenerator:
             meta information about the data
         entity_col: column name of
             the column containing entities in the data
-        label_col: column name of the
-            column of interest in the data
         time_col: column name of the column
             containing time information in the data
-        filter_col: column name of the column
-            to be filtered over
 
         Returns
         -------
@@ -39,7 +37,13 @@ class PredictionProblemGenerator:
         self.cutoff_strategy = cutoff_strategy
         self.ensure_valid_inputs()
 
-    def generate(self, df_sample=None, generate_thresholds=False, n_problems=None):
+    def generate(
+        self,
+        df_sample=None,
+        generate_thresholds=False,
+        n_problems=None,
+        pbar_position=0,
+    ):
         """
         Generate the prediction problems. The prediction problems operations
         hyper parameters are also set.
@@ -68,7 +72,6 @@ class PredictionProblemGenerator:
                 agg_ops.AGGREGATION_OPS,
                 filter_ops.FILTER_OPS,
             ):
-
                 filter_cols = (
                     [None] if filter == "AllFilterOp" else self.table_meta.get_columns()
                 )
@@ -82,13 +85,15 @@ class PredictionProblemGenerator:
                     if filter_col != self.entity_col and ag_col != self.entity_col:
                         yield ag_col, filter_col, ag, filter
 
-        from tqdm import tqdm
-
         # might be inefficent
         total_attempts = sum(1 for _ in iter_over_ops())
         all_attempts = 0
         success_attempts = 0
-        for op_col_combo in tqdm(iter_over_ops(), total=total_attempts):
+        for op_col_combo in tqdm(
+            iter_over_ops(),
+            total=total_attempts,
+            position=pbar_position,
+        ):
             # for op_col_combo in iter_over_ops():
             print(
                 "\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts),

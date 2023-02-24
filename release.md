@@ -6,7 +6,6 @@ Before starting the release process, verify the following:
 
 - [GitHub Action for Unit Tests are green on main](https://github.com/HDI-Project/Trane/actions/workflows/tests.yaml?query=branch%3Amain)
 - [GitHub Action for Install Tests are green on main](https://github.com/HDI-Project/Trane/actions/workflows/install.yaml?query=branch%3Amain)
-
 - Get agreement on the version number to use for the release.
 
 #### Version Numbering

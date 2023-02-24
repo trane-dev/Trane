@@ -38,7 +38,7 @@ def solve(entity_col, window, fwindow):
 
     cutoff_base = datetime.strptime("2017-12-01", "%Y-%m-%d")
     cutoff_end = datetime.strptime("2018-06-01", "%Y-%m-%d")
-    cutoff_strategy = trane.FixWindowCutoffStrategy(
+    cutoff_strategy = trane.CutoffStrategy(
         entity_col,
         cutoff_base,
         cutoff_end,

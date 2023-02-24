@@ -30,8 +30,21 @@ def load_covid_data():
     filepath = os.path.join(dir_path, "covid19.csv")
     df = pd.read_csv(filepath)
     df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%y")
-    df = df.sort_values(by=["Date"])
+    df = df[
+        [
+            "Country/Region",
+            "Date",
+            "Province/State",
+            "Lat",
+            "Long",
+            "Confirmed",
+            "Deaths",
+            "Recovered",
+        ]
+    ]
     df = df.fillna(0)
+    df = df.sort_values(by=["Date"])
+    df = df.reset_index(drop=True)
     return df
 
 

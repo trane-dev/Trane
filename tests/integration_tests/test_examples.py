@@ -61,7 +61,7 @@ def covid_cutoff_strategy(df_covid, meta_covid, sample):
     cutoff = "2d"
     cutoff_base = str(datetime.strptime("2020-01-22", "%Y-%m-%d"))
     cutoff_end = str(datetime.strptime("2020-03-29", "%Y-%m-%d"))
-    cutoff_strategy = trane.FixWindowCutoffStrategy(
+    cutoff_strategy = trane.CutoffStrategy(
         entity_col=entity_col,
         window_size=cutoff,
         minimum_data=cutoff_base,
@@ -95,7 +95,7 @@ def test_youtube(df_youtube, meta_youtube, sample):
     cutoff = "4d"
     cutoff_base = pd.Timestamp(datetime.strptime("2017-11-14", "%Y-%m-%d"))
     cutoff_end = pd.Timestamp(datetime.strptime("2018-06-14", "%Y-%m-%d"))
-    cutoff_strategy = trane.FixWindowCutoffStrategy(
+    cutoff_strategy = trane.CutoffStrategy(
         entity_col=entity_col,
         window_size=cutoff,
         minimum_data=cutoff_base,
@@ -154,7 +154,7 @@ def test_chicago(df_chicago, meta_chicago, sample):
     cutoff = "1h"
     cutoff_base = pd.Timestamp(datetime.strptime("2017-01-02", "%Y-%m-%d"))
     cutoff_end = pd.Timestamp(datetime.strptime("2017-01-31", "%Y-%m-%d"))
-    cutoff_strategy = trane.FixWindowCutoffStrategy(
+    cutoff_strategy = trane.CutoffStrategy(
         entity_col=entity_col,
         window_size=cutoff,
         minimum_data=cutoff_base,

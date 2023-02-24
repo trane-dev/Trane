@@ -10,7 +10,6 @@ What’s new in 0.3.0 (February, 24, 2023)
 * Fixes
     * Update to use new compose argument [#56][#56]
     * Remove py from requirements [#56][#56]
-* Changes
 
     [#56]: <https://github.com/HDI-Project/Trane/pull/56>
     [#57]: <https://github.com/HDI-Project/Trane/pull/57>

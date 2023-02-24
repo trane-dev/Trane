@@ -2,7 +2,7 @@
 
 Changelog
 ---------
-What’s new in 0.3.0 (MONTH, DAY, YEAR)
+What’s new in 0.3.0 (February, 24, 2023)
 =====================================
 
 * Enhancements

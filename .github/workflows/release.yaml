@@ -37,5 +37,6 @@ jobs:
       - name: Publish a Python distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: 'mit_dai_lab'
           password: ${{ secrets.PYPI_API_TOKEN }}
+          repository_url: https://pypi.org/project/trane/
+

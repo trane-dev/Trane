@@ -14,8 +14,9 @@ jobs:
         python-version: 3.8
     - name: Install package and update deps
       run: |
-        python -m pip install .[test]
+        python -m pip install .[dev,test]
         make checkdeps OUTPUT_FILEPATH=tests/latest_requirements.txt
+        make lint-fix
     - name: Create pull request
       uses: peter-evans/create-pull-request@v4
       with:

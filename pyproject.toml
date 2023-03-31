@@ -56,7 +56,7 @@ test = [
     "pytest-runner >= 2.11.1",
 ]
 dev = [
-    "ruff >= 0.0.230" ,
+    "ruff >= 0.0.260" ,
     "black[jupyter] >= 22.12.0",
     "pre-commit == 2.20.0",
 ]

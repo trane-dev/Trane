@@ -11,7 +11,6 @@ def solve(task, evaluator, features):
 
 
 def multi_process_evaluation(evaluator, problems, features, processes=8):
-
     p = Pool(processes)
     result = []
     for _ in tqdm.tqdm(

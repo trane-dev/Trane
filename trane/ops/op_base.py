@@ -152,7 +152,6 @@ class OpBase(object):
         # cycle through unique values for the parameter
         unique_vals = set(df[col])
         for unique_val in unique_vals:
-
             total = len(df)
 
             # apply the operation to the sampled df and see what happens
@@ -227,7 +226,6 @@ class OpBase(object):
         # return the one that results in the most entropy
         unique_vals = set(df[label_col])
         for unique_val in unique_vals:
-
             self.set_hyper_parameter(
                 parameter_name="threshold",
                 parameter_value=unique_val,

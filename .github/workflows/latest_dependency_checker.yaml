@@ -18,6 +18,7 @@ jobs:
         make checkdeps OUTPUT_FILEPATH=tests/latest_requirements.txt
         make lint-fix
     - name: Create pull request
+      id: cpr
       uses: peter-evans/create-pull-request@v4
       with:
         token: ${{ secrets.REPO_SCOPED_TOKEN }}
@@ -27,3 +28,10 @@ jobs:
         branch: latest-dep-update
         branch-suffix: short-commit-hash
         base: main
+    - name: Enable Pull Request Automerge
+      if: steps.cpr.outputs.pull-request-operation == 'created'
+      uses: peter-evans/enable-pull-request-automerge@v3
+      with:
+        token: ${{ secrets.REPO_SCOPED_TOKEN }}
+        pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+        merge-method: squash

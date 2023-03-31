@@ -68,7 +68,6 @@ class PredictionProblemGenerator:
                 agg_ops.AGGREGATION_OPS,
                 filter_ops.FILTER_OPS,
             ):
-
                 filter_cols = (
                     [None] if filter == "AllFilterOp" else self.table_meta.get_columns()
                 )

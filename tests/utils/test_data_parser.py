@@ -54,7 +54,6 @@ for csv_list_to_write, filename in csv_lists_to_write:
 
 
 def test_denormalize():
-
     relationships = [
         ("group.csv", "employee", "hire_date.csv", "employee"),
         ("supervisor.csv", "group", "group.csv", "group"),

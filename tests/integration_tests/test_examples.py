@@ -6,13 +6,6 @@ import pandas as pd
 import pytest
 
 import trane
-from trane import (
-    load_bike,
-    load_covid,
-    load_covid_tablemeta,
-    load_youtube,
-    load_youtube_metadata,
-)
 
 from .utils import generate_and_verify_prediction_problem
 
@@ -23,20 +16,30 @@ def current_dir():
 
 
 @pytest.fixture
-def df_youtube():
-    df = load_youtube()
+def df_youtube(current_dir):
+    datetime_col = "trending_date"
+    filename = "USvideos.csv"
+    df = pd.read_csv(os.path.join(current_dir, filename))
+    df[datetime_col] = pd.to_datetime(df[datetime_col], format="%y.%d.%m")
+    df = df.sort_values(by=[datetime_col])
+    df = df.fillna(0)
     return df
 
 
 @pytest.fixture
-def meta_youtube():
-    return load_youtube_metadata()
+def meta_youtube(current_dir):
+    filename = "meta_youtube.json"
+    meta_fp = os.path.join(current_dir, filename)
+    meta = trane.TableMeta(json.loads(open(meta_fp).read()))
+    return meta
 
 
 @pytest.fixture
-def df_covid():
+def df_covid(current_dir):
     datetime_col = "Date"
-    df = load_covid()
+    filename = "covid19.csv"
+    df = pd.read_csv(os.path.join(current_dir, filename))
+    df[datetime_col] = pd.to_datetime(df[datetime_col], format="%m/%d/%y")
     # to speed up things as covid dataset takes awhile
     df = df.sample(frac=0.25, random_state=1)
     df = df.sort_values(by=[datetime_col])
@@ -45,28 +48,21 @@ def df_covid():
 
 
 @pytest.fixture
-def meta_covid():
-    return load_covid_tablemeta()
+def meta_covid(current_dir):
+    filename = "meta_covid.json"
+    meta_fp = os.path.join(current_dir, filename)
+    meta_covid = trane.TableMeta(json.loads(open(meta_fp).read()))
+    return meta_covid
 
 
 @pytest.fixture
-def covid_cutoff_strategy(df_covid, meta_covid, sample):
-    entity_col = "Country/Region"
-    cutoff = "2d"
-    cutoff_base = str(datetime.strptime("2020-01-22", "%Y-%m-%d"))
-    cutoff_end = str(datetime.strptime("2020-03-29", "%Y-%m-%d"))
-    cutoff_strategy = trane.CutoffStrategy(
-        entity_col=entity_col,
-        window_size=cutoff,
-        minimum_data=cutoff_base,
-        maximum_data=cutoff_end,
-    )
-    return cutoff_strategy
-
-
-@pytest.fixture
-def df_chicago():
-    df = load_bike()
+def df_chicago(current_dir):
+    datetime_col = "date"
+    filename = "bike-sampled.csv"
+    df = pd.read_csv(os.path.join(current_dir, filename))
+    df[datetime_col] = pd.to_datetime(df[datetime_col], format="%Y-%m-%d")
+    df = df.sort_values(by=[datetime_col])
+    df = df.fillna(0)
     return df
 
 
@@ -84,13 +80,13 @@ def test_youtube(df_youtube, meta_youtube, sample):
     cutoff = "4d"
     cutoff_base = pd.Timestamp(datetime.strptime("2017-11-14", "%Y-%m-%d"))
     cutoff_end = pd.Timestamp(datetime.strptime("2018-06-14", "%Y-%m-%d"))
-    cutoff_strategy = trane.CutoffStrategy(
+    cutoff_strategy = trane.FixWindowCutoffStrategy(
         entity_col=entity_col,
         window_size=cutoff,
         minimum_data=cutoff_base,
         maximum_data=cutoff_end,
     )
-    prediction_problem_to_label_times = generate_and_verify_prediction_problem(
+    generate_and_verify_prediction_problem(
         df=df_youtube,
         meta=meta_youtube,
         entity_col=entity_col,
@@ -99,41 +95,26 @@ def test_youtube(df_youtube, meta_youtube, sample):
         sample=sample,
     )
 
-    ft_wrapper = trane.FeaturetoolsWrapper(
-        df=df_youtube,
+
+def test_covid(df_covid, meta_covid, sample):
+    entity_col = "Country/Region"
+    time_col = "Date"
+    cutoff = "2d"
+    cutoff_base = str(datetime.strptime("2020-01-22", "%Y-%m-%d"))
+    cutoff_end = str(datetime.strptime("2020-03-29", "%Y-%m-%d"))
+    cutoff_strategy = trane.FixWindowCutoffStrategy(
+        entity_col=entity_col,
+        window_size=cutoff,
+        minimum_data=cutoff_base,
+        maximum_data=cutoff_end,
+    )
+    generate_and_verify_prediction_problem(
+        df=df_covid,
+        meta=meta_covid,
         entity_col=entity_col,
         time_col=time_col,
-        name="youtube",
-    )
-    for problem_str in prediction_problem_to_label_times:
-        print(problem_str)
-        label_times = prediction_problem_to_label_times[problem_str]
-        features = ft_wrapper.compute_features(label_times, cutoff)
-        print(features)
-
-
-def test_covid(df_covid, covid_cutoff_strategy, meta_covid, sample):
-    time_col = "Date"
-    generate_and_verify_prediction_problem(
-        df=df_covid,
-        meta=meta_covid,
-        entity_col=covid_cutoff_strategy.entity_col,
-        time_col=time_col,
-        cutoff_strategy=covid_cutoff_strategy,
+        cutoff_strategy=cutoff_strategy,
         sample=sample,
-    )
-
-
-def test_covid_multi(df_covid, covid_cutoff_strategy, meta_covid, sample):
-    time_col = "Date"
-    generate_and_verify_prediction_problem(
-        df=df_covid,
-        meta=meta_covid,
-        entity_col=covid_cutoff_strategy.entity_col,
-        time_col=time_col,
-        cutoff_strategy=covid_cutoff_strategy,
-        sample=sample,
-        use_multiprocess=True,
     )
 
 
@@ -143,7 +124,7 @@ def test_chicago(df_chicago, meta_chicago, sample):
     cutoff = "1h"
     cutoff_base = pd.Timestamp(datetime.strptime("2017-01-02", "%Y-%m-%d"))
     cutoff_end = pd.Timestamp(datetime.strptime("2017-01-31", "%Y-%m-%d"))
-    cutoff_strategy = trane.CutoffStrategy(
+    cutoff_strategy = trane.FixWindowCutoffStrategy(
         entity_col=entity_col,
         window_size=cutoff,
         minimum_data=cutoff_base,

@@ -94,7 +94,10 @@ class OpBase(object):
         valid_param_names = self.get_parameter_names()
         if parameter_name not in valid_param_names:
             raise ValueError(
-                f"Invalid parameter name for operation. Valid names:{valid_param_names}",
+                (
+                    "Invalid parameter name for operation. Valid"
+                    f" names:{valid_param_names}"
+                ),
             )
         self.hyper_parameter_settings[parameter_name] = parameter_value
 

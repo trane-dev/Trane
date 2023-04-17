@@ -39,7 +39,8 @@ dependencies = [
     "composeml >= 0.10.1",
     "featuretools",
     "scikit-learn",
-    "tqdm"
+    "tqdm",
+    "ipywidgets",
 ]
 
 [project.urls]
@@ -56,7 +57,7 @@ test = [
     "pytest-runner >= 2.11.1",
 ]
 dev = [
-    "ruff >= 0.0.218" ,
+    "ruff >= 0.0.260" ,
     "black[jupyter] >= 22.12.0",
     "pre-commit == 2.20.0",
 ]
@@ -115,8 +116,13 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
 [tool.ruff]
-# Never enforce `E501` (line length violations), lines cannot be > 79 chars
+# Never enforce `E501` (line length violations)
+line-length = 88
 ignore = ["E501"]
 exclude = [
     "Examples",

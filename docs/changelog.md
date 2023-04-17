@@ -7,6 +7,7 @@ What’s new in 0.3.0 (February, 24, 2023)
 
 * Enhancements
     * Add workflow to clear old caches [#57][#57]
+    * Add detailed walkthroughts in Examples directory [#60][#60]
 * Fixes
     * Update to use new compose argument [#56][#56]
     * Remove py from requirements [#56][#56]
@@ -14,6 +15,7 @@ What’s new in 0.3.0 (February, 24, 2023)
     [#56]: <https://github.com/HDI-Project/Trane/pull/56>
     [#57]: <https://github.com/HDI-Project/Trane/pull/57>
     [#58]: <https://github.com/HDI-Project/Trane/pull/58>
+    [#60]: <https://github.com/HDI-Project/Trane/pull/60>
 
 What’s new in 0.2.0 (January 5, 2023)
 =====================================

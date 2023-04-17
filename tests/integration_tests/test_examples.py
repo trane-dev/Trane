@@ -80,7 +80,7 @@ def test_youtube(df_youtube, meta_youtube, sample):
     cutoff = "4d"
     cutoff_base = pd.Timestamp(datetime.strptime("2017-11-14", "%Y-%m-%d"))
     cutoff_end = pd.Timestamp(datetime.strptime("2018-06-14", "%Y-%m-%d"))
-    cutoff_strategy = trane.FixWindowCutoffStrategy(
+    cutoff_strategy = trane.CutoffStrategy(
         entity_col=entity_col,
         window_size=cutoff,
         minimum_data=cutoff_base,
@@ -93,7 +93,17 @@ def test_youtube(df_youtube, meta_youtube, sample):
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
         sample=sample,
+        use_multiprocess=True,
     )
+    trane.FeaturetoolsWrapper(
+        df=df_youtube,
+        entity_col=entity_col,
+        time_col=time_col,
+        name="youtube",
+    )
+    # for problem_str in prediction_problem_to_label_times:
+    #     label_times = prediction_problem_to_label_times[problem_str]
+    #     ft_wrapper.compute_features(label_times, cutoff)
 
 
 def test_covid(df_covid, meta_covid, sample):
@@ -102,7 +112,7 @@ def test_covid(df_covid, meta_covid, sample):
     cutoff = "2d"
     cutoff_base = str(datetime.strptime("2020-01-22", "%Y-%m-%d"))
     cutoff_end = str(datetime.strptime("2020-03-29", "%Y-%m-%d"))
-    cutoff_strategy = trane.FixWindowCutoffStrategy(
+    cutoff_strategy = trane.CutoffStrategy(
         entity_col=entity_col,
         window_size=cutoff,
         minimum_data=cutoff_base,
@@ -115,26 +125,55 @@ def test_covid(df_covid, meta_covid, sample):
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
         sample=sample,
+        use_multiprocess=True,
     )
 
 
-def test_chicago(df_chicago, meta_chicago, sample):
-    entity_col = "usertype"
-    time_col = "date"
-    cutoff = "1h"
-    cutoff_base = pd.Timestamp(datetime.strptime("2017-01-02", "%Y-%m-%d"))
-    cutoff_end = pd.Timestamp(datetime.strptime("2017-01-31", "%Y-%m-%d"))
-    cutoff_strategy = trane.FixWindowCutoffStrategy(
+@pytest.fixture
+def covid_cutoff_strategy(df_covid, meta_covid, sample):
+    entity_col = "Country/Region"
+    cutoff = "2d"
+    cutoff_base = str(datetime.strptime("2020-01-22", "%Y-%m-%d"))
+    cutoff_end = str(datetime.strptime("2020-03-29", "%Y-%m-%d"))
+    cutoff_strategy = trane.CutoffStrategy(
         entity_col=entity_col,
         window_size=cutoff,
         minimum_data=cutoff_base,
         maximum_data=cutoff_end,
     )
+    return cutoff_strategy
+
+
+def test_covid_multi(df_covid, covid_cutoff_strategy, meta_covid, sample):
+    time_col = "Date"
     generate_and_verify_prediction_problem(
-        df=df_chicago,
-        meta=meta_chicago,
-        entity_col=entity_col,
+        df=df_covid,
+        meta=meta_covid,
+        entity_col=covid_cutoff_strategy.entity_col,
         time_col=time_col,
-        cutoff_strategy=cutoff_strategy,
+        cutoff_strategy=covid_cutoff_strategy,
         sample=sample,
+        use_multiprocess=True,
     )
+
+
+# def test_chicago(df_chicago, meta_chicago, sample):
+#     entity_col = "usertype"
+#     time_col = "date"
+#     cutoff = "1h"
+#     cutoff_base = pd.Timestamp(datetime.strptime("2017-01-02", "%Y-%m-%d"))
+#     cutoff_end = pd.Timestamp(datetime.strptime("2017-01-31", "%Y-%m-%d"))
+#     cutoff_strategy = trane.CutoffStrategy(
+#         entity_col=entity_col,
+#         window_size=cutoff,
+#         minimum_data=cutoff_base,
+#         maximum_data=cutoff_end,
+#     )
+#     generate_and_verify_prediction_problem(
+#         df=df_chicago,
+#         meta=meta_chicago,
+#         entity_col=entity_col,
+#         time_col=time_col,
+#         cutoff_strategy=cutoff_strategy,
+#         sample=sample,
+#     )

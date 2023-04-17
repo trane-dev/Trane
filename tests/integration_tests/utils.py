@@ -20,6 +20,7 @@ from trane.ops.filter_ops import (
     LessFilterOp,
     NeqFilterOp,
 )
+from trane.utils import multiprocess_prediction_problem
 
 agg_op_str_dict = {
     SumAggregationOp: " the total <{}> in all related records",
@@ -47,7 +48,9 @@ def generate_and_verify_prediction_problem(
     time_col,
     cutoff_strategy,
     sample=None,
+    use_multiprocess=False,
 ):
+    prediction_problem_to_label_times = {}
     cutoff = cutoff_strategy.window_size
     problem_generator = trane.PredictionProblemGenerator(
         table_meta=meta,
@@ -97,10 +100,28 @@ def generate_and_verify_prediction_problem(
                 raise ValueError(
                     f"Unexpected prediction problem generated: {p_str}: {p.operations}",
                 )
-        label_times = p.execute(df, -1)
-        assert label_times.target_dataframe_index == entity_col
-        # TODO: fix bug with Filter Operation results in labels that has _execute_operations_on_df == 0
-        # Below is not an ideal way to check the prediction problems
-        # (because it has less than, rather than exact number of unique instances)
-        if not label_times.empty:
-            assert label_times[entity_col].nunique() <= unique_entity_ids
+        if not use_multiprocess:
+            label_times = p.execute(df, -1)
+            assert label_times.target_dataframe_index == entity_col
+            # TODO: fix bug with Filter Operation results in labels that has _execute_operations_on_df == 0
+            # Below is not an ideal way to check the prediction problems
+            # (because it has less than, rather than exact number of unique instances)
+            if not label_times.empty:
+                assert label_times[entity_col].nunique() <= unique_entity_ids
+            prediction_problem_to_label_times[p_str] = label_times
+
+    if use_multiprocess:
+        prediction_problem_to_label_times = multiprocess_prediction_problem(
+            problems,
+            df,
+        )
+    return prediction_problem_to_label_times
+
+
+def check_label_times(label_times, entity_col, unique_entity_ids):
+    assert label_times.target_dataframe_index == entity_col
+    # TODO: fix bug with Filter Operation results in labels that has _execute_operations_on_df == 0
+    # Below is not an ideal way to check the prediction problems
+    # (because it has less than, rather than exact number of unique instances)
+    if not label_times.empty:
+        assert label_times[entity_col].nunique() <= unique_entity_ids

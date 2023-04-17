@@ -6,7 +6,7 @@
 # import pandas as pd
 # from mock import patch
 
-# from trane.core.cutoff_strategy import FixWindowCutoffStrategy
+# from trane.core.cutoff_strategy import CutoffStrategy
 
 
 # @pytest.fixture
@@ -29,7 +29,7 @@
 #     target_dataframe_index = 'user_id'
 #     cutoff = '
 #     window_size =
-#     cutoff_strategy = FixWindowCutoffStrategy(entity,
+#     cutoff_strategy = CutoffStrategy(entity,
 
 
 # # class TestCutoffStrategy(unittest.TestCase):
@@ -46,9 +46,9 @@
 # #         #     return(cutoff)
 # #         # self.generate_fn = generate_fn
 
-# #         # self.cutoff_strategy = FixWindowCutoffStrategy(
+# #         # self.cutoff_strategy = CutoffStrategy(
 # #         #     generate_fn=self.generate_fn, description=self.description)
-# # 	    self.cutoff_strategy = FixWindowCutoffStrategy(entity,
+# # 	    self.cutoff_strategy = CutoffStrategy(entity,
 # #                                                        cutoff,
 # #                                                        cutoff_base,
 # #                                                        cutoff_end,

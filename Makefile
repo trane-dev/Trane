@@ -8,13 +8,13 @@ clean:
 
 .PHONY: lint
 lint:
-	black trane/ tests/ --check
-	ruff trane/ tests/
+	black trane/ tests/ --check --config=./pyproject.toml
+	ruff trane/ tests/ --config=./pyproject.toml
 
 .PHONY: lint-fix
 lint-fix:
-	black trane/ tests/
-	ruff trane/ tests/ --fix
+	black trane/ tests/ --config=./pyproject.toml
+	ruff trane/ tests/ --fix --config=./pyproject.toml
 
 .PHONY: installdeps-dev
 installdeps-dev:
@@ -29,17 +29,20 @@ installdeps-test:
 installdeps-docs:
 	python -m pip install ".[docs]"
 
+PYTEST = python -m pytest -n auto -s -vv -x
+COVERAGE = --cov=trane/ --cov-report term-missing
+
 .PHONY: tests
 tests:
-	python -m pytest -n auto -s -vv -x tests/ --sample 100 --cov=trane/ --cov-report term-missing
+	$(PYTEST) tests/ --sample 100 $(COVERAGE)
 
 .PHONY: unit-tests
 unit-tests:
-	python -m pytest -n auto -s -vv -x tests/ --ignore=tests/integration_tests --cov=trane/ --cov-report term-missing
+	$(PYTEST) tests/ --ignore=tests/integration_tests $(COVERAGE)
 
 .PHONY: integration-tests
 integration-tests:
-	python -m pytest -n auto -s -vv -x tests/integration_tests --sample 100 --cov=trane/ --cov-report term-missing
+	$(PYTEST) tests/integration_tests --sample 100
 
 .PHONY: upgradepip
 upgradepip:

@@ -1,6 +1,6 @@
 from trane.core import *  # noqa
 from trane.datasets import (
-    load_covid_data,
+    load_covid,
     load_covid_tablemeta,
 )
 from trane.utils import *  # noqa

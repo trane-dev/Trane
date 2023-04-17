@@ -1,8 +1,69 @@
-import os
-
 import pandas as pd
 
 from trane.utils import TableMeta
+
+
+def load_covid():
+    filepath = generate_s3_url("covid19.csv")
+    df = pd.read_csv(filepath)
+    df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%y")
+    df = df[
+        [
+            "Country/Region",
+            "Date",
+            "Province/State",
+            "Lat",
+            "Long",
+            "Confirmed",
+            "Deaths",
+            "Recovered",
+        ]
+    ]
+    df = df.fillna(0)
+    df = df.sort_values(by=["Date"])
+    df = df.reset_index(drop=True)
+    return df
+
+
+def load_flight():
+    filepath = generate_s3_url("airlines.csv")
+    airlines_df = pd.read_csv(filepath)
+
+    filepath = generate_s3_url("airports.csv")
+    airport_df = pd.read_csv(filepath)
+
+    filepath = generate_s3_url("flight-sampled.csv")
+    flights_df = pd.read_csv(filepath)
+    flights_df["DATE"] = pd.to_datetime(flights_df["DATE"])
+
+    return airlines_df, airport_df, flights_df
+
+
+def load_bike():
+    filepath = generate_s3_url("bike-sampled.csv")
+    df = pd.read_csv(filepath)
+    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
+    df = df.sort_values(by=["date"])
+    df = df.fillna(0)
+    return df
+
+
+def load_youtube():
+    time_col = "trending_date"
+    filepath = generate_s3_url("USvideos.csv")
+    df = pd.read_csv(filepath)
+    df[time_col] = pd.to_datetime(df[time_col], format="%y.%d.%m")
+    df = df.sort_values(by=[time_col])
+    df = df.fillna(0)
+    return df
+
+
+def load_yelp():
+    # Sampled Yelp Reviews.zip or Yelp Reviews.zip?
+    filepath = generate_s3_url("Yelp Reviews.zip")
+    df = pd.read_csv(filepath)
+
+    return df
 
 
 def covid_metadata():
@@ -25,28 +86,9 @@ def covid_metadata():
     return metadata
 
 
-def load_covid_data():
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    filepath = os.path.join(dir_path, "covid19.csv")
-    df = pd.read_csv(filepath)
-    df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%y")
-    df = df[
-        [
-            "Country/Region",
-            "Date",
-            "Province/State",
-            "Lat",
-            "Long",
-            "Confirmed",
-            "Deaths",
-            "Recovered",
-        ]
-    ]
-    df = df.fillna(0)
-    df = df.sort_values(by=["Date"])
-    df = df.reset_index(drop=True)
-    return df
-
-
 def load_covid_tablemeta():
     return TableMeta(covid_metadata())
+
+
+def generate_s3_url(key, bucket="trane-datasets"):
+    return f"https://{bucket}.s3.amazonaws.com/{key}"

@@ -127,6 +127,21 @@ def test_covid(df_covid, meta_covid, sample):
     )
 
 
+@pytest.fixture
+def covid_cutoff_strategy(df_covid, meta_covid, sample):
+    entity_col = "Country/Region"
+    cutoff = "2d"
+    cutoff_base = str(datetime.strptime("2020-01-22", "%Y-%m-%d"))
+    cutoff_end = str(datetime.strptime("2020-03-29", "%Y-%m-%d"))
+    cutoff_strategy = trane.CutoffStrategy(
+        entity_col=entity_col,
+        window_size=cutoff,
+        minimum_data=cutoff_base,
+        maximum_data=cutoff_end,
+    )
+    return cutoff_strategy
+
+
 def test_covid_multi(df_covid, covid_cutoff_strategy, meta_covid, sample):
     time_col = "Date"
     generate_and_verify_prediction_problem(

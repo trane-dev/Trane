@@ -86,7 +86,7 @@ def test_youtube(df_youtube, meta_youtube, sample):
         minimum_data=cutoff_base,
         maximum_data=cutoff_end,
     )
-    generate_and_verify_prediction_problem(
+    prediction_problem_to_label_times = generate_and_verify_prediction_problem(
         df=df_youtube,
         meta=meta_youtube,
         entity_col=entity_col,
@@ -94,6 +94,15 @@ def test_youtube(df_youtube, meta_youtube, sample):
         cutoff_strategy=cutoff_strategy,
         sample=sample,
     )
+    ft_wrapper = trane.FeaturetoolsWrapper(
+        df=df_youtube,
+        entity_col=entity_col,
+        time_col=time_col,
+        name="youtube",
+    )
+    for problem_str in prediction_problem_to_label_times:
+        label_times = prediction_problem_to_label_times[problem_str]
+        ft_wrapper.compute_features(label_times, cutoff)
 
 
 def test_covid(df_covid, meta_covid, sample):
@@ -115,6 +124,19 @@ def test_covid(df_covid, meta_covid, sample):
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
         sample=sample,
+    )
+
+
+def test_covid_multi(df_covid, covid_cutoff_strategy, meta_covid, sample):
+    time_col = "Date"
+    generate_and_verify_prediction_problem(
+        df=df_covid,
+        meta=meta_covid,
+        entity_col=covid_cutoff_strategy.entity_col,
+        time_col=time_col,
+        cutoff_strategy=covid_cutoff_strategy,
+        sample=sample,
+        use_multiprocess=True,
     )
 
 

@@ -6,6 +6,13 @@ import pandas as pd
 import pytest
 
 import trane
+from trane import (
+    load_bike,
+    load_covid,
+    load_covid_tablemeta,
+    load_youtube,
+    load_youtube_metadata,
+)
 
 from .utils import generate_and_verify_prediction_problem
 
@@ -16,30 +23,20 @@ def current_dir():
 
 
 @pytest.fixture
-def df_youtube(current_dir):
-    datetime_col = "trending_date"
-    filename = "USvideos.csv"
-    df = pd.read_csv(os.path.join(current_dir, filename))
-    df[datetime_col] = pd.to_datetime(df[datetime_col], format="%y.%d.%m")
-    df = df.sort_values(by=[datetime_col])
-    df = df.fillna(0)
+def df_youtube():
+    df = load_youtube()
     return df
 
 
 @pytest.fixture
-def meta_youtube(current_dir):
-    filename = "meta_youtube.json"
-    meta_fp = os.path.join(current_dir, filename)
-    meta = trane.TableMeta(json.loads(open(meta_fp).read()))
-    return meta
+def meta_youtube():
+    return load_youtube_metadata()
 
 
 @pytest.fixture
-def df_covid(current_dir):
+def df_covid():
     datetime_col = "Date"
-    filename = "covid19.csv"
-    df = pd.read_csv(os.path.join(current_dir, filename))
-    df[datetime_col] = pd.to_datetime(df[datetime_col], format="%m/%d/%y")
+    df = load_covid()
     # to speed up things as covid dataset takes awhile
     df = df.sample(frac=0.25, random_state=1)
     df = df.sort_values(by=[datetime_col])
@@ -48,11 +45,8 @@ def df_covid(current_dir):
 
 
 @pytest.fixture
-def meta_covid(current_dir):
-    filename = "meta_covid.json"
-    meta_fp = os.path.join(current_dir, filename)
-    meta_covid = trane.TableMeta(json.loads(open(meta_fp).read()))
-    return meta_covid
+def meta_covid():
+    return load_covid_tablemeta()
 
 
 @pytest.fixture
@@ -71,13 +65,8 @@ def covid_cutoff_strategy(df_covid, meta_covid, sample):
 
 
 @pytest.fixture
-def df_chicago(current_dir):
-    datetime_col = "date"
-    filename = "bike-sampled.csv"
-    df = pd.read_csv(os.path.join(current_dir, filename))
-    df[datetime_col] = pd.to_datetime(df[datetime_col], format="%Y-%m-%d")
-    df = df.sort_values(by=[datetime_col])
-    df = df.fillna(0)
+def df_chicago():
+    df = load_bike()
     return df
 
 

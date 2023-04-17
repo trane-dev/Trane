@@ -4,5 +4,6 @@ from trane.datasets.load_functions import (
     load_flight,
     load_bike,
     load_youtube,
+    load_youtube_metadata,
     load_yelp,
 )

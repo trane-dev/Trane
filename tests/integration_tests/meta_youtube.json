@@ -1,20 +1,4 @@
-{
-    "tables": [
-        {
-            "fields": [
-                {
-                    "name": "trending_date",
-                    "type": "time"
-                },
-                {
-                    "name": "channel_title",
-                    "type": "id"
-                },
-                {
-                    "name": "category_id",
-                    "subtype": "categorical",
-                    "type": "categorical"
-                },
+
                 {
                     "name": "views",
                     "subtype": "integer",

@@ -66,7 +66,7 @@ def load_yelp():
     return df
 
 
-def covid_metadata():
+def load_covid_tablemeta():
     metadata = {
         "tables": [
             {
@@ -83,11 +83,30 @@ def covid_metadata():
             },
         ],
     }
-    return metadata
+    return TableMeta(metadata)
 
 
-def load_covid_tablemeta():
-    return TableMeta(covid_metadata())
+def load_youtube_metadata():
+    metadata = {
+        "tables": [
+            {
+                "fields": [
+                    {"name": "trending_date", "type": "time"},
+                    {"name": "channel_title", "type": "id"},
+                    {
+                        "name": "category_id",
+                        "type": "categorical",
+                        "subtype": "categorical",
+                    },
+                    {"name": "views", "type": "categorical", "subtype": "number"},
+                    {"name": "likes", "type": "categorical", "subtype": "integer"},
+                    {"name": "dislikes", "type": "integer", "subtype": "number"},
+                    {"name": "comment_count", "type": "integer", "subtype": "number"},
+                ],
+            },
+        ],
+    }
+    return TableMeta(metadata)
 
 
 def generate_s3_url(key, bucket="trane-datasets"):

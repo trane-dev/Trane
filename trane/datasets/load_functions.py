@@ -109,5 +109,35 @@ def load_youtube_metadata():
     return TableMeta(metadata)
 
 
+def load_bike_metadata():
+    metadata = {
+        "tables": [
+            {
+                "fields": [
+                    {"name": "date", "type": "time"},
+                    {"name": "hour", "subtype": "categorical", "type": "categorical"},
+                    {
+                        "name": "usertype",
+                        "subtype": "categorical",
+                        "type": "categorical",
+                    },
+                    {"name": "gender", "subtype": "categorical", "type": "categorical"},
+                    {"name": "tripduration", "subtype": "float", "type": "number"},
+                    {"name": "temperature", "subtype": "float", "type": "number"},
+                    {"name": "from_station_id", "type": "id"},
+                    {
+                        "name": "dpcapacity_start",
+                        "subtype": "integer",
+                        "type": "number",
+                    },
+                    {"name": "to_station_id", "type": "id"},
+                    {"name": "dpcapacity_end", "subtype": "integer", "type": "number"},
+                ],
+            },
+        ],
+    }
+    return TableMeta(metadata)
+
+
 def generate_s3_url(key, bucket="trane-datasets"):
     return f"https://{bucket}.s3.amazonaws.com/{key}"

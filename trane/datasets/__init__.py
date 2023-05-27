@@ -1,7 +1,6 @@
 from trane.datasets.load_functions import (
     load_covid,
     load_covid_tablemeta,
-    load_flight,
     load_bike,
     load_bike_metadata,
     load_youtube,

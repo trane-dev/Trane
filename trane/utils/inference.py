@@ -147,7 +147,7 @@ def boolean_nullable_func(series):
         series.dtype,
     ):
         return True
-    elif pdtypes.is_object_dtype(series.dtype):
+    elif pdtypes.is_object_dtype(series.dtype) or pdtypes.is_string_dtype(series.dtype):
         series_no_null = series.dropna()
         try:
             series_no_null_unq = set(series_no_null)

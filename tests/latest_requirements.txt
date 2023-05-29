@@ -16,12 +16,12 @@ numpy==1.24.3
 pandas==1.5.3
 pyparsing==3.0.9
 pytest==7.3.1
-pytest-cov==4.0.0
+pytest-cov==4.1.0
 pytest-runner==6.0.0
 pytest-xdist==3.3.1
 python-dateutil==2.8.2
 pytz==2023.3
-pyzmq==25.0.2
+pyzmq==25.1.0
 scikit-learn==1.2.2
 scipy==1.10.1
 tornado==6.3.2

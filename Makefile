@@ -34,6 +34,10 @@ COVERAGE = --cov=trane/ --cov-report term-missing
 
 .PHONY: tests
 tests:
+	$(PYTEST) tests/ --sample 100
+
+.PHONY: tests-coverage
+tests-coverage:
 	$(PYTEST) tests/ --sample 100 $(COVERAGE)
 
 .PHONY: unit-tests

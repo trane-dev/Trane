@@ -82,11 +82,19 @@ class PredictionProblem:
         Parameters
         ----------
         table_meta: TableMeta object. Contains meta information about the data
+            example:
+            {
+                'id': ColumnSchema(logical_type=Categorial, semantic_tags={'index'}),
+                'time': ColumnSchema(logical_type=DateTime, semantic_tags={'time_index'}),
+                'price': ColumnSchema(logical_type=Double, semantic_tags={'numeric'}),
+                'product': ColumnSchema(logical_type=Categorial, semantic_tags={'category'}),
+            }
 
         Returns
         -------
         Bool
         """
+
         # don't contaminate original table_meta
         if table_meta:
             temp_meta = table_meta.copy()
@@ -97,8 +105,10 @@ class PredictionProblem:
         for op in self.operations:
             # op.type_check returns a modified temp_meta,
             # which accounts for the operation having taken place
-            temp_meta = op.op_type_check(temp_meta)
-            if temp_meta is None:
+            column_type = table_meta.get(op.column_name)
+            if new_column_type := op.op_type_check(column_type):
+                temp_meta[op.column_name] = new_column_type
+            else:
                 return False
 
         if temp_meta in TableMeta.TYPES:

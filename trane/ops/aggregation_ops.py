@@ -1,3 +1,8 @@
+from woodwork.column_schema import ColumnSchema
+from woodwork.logical_types import (
+    Double,
+)
+
 from trane.ops.op_base import OpBase
 from trane.utils.table_meta import TableMeta as TM
 
@@ -12,7 +17,6 @@ AGGREGATION_OPS = [
 
 
 class AggregationOpBase(OpBase):
-
     """
     Super class for all Aggregation Operations. The class is empty and is
     currently a placeholder for any AggregationOpBase level methods we want to
@@ -81,53 +85,75 @@ class CountAggregationOp(AggregationOpBase):
 
 class SumAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
-            return None
-        return float(dataframe[self.column_name].sum())
-
-
-class AvgAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
-            return None
-        return float(dataframe[self.column_name].mean())
-
-
-class MaxAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
-            return None
-        return float(dataframe[self.column_name].max())
-
-
-class MinAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_FLOAT), (TM.TYPE_INTEGER, TM.TYPE_FLOAT)]
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
-            return None
-        return float(dataframe[self.column_name].min())
-
-
-class MajorityAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
     IOTYPES = [
-        (TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-        (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER),
+        (
+            ColumnSchema(semantic_tags={"numeric"}),
+            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        ),
     ]
 
     def execute(self, dataframe):
         if len(dataframe) == 0:
             return None
+        return dataframe[self.column_name].sum()
 
+
+class AvgAggregationOp(AggregationOpBase):
+    REQUIRED_PARAMETERS = []
+    IOTYPES = [
+        (
+            ColumnSchema(semantic_tags={"numeric"}),
+            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        ),
+    ]
+
+    def execute(self, dataframe):
+        if len(dataframe) == 0:
+            return None
+        return dataframe[self.column_name].mean()
+
+
+class MaxAggregationOp(AggregationOpBase):
+    REQUIRED_PARAMETERS = []
+    IOTYPES = [
+        (
+            ColumnSchema(semantic_tags={"numeric"}),
+            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        ),
+    ]
+
+    def execute(self, dataframe):
+        if len(dataframe) == 0:
+            return None
+        return dataframe[self.column_name].max()
+
+
+class MinAggregationOp(AggregationOpBase):
+    REQUIRED_PARAMETERS = []
+    IOTYPES = [
+        (
+            ColumnSchema(semantic_tags={"numeric"}),
+            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        ),
+    ]
+
+    def execute(self, dataframe):
+        if len(dataframe) == 0:
+            return None
+        return dataframe[self.column_name].min()
+
+
+class MajorityAggregationOp(AggregationOpBase):
+    REQUIRED_PARAMETERS = []
+    IOTYPES = [
+        (
+            ColumnSchema(semantic_tags={"category"}),
+            ColumnSchema(semantic_tags={"category"}),
+        ),
+        (ColumnSchema(semantic_tags={"index"}), ColumnSchema(semantic_tags={"index"})),
+    ]
+
+    def execute(self, dataframe):
+        if len(dataframe) == 0:
+            return None
         return str(dataframe[self.column_name].mode()[0])

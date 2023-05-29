@@ -20,8 +20,7 @@ class PredictionProblemGenerator:
         """
         Parameters
         ----------
-        table_meta: TableMeta object. Contains
-            meta information about the data
+        table_meta: a dictionary containing typing information about the data
         entity_col: column name of
             the column containing entities in the data
         time_col: column name of the column

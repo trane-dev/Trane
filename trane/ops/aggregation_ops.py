@@ -1,10 +1,10 @@
 from woodwork.column_schema import ColumnSchema
 from woodwork.logical_types import (
     Double,
+    Integer,
 )
 
 from trane.ops.op_base import OpBase
-from trane.utils.table_meta import TableMeta as TM
 
 AGGREGATION_OPS = [
     "CountAggregationOp",
@@ -43,41 +43,15 @@ class AggregationOpBase(OpBase):
 
     """
 
-    def op_type_check(self, table_meta):
-        """
-        Data type check for the operation.
-        Operations may change the data type of a column, eg. int -> bool.
-        One operation can only be applied on a few data types, eg. `greater`
-        can be applied on int but can't be applied on bool.
-        This function checks whether the current operation can be applied on
-        the data.
-        It returns the updated TableMeta for next operation or None if it's not
-        valid.
-
-        Parameters
-        ----------
-        table_meta: table meta before this operation.
-
-        Returns
-        -------
-        table_meta: table meta after this operation. None if not compatable.
-
-        """
-        self.input_type = table_meta.get_type(self.column_name)
-        for idx, (input_type, output_type) in enumerate(self.IOTYPES):
-            if self.input_type == input_type:
-                self.output_type = output_type
-                return output_type
-        return None
-
 
 class CountAggregationOp(AggregationOpBase):
     REQUIRED_PARAMETERS = []
-    IOTYPES = None
-
-    def op_type_check(self, table_meta):
-        self.output_type = TM.TYPE_INTEGER
-        return TM.TYPE_INTEGER
+    IOTYPES = [
+        (
+            ColumnSchema(),
+            ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        ),
+    ]
 
     def execute(self, dataframe):
         return len(dataframe)
@@ -150,7 +124,10 @@ class MajorityAggregationOp(AggregationOpBase):
             ColumnSchema(semantic_tags={"category"}),
             ColumnSchema(semantic_tags={"category"}),
         ),
-        (ColumnSchema(semantic_tags={"index"}), ColumnSchema(semantic_tags={"index"})),
+        (
+            ColumnSchema(semantic_tags={"index"}),
+            ColumnSchema(semantic_tags={"index"}),
+        ),
     ]
 
     def execute(self, dataframe):

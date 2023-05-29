@@ -22,7 +22,6 @@ from trane.ops.filter_ops import (
     LessFilterOp,
     NeqFilterOp,
 )
-from trane.ops.op_saver import op_from_json, op_to_json
 from trane.utils.table_meta import TableMeta
 
 __all__ = ["PredictionProblem"]
@@ -85,7 +84,7 @@ class PredictionProblem:
             example:
             {
                 'id': ColumnSchema(logical_type=Categorial, semantic_tags={'index'}),
-                'time': ColumnSchema(logical_type=DateTime, semantic_tags={'time_index'}),
+                'time': ColumnSchema(logical_type=Datetime, semantic_tags={'time_index'}),
                 'price': ColumnSchema(logical_type=Double, semantic_tags={'numeric'}),
                 'product': ColumnSchema(logical_type=Categorial, semantic_tags={'category'}),
             }
@@ -105,10 +104,8 @@ class PredictionProblem:
         for op in self.operations:
             # op.type_check returns a modified temp_meta,
             # which accounts for the operation having taken place
-            column_type = table_meta.get(op.column_name)
-            if new_column_type := op.op_type_check(column_type):
-                temp_meta[op.column_name] = new_column_type
-            else:
+            temp_meta = op.op_type_check(temp_meta)
+            if temp_meta is None:
                 return False
 
         if temp_meta in TableMeta.TYPES:
@@ -373,68 +370,6 @@ class PredictionProblem:
             # assign cutoff strategy to problem
             problem.cutoff_strategy = cutoff_strategy
 
-        return problem
-
-    def to_json(self):
-        """
-        This function converts Prediction Problems to JSON. It captures the
-        table_meta, but not the cutoff_strategy
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        json: JSON representation of the Prediction Problem.
-
-        """
-        table_meta_json = None
-        if self.table_meta:
-            table_meta_json = self.table_meta.to_json()
-
-        return json.dumps(
-            {
-                "operations": [json.loads(op_to_json(op)) for op in self.operations],
-                "entity_col": self.entity_col,
-                "time_col": self.time_col,
-                "table_meta": table_meta_json,
-            },
-        )
-
-    @classmethod
-    def from_json(cls, json_data):
-        """
-        This function converts a JSON snippet
-        to a prediction problem
-
-        Parameters
-        ----------
-        json_data: JSON code or dict containing the prediction problem.
-
-        Returns
-        -------
-        problem: Prediction Problem
-        """
-
-        # only tries json.loads if json_data is not a dict
-        if not isinstance(json_data, dict):
-            json_data = json.loads(json_data)
-
-        operations = [
-            op_from_json(json.dumps(item)) for item in json_data["operations"]
-        ]
-        entity_col = json_data["entity_col"]
-        time_col = json_data["time_col"]
-        table_meta = TableMeta.from_json(json_data.get("table_meta"))
-
-        problem = PredictionProblem(
-            operations=operations,
-            entity_col=entity_col,
-            time_col=time_col,
-            table_meta=table_meta,
-            cutoff_strategy=None,
-        )
         return problem
 
     def _dill_cutoff_strategy(self):

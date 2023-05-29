@@ -1,23 +1,34 @@
 import pandas as pd
 import pytest
+from woodwork.column_schema import ColumnSchema
+from woodwork.logical_types import (
+    Boolean,
+    Categorical,
+    Datetime,
+    Double,
+)
 
 from trane.ops.op_base import OpBase
-from trane.utils.table_meta import TableMeta as TM
 
 
 class FakeOp(OpBase):
-    """
-    Make a fake operation for testing.
-    It has PARAMS and IOTYPES, but execute is not implemented
-    """
-
-    PARAMS = [{"param": TM.TYPE_FLOAT}, {"param": TM.TYPE_TEXT}]
-    IOTYPES = [(TM.TYPE_FLOAT, TM.TYPE_BOOL), (TM.TYPE_TEXT, TM.TYPE_BOOL)]
+    REQUIRED_PARAMETERS = []
+    IOTYPES = [
+        (
+            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+            ColumnSchema(logical_type=Boolean),
+        ),
+    ]
 
 
 class FakeOpRequired(OpBase):
-    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
-    IOTYPES = None
+    REQUIRED_PARAMETERS = [{"threshold": None}]
+    IOTYPES = [
+        (
+            ColumnSchema(logical_type=Categorical),
+            ColumnSchema(logical_type=Boolean),
+        ),
+    ]
 
 
 def test_op_base_init():
@@ -34,54 +45,36 @@ def test_op_base_init():
         op(None)
 
 
-def test_op_type_check_with_correct_type1():
-    """
-    With input type TYPE_FLOAT, check if input_type and output_type are correct.
-    """
-    meta = TM(
-        {
-            "tables": [
-                {
-                    "fields": [
-                        {
-                            "name": "col",
-                            "type": TM.SUPERTYPE[TM.TYPE_FLOAT],
-                            "subtype": TM.TYPE_FLOAT,
-                        },
-                    ],
-                },
-            ],
-        },
-    )
-    op = FakeOp("col")
-    meta2 = op.op_type_check(meta)
-    assert meta2 == meta
-    assert meta.get_type("col") == TM.TYPE_BOOL
-    assert op.input_type == TM.TYPE_FLOAT and op.output_type == TM.TYPE_BOOL
+def test_op_type_check_returns_modified_meta():
+    meta = {
+        "id": ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
+        "time": ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
+        "price": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        "product": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+    }
+    expected_meta = {
+        "id": ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
+        "time": ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
+        "price": ColumnSchema(logical_type=Boolean),
+        "product": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+    }
+    op = FakeOp("price")
+    output_meta = op.op_type_check(meta)
+    assert output_meta == expected_meta
+    assert op.input_type == ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
+    assert op.output_type == ColumnSchema(logical_type=Boolean)
 
 
-def test_op_type_check_with_correct_type2():
-    """
-    With input type TYPE_TEXT, check if input_type and output_type are correct.
-    """
-    meta = TM({"tables": [{"fields": [{"name": "col", "type": TM.TYPE_TEXT}]}]})
-    op = FakeOp("col")
-    meta2 = op.op_type_check(meta)
-    assert meta2 == meta
-    assert meta.get_type("col") == TM.TYPE_BOOL
-    assert op.input_type == TM.TYPE_TEXT and op.output_type == TM.TYPE_BOOL
-
-
-def test_op_type_check_with_wrong_type():
-    """
-    with input type TYPE_IDENTIFIER, check if None is returned by op_type_check.
-    """
-    meta = TM({"tables": [{"fields": [{"name": "col", "type": TM.TYPE_IDENTIFIER}]}]})
-    op = FakeOp("col")
-    meta2 = op.op_type_check(meta)
-    assert meta2 is None
-    assert meta.get_type("col") == TM.TYPE_IDENTIFIER
-    assert op.input_type is TM.TYPE_IDENTIFIER and op.output_type is None
+def test_op_type_check_wrong_type():
+    meta = {
+        "id": ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
+        "time": ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
+        "price": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        "product": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+    }
+    op = FakeOp("product")
+    output_meta = op.op_type_check(meta)
+    assert output_meta is None
 
 
 def test_set_hyper_parameter():

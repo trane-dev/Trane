@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import pytest
-from woodwork.column_schema import ColumnSchema
 
 from trane.ops.aggregation_ops import (
     AvgAggregationOp,
@@ -37,9 +36,7 @@ def test_agg_ops(df, agg_operation, expected_output):
     if agg_operation == MajorityAggregationOp:
         assert isinstance(output, str)
     else:
-        assert isinstance(output, float) or isinstance(output, (int, np.integer))
-    if hasattr(op, "OTYPE"):
-        assert op.OTYPE == ColumnSchema(semantic_tags={"numeric"})
+        assert isinstance(output, (float, int, np.integer))
 
 
 @pytest.mark.parametrize(

@@ -1,5 +1,6 @@
+from woodwork.column_schema import ColumnSchema
+
 from trane.ops.op_base import OpBase
-from trane.utils.table_meta import TableMeta as TM
 
 FILTER_OPS = [
     "AllFilterOp",
@@ -39,18 +40,21 @@ class AllFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = []
     IOTYPES = []
 
-    def op_type_check(self, table_meta):
-        return table_meta
-
     def execute(self, dataframe):
         return dataframe
 
 
 class EqFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
+    REQUIRED_PARAMETERS = [{"threshold": None}]
     IOTYPES = [
-        (TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-        (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER),
+        (
+            ColumnSchema(semantic_tags={"category"}),
+            ColumnSchema(semantic_tags={"category"}),
+        ),
+        (
+            ColumnSchema(semantic_tags={"index"}),
+            ColumnSchema(semantic_tags={"index"}),
+        ),
     ]
 
     def execute(self, dataframe):
@@ -60,10 +64,16 @@ class EqFilterOp(FilterOpBase):
 
 
 class NeqFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
+    REQUIRED_PARAMETERS = [{"threshold": None}]
     IOTYPES = [
-        (TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-        (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER),
+        (
+            ColumnSchema(semantic_tags={"category"}),
+            ColumnSchema(semantic_tags={"category"}),
+        ),
+        (
+            ColumnSchema(semantic_tags={"index"}),
+            ColumnSchema(semantic_tags={"index"}),
+        ),
     ]
 
     def execute(self, dataframe):
@@ -73,8 +83,13 @@ class NeqFilterOp(FilterOpBase):
 
 
 class GreaterFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    REQUIRED_PARAMETERS = [{"threshold": None}]
+    IOTYPES = [
+        (
+            ColumnSchema(semantic_tags={"numeric"}),
+            ColumnSchema(semantic_tags={"numeric"}),
+        ),
+    ]
 
     def execute(self, dataframe):
         return dataframe[
@@ -83,8 +98,13 @@ class GreaterFilterOp(FilterOpBase):
 
 
 class LessFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    REQUIRED_PARAMETERS = [{"threshold": None}]
+    IOTYPES = [
+        (
+            ColumnSchema(semantic_tags={"numeric"}),
+            ColumnSchema(semantic_tags={"numeric"}),
+        ),
+    ]
 
     def execute(self, dataframe):
         return dataframe[

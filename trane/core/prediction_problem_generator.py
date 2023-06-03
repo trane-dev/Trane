@@ -2,6 +2,12 @@ import copy
 import itertools
 
 from tqdm.notebook import tqdm
+from woodwork.column_schema import ColumnSchema
+from woodwork.logical_types import (
+    Categorical,
+    Datetime,
+    Integer,
+)
 
 from trane.core.prediction_problem import PredictionProblem
 from trane.ops import aggregation_ops as agg_ops
@@ -67,22 +73,17 @@ class PredictionProblemGenerator:
         problems = []
 
         def iter_over_ops():
-            for ag, filter in itertools.product(
+            for agg, filter_ in itertools.product(
                 agg_ops.AGGREGATION_OPS,
                 filter_ops.FILTER_OPS,
             ):
-                filter_cols = (
-                    [None] if filter == "AllFilterOp" else self.table_meta.get_columns()
-                )
-                ag_cols = (
-                    [None]
-                    if ag == "CountAggregationOp"
-                    else self.table_meta.get_columns()
-                )
+                all_columns = list(self.table_meta.keys())
 
-                for filter_col, ag_col in itertools.product(filter_cols, ag_cols):
-                    if filter_col != self.entity_col and ag_col != self.entity_col:
-                        yield ag_col, filter_col, ag, filter
+                filter_cols = [None] if filter_ == "AllFilterOp" else all_columns
+                agg_cols = [None] if agg == "CountAggregationOp" else all_columns
+                for filter_col, agg_col in itertools.product(filter_cols, agg_cols):
+                    if filter_col != self.entity_col and agg_col != self.entity_col:
+                        yield agg_col, filter_col, agg, filter_
 
         # might be inefficent
         total_attempts = sum(1 for _ in iter_over_ops())
@@ -113,7 +114,6 @@ class PredictionProblemGenerator:
                 table_meta=self.table_meta,
                 cutoff_strategy=self.cutoff_strategy,
             )
-
             if problem.is_valid() and generate_thresholds:
                 for final_problem, _ in self._threshold_recommend(problem, df_sample):
                     problems.append(final_problem)
@@ -155,11 +155,22 @@ class PredictionProblemGenerator:
         TypeChecking for the problem generator entity_col
         and label_col. Errors if types don't match up.
         """
-        assert self.table_meta.get_type(self.entity_col) in [
-            TableMeta.TYPE_IDENTIFIER,
-            TableMeta.TYPE_TEXT,
-            TableMeta.TYPE_CATEGORY,
-        ]
+        for col, col_type in self.table_meta.items():
+            assert isinstance(col, str)
+            assert isinstance(col_type, ColumnSchema)
+
+        entity_col_type = self.table_meta[self.entity_col]
+        assert entity_col_type.logical_type in [Integer(), Categorical()]
+        assert "index" in entity_col_type.semantic_tags
+
+        time_col_type = self.table_meta[self.time_col]
+        assert time_col_type.logical_type == Datetime()
+
+        # assert self.table_meta.get_type(self.entity_col) in [
+        #     TableMeta.TYPE_IDENTIFIER,
+        #     TableMeta.TYPE_TEXT,
+        #     TableMeta.TYPE_CATEGORY,
+        # ]
 
     def _categorical_threshold(self, df_col, k=3):
         counter = {}
@@ -180,6 +191,8 @@ class PredictionProblemGenerator:
         if len(filter_op.REQUIRED_PARAMETERS) == 0:
             yield copy.deepcopy(problem), "no threshold"
         else:
+            print(filter_op.input_type)
+            breakpoint()
             if filter_op.input_type == TableMeta.TYPE_CATEGORY:
                 for item in self._categorical_threshold(
                     df_sample[filter_op.column_name],

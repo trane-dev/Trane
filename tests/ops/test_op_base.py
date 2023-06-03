@@ -104,15 +104,3 @@ def test_sample_df_and_unique_values():
     assert len(sample_df["col"].unique()) <= max_num_unique_values
     assert sample_df.shape == (max_num_rows, 1)
     assert unique_vals == set(values)
-
-
-# def test_op_equality():
-#     column_name = "test"
-#     id_row_op = IdentityRowOp(column_name)
-#     id_row_op_clone = IdentityRowOp(column_name)
-#     assert(id_row_op == id_row_op_clone)
-
-#     id_trans_op = IdentityTransformationOp(column_name)
-#     id_trans_op_clone = IdentityTransformationOp(column_name)
-
-#     assert(id_trans_op == id_trans_op_clone)

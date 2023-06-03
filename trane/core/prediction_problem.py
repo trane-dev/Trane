@@ -107,6 +107,16 @@ class PredictionProblem:
             temp_meta = op.op_type_check(temp_meta)
             if temp_meta is None:
                 return False
+        # TYPES = [
+        #     TYPE_CATEGORY,
+        #     TYPE_BOOL,
+        #     TYPE_ORDERED,
+        #     TYPE_TEXT,
+        #     TYPE_INTEGER,
+        #     TYPE_FLOAT,
+        #     TYPE_TIME,
+        #     TYPE_IDENTIFIER,
+        # ]
 
         if temp_meta in TableMeta.TYPES:
             self.label_type = temp_meta

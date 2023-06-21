@@ -10,7 +10,7 @@ scripts/*.json
 scripts/*.txt
 scripts/*.parquet
 docs/*.parquet
-
+Untitled.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

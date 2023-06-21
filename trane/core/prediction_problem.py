@@ -5,6 +5,16 @@ import os
 import composeml as cp
 import dill
 import numpy as np
+from woodwork.column_schema import ColumnSchema
+from woodwork.logical_types import (
+    Boolean,
+    Categorical,
+    Datetime,
+    Double,
+    Integer,
+    NaturalLanguage,
+    Ordinal,
+)
 
 from trane.ops.aggregation_ops import (
     AvgAggregationOp,
@@ -107,6 +117,20 @@ class PredictionProblem:
             temp_meta = op.op_type_check(temp_meta)
             if temp_meta is None:
                 return False
+        TYPES = [
+            ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+            ColumnSchema(logical_type=Boolean),
+            ColumnSchema(logical_type=Ordinal),
+            ColumnSchema(logical_type=NaturalLanguage),
+            ColumnSchema(logical_type=Integer),
+            ColumnSchema(logical_type=Double),
+            ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+            ColumnSchema(logical_type=Datetime),
+            ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
+            ColumnSchema(logical_type=Integer, semantic_tags={"index"}),
+            ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
+        ]
         # TYPES = [
         #     TYPE_CATEGORY,
         #     TYPE_BOOL,
@@ -118,7 +142,7 @@ class PredictionProblem:
         #     TYPE_IDENTIFIER,
         # ]
 
-        if temp_meta in TableMeta.TYPES:
+        if temp_meta in TYPES:
             self.label_type = temp_meta
             return True
         else:

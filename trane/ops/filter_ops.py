@@ -40,6 +40,9 @@ class AllFilterOp(FilterOpBase):
     REQUIRED_PARAMETERS = []
     IOTYPES = []
 
+    def op_type_check(self, table_meta):
+        return table_meta
+
     def execute(self, dataframe):
         return dataframe
 

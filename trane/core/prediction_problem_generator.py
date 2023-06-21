@@ -71,17 +71,25 @@ class PredictionProblemGenerator:
 
         # a list of problems that will eventually be returned
         problems = []
+        all_columns = list(self.table_meta.keys())
 
+        # iterate over all possible combinations of operations
         def iter_over_ops():
             for agg, filter_ in itertools.product(
                 agg_ops.AGGREGATION_OPS,
                 filter_ops.FILTER_OPS,
             ):
-                all_columns = list(self.table_meta.keys())
+                filter_columns = all_columns
+                if filter_ == "AllFilterOp":
+                    filter_columns = [None]
 
-                filter_cols = [None] if filter_ == "AllFilterOp" else all_columns
-                agg_cols = [None] if agg == "CountAggregationOp" else all_columns
-                for filter_col, agg_col in itertools.product(filter_cols, agg_cols):
+                agg_columns = all_columns
+                if agg == "CountAggregationOp":
+                    agg_columns = [None]
+                for filter_col, agg_col in itertools.product(
+                    filter_columns,
+                    agg_columns,
+                ):
                     if filter_col != self.entity_col and agg_col != self.entity_col:
                         yield agg_col, filter_col, agg, filter_
 
@@ -192,7 +200,6 @@ class PredictionProblemGenerator:
             yield copy.deepcopy(problem), "no threshold"
         else:
             print(filter_op.input_type)
-            breakpoint()
             if filter_op.input_type == TableMeta.TYPE_CATEGORY:
                 for item in self._categorical_threshold(
                     df_sample[filter_op.column_name],

@@ -18,6 +18,8 @@ AGGREGATION_OPS = [
 
 class AggregationOpBase(OpBase):
     """
+    Given a dataframe, and column, return 1 value.
+
     Super class for all Aggregation Operations. The class is empty and is
     currently a placeholder for any AggregationOpBase level methods we want to
     make.
@@ -52,6 +54,10 @@ class CountAggregationOp(AggregationOpBase):
             ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
         ),
     ]
+
+    def op_type_check(self, table_meta):
+        self.output_type = ColumnSchema(logical_type=Integer, semantic_tags={"numeric"})
+        return ColumnSchema(logical_type=Integer, semantic_tags={"numeric"})
 
     def execute(self, dataframe):
         return len(dataframe)

@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
 import pytest
+from woodwork.column_schema import ColumnSchema
+from woodwork.logical_types import (
+    Categorical,
+)
 
 from trane.ops.aggregation_ops import (
     AvgAggregationOp,
@@ -37,6 +41,12 @@ def test_agg_ops(df, agg_operation, expected_output):
         assert isinstance(output, str)
     else:
         assert isinstance(output, (float, int, np.integer))
+
+    meta = {
+        "col": ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
+    }
+    output_meta = op.op_type_check(meta)
+    print(output_meta)
 
 
 @pytest.mark.parametrize(

@@ -35,7 +35,7 @@ def make_fake_meta():
     meta = {
         "id": ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
         "date": ColumnSchema(logical_type=Datetime),
-        "amount": ColumnSchema(logical_type=Double),
+        "amount": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
     }
     return meta
 
@@ -62,4 +62,6 @@ def test_prediction_problem():
         cutoff_strategy=cutoff_strategy,
         time_col=time_col,
     )
-    problem_generator.generate(df, generate_thresholds=True)
+    problems = problem_generator.generate(df, generate_thresholds=True)
+    for p in problems:
+        print(p)

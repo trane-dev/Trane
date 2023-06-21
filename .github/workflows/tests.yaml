@@ -50,7 +50,7 @@ jobs:
         name: Run integration tests
         run: |
           make integration-tests
-      - if: matrix.type_of_tests == 'unit tests' && matrix.python-version == '3.11'
+      - if: ${{ matrix.type_of_tests == 'unit tests'}}
         name: Run coverage
         uses: codecov/codecov-action@v3
         with:

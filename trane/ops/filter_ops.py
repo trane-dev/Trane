@@ -1,4 +1,9 @@
 from woodwork.column_schema import ColumnSchema
+from woodwork.logical_types import (
+    Boolean,
+    Double,
+    Integer,
+)
 
 from trane.ops.op_base import OpBase
 
@@ -90,9 +95,24 @@ class GreaterFilterOp(FilterOpBase):
     IOTYPES = [
         (
             ColumnSchema(semantic_tags={"numeric"}),
-            ColumnSchema(semantic_tags={"numeric"}),
+            ColumnSchema(logical_type=Boolean),
         ),
     ]
+
+    def __init__(self, column_name):
+        self.column_name = column_name
+        self.input_type = ColumnSchema(semantic_tags={"numeric"})
+        self.output_type = ColumnSchema(logical_type=Boolean)
+        self.hyper_parameter_settings = {}
+
+    def op_type_check(self, table_meta):
+        self.output_type = ColumnSchema(logical_type=Boolean)
+        if "numeric" not in table_meta[self.column_name].semantic_tags:
+            return None
+        if not isinstance(table_meta[self.column_name].logical_type, (Double, Integer)):
+            return None
+        table_meta[self.column_name] = ColumnSchema(logical_type=Boolean)
+        return table_meta
 
     def execute(self, dataframe):
         return dataframe[

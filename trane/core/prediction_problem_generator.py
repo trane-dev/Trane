@@ -1,5 +1,7 @@
 import copy
+import heapq
 import itertools
+import random
 
 from tqdm.notebook import tqdm
 from woodwork.column_schema import ColumnSchema
@@ -12,7 +14,6 @@ from woodwork.logical_types import (
 from trane.core.prediction_problem import PredictionProblem
 from trane.ops import aggregation_ops as agg_ops
 from trane.ops import filter_ops
-from trane.utils.table_meta import TableMeta
 
 __all__ = ["PredictionProblemGenerator"]
 
@@ -44,7 +45,7 @@ class PredictionProblemGenerator:
 
     def generate(
         self,
-        df_sample=None,
+        df,
         generate_thresholds=False,
         n_problems=None,
         pbar_position=0,
@@ -55,8 +56,8 @@ class PredictionProblemGenerator:
 
         Parameters
         ----------
-        df_sample (optional, pd.DataFrame): Dataframe sample to use to generate relevant thresholds.
-            Defaults to None (does not automatically generate thresholds).
+        df (pd.DataFrame): Dataframe to use to generate relevant thresholds. You could use a sample of the
+            dataframe to speed up the process.
         generate_thresholds (optional, bool): Whether to automatically generate thresholds for problems.
             Defaults to False.
         n_problems (optional, int): Maximum number of problems to generate. Defaults to generating all possible
@@ -66,43 +67,40 @@ class PredictionProblemGenerator:
         -------
         problems: a list of Prediction Problem objects.
         """
-        if generate_thresholds and df_sample is None:
+        if generate_thresholds and df is None:
             raise ValueError("Must provide a dataframe sample to generate thresholds")
 
         # a list of problems that will eventually be returned
         problems = []
         all_columns = list(self.table_meta.keys())
 
-        # iterate over all possible combinations of operations
-        def iter_over_ops():
-            for agg, filter_ in itertools.product(
-                agg_ops.AGGREGATION_OPS,
-                filter_ops.FILTER_OPS,
+        possible_ops = []
+        for agg, filter_ in itertools.product(
+            agg_ops.AGGREGATION_OPS,
+            filter_ops.FILTER_OPS,
+        ):
+            filter_columns = all_columns
+            if filter_ == "AllFilterOp":
+                filter_columns = [None]
+
+            agg_columns = all_columns
+            if agg == "CountAggregationOp":
+                agg_columns = [None]
+            for filter_col, agg_col in itertools.product(
+                filter_columns,
+                agg_columns,
             ):
-                filter_columns = all_columns
-                if filter_ == "AllFilterOp":
-                    filter_columns = [None]
+                if filter_col != self.entity_col and agg_col != self.entity_col:
+                    possible_ops.append((agg_col, filter_col, agg, filter_))
 
-                agg_columns = all_columns
-                if agg == "CountAggregationOp":
-                    agg_columns = [None]
-                for filter_col, agg_col in itertools.product(
-                    filter_columns,
-                    agg_columns,
-                ):
-                    if filter_col != self.entity_col and agg_col != self.entity_col:
-                        yield agg_col, filter_col, agg, filter_
-
-        # might be inefficent
-        total_attempts = sum(1 for _ in iter_over_ops())
+        total_attempts = len(possible_ops)
         all_attempts = 0
         success_attempts = 0
         for op_col_combo in tqdm(
-            iter_over_ops(),
+            possible_ops,
             total=total_attempts,
             position=pbar_position,
         ):
-            # for op_col_combo in iter_over_ops():
             print(
                 "\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts),
                 end="",
@@ -123,7 +121,7 @@ class PredictionProblemGenerator:
                 cutoff_strategy=self.cutoff_strategy,
             )
             if problem.is_valid() and generate_thresholds:
-                for final_problem, _ in self._threshold_recommend(problem, df_sample):
+                for final_problem, _ in self._threshold_recommend(problem, df):
                     problems.append(final_problem)
                     success_attempts += 1
             elif problem.is_valid():
@@ -174,51 +172,33 @@ class PredictionProblemGenerator:
         time_col_type = self.table_meta[self.time_col]
         assert time_col_type.logical_type == Datetime()
 
-        # assert self.table_meta.get_type(self.entity_col) in [
-        #     TableMeta.TYPE_IDENTIFIER,
-        #     TableMeta.TYPE_TEXT,
-        #     TableMeta.TYPE_CATEGORY,
-        # ]
-
-    def _categorical_threshold(self, df_col, k=3):
-        counter = {}
-        for item in df_col:
-            try:
-                counter[item] += 1
-            except BaseException:
-                counter[item] = 1
-
-        counter_tuple = list(counter.items())
-        counter_tuple = sorted(counter_tuple, key=lambda x: -x[1])
-        counter_tuple = counter_tuple[:3]
-        return [item[0] for item in counter_tuple]
-
-    def _threshold_recommend(self, problem, df_sample):
+    def _threshold_recommend(self, problem, df):
         yielded_thresholds = []
         filter_op = problem.operations[0]
         if len(filter_op.REQUIRED_PARAMETERS) == 0:
             yield copy.deepcopy(problem), "no threshold"
         else:
-            print(filter_op.input_type)
-            if filter_op.input_type == TableMeta.TYPE_CATEGORY:
-                for item in self._categorical_threshold(
-                    df_sample[filter_op.column_name],
-                ):
-                    if item not in yielded_thresholds:
-                        yielded_thresholds.append(item)
+            if filter_op.input_type == ColumnSchema(semantic_tags={"category"}):
+                most_frequent_categories = get_k_most_frequent(
+                    df[filter_op.column_name],
+                    k=3,
+                )
+                for category in most_frequent_categories:
+                    if category not in yielded_thresholds:
+                        yielded_thresholds.append(category)
                         problem_final = copy.deepcopy(problem)
                         problem_final.operations[0].set_hyper_parameter(
                             parameter_name="threshold",
-                            parameter_value=item,
+                            parameter_value=category,
                         )
-                        yield problem_final, "threshold: {}".format(item)
+                        yield problem_final, "threshold: {}".format(category)
                     else:
                         continue
-            elif filter_op.input_type in [TableMeta.TYPE_FLOAT, TableMeta.TYPE_INTEGER]:
+            elif filter_op.input_type == ColumnSchema(semantic_tags={"numeric"}):
                 for keep_rate in [0.25, 0.5, 0.75]:
                     threshold = filter_op.find_threshhold_by_remaining(
                         fraction_of_data_target=keep_rate,
-                        df=df_sample,
+                        df=df,
                         col=filter_op.column_name,
                     )
                     if threshold not in yielded_thresholds:
@@ -234,3 +214,54 @@ class PredictionProblemGenerator:
                         )
                     else:
                         continue
+
+
+def get_k_most_frequent(series, k=3):
+    # get the top k most frequent values
+    if series.dtype in ["category", "object"]:
+        return series.value_counts()[:k].index.tolist()
+    raise ValueError("Series must be categorical or object dtype")
+
+
+def recommend_numeric_threshold(
+    df,
+    col,
+    filter_op,
+    num_random_samples=10,
+    num_rows_to_execute_on=2000,
+    keep_rates=[0.25, 0.5, 0.75],
+):
+    for keep_rate in keep_rates:
+        df, unique_vals = _sample_df_and_unique_values(
+            df=df,
+            col=col,
+            max_num_unique_values=num_random_samples,
+            max_num_rows=num_rows_to_execute_on,
+        )
+
+        filter_op.find_threshhold_by_remaining(
+            fraction_of_data_target=keep_rate,
+            df=df,
+            col=filter_op.column_name,
+        )
+
+
+def _sample_df_and_unique_values(
+    df,
+    col,
+    max_num_unique_values,
+    max_num_rows,
+):
+    unique_vals = set(df[col])
+
+    if len(unique_vals) > max_num_unique_values:
+        unique_vals = heapq.nlargest(
+            max_num_unique_values,
+            unique_vals,
+            key=lambda L: random.random(),
+        )
+
+    if len(df) > max_num_rows:
+        df = df.sample(max_num_rows)
+
+    return (df, unique_vals)

@@ -64,4 +64,5 @@ def test_prediction_problem():
     )
     problems = problem_generator.generate(df, generate_thresholds=True)
     for p in problems:
+        print(p.operations)
         print(p)

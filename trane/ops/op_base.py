@@ -48,22 +48,22 @@ class OpBase(object):
         self.output_type = None
         self.hyper_parameter_settings = {}
 
-    def op_type_check(self, meta):
-        """
-        Data type check for the operation.
+    # def op_type_check(self, meta):
+    #     """
+    #     Data type check for the operation.
 
-        Parameters
-        ----------
-        column_type: the ColumnSchema of the input column
-        """
-        self.input_type = meta.get(self.column_name)
-        for op_defined_input_type, op_defined_output_type in self.IOTYPES:
-            if self.input_type and op_defined_input_type:
-                if self.input_type == op_defined_input_type:
-                    self.output_type = op_defined_output_type
-                    meta[self.column_name] = self.output_type
-                    return meta
-        return None
+    #     Parameters
+    #     ----------
+    #     column_type: the ColumnSchema of the input column
+    #     """
+    #     self.input_type = meta.get(self.column_name)
+    #     for op_defined_input_type, op_defined_output_type in self.IOTYPES:
+    #         if self.input_type and op_defined_input_type:
+    #             if self.input_type == op_defined_input_type:
+    #                 self.output_type = op_defined_output_type
+    #                 meta[self.column_name] = self.output_type
+    #                 return meta
+    #     return None
 
     # def op_type_check(self, table_meta):
     #     """

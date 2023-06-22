@@ -114,6 +114,8 @@ class PredictionProblem:
         for op in self.operations:
             # op.type_check returns a modified temp_meta,
             # which accounts for the operation having taken place
+            if not hasattr(op, "op_type_check"):
+                return False
             temp_meta = op.op_type_check(temp_meta)
             if temp_meta is None:
                 return False
@@ -215,6 +217,9 @@ class PredictionProblem:
         for operation in self.operations:
             df = operation.execute(df)
         return df
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def __str__(self):
         """

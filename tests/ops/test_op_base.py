@@ -20,6 +20,16 @@ class FakeOp(OpBase):
         ),
     ]
 
+    def op_type_check(self, meta):
+        self.input_type = meta.get(self.column_name)
+        for op_defined_input_type, op_defined_output_type in self.IOTYPES:
+            if self.input_type and op_defined_input_type:
+                if self.input_type == op_defined_input_type:
+                    self.output_type = op_defined_output_type
+                    meta[self.column_name] = self.output_type
+                    return meta
+        return None
+
 
 class FakeOpRequired(OpBase):
     REQUIRED_PARAMETERS = [{"threshold": None}]

@@ -5,16 +5,6 @@ import os
 import composeml as cp
 import dill
 import numpy as np
-from woodwork.column_schema import ColumnSchema
-from woodwork.logical_types import (
-    Boolean,
-    Categorical,
-    Datetime,
-    Double,
-    Integer,
-    NaturalLanguage,
-    Ordinal,
-)
 
 from trane.ops.aggregation_ops import (
     AvgAggregationOp,
@@ -103,36 +93,37 @@ class PredictionProblem:
         -------
         Bool
         """
-
         # don't contaminate original table_meta
         if table_meta:
             temp_meta = table_meta.copy()
         else:
             temp_meta = self.table_meta.copy()
-
         # sort each operation in its respective bucket
         for op in self.operations:
-            # op.type_check returns a modified temp_meta,
+            # op.op_type_check returns a modified temp_meta,
             # which accounts for the operation having taken place
             if not hasattr(op, "op_type_check"):
                 return False
             temp_meta = op.op_type_check(temp_meta)
+            # if "For each <id> predict the total <amount> in all related records with <amount> greater than" in str(self) and "in next" in str(self):
+            #     breakpoint()
             if temp_meta is None:
                 return False
-        TYPES = [
-            ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-            ColumnSchema(logical_type=Boolean),
-            ColumnSchema(logical_type=Ordinal),
-            ColumnSchema(logical_type=NaturalLanguage),
-            ColumnSchema(logical_type=Integer),
-            ColumnSchema(logical_type=Double),
-            ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-            ColumnSchema(logical_type=Datetime),
-            ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
-            ColumnSchema(logical_type=Integer, semantic_tags={"index"}),
-            ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
-        ]
+
+        # [
+        #     ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+        #     ColumnSchema(logical_type=Boolean),
+        #     ColumnSchema(logical_type=Ordinal, semantic_tags={"category"}),
+        #     ColumnSchema(logical_type=Integer),
+        #     ColumnSchema(logical_type=Double),
+        #     ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        #     ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        #     ColumnSchema(logical_type=Datetime),
+        #     ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
+        #     ColumnSchema(logical_type=Integer, semantic_tags={"index"}),
+        #     ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
+        # ]
+        return True
         # TYPES = [
         #     TYPE_CATEGORY,
         #     TYPE_BOOL,
@@ -144,11 +135,12 @@ class PredictionProblem:
         #     TYPE_IDENTIFIER,
         # ]
 
-        if temp_meta in TYPES:
-            self.label_type = temp_meta
-            return True
-        else:
-            return False
+        # not sure what this is for
+        # if temp_meta in TYPES:
+        #     self.label_type = temp_meta
+        #     return True
+        # else:
+        #     return False
 
     def execute(
         self,

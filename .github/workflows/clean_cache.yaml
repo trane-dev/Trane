@@ -8,8 +8,8 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
+      - uses: GitHubSecurityLab/actions-permissions/advisor@v1
+      - uses: actions/checkout@v3
       - name: Cleanup
         run: |
           gh extension install actions/gh-actions-cache

@@ -101,16 +101,18 @@ class PredictionProblemGenerator:
             total=total_attempts,
             position=pbar_position,
         ):
-            print(
-                "\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts),
-                end="",
-            )
+            # print(
+            #     "\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts),
+            #     end="",
+            # )
             all_attempts += 1
             ag_col, filter_col, agg_op_name, filter_op_name = op_col_combo
+            # print(ag_col, filter_col, agg_op_name, filter_op_name)
 
             agg_op_obj = getattr(agg_ops, agg_op_name)(ag_col)  # noqa
             filter_op_obj = getattr(filter_ops, filter_op_name)(filter_col)  # noqa
 
+            # Note: the order of the operations matters, the filter operation is first
             operations = [filter_op_obj, agg_op_obj]
 
             problem = PredictionProblem(
@@ -120,17 +122,30 @@ class PredictionProblemGenerator:
                 table_meta=self.table_meta,
                 cutoff_strategy=self.cutoff_strategy,
             )
-            if problem.is_valid() and generate_thresholds:
-                for final_problem, _ in self._threshold_recommend(problem, df):
-                    problems.append(final_problem)
+
+            if problem.is_valid() and generate_thresholds is True:
+                filter_op = problem.operations[0]
+                if len(filter_op.REQUIRED_PARAMETERS) == 0:
+                    # the filter operation does not require a threshold
+                    problems.append(problem)
                     success_attempts += 1
+                else:
+                    yielded_thresholds = self._threshold_recommend(filter_op, df)
+                    for threshold in yielded_thresholds:
+                        final_problem = copy.deepcopy(problem)
+                        final_problem.operations[0].set_hyper_parameter(
+                            parameter_name="threshold",
+                            parameter_value=threshold,
+                        )
+                        problems.append(final_problem)
+                        success_attempts += 1
             elif problem.is_valid():
                 problems.append(problem)
                 success_attempts += 1
             if n_problems and success_attempts >= n_problems:
                 break
 
-        print("\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts))
+        # print("\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts))
         return problems
 
     def generate_thresholds(self, problems, df_sample):
@@ -172,48 +187,56 @@ class PredictionProblemGenerator:
         time_col_type = self.table_meta[self.time_col]
         assert time_col_type.logical_type == Datetime()
 
-    def _threshold_recommend(self, problem, df):
+    def _threshold_recommend(self, filter_op, df, keep_rates=[0.25, 0.5, 0.75]):
         yielded_thresholds = []
-        filter_op = problem.operations[0]
-        if len(filter_op.REQUIRED_PARAMETERS) == 0:
-            yield copy.deepcopy(problem), "no threshold"
-        else:
-            if filter_op.input_type == ColumnSchema(semantic_tags={"category"}):
-                most_frequent_categories = get_k_most_frequent(
-                    df[filter_op.column_name],
-                    k=3,
+        # if len(filter_op.REQUIRED_PARAMETERS) == 0:
+        #     yield copy.deepcopy(problem), "no threshold"
+        if filter_op.input_type == ColumnSchema(semantic_tags={"category"}):
+            most_frequent_categories = get_k_most_frequent(
+                df[filter_op.column_name],
+                k=3,
+            )
+            for category in most_frequent_categories:
+                if category not in yielded_thresholds:
+                    yielded_thresholds.append(category)
+        elif filter_op.input_type == ColumnSchema(semantic_tags={"numeric"}):
+            for rate in keep_rates:
+                threshold = filter_op.find_threshhold_by_remaining(
+                    fraction_of_data_target=rate,
+                    df=df,
+                    col=filter_op.column_name,
                 )
-                for category in most_frequent_categories:
-                    if category not in yielded_thresholds:
-                        yielded_thresholds.append(category)
-                        problem_final = copy.deepcopy(problem)
-                        problem_final.operations[0].set_hyper_parameter(
-                            parameter_name="threshold",
-                            parameter_value=category,
-                        )
-                        yield problem_final, "threshold: {}".format(category)
-                    else:
-                        continue
-            elif filter_op.input_type == ColumnSchema(semantic_tags={"numeric"}):
-                for keep_rate in [0.25, 0.5, 0.75]:
-                    threshold = filter_op.find_threshhold_by_remaining(
-                        fraction_of_data_target=keep_rate,
-                        df=df,
-                        col=filter_op.column_name,
-                    )
-                    if threshold not in yielded_thresholds:
-                        yielded_thresholds.append(threshold)
-                        problem_final = copy.deepcopy(problem)
-                        problem_final.operations[0].set_hyper_parameter(
-                            parameter_name="threshold",
-                            parameter_value=threshold,
-                        )
-                        yield problem_final, "threshold: {} (keep {}%)".format(
-                            threshold,
-                            keep_rate * 100,
-                        )
-                    else:
-                        continue
+                if threshold not in yielded_thresholds:
+                    yielded_thresholds.append(threshold)
+        return yielded_thresholds
+        #     problem_final = copy.deepcopy(problem)
+        #     problem_final.operations[0].set_hyper_parameter(
+        #         parameter_name="threshold",
+        #         parameter_value=category,
+        #     )
+        #     yield problem_final, "threshold: {}".format(category)
+        # else:
+        #     continue
+        # elif filter_op.input_type == ColumnSchema(semantic_tags={"numeric"}):
+        #     for keep_rate in [0.25, 0.5, 0.75]:
+        #         threshold = filter_op.find_threshhold_by_remaining(
+        #             fraction_of_data_target=keep_rate,
+        #             df=df,
+        #             col=filter_op.column_name,
+        #         )
+        #         if threshold not in yielded_thresholds:
+        #             yielded_thresholds.append(threshold)
+        #             problem_final = copy.deepcopy(problem)
+        #             problem_final.operations[0].set_hyper_parameter(
+        #                 parameter_name="threshold",
+        #                 parameter_value=threshold,
+        #             )
+        #             yield problem_final, "threshold: {} (keep {}%)".format(
+        #                 threshold,
+        #                 keep_rate * 100,
+        #             )
+        #         else:
+        #             continue
 
 
 def get_k_most_frequent(series, k=3):

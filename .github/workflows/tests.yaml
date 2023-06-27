@@ -21,6 +21,7 @@ jobs:
           - python-version: "3.8"
             type_of_tests: "integration tests"
     steps:
+      - uses: GitHubSecurityLab/actions-permissions/advisor@v1
       - uses: actions/checkout@v3
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v4

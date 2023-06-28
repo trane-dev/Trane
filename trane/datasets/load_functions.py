@@ -48,9 +48,8 @@ def load_youtube():
 
 def load_yelp():
     # Sampled Yelp Reviews.zip or Yelp Reviews.zip?
-    filepath = generate_s3_url("Yelp Reviews.zip")
+    filepath = generate_local_filepath("Yelp Reviews.zip")
     df = pd.read_csv(filepath)
-
     return df
 
 

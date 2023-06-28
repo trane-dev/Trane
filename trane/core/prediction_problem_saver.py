@@ -1,7 +1,6 @@
 import json
 
 from trane.core.prediction_problem import PredictionProblem
-from trane.utils.table_meta import TableMeta
 
 __all__ = ["prediction_problems_to_json_file", "prediction_problems_from_json_file"]
 
@@ -80,13 +79,13 @@ def prediction_problems_from_json_file(filename):
     prediction_problems = [
         PredictionProblem.from_json(json.dumps(prob)) for prob in prediction_problems
     ]
-    table_meta = TableMeta.from_json(json.dumps(data["table_meta"]))
+    # table_meta = TableMeta.from_json(json.dumps(data["table_meta"]))
     entity_id_column = data["entity_id_column"]
     label_generating_column = data["label_generating_column"]
     time_column = data["time_column"]
     return (
         prediction_problems,
-        table_meta,
+        # table_meta,
         entity_id_column,
         label_generating_column,
         time_column,

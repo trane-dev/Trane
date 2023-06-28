@@ -1,10 +1,6 @@
-from datetime import datetime
-
 import pandas as pd
 
-from trane.utils.table_meta import TableMeta as TM
-
-__all__ = ["denormalize", "parse_data"]
+__all__ = ["denormalize"]
 
 
 class CsvMerge:
@@ -87,29 +83,3 @@ def denormalize(relationships):
     assert len(csv_merge_objs) == 1
 
     return csv_merge_objs[0].get_data()
-
-
-def parse_data(dataframe, table_meta):
-    """
-    Convert columns specified as time in the table_meta from str objects to datetime objects.
-
-    Parameters
-    ----------
-    dataframe: the data
-    table_meta: a TableMeta object specifying meta information about the data
-
-    Returns
-    ----------
-    dataframe: with time columns converted from str to datetime.
-    """
-
-    columns = table_meta.get_columns()
-    for column in columns:
-        if table_meta.get_type(column) == TM.TYPE_TIME:
-            dataframe[column] = dataframe[column].apply(
-                lambda x: datetime.strptime(
-                    x,
-                    table_meta.get_property(column, "format"),
-                ),
-            )
-    return dataframe

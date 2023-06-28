@@ -1,11 +1,13 @@
 from datetime import datetime
 
+import pandas as pd
+
 __all__ = ["CutoffStrategy"]
 
 
 def clean_date(date):
     if isinstance(date, str):
-        return datetime.strptime(date, "%Y-%m-%d")
+        return pd.Timestamp(datetime.strptime(date, "%Y-%m-%d"))
     return date
 
 

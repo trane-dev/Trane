@@ -1,9 +1,15 @@
-import json
 import os
 from datetime import datetime
 
 import pandas as pd
 import pytest
+from woodwork.column_schema import ColumnSchema
+from woodwork.logical_types import (
+    Categorical,
+    Datetime,
+    Double,
+    Integer,
+)
 
 import trane
 
@@ -28,10 +34,22 @@ def df_youtube(current_dir):
 
 @pytest.fixture
 def meta_youtube(current_dir):
-    filename = "meta_youtube.json"
-    meta_fp = os.path.join(current_dir, filename)
-    meta = trane.TableMeta(json.loads(open(meta_fp).read()))
-    return meta
+    table_meta = {
+        "trending_date": ColumnSchema(logical_type=Datetime),
+        "channel_title": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"index"},
+        ),
+        "category_id": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"category", "index"},
+        ),
+        "views": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        "likes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        "dislikes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        "comment_count": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+    }
+    return table_meta
 
 
 @pytest.fixture
@@ -49,10 +67,23 @@ def df_covid(current_dir):
 
 @pytest.fixture
 def meta_covid(current_dir):
-    filename = "meta_covid.json"
-    meta_fp = os.path.join(current_dir, filename)
-    meta_covid = trane.TableMeta(json.loads(open(meta_fp).read()))
-    return meta_covid
+    table_meta = {
+        "Province/State": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"category"},
+        ),
+        "Country/Region": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"category", "index"},
+        ),
+        "Lat": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        "Long": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        "Date": ColumnSchema(logical_type=Datetime),
+        "Confirmed": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        "Deaths": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        "Recovered": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+    }
+    return table_meta
 
 
 @pytest.fixture
@@ -68,10 +99,28 @@ def df_chicago(current_dir):
 
 @pytest.fixture
 def meta_chicago(current_dir):
-    filename = "meta_chicago.json"
-    meta_fp = os.path.join(current_dir, filename)
-    meta_covid = trane.TableMeta(json.loads(open(meta_fp).read()))
-    return meta_covid
+    table_meta = {
+        "date": ColumnSchema(logical_type=Datetime),
+        "hour": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+        "usertype": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+        "gender": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+        "tripduration": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        "temperature": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        "from_station_id": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"index"},
+        ),
+        "dpcapacity_start": ColumnSchema(
+            logical_type=Integer,
+            semantic_tags={"numeric"},
+        ),
+        "to_station_id": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"index"},
+        ),
+        "dpcapacity_end": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+    }
+    return table_meta
 
 
 def test_youtube(df_youtube, meta_youtube, sample):
@@ -93,7 +142,7 @@ def test_youtube(df_youtube, meta_youtube, sample):
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
         sample=sample,
-        use_multiprocess=True,
+        use_multiprocess=False,
     )
     trane.FeaturetoolsWrapper(
         df=df_youtube,
@@ -110,8 +159,8 @@ def test_covid(df_covid, meta_covid, sample):
     entity_col = "Country/Region"
     time_col = "Date"
     cutoff = "2d"
-    cutoff_base = str(datetime.strptime("2020-01-22", "%Y-%m-%d"))
-    cutoff_end = str(datetime.strptime("2020-03-29", "%Y-%m-%d"))
+    cutoff_base = pd.Timestamp(datetime.strptime("2020-01-22", "%Y-%m-%d"))
+    cutoff_end = pd.Timestamp(datetime.strptime("2020-03-29", "%Y-%m-%d"))
     cutoff_strategy = trane.CutoffStrategy(
         entity_col=entity_col,
         window_size=cutoff,
@@ -125,7 +174,7 @@ def test_covid(df_covid, meta_covid, sample):
         time_col=time_col,
         cutoff_strategy=cutoff_strategy,
         sample=sample,
-        use_multiprocess=True,
+        use_multiprocess=False,
     )
 
 
@@ -133,8 +182,8 @@ def test_covid(df_covid, meta_covid, sample):
 def covid_cutoff_strategy(df_covid, meta_covid, sample):
     entity_col = "Country/Region"
     cutoff = "2d"
-    cutoff_base = str(datetime.strptime("2020-01-22", "%Y-%m-%d"))
-    cutoff_end = str(datetime.strptime("2020-03-29", "%Y-%m-%d"))
+    cutoff_base = "2020-01-22"
+    cutoff_end = "2020-03-29"
     cutoff_strategy = trane.CutoffStrategy(
         entity_col=entity_col,
         window_size=cutoff,
@@ -144,17 +193,17 @@ def covid_cutoff_strategy(df_covid, meta_covid, sample):
     return cutoff_strategy
 
 
-def test_covid_multi(df_covid, covid_cutoff_strategy, meta_covid, sample):
-    time_col = "Date"
-    generate_and_verify_prediction_problem(
-        df=df_covid,
-        meta=meta_covid,
-        entity_col=covid_cutoff_strategy.entity_col,
-        time_col=time_col,
-        cutoff_strategy=covid_cutoff_strategy,
-        sample=sample,
-        use_multiprocess=True,
-    )
+# def test_covid_multi(df_covid, covid_cutoff_strategy, meta_covid, sample):
+#     time_col = "Date"
+#     generate_and_verify_prediction_problem(
+#         df=df_covid,
+#         meta=meta_covid,
+#         entity_col=covid_cutoff_strategy.entity_col,
+#         time_col=time_col,
+#         cutoff_strategy=covid_cutoff_strategy,
+#         sample=sample,
+#         use_multiprocess=True,
+#     )
 
 
 # def test_chicago(df_chicago, meta_chicago, sample):

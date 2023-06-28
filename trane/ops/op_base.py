@@ -15,6 +15,8 @@ class OpBase(object):
     IOTYPES is a list of possible input and output type pairs.
         For example `greater` can operate on int and str and output bool.
         [(int, bool), (str, bool), ...]
+        In the following format:
+        [(input_type1, output_type1), (input_type2, output_type2), ...]
 
     REQUIRED_PARAMETERS is a list of parameter and type dicts.
 
@@ -33,6 +35,9 @@ class OpBase(object):
         Parameters
         ----------
         column_name: the column this operation applies to
+        input_type: the ColumnSchema of the input column
+        output_type: the ColumnSchema of the output column
+        hyper_parameter_settings: the dict of hyper parameter name and value
 
         Returns
         -------
@@ -43,33 +48,47 @@ class OpBase(object):
         self.output_type = None
         self.hyper_parameter_settings = {}
 
-    def op_type_check(self, table_meta):
-        """
-        Data type check for the operation.
-        Operations may change the data type of a column, eg. int -> bool.
-        One operation can only be applied on a few data types, eg. `greater`
-        can be applied on int but can't be applied on bool.
-        This function checks whether the current operation can be applied on
-        the data.
-        It returns the updated TableMeta for next operation or None if it's not
-        valid.
+    # def op_type_check(self, meta):
+    #     """
+    #     Data type check for the operation.
 
-        Parameters
-        ----------
-        table_meta: table meta before this operation.
+    #     Parameters
+    #     ----------
+    #     column_type: the ColumnSchema of the input column
+    #     """
+    #     self.input_type = meta.get(self.column_name)
+    #     for op_defined_input_type, op_defined_output_type in self.IOTYPES:
+    #         if self.input_type and op_defined_input_type:
+    #             if self.input_type == op_defined_input_type:
+    #                 self.output_type = op_defined_output_type
+    #                 meta[self.column_name] = self.output_type
+    #                 return meta
+    #     return None
 
-        Returns
-        -------
-        table_meta: table meta after this operation. None if not compatable.
-
-        """
-        self.input_type = table_meta.get_type(self.column_name)
-        for idx, (input_type, output_type) in enumerate(self.IOTYPES):
-            if self.input_type == input_type:
-                self.output_type = output_type
-                table_meta.set_type(self.column_name, output_type)
-                return table_meta
-        return None
+    # def op_type_check(self, table_meta):
+    #     """
+    #     Data type check for the operation.
+    #     Operations may change the data type of a column, eg. int -> bool.
+    #     One operation can only be applied on a few data types, eg. `greater`
+    #     can be applied on int but can't be applied on bool.
+    #     This function checks whether the current operation can be applied on
+    #     the data.
+    #     It returns the updated TableMeta for next operation or None if it's not
+    #     valid.
+    #     Parameters
+    #     ----------
+    #     table_meta: table meta before this operation.
+    #     Returns
+    #     -------
+    #     table_meta: table meta after this operation. None if not compatable.
+    #     """
+    #     self.input_type = table_meta.get_type(self.column_name)
+    #     for idx, (input_type, output_type) in enumerate(self.IOTYPES):
+    #         if self.input_type == input_type:
+    #             self.output_type = output_type
+    #             table_meta.set_type(self.column_name, output_type)
+    #             return table_meta
+    #     return None
 
     def get_parameter_names(self):
         names = []

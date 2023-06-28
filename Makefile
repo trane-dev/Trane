@@ -30,7 +30,7 @@ installdeps-docs:
 	python -m pip install ".[docs]"
 
 PYTEST = python -m pytest -n auto -s -vv -x
-COVERAGE = --cov=trane/ --cov-report term-missing
+COVERAGE = --cov=trane/ --cov-report term-missing --cov-config=./pyproject.toml --cov-report=xml:./coverage.xml
 
 .PHONY: tests
 tests:

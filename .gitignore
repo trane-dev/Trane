@@ -4,6 +4,13 @@ group.csv
 hire_date.csv
 skills.csv
 supervisor.csv
+data_raw.csv
+scripts/*.csv
+scripts/*.json
+scripts/*.txt
+scripts/*.parquet
+docs/*.parquet
+Untitled.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

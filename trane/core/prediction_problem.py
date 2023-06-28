@@ -22,7 +22,6 @@ from trane.ops.filter_ops import (
     LessFilterOp,
     NeqFilterOp,
 )
-from trane.ops.op_saver import op_from_json, op_to_json
 from trane.utils.table_meta import TableMeta
 
 __all__ = ["PredictionProblem"]
@@ -82,6 +81,13 @@ class PredictionProblem:
         Parameters
         ----------
         table_meta: TableMeta object. Contains meta information about the data
+            example:
+            {
+                'id': ColumnSchema(logical_type=Categorial, semantic_tags={'index'}),
+                'time': ColumnSchema(logical_type=Datetime, semantic_tags={'time_index'}),
+                'price': ColumnSchema(logical_type=Double, semantic_tags={'numeric'}),
+                'product': ColumnSchema(logical_type=Categorial, semantic_tags={'category'}),
+            }
 
         Returns
         -------
@@ -92,20 +98,49 @@ class PredictionProblem:
             temp_meta = table_meta.copy()
         else:
             temp_meta = self.table_meta.copy()
-
         # sort each operation in its respective bucket
         for op in self.operations:
-            # op.type_check returns a modified temp_meta,
+            # op.op_type_check returns a modified temp_meta,
             # which accounts for the operation having taken place
+            if not hasattr(op, "op_type_check"):
+                return False
             temp_meta = op.op_type_check(temp_meta)
+            # if "For each <id> predict the total <amount> in all related records with <amount> greater than" in str(self) and "in next" in str(self):
+            #     breakpoint()
             if temp_meta is None:
                 return False
 
-        if temp_meta in TableMeta.TYPES:
-            self.label_type = temp_meta
-            return True
-        else:
-            return False
+        # [
+        #     ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+        #     ColumnSchema(logical_type=Boolean),
+        #     ColumnSchema(logical_type=Ordinal, semantic_tags={"category"}),
+        #     ColumnSchema(logical_type=Integer),
+        #     ColumnSchema(logical_type=Double),
+        #     ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        #     ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        #     ColumnSchema(logical_type=Datetime),
+        #     ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
+        #     ColumnSchema(logical_type=Integer, semantic_tags={"index"}),
+        #     ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
+        # ]
+        return True
+        # TYPES = [
+        #     TYPE_CATEGORY,
+        #     TYPE_BOOL,
+        #     TYPE_ORDERED,
+        #     TYPE_TEXT,
+        #     TYPE_INTEGER,
+        #     TYPE_FLOAT,
+        #     TYPE_TIME,
+        #     TYPE_IDENTIFIER,
+        # ]
+
+        # not sure what this is for
+        # if temp_meta in TYPES:
+        #     self.label_type = temp_meta
+        #     return True
+        # else:
+        #     return False
 
     def execute(
         self,
@@ -174,6 +209,9 @@ class PredictionProblem:
         for operation in self.operations:
             df = operation.execute(df)
         return df
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def __str__(self):
         """
@@ -363,68 +401,6 @@ class PredictionProblem:
             # assign cutoff strategy to problem
             problem.cutoff_strategy = cutoff_strategy
 
-        return problem
-
-    def to_json(self):
-        """
-        This function converts Prediction Problems to JSON. It captures the
-        table_meta, but not the cutoff_strategy
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        json: JSON representation of the Prediction Problem.
-
-        """
-        table_meta_json = None
-        if self.table_meta:
-            table_meta_json = self.table_meta.to_json()
-
-        return json.dumps(
-            {
-                "operations": [json.loads(op_to_json(op)) for op in self.operations],
-                "entity_col": self.entity_col,
-                "time_col": self.time_col,
-                "table_meta": table_meta_json,
-            },
-        )
-
-    @classmethod
-    def from_json(cls, json_data):
-        """
-        This function converts a JSON snippet
-        to a prediction problem
-
-        Parameters
-        ----------
-        json_data: JSON code or dict containing the prediction problem.
-
-        Returns
-        -------
-        problem: Prediction Problem
-        """
-
-        # only tries json.loads if json_data is not a dict
-        if not isinstance(json_data, dict):
-            json_data = json.loads(json_data)
-
-        operations = [
-            op_from_json(json.dumps(item)) for item in json_data["operations"]
-        ]
-        entity_col = json_data["entity_col"]
-        time_col = json_data["time_col"]
-        table_meta = TableMeta.from_json(json_data.get("table_meta"))
-
-        problem = PredictionProblem(
-            operations=operations,
-            entity_col=entity_col,
-            time_col=time_col,
-            table_meta=table_meta,
-            cutoff_strategy=None,
-        )
         return problem
 
     def _dill_cutoff_strategy(self):

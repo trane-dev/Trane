@@ -1,10 +1,12 @@
+import os
+
 import pandas as pd
 
 from trane.utils import TableMeta
 
 
 def load_covid():
-    filepath = generate_s3_url("covid19.csv")
+    filepath = generate_local_filepath("covid19.csv")
     df = pd.read_csv(filepath)
     df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%y")
     df = df[
@@ -25,22 +27,8 @@ def load_covid():
     return df
 
 
-def load_flight():
-    filepath = generate_s3_url("airlines.csv")
-    airlines_df = pd.read_csv(filepath)
-
-    filepath = generate_s3_url("airports.csv")
-    airport_df = pd.read_csv(filepath)
-
-    filepath = generate_s3_url("flight-sampled.csv")
-    flights_df = pd.read_csv(filepath)
-    flights_df["DATE"] = pd.to_datetime(flights_df["DATE"])
-
-    return airlines_df, airport_df, flights_df
-
-
 def load_bike():
-    filepath = generate_s3_url("bike-sampled.csv")
+    filepath = generate_local_filepath("bike-sampled.csv")
     df = pd.read_csv(filepath)
     df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
     df = df.sort_values(by=["date"])
@@ -50,7 +38,7 @@ def load_bike():
 
 def load_youtube():
     time_col = "trending_date"
-    filepath = generate_s3_url("USvideos.csv")
+    filepath = generate_local_filepath("USvideos.csv")
     df = pd.read_csv(filepath)
     df[time_col] = pd.to_datetime(df[time_col], format="%y.%d.%m")
     df = df.sort_values(by=[time_col])
@@ -60,9 +48,8 @@ def load_youtube():
 
 def load_yelp():
     # Sampled Yelp Reviews.zip or Yelp Reviews.zip?
-    filepath = generate_s3_url("Yelp Reviews.zip")
+    filepath = generate_local_filepath("Yelp Reviews.zip")
     df = pd.read_csv(filepath)
-
     return df
 
 
@@ -107,6 +94,41 @@ def load_youtube_metadata():
         ],
     }
     return TableMeta(metadata)
+
+
+def load_bike_metadata():
+    metadata = {
+        "tables": [
+            {
+                "fields": [
+                    {"name": "date", "type": "time"},
+                    {"name": "hour", "subtype": "categorical", "type": "categorical"},
+                    {
+                        "name": "usertype",
+                        "subtype": "categorical",
+                        "type": "categorical",
+                    },
+                    {"name": "gender", "subtype": "categorical", "type": "categorical"},
+                    {"name": "tripduration", "subtype": "float", "type": "number"},
+                    {"name": "temperature", "subtype": "float", "type": "number"},
+                    {"name": "from_station_id", "type": "id"},
+                    {
+                        "name": "dpcapacity_start",
+                        "subtype": "integer",
+                        "type": "number",
+                    },
+                    {"name": "to_station_id", "type": "id"},
+                    {"name": "dpcapacity_end", "subtype": "integer", "type": "number"},
+                ],
+            },
+        ],
+    }
+    return TableMeta(metadata)
+
+
+def generate_local_filepath(key):
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(dir_path, key)
 
 
 def generate_s3_url(key, bucket="trane-datasets"):

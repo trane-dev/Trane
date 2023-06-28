@@ -1,4 +1,14 @@
+from datetime import datetime
+
+import pandas as pd
+
 __all__ = ["CutoffStrategy"]
+
+
+def clean_date(date):
+    if isinstance(date, str):
+        return pd.Timestamp(datetime.strptime(date, "%Y-%m-%d"))
+    return date
 
 
 class CutoffStrategy:
@@ -12,8 +22,8 @@ class CutoffStrategy:
         self.entity_col = entity_col
         self.target_dataframe_index = entity_col
         self.window_size = window_size
-        self.minimum_data = minimum_data
-        self.maximum_data = maximum_data
+        self.minimum_data = clean_date(minimum_data)
+        self.maximum_data = clean_date(maximum_data)
         # self.gap = gap
         self.description = "in next {} days".format(window_size)
 

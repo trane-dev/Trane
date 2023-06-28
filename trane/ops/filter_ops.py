@@ -1,5 +1,13 @@
+from woodwork.column_schema import ColumnSchema
+from woodwork.logical_types import (
+    Categorical,
+    Double,
+    Integer,
+    Ordinal,
+    PostalCode,
+)
+
 from trane.ops.op_base import OpBase
-from trane.utils.table_meta import TableMeta as TM
 
 FILTER_OPS = [
     "AllFilterOp",
@@ -32,6 +40,11 @@ class FilterOpBase(OpBase):
     execute method: transform dataframe according to the operation and return
       the new dataframe
 
+    Filter operations filter data
+    row operations transform data within a row and return a dataframe of the same dimensions,
+    transformation operations transform data across rows and return a new dataset with fewer rows,
+    aggregation operations accumulate the dataframe into a single row.
+
     """
 
 
@@ -47,11 +60,50 @@ class AllFilterOp(FilterOpBase):
 
 
 class EqFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
+    REQUIRED_PARAMETERS = [{"threshold": None}]
     IOTYPES = [
-        (TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-        (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER),
+        (
+            ColumnSchema(semantic_tags={"category"}),
+            ColumnSchema(semantic_tags={"category"}),
+        ),
+        (
+            ColumnSchema(semantic_tags={"index"}),
+            ColumnSchema(semantic_tags={"index"}),
+        ),
     ]
+
+    def __init__(self, column_name):
+        self.column_name = column_name
+        self.input_type = [
+            ColumnSchema(semantic_tags={"index"}),
+            ColumnSchema(semantic_tags={"category"}),
+        ]
+        # doesn't seem right
+        # self.output_type = ColumnSchema(logical_type=Boolean)
+        self.hyper_parameter_settings = {}
+
+    def op_type_check(self, table_meta):
+        semantic_tags = table_meta[self.column_name].semantic_tags
+        if "index" not in semantic_tags or "category" not in semantic_tags:
+            return None
+        if not isinstance(
+            table_meta[self.column_name].logical_type,
+            (Integer, Categorical, Ordinal, PostalCode),
+        ):
+            return None
+
+        if "numeric" in semantic_tags:
+            self.output_type = ColumnSchema(
+                logical_type=table_meta[self.column_name].logical_type,
+                semantic_tags={"numeric"},
+            )
+        if "category" in semantic_tags:
+            self.output_type = ColumnSchema(
+                logical_type=table_meta[self.column_name].logical_type,
+                semantic_tags={"category"},
+            )
+
+        return table_meta
 
     def execute(self, dataframe):
         return dataframe[
@@ -60,11 +112,50 @@ class EqFilterOp(FilterOpBase):
 
 
 class NeqFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_CATEGORY}]
+    REQUIRED_PARAMETERS = [{"threshold": None}]
     IOTYPES = [
-        (TM.TYPE_CATEGORY, TM.TYPE_CATEGORY),
-        (TM.TYPE_IDENTIFIER, TM.TYPE_IDENTIFIER),
+        (
+            ColumnSchema(semantic_tags={"category"}),
+            ColumnSchema(semantic_tags={"category"}),
+        ),
+        (
+            ColumnSchema(semantic_tags={"index"}),
+            ColumnSchema(semantic_tags={"index"}),
+        ),
     ]
+
+    def __init__(self, column_name):
+        self.column_name = column_name
+        self.input_type = [
+            ColumnSchema(semantic_tags={"index"}),
+            ColumnSchema(semantic_tags={"category"}),
+        ]
+        # doesn't seem right
+        # self.output_type = ColumnSchema(logical_type=Boolean)
+        self.hyper_parameter_settings = {}
+
+    def op_type_check(self, table_meta):
+        semantic_tags = table_meta[self.column_name].semantic_tags
+        if "index" not in semantic_tags or "category" not in semantic_tags:
+            return None
+        if not isinstance(
+            table_meta[self.column_name].logical_type,
+            (Integer, Categorical, Ordinal, PostalCode),
+        ):
+            return None
+
+        if "numeric" in semantic_tags:
+            self.output_type = ColumnSchema(
+                logical_type=table_meta[self.column_name].logical_type,
+                semantic_tags={"numeric"},
+            )
+        if "category" in semantic_tags:
+            self.output_type = ColumnSchema(
+                logical_type=table_meta[self.column_name].logical_type,
+                semantic_tags={"category"},
+            )
+
+        return table_meta
 
     def execute(self, dataframe):
         return dataframe[
@@ -73,8 +164,29 @@ class NeqFilterOp(FilterOpBase):
 
 
 class GreaterFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    REQUIRED_PARAMETERS = [{"threshold": None}]
+    IOTYPES = [
+        (
+            ColumnSchema(semantic_tags={"numeric"}),
+            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        ),
+    ]
+
+    def __init__(self, column_name):
+        self.column_name = column_name
+        self.input_type = ColumnSchema(semantic_tags={"numeric"})
+        self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
+        self.hyper_parameter_settings = {}
+
+    def op_type_check(self, table_meta):
+        self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
+        if "numeric" not in table_meta[self.column_name].semantic_tags:
+            return None
+        table_meta[self.column_name] = ColumnSchema(
+            logical_type=Double,
+            semantic_tags={"numeric"},
+        )
+        return table_meta
 
     def execute(self, dataframe):
         return dataframe[
@@ -83,8 +195,29 @@ class GreaterFilterOp(FilterOpBase):
 
 
 class LessFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": TM.TYPE_INTEGER}]
-    IOTYPES = [(TM.TYPE_INTEGER, TM.TYPE_INTEGER), (TM.TYPE_FLOAT, TM.TYPE_FLOAT)]
+    REQUIRED_PARAMETERS = [{"threshold": None}]
+    IOTYPES = [
+        (
+            ColumnSchema(semantic_tags={"numeric"}),
+            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        ),
+    ]
+
+    def __init__(self, column_name):
+        self.column_name = column_name
+        self.input_type = ColumnSchema(semantic_tags={"numeric"})
+        self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
+        self.hyper_parameter_settings = {}
+
+    def op_type_check(self, table_meta):
+        self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
+        if "numeric" not in table_meta[self.column_name].semantic_tags:
+            return None
+        table_meta[self.column_name] = ColumnSchema(
+            logical_type=Double,
+            semantic_tags={"numeric"},
+        )
+        return table_meta
 
     def execute(self, dataframe):
         return dataframe[

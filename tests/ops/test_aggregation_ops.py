@@ -1,5 +1,10 @@
+import numpy as np
 import pandas as pd
 import pytest
+from woodwork.column_schema import ColumnSchema
+from woodwork.logical_types import (
+    Categorical,
+)
 
 from trane.ops.aggregation_ops import (
     AvgAggregationOp,
@@ -9,33 +14,12 @@ from trane.ops.aggregation_ops import (
     MinAggregationOp,
     SumAggregationOp,
 )
-from trane.utils.table_meta import TableMeta
 
 
 @pytest.fixture
 def df():
     df = pd.DataFrame({"col": [1, 2, 3, 4, 5]})
     return df
-
-
-@pytest.fixture
-def meta():
-    meta = TableMeta(
-        {
-            "tables": [
-                {
-                    "fields": [
-                        {
-                            "name": "col",
-                            "type": TableMeta.SUPERTYPE[TableMeta.TYPE_FLOAT],
-                            "subtype": TableMeta.TYPE_FLOAT,
-                        },
-                    ],
-                },
-            ],
-        },
-    )
-    return meta
 
 
 @pytest.mark.parametrize(
@@ -49,11 +33,20 @@ def meta():
         (MajorityAggregationOp, str(1)),
     ],
 )
-def test_agg_ops(df, meta, agg_operation, expected_output):
+def test_agg_ops(df, agg_operation, expected_output):
     op = agg_operation("col")
-    op.op_type_check(meta)
     output = op(df)
     assert output == expected_output
+    if agg_operation == MajorityAggregationOp:
+        assert isinstance(output, str)
+    else:
+        assert isinstance(output, (float, int, np.integer))
+
+    meta = {
+        "col": ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
+    }
+    output_meta = op.op_type_check(meta)
+    print(output_meta)
 
 
 @pytest.mark.parametrize(

@@ -7,8 +7,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
-from trane.utils.table_meta import TableMeta as TM
-
 __all__ = ["PredictionProblemEvaluator"]
 
 
@@ -104,37 +102,37 @@ class PredictionProblemEvaluator(object):
         counter_tuple = counter_tuple[:3]
         return [item[0] for item in counter_tuple]
 
-    def threshold_recommend(self, problem):
-        filter_op = problem.operations[0]
-        if len(filter_op.REQUIRED_PARAMETERS) == 0:
-            yield copy.deepcopy(problem), "no threshold"
-        else:
-            if filter_op.input_type == TM.TYPE_CATEGORY:
-                for item in self._categorical_threshold(
-                    self.sampled_df[filter_op.column_name],
-                ):
-                    problem_final = copy.deepcopy(problem)
-                    problem_final.operations[0].set_hyper_parameter(
-                        parameter_name="threshold",
-                        parameter_value=item,
-                    )
-                    yield problem_final, "threshold: {}".format(item)
-            elif filter_op.input_type in [TM.TYPE_FLOAT, TM.TYPE_INTEGER]:
-                for keep_rate in [0.25, 0.5, 0.75]:
-                    threshold = filter_op.find_threshhold_by_remaining(
-                        fraction_of_data_target=keep_rate,
-                        df=self.sampled_df,
-                        col=filter_op.column_name,
-                    )
-                    problem_final = copy.deepcopy(problem)
-                    problem_final.operations[0].set_hyper_parameter(
-                        parameter_name="threshold",
-                        parameter_value=threshold,
-                    )
-                    yield problem_final, "threshold: {} (keep {}%)".format(
-                        threshold,
-                        keep_rate * 100,
-                    )
+    # def threshold_recommend(self, problem):
+    #     filter_op = problem.operations[0]
+    #     if len(filter_op.REQUIRED_PARAMETERS) == 0:
+    #         yield copy.deepcopy(problem), "no threshold"
+    #     else:
+    #         if filter_op.input_type == TM.TYPE_CATEGORY:
+    #             for item in self._categorical_threshold(
+    #                 self.sampled_df[filter_op.column_name],
+    #             ):
+    #                 problem_final = copy.deepcopy(problem)
+    #                 problem_final.operations[0].set_hyper_parameter(
+    #                     parameter_name="threshold",
+    #                     parameter_value=item,
+    #                 )
+    #                 yield problem_final, "threshold: {}".format(item)
+    #         elif filter_op.input_type in [TM.TYPE_FLOAT, TM.TYPE_INTEGER]:
+    #             for keep_rate in [0.25, 0.5, 0.75]:
+    #                 threshold = filter_op.find_threshhold_by_remaining(
+    #                     fraction_of_data_target=keep_rate,
+    #                     df=self.sampled_df,
+    #                     col=filter_op.column_name,
+    #                 )
+    #                 problem_final = copy.deepcopy(problem)
+    #                 problem_final.operations[0].set_hyper_parameter(
+    #                     parameter_name="threshold",
+    #                     parameter_value=threshold,
+    #                 )
+    #                 yield problem_final, "threshold: {} (keep {}%)".format(
+    #                     threshold,
+    #                     keep_rate * 100,
+    #                 )
 
     def split_dataset(self, problem, problem_type, labels, features):
         X_train, X_test, Y_train, Y_test = [], [], [], []
@@ -191,12 +189,14 @@ class PredictionProblemEvaluator(object):
         return X_train, X_test, Y_train, Y_test
 
     def evaluate(self, problem, features, labels):
-        if problem.label_type in [TM.TYPE_INTEGER, TM.TYPE_FLOAT]:
-            problem_type = "regression"
-        elif problem.label_type in [TM.TYPE_CATEGORY, TM.TYPE_IDENTIFIER]:
-            problem_type = "classification"
-        else:
-            return {"status": "fail", "description": "unknown problem type"}
+        # totally wrong, just for testing
+        problem_type = "regression"
+        # if problem.label_type in [TM.TYPE_INTEGER, TM.TYPE_FLOAT]:
+        #     problem_type = "regression"
+        # elif problem.label_type in [TM.TYPE_CATEGORY, TM.TYPE_IDENTIFIER]:
+        #     problem_type = "classification"
+        # else:
+        #     return {"status": "fail", "description": "unknown problem type"}
 
         template_res = {"problem_type": problem_type, "template_nl": str(problem)}
         evaluations = []

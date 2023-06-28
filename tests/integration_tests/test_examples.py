@@ -3,15 +3,13 @@ from datetime import datetime
 
 import pandas as pd
 import pytest
-from woodwork.column_schema import ColumnSchema
-from woodwork.logical_types import (
-    Categorical,
-    Datetime,
-    Double,
-    Integer,
-)
 
 import trane
+from trane.datasets.load_functions import (
+    load_bike_metadata,
+    load_covid_metadata,
+    load_youtube_metadata,
+)
 
 from .utils import generate_and_verify_prediction_problem
 
@@ -34,21 +32,7 @@ def df_youtube(current_dir):
 
 @pytest.fixture
 def meta_youtube(current_dir):
-    table_meta = {
-        "trending_date": ColumnSchema(logical_type=Datetime),
-        "channel_title": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"index"},
-        ),
-        "category_id": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"category", "index"},
-        ),
-        "views": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "likes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "dislikes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "comment_count": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-    }
+    table_meta = load_youtube_metadata()
     return table_meta
 
 
@@ -67,22 +51,7 @@ def df_covid(current_dir):
 
 @pytest.fixture
 def meta_covid(current_dir):
-    table_meta = {
-        "Province/State": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"category"},
-        ),
-        "Country/Region": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"category", "index"},
-        ),
-        "Lat": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "Long": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "Date": ColumnSchema(logical_type=Datetime),
-        "Confirmed": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "Deaths": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "Recovered": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-    }
+    table_meta = load_covid_metadata()
     return table_meta
 
 
@@ -99,27 +68,7 @@ def df_chicago(current_dir):
 
 @pytest.fixture
 def meta_chicago(current_dir):
-    table_meta = {
-        "date": ColumnSchema(logical_type=Datetime),
-        "hour": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-        "usertype": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-        "gender": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-        "tripduration": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "temperature": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "from_station_id": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"index"},
-        ),
-        "dpcapacity_start": ColumnSchema(
-            logical_type=Integer,
-            semantic_tags={"numeric"},
-        ),
-        "to_station_id": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"index"},
-        ),
-        "dpcapacity_end": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-    }
+    table_meta = load_bike_metadata()
     return table_meta
 
 

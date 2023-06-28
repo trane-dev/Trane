@@ -4,13 +4,10 @@ from multiprocessing import Manager, Pool
 from tqdm.contrib.concurrent import process_map
 from tqdm.notebook import tqdm
 
-from trane.utils.table_meta import TableMeta as TM
-
-
-def overall_prediction_helper(df, meta):
-    df["__fake_root_entity__"] = 0
-    meta.add_column("__fake_root_entity__", TM.TYPE_IDENTIFIER)
-    return df, meta
+# def overall_prediction_helper(df, meta):
+#     df["__fake_root_entity__"] = 0
+#     meta.add_column("__fake_root_entity__", TM.TYPE_IDENTIFIER)
+#     return df, meta
 
 
 def execute_prediction_problems(df, problems):

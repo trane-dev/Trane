@@ -1,8 +1,13 @@
 import os
 
 import pandas as pd
-
-from trane.utils import TableMeta
+from woodwork.column_schema import ColumnSchema
+from woodwork.logical_types import (
+    Categorical,
+    Datetime,
+    Double,
+    Integer,
+)
 
 
 def load_covid():
@@ -53,77 +58,68 @@ def load_yelp():
     return df
 
 
-def load_covid_tablemeta():
-    metadata = {
-        "tables": [
-            {
-                "fields": [
-                    {"name": "Province/State", "type": "text"},
-                    {"name": "Country/Region", "type": "text"},
-                    {"name": "Lat", "type": "number", "subtype": "float"},
-                    {"name": "Long", "type": "number", "subtype": "float"},
-                    {"name": "Date", "type": "datetime"},
-                    {"name": "Confirmed", "type": "number", "subtype": "integer"},
-                    {"name": "Deaths", "type": "number", "subtype": "integer"},
-                    {"name": "Recovered", "type": "number", "subtype": "integer"},
-                ],
-            },
-        ],
+def load_covid_metadata():
+    table_meta = {
+        "Province/State": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"category"},
+        ),
+        "Country/Region": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"category", "index"},
+        ),
+        "Lat": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        "Long": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        "Date": ColumnSchema(logical_type=Datetime),
+        "Confirmed": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        "Deaths": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        "Recovered": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
     }
-    return TableMeta(metadata)
+    return table_meta
 
 
 def load_youtube_metadata():
-    metadata = {
-        "tables": [
-            {
-                "fields": [
-                    {"name": "trending_date", "type": "time"},
-                    {"name": "channel_title", "type": "id"},
-                    {
-                        "name": "category_id",
-                        "type": "categorical",
-                        "subtype": "categorical",
-                    },
-                    {"name": "views", "type": "categorical", "subtype": "number"},
-                    {"name": "likes", "type": "categorical", "subtype": "integer"},
-                    {"name": "dislikes", "type": "integer", "subtype": "number"},
-                    {"name": "comment_count", "type": "integer", "subtype": "number"},
-                ],
-            },
-        ],
+    table_meta = {
+        "trending_date": ColumnSchema(logical_type=Datetime),
+        "channel_title": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"index"},
+        ),
+        "category_id": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"category", "index"},
+        ),
+        "views": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        "likes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        "dislikes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        "comment_count": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
     }
-    return TableMeta(metadata)
+    return table_meta
 
 
 def load_bike_metadata():
-    metadata = {
-        "tables": [
-            {
-                "fields": [
-                    {"name": "date", "type": "time"},
-                    {"name": "hour", "subtype": "categorical", "type": "categorical"},
-                    {
-                        "name": "usertype",
-                        "subtype": "categorical",
-                        "type": "categorical",
-                    },
-                    {"name": "gender", "subtype": "categorical", "type": "categorical"},
-                    {"name": "tripduration", "subtype": "float", "type": "number"},
-                    {"name": "temperature", "subtype": "float", "type": "number"},
-                    {"name": "from_station_id", "type": "id"},
-                    {
-                        "name": "dpcapacity_start",
-                        "subtype": "integer",
-                        "type": "number",
-                    },
-                    {"name": "to_station_id", "type": "id"},
-                    {"name": "dpcapacity_end", "subtype": "integer", "type": "number"},
-                ],
-            },
-        ],
+    table_meta = {
+        "date": ColumnSchema(logical_type=Datetime),
+        "hour": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+        "usertype": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+        "gender": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+        "tripduration": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        "temperature": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        "from_station_id": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"index"},
+        ),
+        "dpcapacity_start": ColumnSchema(
+            logical_type=Integer,
+            semantic_tags={"numeric"},
+        ),
+        "to_station_id": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"index"},
+        ),
+        "dpcapacity_end": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
     }
-    return TableMeta(metadata)
+    return table_meta
 
 
 def generate_local_filepath(key):

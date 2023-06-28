@@ -22,7 +22,6 @@ from trane.ops.filter_ops import (
     LessFilterOp,
     NeqFilterOp,
 )
-from trane.utils.table_meta import TableMeta
 
 __all__ = ["PredictionProblem"]
 
@@ -453,51 +452,50 @@ class PredictionProblem:
             ),
         )
 
-        allowed_types_category = [bool, int, str, float]
         allowed_types_bool = [bool, np.bool_]
         allowed_types_text = [str]
         allowed_types_int = [int, np.int64]
         allowed_types_float = [float, np.float64, np.float32]
-        allowed_types_time = (
+        (
             allowed_types_bool
             + allowed_types_int
             + allowed_types_text
             + allowed_types_float
         )
-        allowed_types_ordered = (
+        (
             allowed_types_bool
             + allowed_types_int
             + allowed_types_text
             + allowed_types_float
         )
-        allowed_types_id = allowed_types_int + allowed_types_text + allowed_types_float
+        allowed_types_int + allowed_types_text + allowed_types_float
 
-        if expected_type == TableMeta.TYPE_CATEGORY:
-            assert type(actual_data) in allowed_types_category
+        # if expected_type == TableMeta.TYPE_CATEGORY:
+        #     assert type(actual_data) in allowed_types_category
 
-        elif expected_type == TableMeta.TYPE_BOOL:
-            assert type(actual_data) in allowed_types_bool
+        # elif expected_type == TableMeta.TYPE_BOOL:
+        #     assert type(actual_data) in allowed_types_bool
 
-        elif expected_type == TableMeta.TYPE_ORDERED:
-            assert type(actual_data) in allowed_types_ordered
+        # elif expected_type == TableMeta.TYPE_ORDERED:
+        #     assert type(actual_data) in allowed_types_ordered
 
-        elif expected_type == TableMeta.TYPE_TEXT:
-            assert type(actual_data) in allowed_types_text
+        # elif expected_type == TableMeta.TYPE_TEXT:
+        #     assert type(actual_data) in allowed_types_text
 
-        elif expected_type == TableMeta.TYPE_INTEGER:
-            assert type(actual_data) in allowed_types_int
+        # elif expected_type == TableMeta.TYPE_INTEGER:
+        #     assert type(actual_data) in allowed_types_int
 
-        elif expected_type == TableMeta.TYPE_FLOAT:
-            assert type(actual_data) in allowed_types_float
+        # elif expected_type == TableMeta.TYPE_FLOAT:
+        #     assert type(actual_data) in allowed_types_float
 
-        elif expected_type == TableMeta.TYPE_TIME:
-            assert type(actual_data) in allowed_types_time
+        # elif expected_type == TableMeta.TYPE_TIME:
+        #     assert type(actual_data) in allowed_types_time
 
-        elif expected_type == TableMeta.TYPE_IDENTIFIER:
-            assert type(actual_data) in allowed_types_id
+        # elif expected_type == TableMeta.TYPE_IDENTIFIER:
+        #     assert type(actual_data) in allowed_types_id
 
-        else:
-            logging.critical("check_type function received an unexpected type.")
+        # else:
+        #     logging.critical("check_type function received an unexpected type.")
 
     def set_parameters(self, **parameters):
         for operation in self.operations:

@@ -28,11 +28,6 @@ class FilterOpBase(OpBase):
     operations are defined as classes that inherit the FilterOpBase class and
     instantiate the execute method.
 
-    Make Your Own
-    -------------
-    Simply make a new class that follows the requirements below and issue a
-    pull request.
-
     Requirements
     ------------
     REQUIRED_PARAMETERS: the hyper parameters needed for the operation

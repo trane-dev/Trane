@@ -1,12 +1,11 @@
-from woodwork.column_schema import ColumnSchema
-from woodwork.logical_types import (
+from trane.column_schema import ColumnSchema
+from trane.logical_types import (
     Categorical,
     Double,
     Integer,
     Ordinal,
     PostalCode,
 )
-
 from trane.ops.op_base import OpBase
 
 FILTER_OPS = [

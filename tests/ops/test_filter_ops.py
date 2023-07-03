@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
-from woodwork.column_schema import ColumnSchema
 
+from trane.column_schema import ColumnSchema
 from trane.ops.filter_ops import (
     AllFilterOp,
     EqFilterOp,

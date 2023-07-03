@@ -3,12 +3,6 @@ from datetime import datetime
 import composeml as cp
 import pandas as pd
 import pytest
-from woodwork.column_schema import ColumnSchema
-from woodwork.logical_types import (
-    Categorical,
-    Datetime,
-    Double,
-)
 
 import trane
 
@@ -37,14 +31,20 @@ def make_fake_df():
 @pytest.fixture()
 def make_fake_meta():
     meta = {
-        "id": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"index", "category"},
-        ),
-        "date": ColumnSchema(logical_type=Datetime),
-        "country": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-        "amount": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+        "id": ("Categorical", {"index", "category"}),
+        "date": ("Datetime", {}),
+        "state": ("Categorical", {"category"}),
+        "amount": ("Double", {"numeric"}),
     }
+
+    #     "id": ColumnSchema(
+    #         logical_type=Categorical,
+    #         semantic_tags={"index", "category"},
+    #     ),
+    #     "date": ColumnSchema(logical_type=Datetime),
+    #     "country": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
+    #     "amount": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+    # }
     return meta
 
 
@@ -99,6 +99,8 @@ def min_column(data_slice, column, **kwargs):
 def test_prediction_problem(make_fake_df, make_fake_meta):
     df = make_fake_df
     meta = make_fake_meta
+    for column in df.columns:
+        assert column in meta
     entity_col = "id"
     time_col = "date"
     window_size = "2d"

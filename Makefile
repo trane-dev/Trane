@@ -5,6 +5,7 @@ clean:
 	find . -name __pycache__ -delete
 	find . -name '*~' -delete
 	find . -name '.coverage.*' -delete
+	coverage erase
 
 .PHONY: lint
 lint:
@@ -34,7 +35,7 @@ COVERAGE = --cov=trane/ --cov-report term-missing --cov-config=./pyproject.toml 
 
 .PHONY: tests
 tests:
-	$(PYTEST) tests/ --sample 100 $(COVERAGE)
+	$(PYTEST) tests/ --sample 100
 
 .PHONY: unit-tests
 unit-tests:

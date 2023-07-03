@@ -1,8 +1,9 @@
 import os
 
 import pandas as pd
-from woodwork.column_schema import ColumnSchema
-from woodwork.logical_types import (
+
+from trane.column_schema import ColumnSchema
+from trane.logical_types import (
     Categorical,
     Datetime,
     Double,

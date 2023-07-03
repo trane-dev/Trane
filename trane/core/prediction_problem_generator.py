@@ -4,14 +4,15 @@ import itertools
 import random
 
 from tqdm.notebook import tqdm
-from woodwork.column_schema import ColumnSchema
-from woodwork.logical_types import (
+
+from trane.column_schema import ColumnSchema
+from trane.core.prediction_problem import PredictionProblem
+from trane.core.utils import _parse_table_meta
+from trane.logical_types import (
     Categorical,
     Datetime,
     Integer,
 )
-
-from trane.core.prediction_problem import PredictionProblem
 from trane.ops import aggregation_ops as agg_ops
 from trane.ops import filter_ops
 
@@ -37,7 +38,7 @@ class PredictionProblemGenerator:
         -------
         None
         """
-        self.table_meta = table_meta
+        self.table_meta = _parse_table_meta(table_meta)
         self.entity_col = entity_col
         self.time_col = time_col
         self.cutoff_strategy = cutoff_strategy
@@ -181,11 +182,11 @@ class PredictionProblemGenerator:
             assert isinstance(col_type, ColumnSchema)
 
         entity_col_type = self.table_meta[self.entity_col]
-        assert entity_col_type.logical_type in [Integer(), Categorical()]
+        assert entity_col_type.logical_type in [Integer, Categorical]
         assert "index" in entity_col_type.semantic_tags
 
         time_col_type = self.table_meta[self.time_col]
-        assert time_col_type.logical_type == Datetime()
+        assert time_col_type.logical_type == Datetime
 
     def _threshold_recommend(self, filter_op, df, keep_rates=[0.25, 0.5, 0.75]):
         yielded_thresholds = []

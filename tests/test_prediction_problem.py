@@ -37,7 +37,10 @@ def make_fake_df():
 @pytest.fixture()
 def make_fake_meta():
     meta = {
-        "id": ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
+        "id": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"index", "category"},
+        ),
         "date": ColumnSchema(logical_type=Datetime),
         "country": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
         "amount": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
@@ -45,12 +48,52 @@ def make_fake_meta():
     return meta
 
 
-def num_observations(ds, **kwargs):
-    return len(ds)
+def num_observations(data_slice, **kwargs):
+    return len(data_slice)
 
 
-def column_gt_len(data_slice, column, value):
+def column_gt_len(data_slice, column, value, **kwargs):
     return len(data_slice[data_slice[column] > value])
+
+
+def column_lt_len(data_slice, column, value, **kwargs):
+    return len(data_slice[data_slice[column] < value])
+
+
+def column_gt_op(data_slice, column, value, operation="sum", **kwargs):
+    calculated = data_slice[data_slice[column] > value]
+    if calculated.empty:
+        return pd.NA
+    else:
+        if operation is None:
+            return calculated[column].iloc[0]
+        return getattr(calculated[column], operation)()
+
+
+def column_lt_op(data_slice, column, value, operation="sum", **kwargs):
+    calculated = data_slice[data_slice[column] < value]
+    if calculated.empty:
+        return pd.NA
+    else:
+        if operation is None:
+            return calculated[column].iloc[0]
+        return getattr(calculated[column], operation)()
+
+
+def sum_column(data_slice, column, **kwargs):
+    return data_slice[column].sum()
+
+
+def avg_column(data_slice, column, **kwargs):
+    return data_slice[column].mean()
+
+
+def max_column(data_slice, column, **kwargs):
+    return data_slice[column].max()
+
+
+def min_column(data_slice, column, **kwargs):
+    return data_slice[column].min()
 
 
 def test_prediction_problem(make_fake_df, make_fake_meta):
@@ -75,54 +118,272 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
     )
 
     problems = problem_generator.generate(df, generate_thresholds=True)
+    problems_verified = 0
     # bad integration testing
     # not ideal but okay to test for now
     for p in problems:
         label_times = p.execute(df, -1)
         label_times.rename(columns={"_execute_operations_on_df": "label"}, inplace=True)
+        threshold = p.operations[0].hyper_parameter_settings.get("threshold", None)
+
         if str(p) == "For each <id> predict the number of records in next 2d days":
             assert label_times["label"].tolist() == [1, 2, 2, 1]
-
-            expected_label_times = generate_label_times(
-                num_observations,
+            verify_label_times(
+                cutoff_strategy,
                 df,
-                minimum_data,
-                maximum_data,
-                window_size,
-            )
-            pd.testing.assert_frame_equal(
-                expected_label_times,
+                p,
                 label_times,
-                check_frame_type=False,
+                function=num_observations,
+                operation=None,
             )
+            problems_verified += 1
+        elif "For each <id> predict the number of records with <amount>" in str(p):
+            is_greater_than = False
+            if "greater than" in str(p):
+                is_greater_than = True
+
+            if is_greater_than and threshold == 40:
+                assert label_times["label"].tolist() == [0, 0, 1, 1]
+            elif is_greater_than and threshold == 30:
+                assert label_times["label"].tolist() == [0, 0, 2, 1]
+            elif is_greater_than and threshold == 10:
+                assert label_times["label"].tolist() == [0, 2, 2, 1]
+
+            if not is_greater_than and threshold == 30:
+                assert label_times["label"].tolist() == [1, 1, 0, 0]
+            elif not is_greater_than and threshold == 40:
+                assert label_times["label"].tolist() == [1, 2, 0, 0]
+            elif not is_greater_than and threshold == 50:
+                assert label_times["label"].tolist() == [1, 2, 1, 0]
+            label_function = column_gt_len if is_greater_than else column_lt_len
+            verify_label_times(
+                cutoff_strategy,
+                df,
+                p,
+                label_times,
+                function=label_function,
+                operation=None,
+            )
+            problems_verified += 1
         elif (
-            "For each <id> predict the number of records with <amount> greater than"
+            "For each <id> predict the total <amount> in all related records in next 2d days"
             in str(p)
         ):
-            threshold = p.operations[0].hyper_parameter_settings["threshold"]
-            if threshold == 40:
-                assert label_times["label"].tolist() == [0, 0, 1, 1]
-            elif threshold == 30:
-                assert label_times["label"].tolist() == [0, 0, 2, 1]
-            elif threshold == 10:
-                assert label_times["label"].tolist() == [0, 2, 2, 1]
-            expected_label_times = generate_label_times(
-                column_gt_len,
+            assert label_times["label"].tolist() == [10, 50, 90, 60]
+            verify_label_times(
+                cutoff_strategy,
                 df,
-                minimum_data,
-                maximum_data,
-                window_size,
-                column="amount",
-                value=threshold,
-            )
-            pd.testing.assert_frame_equal(
-                expected_label_times,
+                p,
                 label_times,
-                check_frame_type=False,
+                function=sum_column,
+                operation=None,
             )
-        # elif str(p) == "For each <id> predict the number of records with <amount> greater than 20 in next 2d days":
-        #     assert label_times["label"].tolist() == [1, 1, 1]
-        #     print(label_times)
+            problems_verified += 1
+        elif (
+            "For each <id> predict the total <amount> in all related records with <amount> greater than"
+            in str(p)
+        ):
+            if threshold == 40:
+                assert label_times["label"].tolist() == [50, 60]
+            elif threshold == 30:
+                assert label_times["label"].tolist() == [90, 60]
+            verify_label_times(
+                cutoff_strategy,
+                df,
+                p,
+                label_times,
+                function=column_gt_op,
+                operation="sum",
+            )
+            problems_verified += 1
+        elif (
+            "For each <id> predict the total <amount> in all related records with <amount> less than"
+            in str(p)
+        ):
+            if threshold == 10:
+                assert label_times["label"].tolist() == [10, 20]
+            elif threshold == 20:
+                assert label_times["label"].tolist() == [10, 20]
+            verify_label_times(
+                cutoff_strategy,
+                df,
+                p,
+                label_times,
+                function=column_lt_op,
+                operation="sum",
+            )
+            problems_verified += 1
+        elif (
+            "For each <id> predict the average <amount> in all related records in next 2d days"
+            in str(p)
+        ):
+            assert label_times["label"].tolist() == [10.0, 25.0, 45.0, 60.0]
+            verify_label_times(
+                cutoff_strategy,
+                df,
+                p,
+                label_times,
+                function=avg_column,
+                operation=None,
+            )
+            problems_verified += 1
+        elif (
+            "For each <id> predict the average <amount> in all related records with <amount> greater than"
+            in str(p)
+        ):
+            if threshold == 40:
+                assert label_times["label"].tolist() == [50.0, 60.0]
+            elif threshold == 30:
+                assert label_times["label"].tolist() == [45.0, 60.0]
+            verify_label_times(
+                cutoff_strategy,
+                df,
+                p,
+                label_times,
+                function=column_gt_op,
+                operation="mean",
+            )
+            problems_verified += 1
+        elif (
+            "For each <id> predict the average <amount> in all related records with <amount> less than"
+            in str(p)
+        ):
+            if threshold == 30:
+                assert label_times["label"].tolist() == [10.0, 20.0]
+            elif threshold == 40:
+                assert label_times["label"].tolist() == [10.0, 25.0]
+            verify_label_times(
+                cutoff_strategy,
+                df,
+                p,
+                label_times,
+                function=column_lt_op,
+                operation="mean",
+            )
+            problems_verified += 1
+        elif (
+            "For each <id> predict the maximum <amount> in all related records in next 2d days"
+            in str(p)
+        ):
+            assert label_times["label"].tolist() == [10.0, 30.0, 50.0, 60.0]
+            verify_label_times(
+                cutoff_strategy,
+                df,
+                p,
+                label_times,
+                function=max_column,
+                operation="max",
+            )
+            problems_verified += 1
+        elif (
+            "For each <id> predict the maximum <amount> in all related records with <amount> greater than"
+            in str(p)
+        ):
+            if threshold in [30, 40]:
+                assert label_times["label"].tolist() == [50, 60]
+            verify_label_times(
+                cutoff_strategy,
+                df,
+                p,
+                label_times,
+                function=column_gt_op,
+                operation="max",
+            )
+            problems_verified += 1
+        elif (
+            "For each <id> predict the maximum <amount> in all related records with <amount> less than"
+            in str(p)
+        ):
+            if threshold in [10, 20]:
+                assert label_times["label"].tolist() == [10, 20]
+            verify_label_times(
+                cutoff_strategy,
+                df,
+                p,
+                label_times,
+                function=column_lt_op,
+                operation="max",
+            )
+            problems_verified += 1
+        elif (
+            "For each <id> predict the minimum <amount> in all related records in next 2d days"
+            in str(p)
+        ):
+            assert label_times["label"].tolist() == [10, 20, 40, 60]
+            verify_label_times(
+                cutoff_strategy,
+                df,
+                p,
+                label_times,
+                function=min_column,
+                operation="min",
+            )
+            problems_verified += 1
+        elif (
+            "For each <id> predict the minimum <amount> in all related records with <amount> greater than"
+            in str(p)
+        ):
+            if threshold == 40:
+                assert label_times["label"].tolist() == [50, 60]
+            elif threshold == 30:
+                assert label_times["label"].tolist() == [40, 60]
+            verify_label_times(
+                cutoff_strategy,
+                df,
+                p,
+                label_times,
+                function=column_gt_op,
+                operation="min",
+            )
+            problems_verified += 1
+        elif (
+            "For each <id> predict the minimum <amount> in all related records with <amount> less than"
+            in str(p)
+        ):
+            if threshold in [30, 40]:
+                assert label_times["label"].tolist() == [10, 20]
+            verify_label_times(
+                cutoff_strategy,
+                df,
+                p,
+                label_times,
+                function=column_lt_op,
+                operation="min",
+            )
+            problems_verified += 1
+    assert problems_verified == len(problems)
+
+
+def verify_label_times(
+    cutoff_strategy,
+    df,
+    p,
+    label_times,
+    function,
+    operation,
+    column="amount",
+):
+    threshold = p.operations[0].hyper_parameter_settings.get("threshold", None)
+
+    window_size = cutoff_strategy.window_size
+    minimum_data = cutoff_strategy.minimum_data
+    maximum_data = cutoff_strategy.maximum_data
+
+    expected_label_times = generate_label_times(
+        function,
+        df,
+        minimum_data,
+        maximum_data,
+        window_size,
+        value=threshold,
+        column=column,
+        operation=operation,
+    )
+    pd.testing.assert_frame_equal(
+        expected_label_times,
+        label_times,
+        check_frame_type=False,
+    )
 
 
 def generate_label_times(
@@ -133,6 +394,7 @@ def generate_label_times(
     window_size,
     column=None,
     value=None,
+    operation="sum",
     label_column_name="label",
 ):
     lm = cp.LabelMaker(
@@ -145,6 +407,7 @@ def generate_label_times(
         df=df,
         column=column,
         value=value,
+        operation=operation,
         num_examples_per_instance=-1,
         minimum_data=minimum_data,
         maximum_data=maximum_data,

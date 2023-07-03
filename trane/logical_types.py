@@ -1,5 +1,14 @@
-class LogicalType(object):
-    pass
+class LogicalTypeMetaClass(type):
+    def __repr__(cls):
+        return cls.__name__
+
+
+class LogicalType(object, metaclass=LogicalTypeMetaClass):
+    def __eq__(self, other, deep=False):
+        return isinstance(other, self.__class__)
+
+    def __str__(self):
+        return str(self.__class__)
 
 
 class Boolean(LogicalType):

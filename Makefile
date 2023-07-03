@@ -35,7 +35,7 @@ COVERAGE = --cov=trane/ --cov-report term-missing --cov-config=./pyproject.toml 
 
 .PHONY: tests
 tests:
-	$(PYTEST) tests/ --sample 100
+	$(PYTEST) tests/
 
 .PHONY: unit-tests
 unit-tests:
@@ -43,7 +43,7 @@ unit-tests:
 
 .PHONY: integration-tests
 integration-tests:
-	$(PYTEST) tests/integration_tests --sample 100
+	$(PYTEST) tests/integration_tests
 
 .PHONY: upgradepip
 upgradepip:

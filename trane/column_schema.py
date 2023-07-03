@@ -51,18 +51,12 @@ class ColumnSchema(object):
     @property
     def is_numeric(self):
         """Whether the ColumnSchema is numeric in nature"""
-        return (
-            self.logical_type is not None
-            and "numeric" in self.logical_type.standard_tags
-        )
+        return self.logical_type is not None and "numeric" in self.semantic_tags
 
     @property
     def is_categorical(self):
         """Whether the ColumnSchema is categorical in nature"""
-        return (
-            self.logical_type is not None
-            and "category" in self.logical_type.standard_tags
-        )
+        return self.logical_type is not None and "category" in self.semantic_tags
 
     @property
     def is_datetime(self):

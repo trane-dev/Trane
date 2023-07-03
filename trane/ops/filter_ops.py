@@ -69,7 +69,7 @@ class EqFilterOp(FilterOpBase):
     def __init__(self, column_name):
         self.column_name = column_name
         self.input_type = [
-            ColumnSchema(semantic_tags={"index"}),
+            ColumnSchema(semantic_tags={"category"}),
             ColumnSchema(semantic_tags={"category"}),
         ]
         # doesn't seem right
@@ -121,7 +121,7 @@ class NeqFilterOp(FilterOpBase):
     def __init__(self, column_name):
         self.column_name = column_name
         self.input_type = [
-            ColumnSchema(semantic_tags={"index"}),
+            ColumnSchema(semantic_tags={"category"}),
             ColumnSchema(semantic_tags={"category"}),
         ]
         # doesn't seem right

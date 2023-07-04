@@ -179,18 +179,12 @@ class MajorityAggregationOp(AggregationOpBase):
 
     def __init__(self, column_name):
         self.column_name = column_name
-        self.input_type = ColumnSchema(semantic_tags={"category"})
+        # self.input_type = ColumnSchema(semantic_tags={"category"})
         # doesn't seem right
         # self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
         self.hyper_parameter_settings = {}
 
     def op_type_check(self, table_meta):
-        if table_meta[self.column_name].is_numeric:
-            self.output_type = ColumnSchema(
-                logical_type=table_meta[self.column_name].logical_type,
-                semantic_tags={"numeric"},
-            )
-            return table_meta
         if table_meta[self.column_name].is_categorical:
             self.output_type = ColumnSchema(
                 logical_type=table_meta[self.column_name].logical_type,

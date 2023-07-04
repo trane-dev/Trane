@@ -10,16 +10,16 @@ on:
       - main
   workflow_dispatch:
 jobs:
-  unit_tests:
-    name: ${{ matrix.python_version }} unit tests ${{ matrix.type_of_tests }}
+  tests:
+    name: ${{ matrix.python_version }} ${{ matrix.type_of_tests }} tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.8", "3.11"]
-        type_of_tests: ["unit tests", "integration tests"]
+        type_of_tests: ["unit", "integration"]
         exclude:
           - python-version: "3.8"
-            type_of_tests: "integration tests"
+            type_of_tests: "integration"
     steps:
       - uses: actions/checkout@v3
       - name: Set up python ${{ matrix.python-version }}
@@ -40,6 +40,7 @@ jobs:
         if: (steps.cache.outputs.cache-hit == 'true') && ( github.event.pull_request.title != 'Automated Latest Dependency Updates')
         run:  python -m pip install --no-dependencies .
       - name: Run unit tests
+        if: ${{ matrix.type_of_tests != 'integration tests' }}
         run:  make unit-tests
       - name: Run integration tests
         if: ${{ matrix.type_of_tests == 'integration tests' }}

@@ -12,7 +12,7 @@ What’s new in 0.3.0 (February, 24, 2023)
 * Fixes
     * Update to use new compose argument [#56][#56]
     * Remove py from requirements [#56][#56]
-    * Remove TableMeta class and replace with ColumnSchema [#83][#83]
+    * Remove TableMeta class and replace with ColumnSchema [#83][#83] [#85][#85]
 
     [#56]: <https://github.com/HDI-Project/Trane/pull/56>
     [#57]: <https://github.com/HDI-Project/Trane/pull/57>
@@ -20,6 +20,7 @@ What’s new in 0.3.0 (February, 24, 2023)
     [#60]: <https://github.com/HDI-Project/Trane/pull/60>
     [#77]: <https://github.com/HDI-Project/Trane/pull/77>
     [#83]: <https://github.com/HDI-Project/Trane/pull/83>
+    [#85]: <https://github.com/HDI-Project/Trane/pull/85>
 
 What’s new in 0.2.0 (January 5, 2023)
 =====================================

@@ -33,6 +33,37 @@ To install Trane, run the following command:
 python -m pip install trane
 ```
 
+# Example
+
+Below is an example of using Trane:
+
+```python
+import trane
+
+data = trane.datasets.load_covid()
+table_meta = trane.datasets.load_covid_metadata()
+
+entity_col = "Country/Region"
+window_size = "2d"
+minimum_data = "2020-01-22"
+maximum_data = "2020-03-29"
+cutoff_strategy = trane.CutoffStrategy(
+    entity_col=entity_col,
+    window_size=window_size,
+    minimum_data=minimum_data,
+    maximum_data=maximum_data,
+)
+time_col = "Date"
+problem_generator = trane.PredictionProblemGenerator(
+    entity_col=entity_col,
+    time_col=time_col,
+    cutoff_strategy=cutoff_strategy,
+    table_meta=table_meta,
+)
+problems = problem_generator.generate(data, generate_thresholds=True)
+```
+
+
 ## Citing Trane
 If you use Trane, please consider citing the following paper:
 

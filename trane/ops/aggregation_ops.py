@@ -1,6 +1,5 @@
-from woodwork.column_schema import ColumnSchema
-from woodwork.logical_types import Categorical, Double, Integer, Ordinal, PostalCode
-
+from trane.column_schema import ColumnSchema
+from trane.logical_types import Double, Integer
 from trane.ops.op_base import OpBase
 
 AGGREGATION_OPS = [
@@ -81,11 +80,8 @@ class SumAggregationOp(AggregationOpBase):
         self.hyper_parameter_settings = {}
 
     def op_type_check(self, table_meta):
-        if "numeric" not in table_meta[self.column_name].semantic_tags:
-            return None
-        if not isinstance(table_meta[self.column_name].logical_type, (Integer, Double)):
-            return None
-        return table_meta
+        if table_meta[self.column_name].is_numeric:
+            return table_meta
 
     def execute(self, dataframe):
         if len(dataframe) == 0:
@@ -109,11 +105,8 @@ class AvgAggregationOp(AggregationOpBase):
         self.hyper_parameter_settings = {}
 
     def op_type_check(self, table_meta):
-        if "numeric" not in table_meta[self.column_name].semantic_tags:
-            return None
-        if not isinstance(table_meta[self.column_name].logical_type, (Integer, Double)):
-            return None
-        return table_meta
+        if table_meta[self.column_name].is_numeric:
+            return table_meta
 
     def execute(self, dataframe):
         if len(dataframe) == 0:
@@ -137,11 +130,8 @@ class MaxAggregationOp(AggregationOpBase):
         self.hyper_parameter_settings = {}
 
     def op_type_check(self, table_meta):
-        if "numeric" not in table_meta[self.column_name].semantic_tags:
-            return None
-        if not isinstance(table_meta[self.column_name].logical_type, (Integer, Double)):
-            return None
-        return table_meta
+        if table_meta[self.column_name].is_numeric:
+            return table_meta
 
     def execute(self, dataframe):
         if len(dataframe) == 0:
@@ -165,11 +155,8 @@ class MinAggregationOp(AggregationOpBase):
         self.hyper_parameter_settings = {}
 
     def op_type_check(self, table_meta):
-        if "numeric" not in table_meta[self.column_name].semantic_tags:
-            return None
-        if not isinstance(table_meta[self.column_name].logical_type, (Integer, Double)):
-            return None
-        return table_meta
+        if table_meta[self.column_name].is_numeric:
+            return table_meta
 
     def execute(self, dataframe):
         if len(dataframe) == 0:
@@ -192,32 +179,18 @@ class MajorityAggregationOp(AggregationOpBase):
 
     def __init__(self, column_name):
         self.column_name = column_name
-        self.input_type = ColumnSchema(semantic_tags={"category"})
+        # self.input_type = ColumnSchema(semantic_tags={"category"})
         # doesn't seem right
         # self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
         self.hyper_parameter_settings = {}
 
     def op_type_check(self, table_meta):
-        semantic_tags = table_meta[self.column_name].semantic_tags
-        if "index" not in semantic_tags or "category" not in semantic_tags:
-            return None
-        if not isinstance(
-            table_meta[self.column_name].logical_type,
-            (Integer, Categorical, Ordinal, PostalCode),
-        ):
-            return None
-
-        if "numeric" in semantic_tags:
-            self.output_type = ColumnSchema(
-                logical_type=table_meta[self.column_name].logical_type,
-                semantic_tags={"numeric"},
-            )
-        if "category" in semantic_tags:
+        if table_meta[self.column_name].is_categorical:
             self.output_type = ColumnSchema(
                 logical_type=table_meta[self.column_name].logical_type,
                 semantic_tags={"category"},
             )
-        return table_meta
+            return table_meta
 
     def execute(self, dataframe):
         if len(dataframe) == 0:

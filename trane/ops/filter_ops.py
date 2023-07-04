@@ -1,12 +1,11 @@
-from woodwork.column_schema import ColumnSchema
-from woodwork.logical_types import (
+from trane.column_schema import ColumnSchema
+from trane.logical_types import (
     Categorical,
     Double,
     Integer,
     Ordinal,
     PostalCode,
 )
-
 from trane.ops.op_base import OpBase
 
 FILTER_OPS = [
@@ -27,11 +26,6 @@ class FilterOpBase(OpBase):
     They filter out rows based on values in the filter_column. Filter
     operations are defined as classes that inherit the FilterOpBase class and
     instantiate the execute method.
-
-    Make Your Own
-    -------------
-    Simply make a new class that follows the requirements below and issue a
-    pull request.
 
     Requirements
     ------------
@@ -75,7 +69,7 @@ class EqFilterOp(FilterOpBase):
     def __init__(self, column_name):
         self.column_name = column_name
         self.input_type = [
-            ColumnSchema(semantic_tags={"index"}),
+            ColumnSchema(semantic_tags={"category"}),
             ColumnSchema(semantic_tags={"category"}),
         ]
         # doesn't seem right
@@ -127,7 +121,7 @@ class NeqFilterOp(FilterOpBase):
     def __init__(self, column_name):
         self.column_name = column_name
         self.input_type = [
-            ColumnSchema(semantic_tags={"index"}),
+            ColumnSchema(semantic_tags={"category"}),
             ColumnSchema(semantic_tags={"category"}),
         ]
         # doesn't seem right

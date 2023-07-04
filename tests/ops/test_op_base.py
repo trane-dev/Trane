@@ -1,13 +1,13 @@
 import pandas as pd
 import pytest
-from woodwork.column_schema import ColumnSchema
-from woodwork.logical_types import (
+
+from trane.column_schema import ColumnSchema
+from trane.logical_types import (
     Boolean,
     Categorical,
     Datetime,
     Double,
 )
-
 from trane.ops.op_base import OpBase
 
 

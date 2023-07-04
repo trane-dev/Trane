@@ -6,6 +6,7 @@ import composeml as cp
 import dill
 import numpy as np
 
+from trane.core.utils import _parse_table_meta
 from trane.ops.aggregation_ops import (
     AvgAggregationOp,
     CountAggregationOp,
@@ -55,7 +56,7 @@ class PredictionProblem:
         self.operations = operations
         self.entity_col = entity_col
         self.time_col = time_col
-        self.table_meta = table_meta
+        self.table_meta = _parse_table_meta(table_meta)
         self.cutoff_strategy = cutoff_strategy
         self.label_type = None
 
@@ -104,8 +105,6 @@ class PredictionProblem:
             if not hasattr(op, "op_type_check"):
                 return False
             temp_meta = op.op_type_check(temp_meta)
-            # if "For each <id> predict the total <amount> in all related records with <amount> greater than" in str(self) and "in next" in str(self):
-            #     breakpoint()
             if temp_meta is None:
                 return False
 

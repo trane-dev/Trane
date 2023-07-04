@@ -1,8 +1,4 @@
-from woodwork.column_schema import ColumnSchema
-from woodwork.logical_types import (
-    Datetime,
-)
-
+from trane.column_schema import ColumnSchema
 from trane.datasets.load_functions import (
     load_bike,
     load_bike_metadata,
@@ -10,6 +6,9 @@ from trane.datasets.load_functions import (
     load_covid_metadata,
     load_youtube,
     load_youtube_metadata,
+)
+from trane.logical_types import (
+    Datetime,
 )
 
 

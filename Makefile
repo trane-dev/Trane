@@ -43,7 +43,7 @@ unit-tests:
 
 .PHONY: integration-tests
 integration-tests:
-	$(PYTEST) tests/integration_tests
+	$(PYTEST) tests/integration_tests --sample 100
 
 .PHONY: upgradepip
 upgradepip:

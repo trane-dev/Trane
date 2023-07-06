@@ -6,7 +6,7 @@ import composeml as cp
 import dill
 import numpy as np
 
-from trane.core.utils import TYPE_MAPPING, _parse_table_meta
+from trane.core.utils import _check_operations_valid, _parse_table_meta
 from trane.ops.aggregation_ops import (
     AvgAggregationOp,
     CountAggregationOp,
@@ -97,31 +97,11 @@ class PredictionProblem:
             temp_meta = table_meta.copy()
         else:
             temp_meta = self.table_meta.copy()
-        for op in self.operations:
-            input_output_types = op.input_output_types
-            for op_type, output_type in input_output_types:
-                # operation applies to all columns
-                if op_type is None:
-                    continue
-                if isinstance(op_type, str):
-                    op_type = TYPE_MAPPING[op_type]
-                if isinstance(output_type, str):
-                    output_type = TYPE_MAPPING[output_type]
-                # check the operation is valid for the column
-                column_logical_type = temp_meta[op.column_name].logical_type
-                column_semantic_tags = temp_meta[op.column_name].semantic_tags
 
-                op_logical_type = op_type.logical_type
-                op_semantic_tags = op_type.semantic_tags
-                # if op.column_name == "amount":
-                #     breakpoint()
-                if op_logical_type and column_logical_type != op_logical_type:
-                    return False
-                if not column_semantic_tags.issubset(op_semantic_tags):
-                    return False
-                # update the column's type (to indicate the operation has taken place)
-                temp_meta[op.column_name] = output_type
-        return True
+        result, _ = _check_operations_valid(self.operations, temp_meta)
+        if result:
+            return True
+        return False
 
     def execute(
         self,

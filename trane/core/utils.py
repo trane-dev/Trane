@@ -1,13 +1,14 @@
 from trane.column_schema import ColumnSchema
 from trane.logical_types import ALL_LOGICAL_TYPES, Double, Integer
+from trane.ops import AggregationOpBase, FilterOpBase, OpBase
 
 TYPE_MAPPING = {
     "category": ColumnSchema(semantic_tags={"category"}),
     "index": ColumnSchema(semantic_tags={"index"}),
     None: ColumnSchema(),
     "numeric": ColumnSchema(semantic_tags={"numeric"}),
-    "Double": ColumnSchema(logical_type=Double),
-    "Integer": ColumnSchema(logical_type=Integer),
+    "Double": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+    "Integer": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
 }
 
 
@@ -35,3 +36,36 @@ def _parse_table_meta(table_meta):
         else:
             raise TypeError(f"Invalid schema type for column '{col}'")
     return parsed_schema
+
+
+def _check_operations_valid(
+    operations: list[OpBase],
+    table_meta: dict[str, ColumnSchema],
+):
+    if not isinstance(operations[0], FilterOpBase):
+        raise ValueError
+    if not isinstance(operations[1], AggregationOpBase):
+        raise ValueError
+    for op in operations:
+        input_output_types = op.input_output_types
+        for op_input_type, op_output_type in input_output_types:
+            # operation applies to all columns
+            if op_input_type is None:
+                continue
+            if isinstance(op_input_type, str):
+                op_input_type = TYPE_MAPPING[op_input_type]
+            if isinstance(op_output_type, str):
+                op_output_type = TYPE_MAPPING[op_output_type]
+            # check the operation is valid for the column
+            column_logical_type = table_meta[op.column_name].logical_type
+            column_semantic_tags = table_meta[op.column_name].semantic_tags
+
+            op_input_logical_type = op_input_type.logical_type
+            op_input_semantic_tags = op_input_type.semantic_tags
+            if op_input_logical_type and column_logical_type != op_input_logical_type:
+                return False, {}
+            if not column_semantic_tags.issubset(op_input_semantic_tags):
+                return False, {}
+            # update the column's type (to indicate the operation has taken place)
+            table_meta[op.column_name] = op_output_type
+    return True, table_meta

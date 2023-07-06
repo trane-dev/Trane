@@ -189,12 +189,11 @@ class PredictionProblemGenerator:
 
     def _threshold_recommend(self, filter_op, df, keep_rates=[0.25, 0.5, 0.75]):
         yielded_thresholds = []
-        valid_semantic_tags = []
+        valid_semantic_tags = set()
         for op_input_type, _ in filter_op.input_output_types:
             if isinstance(op_input_type, str):
-                valid_semantic_tags.append(TYPE_MAPPING[op_input_type].semantic_tags)
-            else:
-                valid_semantic_tags.append(op_input_type.semantic_tags)
+                op_input_type = TYPE_MAPPING[op_input_type]
+            valid_semantic_tags.update(op_input_type.semantic_tags)
         if "category" in valid_semantic_tags:
             most_frequent_categories = get_k_most_frequent(
                 df[filter_op.column_name],
@@ -205,10 +204,10 @@ class PredictionProblemGenerator:
                     yielded_thresholds.append(category)
         elif "numeric" in valid_semantic_tags:
             for rate in keep_rates:
-                threshold = filter_op.find_threshhold_by_remaining(
+                threshold = filter_op.find_threshold_by_fraction_of_data_to_keep(
                     fraction_of_data_target=rate,
                     df=df,
-                    col=filter_op.column_name,
+                    label_col=filter_op.column_name,
                 )
                 if threshold not in yielded_thresholds:
                     yielded_thresholds.append(threshold)

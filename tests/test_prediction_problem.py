@@ -358,7 +358,6 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 operation="min",
             )
             problems_verified += 1
-    print(problems)
     assert problems_verified >= 35
 
 

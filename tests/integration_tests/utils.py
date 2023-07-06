@@ -88,7 +88,7 @@ def generate_and_verify_prediction_problem(
                     _ = op.column_name
             elif isinstance(op, FilterOpBase):
                 expected_filter_str = filter_op_str_dict[op.__class__]
-                threshold = op.hyper_parameter_settings.get("threshold", None)
+                threshold = op.threshold
                 assert expected_filter_str in p_str
                 if op.column_name:
                     # filter_column_name

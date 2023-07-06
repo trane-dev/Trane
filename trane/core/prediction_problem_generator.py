@@ -45,6 +45,22 @@ class PredictionProblemGenerator:
         self.cutoff_strategy = cutoff_strategy
         self.ensure_valid_inputs()
 
+    def ensure_valid_inputs(self):
+        """
+        TypeChecking for the problem generator entity_col
+        and label_col. Errors if types don't match up.
+        """
+        for col, col_type in self.table_meta.items():
+            assert isinstance(col, str)
+            assert isinstance(col_type, ColumnSchema)
+
+        entity_col_type = self.table_meta[self.entity_col]
+        assert entity_col_type.logical_type in [Integer, Categorical]
+        assert "index" in entity_col_type.semantic_tags
+
+        time_col_type = self.table_meta[self.time_col]
+        assert time_col_type.logical_type == Datetime
+
     def generate(
         self,
         df,
@@ -104,18 +120,13 @@ class PredictionProblemGenerator:
             total=total_attempts,
             position=pbar_position,
         ):
-            # print(
-            #     "\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts),
-            #     end="",
-            # )
             all_attempts += 1
             ag_col, filter_col, agg_op_name, filter_op_name = op_col_combo
-            # print(ag_col, filter_col, agg_op_name, filter_op_name)
 
             agg_op_obj = getattr(agg_ops, agg_op_name)(ag_col)  # noqa
             filter_op_obj = getattr(filter_ops, filter_op_name)(filter_col)  # noqa
 
-            # Note: the order of the operations matters, the filter operation is first
+            # Note: the order of the operations matters, the filter operation must be first
             operations = [filter_op_obj, agg_op_obj]
 
             problem = PredictionProblem(
@@ -145,47 +156,7 @@ class PredictionProblemGenerator:
                 success_attempts += 1
             if n_problems and success_attempts >= n_problems:
                 break
-        # print("\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts))
         return problems
-
-    def generate_thresholds(self, problems, df_sample):
-        """
-        Generate thresholds for all problems in a list of prediction problems if
-        thresholds can be generated for them.
-
-        Parameters
-        ----------
-        problems: a list of Prediction Problem objects that may need thresholds
-        to be set
-        df_sample: a sample of the dataframe that will be used to execute the
-        prediction problems to generate thresholds from
-
-        Returns
-        -------
-        problems: a list of Prediction Problem objects with thresholds set or the
-        original problem if no thresholds are needed.
-        """
-        final_problems = []
-        for problem in problems:
-            for final_problem, _ in self._threshold_recommend(problem, df_sample):
-                final_problems.append(final_problem)
-        return final_problems
-
-    def ensure_valid_inputs(self):
-        """
-        TypeChecking for the problem generator entity_col
-        and label_col. Errors if types don't match up.
-        """
-        for col, col_type in self.table_meta.items():
-            assert isinstance(col, str)
-            assert isinstance(col_type, ColumnSchema)
-
-        entity_col_type = self.table_meta[self.entity_col]
-        assert entity_col_type.logical_type in [Integer, Categorical]
-        assert "index" in entity_col_type.semantic_tags
-
-        time_col_type = self.table_meta[self.time_col]
-        assert time_col_type.logical_type == Datetime
 
     def _threshold_recommend(self, filter_op, df, keep_rates=[0.25, 0.5, 0.75]):
         yielded_thresholds = []
@@ -212,34 +183,6 @@ class PredictionProblemGenerator:
                 if threshold not in yielded_thresholds:
                     yielded_thresholds.append(threshold)
         return yielded_thresholds
-        #     problem_final = copy.deepcopy(problem)
-        #     problem_final.operations[0].set_hyper_parameter(
-        #         parameter_name="threshold",
-        #         parameter_value=category,
-        #     )
-        #     yield problem_final, "threshold: {}".format(category)
-        # else:
-        #     continue
-        # elif filter_op.input_type == ColumnSchema(semantic_tags={"numeric"}):
-        #     for keep_rate in [0.25, 0.5, 0.75]:
-        #         threshold = filter_op.find_threshhold_by_remaining(
-        #             fraction_of_data_target=keep_rate,
-        #             df=df,
-        #             col=filter_op.column_name,
-        #         )
-        #         if threshold not in yielded_thresholds:
-        #             yielded_thresholds.append(threshold)
-        #             problem_final = copy.deepcopy(problem)
-        #             problem_final.operations[0].set_hyper_parameter(
-        #                 parameter_name="threshold",
-        #                 parameter_value=threshold,
-        #             )
-        #             yield problem_final, "threshold: {} (keep {}%)".format(
-        #                 threshold,
-        #                 keep_rate * 100,
-        #             )
-        #         else:
-        #             continue
 
 
 def get_k_most_frequent(series, k=3):

@@ -1,13 +1,17 @@
-from trane.column_schema import ColumnSchema
-from trane.logical_types import (
+from datetime import datetime
+
+import pandas as pd
+
+from trane.ops import AggregationOpBase, OpBase
+from trane.ops.filter_ops import FilterOpBase
+from trane.typing.column_schema import ColumnSchema
+from trane.typing.logical_types import (
     ALL_LOGICAL_TYPES,
     Categorical,
     Datetime,
     Double,
     Integer,
 )
-from trane.ops import AggregationOpBase, OpBase
-from trane.ops.filter_ops import FilterOpBase
 
 TYPE_MAPPING = {
     "category": ColumnSchema(semantic_tags={"category"}),
@@ -17,6 +21,12 @@ TYPE_MAPPING = {
     "Double": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
     "Integer": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
 }
+
+
+def clean_date(date):
+    if isinstance(date, str):
+        return pd.Timestamp(datetime.strptime(date, "%Y-%m-%d"))
+    return date
 
 
 def _parse_table_meta(table_meta):

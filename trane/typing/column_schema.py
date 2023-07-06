@@ -1,6 +1,6 @@
 from inspect import isclass
 
-from trane.logical_types import Boolean, Datetime, Ordinal
+from trane.typing.logical_types import Boolean, Datetime, Ordinal
 
 
 class ColumnSchema(object):

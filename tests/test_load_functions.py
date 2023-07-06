@@ -1,4 +1,3 @@
-from trane.column_schema import ColumnSchema
 from trane.datasets.load_functions import (
     load_bike,
     load_bike_metadata,
@@ -7,7 +6,8 @@ from trane.datasets.load_functions import (
     load_youtube,
     load_youtube_metadata,
 )
-from trane.logical_types import (
+from trane.typing.column_schema import ColumnSchema
+from trane.typing.logical_types import (
     Datetime,
 )
 

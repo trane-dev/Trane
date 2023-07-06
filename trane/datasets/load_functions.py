@@ -2,8 +2,8 @@ import os
 
 import pandas as pd
 
-from trane.column_schema import ColumnSchema
-from trane.logical_types import (
+from trane.typing.column_schema import ColumnSchema
+from trane.typing.logical_types import (
     Categorical,
     Datetime,
     Double,

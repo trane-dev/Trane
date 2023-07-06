@@ -1,6 +1,6 @@
 import pandas as pd
 
-from trane.utils.inference import (
+from trane.typing.inference import (
     _infer_series_type,
 )
 

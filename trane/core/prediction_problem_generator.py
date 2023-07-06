@@ -3,18 +3,18 @@ import itertools
 
 from tqdm.notebook import tqdm
 
-from trane.column_schema import ColumnSchema
 from trane.core.prediction_problem import PredictionProblem
 from trane.core.utils import _parse_table_meta, get_semantic_tags
-from trane.logical_types import (
-    Categorical,
-    Datetime,
-    Integer,
-)
 from trane.ops import aggregation_ops as agg_ops
 from trane.ops import filter_ops
 from trane.ops.filter_ops import AllFilterOp
 from trane.ops.threshold_functions import get_k_most_frequent
+from trane.typing.column_schema import ColumnSchema
+from trane.typing.logical_types import (
+    Categorical,
+    Datetime,
+    Integer,
+)
 
 __all__ = ["PredictionProblemGenerator"]
 

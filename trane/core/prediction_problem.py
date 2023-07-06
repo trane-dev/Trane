@@ -3,7 +3,6 @@ import logging
 import composeml as cp
 import numpy as np
 
-from trane.column_schema import ColumnSchema
 from trane.core.utils import _check_operations_valid, _parse_table_meta
 from trane.ops.filter_ops import (
     AllFilterOp,
@@ -13,8 +12,7 @@ from trane.ops.filter_ops import (
     LessFilterOp,
     NeqFilterOp,
 )
-
-__all__ = ["PredictionProblem"]
+from trane.typing.column_schema import ColumnSchema
 
 
 class PredictionProblem:
@@ -121,20 +119,14 @@ class PredictionProblem:
                 ),
             )
 
-        default_kwarg = (
-            self.cutoff_strategy.kwarg_dict() if self.cutoff_strategy else {}
-        )
-        search_kwargs = {
-            "minimum_data": minimum_data or default_kwarg.get("minimum_data"),
-            "maximum_data": maximum_data or default_kwarg.get("maximum_data"),
-            "gap": gap or default_kwarg.get("gap"),
-        }
+        minimum_data = minimum_data or self.cutoff_strategy.minimum_data
+        maximum_data = maximum_data or self.cutoff_strategy.maximum_data
         lt = self._label_maker.search(
             df=df,
             num_examples_per_instance=num_examples_per_instance,
-            minimum_data=search_kwargs["minimum_data"],
-            maximum_data=search_kwargs["maximum_data"],
-            gap=search_kwargs["gap"],
+            minimum_data=minimum_data,
+            maximum_data=maximum_data,
+            gap=gap,
             drop_empty=drop_empty,
             verbose=verbose,
             *args,
@@ -314,10 +306,3 @@ class PredictionProblem:
 
         # else:
         #     logging.critical("check_type function received an unexpected type.")
-
-    def set_parameters(self, **parameters):
-        for operation in self.operations:
-            settings = operation.hyper_parameter_settings
-            for parameter in operation.REQUIRED_PARAMETERS:
-                for key in parameter:
-                    settings[key] = parameters.get(key, 0)

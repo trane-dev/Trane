@@ -10,4 +10,3 @@ from trane.utils.helper import (
     execute_prediction_problems,
 )
 from trane.utils.evaluate_tool import *  # noqa
-from trane.utils.inference import *  # noqa

@@ -98,7 +98,8 @@ class MinAggregationOp(AggregationOpBase):
 
 
 class MajorityAggregationOp(AggregationOpBase):
-    input_output_types = [("category", "category"), ("index", "index")]
+    input_output_types = [("category", "category")]
+    # input_output_types = [("category", "category"), ("index", "index")]
     description = "the majority <{}> in all related records"
 
     def label_function(self, dataslice):

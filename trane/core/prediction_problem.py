@@ -6,7 +6,7 @@ import composeml as cp
 import dill
 import numpy as np
 
-from trane.core.utils import _parse_table_meta
+from trane.core.utils import TYPE_MAPPING, _parse_table_meta
 from trane.ops.aggregation_ops import (
     AvgAggregationOp,
     CountAggregationOp,
@@ -93,52 +93,35 @@ class PredictionProblem:
         -------
         Bool
         """
-        # don't contaminate original table_meta
         if table_meta:
             temp_meta = table_meta.copy()
         else:
             temp_meta = self.table_meta.copy()
-        # sort each operation in its respective bucket
         for op in self.operations:
-            # op.op_type_check returns a modified temp_meta,
-            # which accounts for the operation having taken place
-            if not hasattr(op, "op_type_check"):
-                return False
-            temp_meta = op.op_type_check(temp_meta)
-            if temp_meta is None:
-                return False
+            input_output_types = op.input_output_types
+            for op_type, output_type in input_output_types:
+                # operation applies to all columns
+                if op_type is None:
+                    continue
+                if isinstance(op_type, str):
+                    op_type = TYPE_MAPPING[op_type]
+                if isinstance(output_type, str):
+                    output_type = TYPE_MAPPING[output_type]
+                # check the operation is valid for the column
+                column_logical_type = temp_meta[op.column_name].logical_type
+                column_semantic_tags = temp_meta[op.column_name].semantic_tags
 
-        # [
-        #     ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-        #     ColumnSchema(logical_type=Boolean),
-        #     ColumnSchema(logical_type=Ordinal, semantic_tags={"category"}),
-        #     ColumnSchema(logical_type=Integer),
-        #     ColumnSchema(logical_type=Double),
-        #     ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        #     ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        #     ColumnSchema(logical_type=Datetime),
-        #     ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
-        #     ColumnSchema(logical_type=Integer, semantic_tags={"index"}),
-        #     ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
-        # ]
+                op_logical_type = op_type.logical_type
+                op_semantic_tags = op_type.semantic_tags
+                # if op.column_name == "amount":
+                #     breakpoint()
+                if op_logical_type and column_logical_type != op_logical_type:
+                    return False
+                if not column_semantic_tags.issubset(op_semantic_tags):
+                    return False
+                # update the column's type (to indicate the operation has taken place)
+                temp_meta[op.column_name] = output_type
         return True
-        # TYPES = [
-        #     TYPE_CATEGORY,
-        #     TYPE_BOOL,
-        #     TYPE_ORDERED,
-        #     TYPE_TEXT,
-        #     TYPE_INTEGER,
-        #     TYPE_FLOAT,
-        #     TYPE_TIME,
-        #     TYPE_IDENTIFIER,
-        # ]
-
-        # not sure what this is for
-        # if temp_meta in TYPES:
-        #     self.label_type = temp_meta
-        #     return True
-        # else:
-        #     return False
 
     def execute(
         self,
@@ -205,7 +188,7 @@ class PredictionProblem:
         """
         df = df.copy()
         for operation in self.operations:
-            df = operation.execute(df)
+            df = operation.label_function(df)
         return df
 
     def __repr__(self) -> str:
@@ -285,7 +268,7 @@ class PredictionProblem:
             op_desc = "<{col}> {op} {threshold}".format(
                 col=op.column_name,
                 op=filter_op_str_dict[type(op)],
-                threshold=op.hyper_parameter_settings.get("threshold", "__"),
+                threshold=op.__dict__.get("threshold", "__"),
             )
             desc += op_desc
 

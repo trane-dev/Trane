@@ -1,5 +1,14 @@
 from trane.column_schema import ColumnSchema
-from trane.logical_types import ALL_LOGICAL_TYPES
+from trane.logical_types import ALL_LOGICAL_TYPES, Double, Integer
+
+TYPE_MAPPING = {
+    "category": ColumnSchema(semantic_tags={"category"}),
+    "index": ColumnSchema(semantic_tags={"index"}),
+    None: ColumnSchema(),
+    "numeric": ColumnSchema(semantic_tags={"numeric"}),
+    "Double": ColumnSchema(logical_type=Double),
+    "Integer": ColumnSchema(logical_type=Integer),
+}
 
 
 def _parse_table_meta(table_meta):

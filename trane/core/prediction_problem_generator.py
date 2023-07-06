@@ -7,7 +7,7 @@ from tqdm.notebook import tqdm
 
 from trane.column_schema import ColumnSchema
 from trane.core.prediction_problem import PredictionProblem
-from trane.core.utils import _parse_table_meta
+from trane.core.utils import TYPE_MAPPING, _parse_table_meta
 from trane.logical_types import (
     Categorical,
     Datetime,
@@ -15,6 +15,7 @@ from trane.logical_types import (
 )
 from trane.ops import aggregation_ops as agg_ops
 from trane.ops import filter_ops
+from trane.ops.filter_ops import AllFilterOp
 
 __all__ = ["PredictionProblemGenerator"]
 
@@ -91,9 +92,10 @@ class PredictionProblemGenerator:
                 filter_columns,
                 agg_columns,
             ):
+                if filter_col == self.time_col or agg_col == self.time_col:
+                    continue
                 if filter_col != self.entity_col and agg_col != self.entity_col:
                     possible_ops.append((agg_col, filter_col, agg, filter_))
-
         total_attempts = len(possible_ops)
         all_attempts = 0
         success_attempts = 0
@@ -123,10 +125,9 @@ class PredictionProblemGenerator:
                 table_meta=self.table_meta,
                 cutoff_strategy=self.cutoff_strategy,
             )
-
             if problem.is_valid() and generate_thresholds is True:
                 filter_op = problem.operations[0]
-                if len(filter_op.REQUIRED_PARAMETERS) == 0:
+                if isinstance(filter_op, AllFilterOp):
                     # the filter operation does not require a threshold
                     problems.append(problem)
                     success_attempts += 1
@@ -134,9 +135,8 @@ class PredictionProblemGenerator:
                     yielded_thresholds = self._threshold_recommend(filter_op, df)
                     for threshold in yielded_thresholds:
                         final_problem = copy.deepcopy(problem)
-                        final_problem.operations[0].set_hyper_parameter(
-                            parameter_name="threshold",
-                            parameter_value=threshold,
+                        final_problem.operations[0].set_parameters(
+                            threshold=threshold,
                         )
                         problems.append(final_problem)
                         success_attempts += 1
@@ -145,7 +145,6 @@ class PredictionProblemGenerator:
                 success_attempts += 1
             if n_problems and success_attempts >= n_problems:
                 break
-
         # print("\rSuccess/Attempt = {}/{}".format(success_attempts, all_attempts))
         return problems
 
@@ -190,9 +189,13 @@ class PredictionProblemGenerator:
 
     def _threshold_recommend(self, filter_op, df, keep_rates=[0.25, 0.5, 0.75]):
         yielded_thresholds = []
-        # if len(filter_op.REQUIRED_PARAMETERS) == 0:
-        #     yield copy.deepcopy(problem), "no threshold"
-        if filter_op.input_type == ColumnSchema(semantic_tags={"category"}):
+        valid_semantic_tags = []
+        for op_input_type, _ in filter_op.input_output_types:
+            if isinstance(op_input_type, str):
+                valid_semantic_tags.append(TYPE_MAPPING[op_input_type].semantic_tags)
+            else:
+                valid_semantic_tags.append(op_input_type.semantic_tags)
+        if "category" in valid_semantic_tags:
             most_frequent_categories = get_k_most_frequent(
                 df[filter_op.column_name],
                 k=3,
@@ -200,7 +203,7 @@ class PredictionProblemGenerator:
             for category in most_frequent_categories:
                 if category not in yielded_thresholds:
                     yielded_thresholds.append(category)
-        elif filter_op.input_type == ColumnSchema(semantic_tags={"numeric"}):
+        elif "numeric" in valid_semantic_tags:
             for rate in keep_rates:
                 threshold = filter_op.find_threshhold_by_remaining(
                     fraction_of_data_target=rate,

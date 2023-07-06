@@ -7,14 +7,6 @@ import dill
 import numpy as np
 
 from trane.core.utils import _check_operations_valid, _parse_table_meta
-from trane.ops.aggregation_ops import (
-    AvgAggregationOp,
-    CountAggregationOp,
-    MajorityAggregationOp,
-    MaxAggregationOp,
-    MinAggregationOp,
-    SumAggregationOp,
-)
 from trane.ops.filter_ops import (
     AllFilterOp,
     EqFilterOp,
@@ -214,18 +206,7 @@ class PredictionProblem:
         return description
 
     def _describe_aggop(self, op):
-        agg_op_str_dict = {
-            SumAggregationOp: " the total <{}> in all related records",
-            AvgAggregationOp: " the average <{}> in all related records",
-            MaxAggregationOp: " the maximum <{}> in all related records",
-            MinAggregationOp: " the minimum <{}> in all related records",
-            MajorityAggregationOp: " the majority <{}> in all related records",
-        }
-
-        if isinstance(op, CountAggregationOp):
-            return " the number of records"
-        if type(op) in agg_op_str_dict:
-            return agg_op_str_dict[type(op)].format(op.column_name)
+        return op.generate_description()
 
     def _describe_filter(self, op):
         filter_op_str_dict = {

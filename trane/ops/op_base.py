@@ -1,6 +1,6 @@
 import pandas as pd
 
-from trane.ops.threshold_functions import entropy_of_list, sample_unique_values
+from trane.ops.threshold_functions import sample_unique_values
 
 __all__ = ["OpBase"]
 
@@ -76,47 +76,6 @@ class OpBase(object):
                 best_threshold = unique_val
         self.set_parameters(threshold=original_threshold)
         return best_threshold
-
-    def find_threshold_to_maximize_uncertainty(
-        self,
-        df,
-        label_col,
-        entity_col,
-        max_num_unique_values=10,
-        max_number_of_rows=2000,
-        random_state=None,
-    ):
-        original_threshold = self.threshold
-
-        unique_vals = sample_unique_values(
-            df[label_col],
-            max_num_unique_values,
-            random_state,
-        )
-
-        # if len(df) > max_number_of_rows:
-        #     df = df.sample(max_number_of_rows, random_state=random_state)
-
-        best_entropy = 0
-        best_parameter_value = 0
-
-        # return the one that results in the most entropy (contains the most randomness)
-        # more entropy means more unpredictability
-        # goal of ML is to reduce uncertainty
-        # so we want to output the dataframe with the most entropy
-        unique_vals = set(df[label_col])
-        for unique_val in unique_vals:
-            self.set_parameters(threshold=unique_val)
-
-            output_df = df.groupby(entity_col).apply(self.label_function)
-            current_entropy = entropy_of_list(output_df[label_col])
-
-            if current_entropy > best_entropy:
-                best_entropy = current_entropy
-                best_parameter_value = unique_val
-
-        self.set_parameters(threshold=original_threshold)
-        return best_parameter_value
 
     def __hash__(self):
         return hash((type(self).__name__, self.column_name))

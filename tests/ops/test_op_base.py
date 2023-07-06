@@ -15,22 +15,6 @@ def df():
     )
 
 
-def test_find_threshold_to_maximize_uncertanity(df):
-    op = GreaterFilterOp("col")
-    op.set_parameters(threshold=30.0)
-    best_parameter_value = op.find_threshold_to_maximize_uncertainty(
-        df,
-        label_col="col",
-        entity_col="id",
-        random_state=0,
-        max_num_unique_values=2,
-    )
-    # 10 will keep most of the values in col and maximize unpredictability
-    # 10 is the lowest number
-    assert best_parameter_value == 10
-    assert op.threshold == 30.0
-
-
 def test_find_threshold_by_fraction_of_data_to_keep(df):
     op = GreaterFilterOp("col")
     original_threshold = 20.0

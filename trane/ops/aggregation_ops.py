@@ -51,7 +51,7 @@ class CountAggregationOp(AggregationOpBase):
     """
 
     input_output_types = [(None, "Integer")]
-    description = "the number of records"
+    description = " the number of records"
 
     def label_function(self, dataslice):
         return len(dataslice)
@@ -59,7 +59,7 @@ class CountAggregationOp(AggregationOpBase):
 
 class SumAggregationOp(AggregationOpBase):
     input_output_types = [("numeric", "Double")]
-    description = "the total <{}> in all related records"
+    description = " the total <{}> in all related records"
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:
@@ -69,7 +69,7 @@ class SumAggregationOp(AggregationOpBase):
 
 class AvgAggregationOp(AggregationOpBase):
     input_output_types = [("numeric", "Double")]
-    description = "the average <{}> in all related records"
+    description = " the average <{}> in all related records"
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:
@@ -79,7 +79,7 @@ class AvgAggregationOp(AggregationOpBase):
 
 class MaxAggregationOp(AggregationOpBase):
     input_output_types = [("numeric", "Double")]
-    description = "the maximum <{}> in all related records"
+    description = " the maximum <{}> in all related records"
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:
@@ -89,7 +89,7 @@ class MaxAggregationOp(AggregationOpBase):
 
 class MinAggregationOp(AggregationOpBase):
     input_output_types = [("numeric", "Double")]
-    description = "the minimum <{}> in all related records"
+    description = " the minimum <{}> in all related records"
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:
@@ -100,7 +100,7 @@ class MinAggregationOp(AggregationOpBase):
 class MajorityAggregationOp(AggregationOpBase):
     input_output_types = [("category", "category")]
     # input_output_types = [("category", "category"), ("index", "index")]
-    description = "the majority <{}> in all related records"
+    description = " the majority <{}> in all related records"
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:

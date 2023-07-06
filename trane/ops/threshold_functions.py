@@ -5,6 +5,13 @@ import pandas as pd
 from scipy import stats
 
 
+def get_k_most_frequent(series, k=3):
+    # get the top k most frequent values
+    if series.dtype in ["category", "object", "string"]:
+        return series.value_counts()[:k].index.tolist()
+    raise ValueError("Series must be categorical or object dtype")
+
+
 def sample_unique_values(series, max_num_unique_values=10, random_state=None):
     sampled_unique_values = series.unique().tolist()
     if len(sampled_unique_values) > max_num_unique_values:

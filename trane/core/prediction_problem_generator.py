@@ -1,13 +1,11 @@
 import copy
-import heapq
 import itertools
-import random
 
 from tqdm.notebook import tqdm
 
 from trane.column_schema import ColumnSchema
 from trane.core.prediction_problem import PredictionProblem
-from trane.core.utils import TYPE_MAPPING, _parse_table_meta
+from trane.core.utils import _parse_table_meta, get_semantic_tags
 from trane.logical_types import (
     Categorical,
     Datetime,
@@ -16,6 +14,7 @@ from trane.logical_types import (
 from trane.ops import aggregation_ops as agg_ops
 from trane.ops import filter_ops
 from trane.ops.filter_ops import AllFilterOp
+from trane.ops.threshold_functions import get_k_most_frequent
 
 __all__ = ["PredictionProblemGenerator"]
 
@@ -158,79 +157,43 @@ class PredictionProblemGenerator:
                 break
         return problems
 
-    def _threshold_recommend(self, filter_op, df, keep_rates=[0.25, 0.5, 0.75]):
+    def _threshold_recommend(self, filter_op, df):
         yielded_thresholds = []
-        valid_semantic_tags = set()
-        for op_input_type, _ in filter_op.input_output_types:
-            if isinstance(op_input_type, str):
-                op_input_type = TYPE_MAPPING[op_input_type]
-            valid_semantic_tags.update(op_input_type.semantic_tags)
+        valid_semantic_tags = get_semantic_tags(filter_op)
+
         if "category" in valid_semantic_tags:
-            most_frequent_categories = get_k_most_frequent(
-                df[filter_op.column_name],
-                k=3,
+            yielded_thresholds = recommend_categorical_thresholds(
+                df,
+                filter_op,
             )
-            for category in most_frequent_categories:
-                if category not in yielded_thresholds:
-                    yielded_thresholds.append(category)
         elif "numeric" in valid_semantic_tags:
-            for rate in keep_rates:
-                threshold = filter_op.find_threshold_by_fraction_of_data_to_keep(
-                    fraction_of_data_target=rate,
-                    df=df,
-                    label_col=filter_op.column_name,
-                )
-                if threshold not in yielded_thresholds:
-                    yielded_thresholds.append(threshold)
+            yielded_thresholds = recommend_numeric_thresholds(
+                df=df,
+                filter_op=filter_op,
+            )
         return yielded_thresholds
 
 
-def get_k_most_frequent(series, k=3):
-    # get the top k most frequent values
-    if series.dtype in ["category", "object"]:
-        return series.value_counts()[:k].index.tolist()
-    raise ValueError("Series must be categorical or object dtype")
+def recommend_categorical_thresholds(df, filter_op, k=3):
+    thresholds = get_k_most_frequent(
+        df[filter_op.column_name],
+        k=k,
+    )
+    thresholds = list(set(thresholds))
+    return thresholds
 
 
-def recommend_numeric_threshold(
+def recommend_numeric_thresholds(
     df,
-    col,
     filter_op,
-    num_random_samples=10,
-    num_rows_to_execute_on=2000,
     keep_rates=[0.25, 0.5, 0.75],
 ):
+    thresholds = []
     for keep_rate in keep_rates:
-        df, unique_vals = _sample_df_and_unique_values(
-            df=df,
-            col=col,
-            max_num_unique_values=num_random_samples,
-            max_num_rows=num_rows_to_execute_on,
-        )
-
-        filter_op.find_threshhold_by_remaining(
+        threshold = filter_op.find_threshold_by_fraction_of_data_to_keep(
             fraction_of_data_target=keep_rate,
             df=df,
-            col=filter_op.column_name,
+            label_col=filter_op.column_name,
         )
-
-
-def _sample_df_and_unique_values(
-    df,
-    col,
-    max_num_unique_values,
-    max_num_rows,
-):
-    unique_vals = set(df[col])
-
-    if len(unique_vals) > max_num_unique_values:
-        unique_vals = heapq.nlargest(
-            max_num_unique_values,
-            unique_vals,
-            key=lambda L: random.random(),
-        )
-
-    if len(df) > max_num_rows:
-        df = df.sample(max_num_rows)
-
-    return (df, unique_vals)
+        thresholds.append(threshold)
+    return thresholds

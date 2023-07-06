@@ -1,11 +1,9 @@
-import json
 import logging
-import os
 
 import composeml as cp
-import dill
 import numpy as np
 
+from trane.column_schema import ColumnSchema
 from trane.core.utils import _check_operations_valid, _parse_table_meta
 from trane.ops.filter_ops import (
     AllFilterOp,
@@ -30,9 +28,9 @@ class PredictionProblem:
     def __init__(
         self,
         operations,
-        entity_col,
-        time_col,
-        table_meta=None,
+        entity_col: str,
+        time_col: str,
+        table_meta: dict[str, ColumnSchema] = None,
         cutoff_strategy=None,
     ):
         """
@@ -237,129 +235,6 @@ class PredictionProblem:
                 desc += " and "
 
         return desc
-
-    def save(self, path, problem_name):
-        """
-        Saves the pediction problem in two files.
-
-        One file is a dill of the cutoff strategy.
-        The other file is the jsonified operations and the relative path to
-        that cutoff strategy.
-
-        Parameters
-        ----------
-        path: str - the directory in which save the problem
-        problem_name: str - the filename to assign the problem
-
-        Returns
-        -------
-        dict
-        {'saved_correctly': bool,
-         'directory_created': bool,
-         'problem_name': str}
-        The new problem_name may have changed due to a filename collision
-
-        """
-        json_saved = False
-        dill_saved = False
-        created_directory = False
-
-        # create directory if it doesn't exist
-        if not os.path.isdir(path):
-            os.makedirs(path)
-            created_directory = True
-
-        # rename the problem_name if already exists
-        json_file_exists = os.path.exists(os.path.join(path, problem_name + ".json"))
-        dill_file_exists = os.path.exists(os.path.join(path, problem_name + ".dill"))
-
-        i = 1
-        while json_file_exists or dill_file_exists:
-            problem_name += str(i)
-
-            i += 1
-            json_file_exists = os.path.exists(
-                os.path.join(path, problem_name + ".json"),
-            )
-            dill_file_exists = os.path.exists(
-                os.path.join(path, problem_name + ".dill"),
-            )
-
-        # get the cutoff_strategy bytes
-        cutoff_dill_bytes = self._dill_cutoff_strategy()
-
-        # add a key to the problem json
-        json_dict = json.loads(self.to_json())
-        json_dict["cutoff_dill"] = problem_name + ".dill"
-
-        # write the files
-        with open(os.path.join(path, problem_name + ".json"), "w") as f:
-            json.dump(obj=json_dict, fp=f, indent=4, sort_keys=True)
-            json_saved = True
-
-        with open(os.path.join(path, problem_name + ".dill"), "wb") as f:
-            f.write(cutoff_dill_bytes)
-            dill_saved = True
-
-        return {
-            "saved_correctly": json_saved & dill_saved,
-            "created_directory": created_directory,
-            "problem_name": problem_name,
-        }
-
-    @classmethod
-    def load(cls, json_file_path):
-        """
-        Load a prediction problem from json file.
-        If the file links to a dill (binary) cutoff_srategy, also load that
-        and assign it to the prediction problem.
-
-        Parameters
-        ----------
-        json_file_path: str, path and filename for the json file
-
-        Returns
-        -------
-        PredictionProblem
-
-        """
-        with open(json_file_path, "r") as f:
-            problem_dict = json.load(f)
-            problem = cls.from_json(problem_dict)
-
-        cutoff_strategy_file_name = problem_dict.get("cutoff_dill", None)
-
-        if cutoff_strategy_file_name:
-            # reconstruct cutoff strategy filename
-            pickle_path = os.path.join(
-                os.path.dirname(json_file_path),
-                cutoff_strategy_file_name,
-            )
-
-            # load cutoff strategy from file
-            with open(pickle_path, "rb") as f:
-                cutoff_strategy = dill.load(f)
-
-            # assign cutoff strategy to problem
-            problem.cutoff_strategy = cutoff_strategy
-
-        return problem
-
-    def _dill_cutoff_strategy(self):
-        """
-        Function creates a dill for the problem's associated cutoff strategy
-
-        This function requires cutoff time to be assigned.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        a dill of the cutoff strategy
-        """
-        cutoff_dill = dill.dumps(self.cutoff_strategy)
-        return cutoff_dill
 
     def __eq__(self, other):
         """Overrides the default implementation"""

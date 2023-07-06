@@ -4,7 +4,28 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from trane.ops.threshold_functions import entropy_of_list, sample_unique_values
+from trane.ops.threshold_functions import (
+    entropy_of_list,
+    get_k_most_frequent,
+    sample_unique_values,
+)
+
+
+@pytest.mark.parametrize("dtype", [("category"), ("string"), ("object")])
+def test_get_k_most_frequent(dtype):
+    series = pd.Series(
+        ["r", "r", "r", "r", "b", "b", "b", "g", "g", "t", "x"],
+        dtype=dtype,
+    )
+    most_frequent = get_k_most_frequent(series, k=3)
+    assert len(most_frequent) == 3
+    assert most_frequent == ["r", "b", "g"]
+
+
+def test_get_k_most_frequent_raises():
+    series = pd.Series([1, 2, 3, 4, 5], dtype="int64")
+    with pytest.raises(ValueError):
+        get_k_most_frequent(series)
 
 
 def test_entropy_ints():

@@ -1,116 +1,53 @@
 import pandas as pd
 import pytest
 
-from trane.column_schema import ColumnSchema
-from trane.logical_types import (
-    Boolean,
-    Categorical,
-    Datetime,
-    Double,
-)
-from trane.ops.op_base import OpBase
+from trane.ops.filter_ops import GreaterFilterOp, LessFilterOp
 
 
-class FakeOp(OpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [
-        (
-            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-            ColumnSchema(logical_type=Boolean),
-        ),
-    ]
-
-    def op_type_check(self, meta):
-        self.input_type = meta.get(self.column_name)
-        for op_defined_input_type, op_defined_output_type in self.IOTYPES:
-            if self.input_type and op_defined_input_type:
-                if self.input_type == op_defined_input_type:
-                    self.output_type = op_defined_output_type
-                    meta[self.column_name] = self.output_type
-                    return meta
-        return None
-
-
-class FakeOpRequired(OpBase):
-    REQUIRED_PARAMETERS = [{"threshold": None}]
-    IOTYPES = [
-        (
-            ColumnSchema(logical_type=Categorical),
-            ColumnSchema(logical_type=Boolean),
-        ),
-    ]
-
-
-def test_op_base_init():
-    """
-    Check if FakeOp is initialized correctly.
-    Check if NotImplementedError is raised.
-    """
-    op = FakeOp("col")
-    assert op.input_type is None
-    assert op.output_type is None
-    assert isinstance(op.hyper_parameter_settings, dict)
-    assert len(op.hyper_parameter_settings) == 0
-    with pytest.raises(NotImplementedError):
-        op(None)
-
-
-def test_op_type_check_returns_modified_meta():
-    meta = {
-        "id": ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
-        "time": ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
-        "price": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "product": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-    }
-    expected_meta = {
-        "id": ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
-        "time": ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
-        "price": ColumnSchema(logical_type=Boolean),
-        "product": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-    }
-    op = FakeOp("price")
-    output_meta = op.op_type_check(meta)
-    assert output_meta == expected_meta
-    assert op.input_type == ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
-    assert op.output_type == ColumnSchema(logical_type=Boolean)
-
-
-def test_op_type_check_wrong_type():
-    meta = {
-        "id": ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
-        "time": ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
-        "price": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "product": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-    }
-    op = FakeOp("product")
-    output_meta = op.op_type_check(meta)
-    assert output_meta is None
-
-
-def test_set_hyper_parameter():
-    op = FakeOpRequired("col")
-    op.set_hyper_parameter(parameter_name="threshold", parameter_value=5)
-    assert op.hyper_parameter_settings["threshold"] == 5
-
-
-def test_set_hyper_parameter_raises():
-    op = FakeOpRequired("col")
-    with pytest.raises(ValueError):
-        op.set_hyper_parameter(parameter_name="invalid_param", parameter_value=5)
-
-
-def test_sample_df_and_unique_values():
-    values = [1, 2, 2, 4, 4, 5]
-    df = pd.DataFrame({"col": values})
-    op = FakeOpRequired("col")
-    max_num_rows = 3
-    max_num_unique_values = len(set(values))
-    sample_df, unique_vals = op._sample_df_and_unique_values(
-        df=df,
-        col="col",
-        max_num_unique_values=max_num_unique_values,
-        max_num_rows=max_num_rows,
+@pytest.fixture
+def df():
+    return pd.DataFrame(
+        {
+            "id": [1, 2, 2, 2, 3, 3, 3],
+            "col": [10, 20, 30, 40, 50, 60, 70],
+            "col2": ["red", "red", "blue", "blue", "blue", "green", "green"],
+        },
     )
-    assert len(sample_df["col"].unique()) <= max_num_unique_values
-    assert sample_df.shape == (max_num_rows, 1)
-    assert unique_vals == set(values)
+
+
+def test_find_threshold_to_maximize_uncertanity(df):
+    op = GreaterFilterOp("col")
+    op.set_parameters(threshold=30.0)
+    best_parameter_value = op.find_threshold_to_maximize_uncertainty(
+        df,
+        label_col="col",
+        entity_col="id",
+        random_state=0,
+        max_num_unique_values=2,
+    )
+    # 10 will keep most of the values in col and maximize unpredictability
+    # 10 is the lowest number
+    assert best_parameter_value == 10
+    assert op.threshold == 30.0
+
+
+def test_find_threshold_by_fraction_of_data_to_keep(df):
+    op = GreaterFilterOp("col")
+    original_threshold = 20.0
+    op.set_parameters(threshold=original_threshold)
+    best_threshold = op.find_threshold_by_fraction_of_data_to_keep(
+        fraction_of_data_target=0.25,
+        df=df,
+        label_col="col",
+        random_state=0,
+    )
+    # want to keep 0.25 of the data (25%)
+    # 50 is the lowest number that keeps 25% of the data (length is 7, keep 2 numbers)
+    assert best_threshold == 50.0
+    assert op.threshold == original_threshold
+    assert hash(op) == hash(("GreaterFilterOp", "col"))
+
+
+def test_eq():
+    assert GreaterFilterOp("col") == GreaterFilterOp("col")
+    assert GreaterFilterOp("col") != LessFilterOp("col")

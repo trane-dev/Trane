@@ -36,15 +36,6 @@ def make_fake_meta():
         "state": ("Categorical", {"category"}),
         "amount": ("Double", {"numeric"}),
     }
-
-    #     "id": ColumnSchema(
-    #         logical_type=Categorical,
-    #         semantic_tags={"index", "category"},
-    #     ),
-    #     "date": ColumnSchema(logical_type=Datetime),
-    #     "country": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-    #     "amount": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-    # }
     return meta
 
 

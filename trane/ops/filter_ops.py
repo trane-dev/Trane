@@ -1,11 +1,5 @@
-from trane.column_schema import ColumnSchema
-from trane.logical_types import (
-    Categorical,
-    Double,
-    Integer,
-    Ordinal,
-    PostalCode,
-)
+import pandas as pd
+
 from trane.ops.op_base import OpBase
 
 FILTER_OPS = [
@@ -27,13 +21,6 @@ class FilterOpBase(OpBase):
     operations are defined as classes that inherit the FilterOpBase class and
     instantiate the execute method.
 
-    Requirements
-    ------------
-    REQUIRED_PARAMETERS: the hyper parameters needed for the operation
-    IOTYPES: the input and output types of the operation using TableMeta types
-    execute method: transform dataframe according to the operation and return
-      the new dataframe
-
     Filter operations filter data
     row operations transform data within a row and return a dataframe of the same dimensions,
     transformation operations transform data across rows and return a new dataset with fewer rows,
@@ -43,177 +30,63 @@ class FilterOpBase(OpBase):
 
 
 class AllFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = []
+    input_output_types = [(None, None)]
+    description = ""
 
-    def op_type_check(self, table_meta):
-        return table_meta
-
-    def execute(self, dataframe):
-        return dataframe
+    def label_function(self, dataslice):
+        if len(dataslice) == 0:
+            return pd.NA
+        return dataslice
 
 
 class EqFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": None}]
-    IOTYPES = [
-        (
-            ColumnSchema(semantic_tags={"category"}),
-            ColumnSchema(semantic_tags={"category"}),
-        ),
-        (
-            ColumnSchema(semantic_tags={"index"}),
-            ColumnSchema(semantic_tags={"index"}),
-        ),
-    ]
+    input_output_types = [("category", "category"), ("index", "index")]
+    description = "equal to"
 
-    def __init__(self, column_name):
-        self.column_name = column_name
-        self.input_type = [
-            ColumnSchema(semantic_tags={"category"}),
-            ColumnSchema(semantic_tags={"category"}),
-        ]
-        # doesn't seem right
-        # self.output_type = ColumnSchema(logical_type=Boolean)
-        self.hyper_parameter_settings = {}
+    def set_parameters(self, threshold: float):
+        self.threshold = threshold
 
-    def op_type_check(self, table_meta):
-        semantic_tags = table_meta[self.column_name].semantic_tags
-        if "index" not in semantic_tags or "category" not in semantic_tags:
-            return None
-        if not isinstance(
-            table_meta[self.column_name].logical_type,
-            (Integer, Categorical, Ordinal, PostalCode),
-        ):
-            return None
-
-        if "numeric" in semantic_tags:
-            self.output_type = ColumnSchema(
-                logical_type=table_meta[self.column_name].logical_type,
-                semantic_tags={"numeric"},
-            )
-        if "category" in semantic_tags:
-            self.output_type = ColumnSchema(
-                logical_type=table_meta[self.column_name].logical_type,
-                semantic_tags={"category"},
-            )
-
-        return table_meta
-
-    def execute(self, dataframe):
-        return dataframe[
-            dataframe[self.column_name] == self.hyper_parameter_settings["threshold"]
-        ]
+    def label_function(self, dataslice):
+        return dataslice[dataslice[self.column_name] == self.threshold]
 
 
 class NeqFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": None}]
-    IOTYPES = [
-        (
-            ColumnSchema(semantic_tags={"category"}),
-            ColumnSchema(semantic_tags={"category"}),
-        ),
-        (
-            ColumnSchema(semantic_tags={"index"}),
-            ColumnSchema(semantic_tags={"index"}),
-        ),
-    ]
+    input_output_types = [("category", "category"), ("index", "index")]
+    description = "not equal to"
 
-    def __init__(self, column_name):
-        self.column_name = column_name
-        self.input_type = [
-            ColumnSchema(semantic_tags={"category"}),
-            ColumnSchema(semantic_tags={"category"}),
-        ]
-        # doesn't seem right
-        # self.output_type = ColumnSchema(logical_type=Boolean)
-        self.hyper_parameter_settings = {}
+    def set_parameters(self, threshold: float):
+        self.threshold = threshold
 
-    def op_type_check(self, table_meta):
-        semantic_tags = table_meta[self.column_name].semantic_tags
-        if "index" not in semantic_tags or "category" not in semantic_tags:
-            return None
-        if not isinstance(
-            table_meta[self.column_name].logical_type,
-            (Integer, Categorical, Ordinal, PostalCode),
-        ):
-            return None
-
-        if "numeric" in semantic_tags:
-            self.output_type = ColumnSchema(
-                logical_type=table_meta[self.column_name].logical_type,
-                semantic_tags={"numeric"},
-            )
-        if "category" in semantic_tags:
-            self.output_type = ColumnSchema(
-                logical_type=table_meta[self.column_name].logical_type,
-                semantic_tags={"category"},
-            )
-
-        return table_meta
-
-    def execute(self, dataframe):
-        return dataframe[
-            dataframe[self.column_name] != self.hyper_parameter_settings["threshold"]
-        ]
+    def label_function(self, dataframe):
+        return dataframe[dataframe[self.column_name] != self.threshold]
 
 
 class GreaterFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": None}]
-    IOTYPES = [
-        (
-            ColumnSchema(semantic_tags={"numeric"}),
-            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        ),
-    ]
+    input_output_types = [("numeric", "Double")]
+    description = "greater than"
 
-    def __init__(self, column_name):
-        self.column_name = column_name
-        self.input_type = ColumnSchema(semantic_tags={"numeric"})
-        self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
-        self.hyper_parameter_settings = {}
+    def set_parameters(self, threshold: float):
+        self.threshold = threshold
 
-    def op_type_check(self, table_meta):
-        self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
-        if "numeric" not in table_meta[self.column_name].semantic_tags:
-            return None
-        table_meta[self.column_name] = ColumnSchema(
-            logical_type=Double,
-            semantic_tags={"numeric"},
-        )
-        return table_meta
-
-    def execute(self, dataframe):
-        return dataframe[
-            dataframe[self.column_name] > self.hyper_parameter_settings["threshold"]
-        ]
+    def label_function(self, dataframe):
+        return dataframe[dataframe[self.column_name] > self.threshold]
 
 
 class LessFilterOp(FilterOpBase):
-    REQUIRED_PARAMETERS = [{"threshold": None}]
-    IOTYPES = [
-        (
-            ColumnSchema(semantic_tags={"numeric"}),
-            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        ),
-    ]
+    input_output_types = [("numeric", "Double")]
+    description = "less than"
 
-    def __init__(self, column_name):
-        self.column_name = column_name
-        self.input_type = ColumnSchema(semantic_tags={"numeric"})
-        self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
-        self.hyper_parameter_settings = {}
+    def set_parameters(self, threshold: float):
+        self.threshold = threshold
 
-    def op_type_check(self, table_meta):
-        self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
-        if "numeric" not in table_meta[self.column_name].semantic_tags:
-            return None
-        table_meta[self.column_name] = ColumnSchema(
-            logical_type=Double,
-            semantic_tags={"numeric"},
-        )
-        return table_meta
+    def label_function(self, dataframe):
+        return dataframe[dataframe[self.column_name] < self.threshold]
 
-    def execute(self, dataframe):
-        return dataframe[
-            dataframe[self.column_name] < self.hyper_parameter_settings["threshold"]
-        ]
+
+FILT_OPS = [
+    AllFilterOp,
+    GreaterFilterOp,
+    EqFilterOp,
+    NeqFilterOp,
+    LessFilterOp,
+]

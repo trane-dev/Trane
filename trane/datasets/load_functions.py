@@ -52,13 +52,6 @@ def load_youtube():
     return df
 
 
-def load_yelp():
-    # Sampled Yelp Reviews.zip or Yelp Reviews.zip?
-    filepath = generate_local_filepath("Yelp Reviews.zip")
-    df = pd.read_csv(filepath)
-    return df
-
-
 def load_covid_metadata():
     table_meta = {
         "Province/State": ColumnSchema(
@@ -126,7 +119,3 @@ def load_bike_metadata():
 def generate_local_filepath(key):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     return os.path.join(dir_path, key)
-
-
-def generate_s3_url(key, bucket="trane-datasets"):
-    return f"https://{bucket}.s3.amazonaws.com/{key}"

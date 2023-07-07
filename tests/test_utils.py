@@ -1,4 +1,8 @@
-from trane.core.utils import _check_operations_valid, _parse_table_meta
+from datetime import datetime
+
+import pandas as pd
+
+from trane.core.utils import _check_operations_valid, _parse_table_meta, clean_date
 from trane.ops.aggregation_ops import CountAggregationOp
 from trane.ops.filter_ops import AllFilterOp, EqFilterOp, GreaterFilterOp
 
@@ -41,3 +45,11 @@ def test_parse_table_cat():
     operations = [EqFilterOp("state"), CountAggregationOp(None)]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
+
+
+def test_clean_date():
+    assert clean_date("2019-01-01") == pd.Timestamp(
+        datetime.strptime("2019-01-01", "%Y-%m-%d"),
+    )
+    timestamp = pd.Timestamp(datetime.strptime("2019-01-01", "%Y-%m-%d"))
+    assert clean_date(timestamp) == timestamp

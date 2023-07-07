@@ -15,7 +15,3 @@ class CutoffStrategy:
         self.minimum_data = clean_date(minimum_data)
         self.maximum_data = clean_date(maximum_data)
         self.description = "in next {} days".format(window_size)
-
-    def kwarg_dict(self):
-        # NOT DEPRECATED, still used
-        return {k: v for k, v in self.__dict__.items() if v is not None}

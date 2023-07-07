@@ -50,8 +50,6 @@ def _parse_table_meta(table_meta):
             )
         elif isinstance(schema, ColumnSchema):
             parsed_schema[col] = schema
-        else:
-            raise TypeError(f"Invalid schema type for column '{col}'")
     return parsed_schema
 
 

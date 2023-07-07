@@ -12,7 +12,6 @@ from trane.ops.filter_ops import (
     LessFilterOp,
     NeqFilterOp,
 )
-from trane.typing.column_schema import ColumnSchema
 
 
 class PredictionProblem:
@@ -28,7 +27,7 @@ class PredictionProblem:
         operations,
         entity_col: str,
         time_col: str,
-        table_meta: dict[str, ColumnSchema] = None,
+        table_meta=None,
         cutoff_strategy=None,
     ):
         """

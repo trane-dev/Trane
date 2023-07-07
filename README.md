@@ -7,7 +7,7 @@
       <img src="https://github.com/HDI-Project/Trane/actions/workflows/tests.yaml/badge.svg" alt="Tests" />
     </a>
     <a href="https://codecov.io/gh/trane-dev/Trane" >
-      <img src="https://codecov.io/gh/trane-dev/Trane/branch/master/graph/badge.svg?token=HafAlYGH8F"/>
+      <img src="https://codecov.io/gh/trane-dev/Trane/branch/main/graph/badge.svg?token=HafAlYGH8F"/>
     </a>
     <a href="https://badge.fury.io/py/Trane" target="_blank">
         <img src="https://badge.fury.io/py/Trane.svg?maxAge=2592000" alt="PyPI Version" />

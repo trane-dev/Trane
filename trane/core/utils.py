@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from trane.ops import AggregationOpBase, OpBase
+from trane.ops import AggregationOpBase
 from trane.ops.filter_ops import FilterOpBase
 from trane.typing.column_schema import ColumnSchema
 from trane.typing.logical_types import (
@@ -54,8 +54,8 @@ def _parse_table_meta(table_meta):
 
 
 def _check_operations_valid(
-    operations: list[OpBase],
-    table_meta: dict[str, ColumnSchema],
+    operations,
+    table_meta,
 ):
     if not isinstance(operations[0], FilterOpBase):
         raise ValueError

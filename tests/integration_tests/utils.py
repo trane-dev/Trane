@@ -53,6 +53,7 @@ def generate_and_verify_prediction_problem(
     prediction_problem_to_label_times = {}
     cutoff = cutoff_strategy.window_size
     problem_generator = trane.PredictionProblemGenerator(
+        df=df,
         table_meta=meta,
         entity_col=entity_col,
         cutoff_strategy=cutoff_strategy,

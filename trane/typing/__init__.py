@@ -6,5 +6,6 @@ from trane.typing.logical_types import (
 )
 from trane.typing.column_schema import ColumnSchema
 from trane.typing.inference import (
-    infer_types,
+    _infer_series_type,
+    infer_table_meta,
 )

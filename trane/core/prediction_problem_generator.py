@@ -10,6 +10,7 @@ from trane.ops import filter_ops
 from trane.ops.filter_ops import AllFilterOp
 from trane.ops.threshold_functions import get_k_most_frequent
 from trane.typing.column_schema import ColumnSchema
+from trane.typing.inference import infer_table_meta
 from trane.typing.logical_types import (
     Categorical,
     Datetime,
@@ -24,7 +25,7 @@ class PredictionProblemGenerator:
     Object for generating prediction problems on data.
     """
 
-    def __init__(self, table_meta, entity_col, time_col, cutoff_strategy=None):
+    def __init__(self, df, entity_col, time_col, table_meta=None, cutoff_strategy=None):
         """
         Parameters
         ----------
@@ -38,10 +39,16 @@ class PredictionProblemGenerator:
         -------
         None
         """
-        self.table_meta = _parse_table_meta(table_meta)
+        self.df = df
         self.entity_col = entity_col
         self.time_col = time_col
         self.cutoff_strategy = cutoff_strategy
+
+        if table_meta is None:
+            self.table_meta = infer_table_meta(df)
+        else:
+            self.table_meta = _parse_table_meta(table_meta)
+        self.transform_data()
         self.ensure_valid_inputs()
 
     def ensure_valid_inputs(self):
@@ -49,9 +56,11 @@ class PredictionProblemGenerator:
         TypeChecking for the problem generator entity_col
         and label_col. Errors if types don't match up.
         """
-        for col, col_type in self.table_meta.items():
+        for col, column_schema in self.table_meta.items():
             assert isinstance(col, str)
-            assert isinstance(col_type, ColumnSchema)
+            assert isinstance(column_schema, ColumnSchema)
+            assert col in self.df.columns
+            assert column_schema.logical_type.dtype == str(self.df[col].dtype)
 
         entity_col_type = self.table_meta[self.entity_col]
         assert entity_col_type.logical_type in [Integer, Categorical]
@@ -59,6 +68,15 @@ class PredictionProblemGenerator:
 
         time_col_type = self.table_meta[self.time_col]
         assert time_col_type.logical_type == Datetime
+
+    def transform_data(self):
+        """
+        Transform the data to the correct types.
+        """
+        for col, column_schema in self.table_meta.items():
+            expected_logical_type = column_schema.logical_type
+            if self.df[col].dtype != expected_logical_type.dtype:
+                self.df[col] = expected_logical_type().transform(series=self.df[col])
 
     def generate(
         self,

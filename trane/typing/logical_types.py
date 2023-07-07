@@ -1,4 +1,4 @@
-from trane.typing.inference import (
+from trane.typing.inference_functions import (
     boolean_func,
     categorical_func,
     datetime_func,
@@ -13,7 +13,7 @@ class LogicalTypeMetaClass(type):
         return cls.__name__
 
 
-class LogicalType(object, metaclass=LogicalTypeMetaClass):
+class LogicalType(object):
     dtype = None
 
     def __eq__(self, other, deep=False):
@@ -21,6 +21,9 @@ class LogicalType(object, metaclass=LogicalTypeMetaClass):
 
     def __str__(self):
         return str(self.__class__)
+
+    def __repr__(cls):
+        return cls.__name__
 
     @staticmethod
     def inference_func(series):
@@ -47,7 +50,7 @@ class Categorical(LogicalType):
 
 
 class Datetime(LogicalType):
-    dype = "datetime64[ns]"
+    dtype = "datetime64[ns]"
 
     @staticmethod
     def inference_func(series):
@@ -80,6 +83,10 @@ class NaturalLanguage(LogicalType):
 
 class Ordinal(LogicalType):
     dtype = "category"
+
+
+class Unknown(LogicalType):
+    dtype = "string"
 
 
 ALL_LOGICAL_TYPES = [

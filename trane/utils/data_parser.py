@@ -1,7 +1,5 @@
 import pandas as pd
 
-__all__ = ["denormalize"]
-
 
 class CsvMerge:
     """

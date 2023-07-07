@@ -31,7 +31,7 @@ def make_fake_df():
 @pytest.fixture()
 def make_fake_meta():
     meta = {
-        "id": ("Categorical", {"index", "category"}),
+        "id": ("Integer", {"index"}),
         "date": ("Datetime", {}),
         "state": ("Categorical", {"category"}),
         "amount": ("Double", {"numeric"}),
@@ -104,6 +104,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
         maximum_data=maximum_data,
     )
     problem_generator = trane.PredictionProblemGenerator(
+        df=df,
         table_meta=meta,
         entity_col=entity_col,
         cutoff_strategy=cutoff_strategy,

@@ -13,7 +13,7 @@ Tokens = Iterable[str]
 
 COMMON_WORDS_SET = set(
     word.strip().lower()
-    for word in files("trane.utils").joinpath("1-1000.txt").read_text().split("\n")
+    for word in files("trane.typing").joinpath("1-1000.txt").read_text().split("\n")
     if len(word) > 0
 )
 

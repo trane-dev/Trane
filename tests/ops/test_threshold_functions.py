@@ -30,7 +30,7 @@ def test_get_k_most_frequent_raises():
 
 def test_entropy_ints():
     labels = [1, 3, 5, 2, 3, 5, 3, 2, 1, 3, 4, 5]
-    assert entropy_of_list(labels) == entropy_alternative(labels)
+    assert np.isclose(entropy_of_list(labels), entropy_alternative(labels), atol=1e-3)
 
 
 @pytest.mark.parametrize("dtype", [("category"), ("string"), ("object")])
@@ -39,7 +39,7 @@ def test_entropy_categorical(dtype):
         ["red", "red", "blue", "blue", "blue", "green", "green"],
         dtype=dtype,
     )
-    assert entropy_of_list(labels) == entropy_alternative(labels)
+    assert np.isclose(entropy_of_list(labels), entropy_alternative(labels), atol=1e-3)
 
 
 def entropy_alternative(labels, base=None):

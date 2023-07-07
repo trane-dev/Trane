@@ -13,7 +13,7 @@ class LogicalTypeMetaClass(type):
         return cls.__name__
 
 
-class LogicalType(object):
+class LogicalType(object, metaclass=LogicalTypeMetaClass):
     dtype = None
 
     def __eq__(self, other, deep=False):
@@ -21,9 +21,6 @@ class LogicalType(object):
 
     def __str__(self):
         return str(self.__class__)
-
-    def __repr__(cls):
-        return cls.__name__
 
     @staticmethod
     def inference_func(series):

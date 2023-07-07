@@ -3,6 +3,7 @@ from typing import Any, Iterable, Union
 
 import numpy as np
 import pandas as pd
+from dateutil.parser import ParserError
 from importlib_resources import files
 from pandas.api import types as pdtypes
 
@@ -39,10 +40,38 @@ def categorical_func(series):
 
 
 def integer_func(series):
-    if not series.isnull().any():
+    if integer_nullable_func(series) and not series.isnull().any():
         if pdtypes.is_object_dtype(series.dtype):
             return True
         return all(series.mod(1).eq(0))
+    return False
+
+
+def integer_nullable_func(series):
+    if pdtypes.is_integer_dtype(series.dtype):
+        threshold = None
+        if threshold is not None:
+            return not _is_categorical_series(series, threshold)
+        else:
+            return True
+    elif pdtypes.is_float_dtype(series.dtype):
+
+        def _is_valid_int(value):
+            return value >= MIN_INT and value <= MAX_INT and value.is_integer()
+
+        if not series.isnull().any():
+            return False
+        series_no_null = series.dropna()
+        return all([_is_valid_int(v) for v in series_no_null])
+    elif pdtypes.is_object_dtype(series.dtype):
+        series_no_null = series.dropna()
+        try:
+            return series_no_null.map(
+                lambda x: (isinstance(x, str) and isinstance(int(x), int)),
+            ).all()
+        except ValueError:
+            return False
+
     return False
 
 
@@ -67,8 +96,50 @@ def double_func(series):
 
 
 def boolean_func(series):
-    if not series.isnull().any():
+    if boolean_nullable_func(series) and not series.isnull().any():
         return True
+    return False
+
+
+boolean_inference_strings = [
+    ["yes", "no"],
+    ["y", "n"],
+    ["true", "false"],
+    ["t", "f"],
+]
+boolean_inference_ints = []
+
+
+def boolean_nullable_func(series):
+    if pdtypes.is_bool_dtype(series.dtype) and not pdtypes.is_categorical_dtype(
+        series.dtype,
+    ):
+        return True
+    elif pdtypes.is_object_dtype(series.dtype):
+        series_no_null = series.dropna()
+        try:
+            series_no_null_unq = set(series_no_null)
+            if series_no_null_unq in [
+                {False, True},
+                {True},
+                {False},
+            ]:
+                return True
+            series_lower = set(str(s).lower() for s in set(series_no_null))
+            if series_lower in [
+                set(boolean_list) for boolean_list in boolean_inference_strings
+            ]:
+                return True
+        except (
+            TypeError
+        ):  # Necessary to check for non-hashable values because of object dtype consideration
+            return False
+    elif pdtypes.is_integer_dtype(series.dtype) and len(
+        boolean_inference_ints,
+    ):
+        series_unique = set(series)
+        if series_unique == set(boolean_inference_ints):
+            return True
     return False
 
 
@@ -117,6 +188,20 @@ def col_is_datetime(col, datetime_format=None):
         # this try/except block handles that, among other potential issues for experimental dtypes
         # until we find a more appropriate solution
         pass
+
+    col = col.astype(str)
+
+    try:
+        pd.to_datetime(
+            col,
+            errors="raise",
+            format=datetime_format,
+            infer_datetime_format=True,
+        )
+        return True
+
+    except (ParserError, ValueError, OverflowError, TypeError):
+        return False
 
 
 def _is_categorical_series(series: pd.Series, threshold: float) -> bool:

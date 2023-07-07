@@ -5,5 +5,4 @@ from trane.datasets.load_functions import (
     load_bike_metadata,
     load_youtube,
     load_youtube_metadata,
-    load_yelp,
 )

@@ -2,8 +2,8 @@ import os
 
 import pandas as pd
 
-from trane.column_schema import ColumnSchema
-from trane.logical_types import (
+from trane.typing.column_schema import ColumnSchema
+from trane.typing.logical_types import (
     Categorical,
     Datetime,
     Double,
@@ -49,13 +49,6 @@ def load_youtube():
     df[time_col] = pd.to_datetime(df[time_col], format="%y.%d.%m")
     df = df.sort_values(by=[time_col])
     df = df.fillna(0)
-    return df
-
-
-def load_yelp():
-    # Sampled Yelp Reviews.zip or Yelp Reviews.zip?
-    filepath = generate_local_filepath("Yelp Reviews.zip")
-    df = pd.read_csv(filepath)
     return df
 
 
@@ -126,7 +119,3 @@ def load_bike_metadata():
 def generate_local_filepath(key):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     return os.path.join(dir_path, key)
-
-
-def generate_s3_url(key, bucket="trane-datasets"):
-    return f"https://{bucket}.s3.amazonaws.com/{key}"

@@ -10,14 +10,6 @@ from tqdm.notebook import tqdm
 #     return df, meta
 
 
-def execute_prediction_problems(df, problems):
-    prediction_problem_to_label_times = {}
-    for p in tqdm(problems, position=0):
-        x = p.execute(df, -1, verbose=False)
-        prediction_problem_to_label_times[str(p)] = x
-    return prediction_problem_to_label_times
-
-
 def _solve_single_problem(problem, ns, shared_dict):
     df = ns.df
     x = problem.execute(df, -1, verbose=False)

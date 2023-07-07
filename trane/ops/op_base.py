@@ -1,8 +1,6 @@
-import heapq
-import random
-from collections import Counter
+import pandas as pd
 
-from scipy import stats
+from trane.ops.threshold_functions import sample_unique_values
 
 __all__ = ["OpBase"]
 
@@ -10,335 +8,85 @@ __all__ = ["OpBase"]
 class OpBase(object):
     """
     Super class of all operations.
-    All operations should have REQUIRED_PARAMETERS and IOTYPES.
-
-    IOTYPES is a list of possible input and output type pairs.
-        For example `greater` can operate on int and str and output bool.
-        [(int, bool), (str, bool), ...]
-        In the following format:
-        [(input_type1, output_type1), (input_type2, output_type2), ...]
-
-    REQUIRED_PARAMETERS is a list of parameter and type dicts.
-
-    hyper_parameter_settings is a dict of parameter name and value.
-
     """
 
-    REQUIRED_PARAMETERS = None
-    IOTYPES = None
+    description = None
+    threshold = None
 
-    def __init__(self, column_name):
+    def __init__(self, column_name, input_type=None, output_type=None):
         """
-        Initalization of all operations. Subclasses shouldn't have their own
-        init.
+        Initalization of all operations.
+        Subclasses shouldn't have their own init.
 
         Parameters
         ----------
         column_name: the column this operation applies to
         input_type: the ColumnSchema of the input column
         output_type: the ColumnSchema of the output column
-        hyper_parameter_settings: the dict of hyper parameter name and value
 
         Returns
         -------
         None
         """
         self.column_name = column_name
-        self.input_type = None
-        self.output_type = None
-        self.hyper_parameter_settings = {}
 
-    # def op_type_check(self, meta):
-    #     """
-    #     Data type check for the operation.
+    def __call__(self, dataslice):
+        return self.label_function(dataslice)
 
-    #     Parameters
-    #     ----------
-    #     column_type: the ColumnSchema of the input column
-    #     """
-    #     self.input_type = meta.get(self.column_name)
-    #     for op_defined_input_type, op_defined_output_type in self.IOTYPES:
-    #         if self.input_type and op_defined_input_type:
-    #             if self.input_type == op_defined_input_type:
-    #                 self.output_type = op_defined_output_type
-    #                 meta[self.column_name] = self.output_type
-    #                 return meta
-    #     return None
-
-    # def op_type_check(self, table_meta):
-    #     """
-    #     Data type check for the operation.
-    #     Operations may change the data type of a column, eg. int -> bool.
-    #     One operation can only be applied on a few data types, eg. `greater`
-    #     can be applied on int but can't be applied on bool.
-    #     This function checks whether the current operation can be applied on
-    #     the data.
-    #     It returns the updated TableMeta for next operation or None if it's not
-    #     valid.
-    #     Parameters
-    #     ----------
-    #     table_meta: table meta before this operation.
-    #     Returns
-    #     -------
-    #     table_meta: table meta after this operation. None if not compatable.
-    #     """
-    #     self.input_type = table_meta.get_type(self.column_name)
-    #     for idx, (input_type, output_type) in enumerate(self.IOTYPES):
-    #         if self.input_type == input_type:
-    #             self.output_type = output_type
-    #             table_meta.set_type(self.column_name, output_type)
-    #             return table_meta
-    #     return None
-
-    def get_parameter_names(self):
-        names = []
-        for param_dict in self.REQUIRED_PARAMETERS:
-            for name, _ in param_dict.items():
-                names.append(name)
-        return names
-
-    def set_hyper_parameter(self, parameter_name, parameter_value):
-        """
-        Set the hyper parameter of the operation.
-
-        Parameters
-        ----------
-        hyper_parameter: value for the hyper parameter
-
-        Returns
-        -------
-        None
-
-        """
-        valid_param_names = self.get_parameter_names()
-        if parameter_name not in valid_param_names:
-            raise ValueError(
-                (
-                    "Invalid parameter name for operation. Valid"
-                    f" names:{valid_param_names}"
-                ),
-            )
-        self.hyper_parameter_settings[parameter_name] = parameter_value
-
-    def __call__(self, dataframe):
-        return self.execute(dataframe)
-
-    def execute(self, dataframe):
+    def label_function(self, dataslice):
         raise NotImplementedError
 
-    def find_threshhold_by_remaining(
+    def generate_description(self):
+        if self.description:
+            return self.description.format(self.column_name)
+        return self.description
+
+    def set_parameters(self, threshold: float):
+        raise NotImplementedError
+
+    def find_threshold_by_fraction_of_data_to_keep(
         self,
-        fraction_of_data_target,
-        df,
-        col,
-        num_random_samples=10,
-        num_rows_to_execute_on=2000,
+        fraction_of_data_target: float,
+        df: pd.DataFrame,
+        label_col: str,
+        max_num_unique_values: int = 10,
+        max_number_of_rows: int = 2000,
+        random_state: int = None,
     ):
-        """
-        This function finds and returns a parameter setting for the
-        op. The parameter setting that comes closest to the
-        fraction_of_data_target data is chosen.
-
-        Parameters
-        ----------
-        fraction_of_data_target: The fraction of the filter op
-            aims to keep in the dataset.
-        df: the relevant data
-        col: the column name of the column intended to be operated on
-        num_random_samples: if there's more than this many unique values to
-            test, randomly sample this many values from the dataset.
-            More is better, but slower.
-        num_rows_to_execute_on: if the df contains more than this number
-            of rows, randomly select this many rows to use as the df.
-            More is better, but slower.
-
-        Returns
-        ----------
-        best_filter_value: parameter setting for the filter op.
-        """
-
-        # record the original settings to prevent side effects
-        original_hyperparam_settings = self.hyper_parameter_settings
-
-        df, unique_vals = self._sample_df_and_unique_values(
-            df=df,
-            col=col,
-            max_num_unique_values=num_random_samples,
-            max_num_rows=num_rows_to_execute_on,
+        original_threshold = self.threshold
+        unique_vals = sample_unique_values(
+            df[label_col],
+            max_num_unique_values,
+            random_state,
         )
+        if len(df) > max_number_of_rows:
+            df = df.sample(max_number_of_rows, random_state=random_state)
 
-        # best score is the fraction of data that remains after data is
-        # truncated at a given value
-        best_score, best_val = 1, 0
-
-        # cycle through unique values for the parameter
-        unique_vals = set(df[col])
+        best_score, best_threshold = 1, 0
+        original_num_rows = len(df)
         for unique_val in unique_vals:
-            total = len(df)
-
-            # apply the operation to the sampled df and see what happens
-            # this overwrites existing hyperparams. They will need to be
-            # reset later
-            self.set_hyper_parameter(
-                parameter_name="threshold",
-                parameter_value=unique_val,
-            )
-            filtered_df = self.execute(df)
-
-            # see how many items remain. Score based on how close we are to
-            # the correct fraction of data that will remain at the give number
+            self.set_parameters(threshold=unique_val)
+            filtered_df = self.label_function(df)
             count = len(filtered_df)
-            fraction_of_data_left = count / total
+            fraction_of_data_left = count / original_num_rows
             score = abs(fraction_of_data_left - fraction_of_data_target)
-
-            #  record the closest score
+            # minimize the score (reduce the difference)
             if score < best_score:
                 best_score = score
-                best_val = unique_val
-
-        # reset operation to original hyperparamets
-        self.hyper_parameter_settings = original_hyperparam_settings
-        return best_val
-
-    def find_threshhold_by_diversity(
-        self,
-        df,
-        label_col,
-        entity_col,
-        num_random_samples=10,
-        num_rows_to_execute_on=2000,
-    ):
-        """
-        This function selects a parameter setting for the
-        operations, excluding the filter operation.
-        The parameter setting that maximizes the
-        entropy of the output data is chosen.
-        Parameters
-        ----------
-        df: the relevant data
-        label_col: column name of the column of interest in the data
-        entity_col: the column containing entities in the data
-        num_random_samples: if there's more than this many unique values to
-            test, randomly sample this many values from the dataset
-        num_rows_to_execute_on: if the dataframe contains more than this number
-            of rows, randomly select this many rows to use as the dataframe
-
-        Returns
-        -------
-        best_parameter_value: parameter setting for the operation.
-        best_df: the dataframe (possibly filtered depending on
-            num_rows_to_execute_on)
-            after having the operation applied with the chosen parameter value.
-        """
-
-        # record the original settings to prevent side effects
-        original_hyperparam_settings = self.hyper_parameter_settings
-
-        df, unique_vals = self._sample_df_and_unique_values(
-            df=df,
-            col=label_col,
-            max_num_unique_values=num_random_samples,
-            max_num_rows=num_rows_to_execute_on,
-        )
-
-        best_entropy = 0
-        best_parameter_value = 0
-
-        # try each unique value
-        # return the one that results in the most entropy
-        unique_vals = set(df[label_col])
-        for unique_val in unique_vals:
-            self.set_hyper_parameter(
-                parameter_name="threshold",
-                parameter_value=unique_val,
-            )
-
-            output_df = df.groupby(entity_col).apply(self.execute)
-
-            current_entropy = self._entropy_of_a_list(list(output_df[label_col]))
-
-            if current_entropy > best_entropy:
-                best_entropy = current_entropy
-                best_parameter_value = unique_val
-
-        self.hyper_parameter_settings = original_hyperparam_settings
-        return best_parameter_value
-
-    def _sample_df_and_unique_values(
-        self,
-        df,
-        col,
-        max_num_unique_values,
-        max_num_rows,
-    ):
-        """
-        Helper methods
-
-        Randomly sample unique values in the passed col in a dataframe so that
-        the number of unique_values is the <= max_num_unique_values
-
-        Randomly sample a dataframe so that the number of
-        rows is <= max_num_rows
-
-        Parameters
-        ----------
-        df: Pandas DataFrame
-        col: column to base sampling on
-        max_num_unique_values: the maximum allowed number of unique values to
-            return
-        max_num_rows: the maximum allowed number of rows to return
-
-        Returns
-        -------
-        df: sampled dataframe which is a subset of the original dataframe
-        unique_vals: a list of unique values
-        """
-        # unique_vals = df[col].unique().tolist()
-        unique_vals = set(df[col])
-
-        if len(unique_vals) > max_num_unique_values:
-            unique_vals = heapq.nlargest(
-                max_num_unique_values,
-                unique_vals,
-                key=lambda L: random.random(),
-            )
-            # Fixes DeprecationWarning: Sampling from a set deprecated since Python 3.9 and will be removed in a subsequent version.
-            # unique_vals = list(
-            # random.sample(unique_vals, max_num_unique_values))
-
-        if len(df) > max_num_rows:
-            df = df.sample(max_num_rows)
-
-        return (df, unique_vals)
-
-    def _entropy_of_a_list(self, values):
-        """
-        Calculate the entropy (information) of the list.
-        Parameters
-        ----------
-        values: list of values
-        Returns
-        ----------
-        entropy: the entropy or information in the list.
-        """
-        counts = Counter(values).values()
-        total = float(sum(counts))
-        probabilities = [val / total for val in counts]
-        entropy = stats.entropy(probabilities)
-        return entropy
+                best_threshold = unique_val
+        self.set_parameters(threshold=original_threshold)
+        return best_threshold
 
     def __hash__(self):
         return hash((type(self).__name__, self.column_name))
 
-    def __repr__(self):
-        hyper_param_str = ",".join(
-            [str(x) for x in list(self.hyper_parameter_settings.values())],
-        )
-
-        if len(hyper_param_str) > 0:
-            hyper_param_str = "@" + hyper_param_str
-
-        return "%s(%s%s)" % (type(self).__name__, self.column_name, hyper_param_str)
+    # def __repr__(self):
+    #     hyper_param_str = ",".join(
+    #         [str(x) for x in list(self.hyper_parameter_settings.values())],
+    #     )
+    #     if len(hyper_param_str) > 0:
+    #         hyper_param_str = "@" + hyper_param_str
+    #     return "%s(%s%s)" % (type(self).__name__, self.column_name, hyper_param_str)
 
     def __eq__(self, other):
         """Overrides the default implementation"""

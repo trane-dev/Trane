@@ -1,20 +1,9 @@
-import json
 import logging
-import os
 
 import composeml as cp
-import dill
 import numpy as np
 
-from trane.core.utils import _parse_table_meta
-from trane.ops.aggregation_ops import (
-    AvgAggregationOp,
-    CountAggregationOp,
-    MajorityAggregationOp,
-    MaxAggregationOp,
-    MinAggregationOp,
-    SumAggregationOp,
-)
+from trane.core.utils import _check_operations_valid, _parse_table_meta
 from trane.ops.filter_ops import (
     AllFilterOp,
     EqFilterOp,
@@ -23,8 +12,6 @@ from trane.ops.filter_ops import (
     LessFilterOp,
     NeqFilterOp,
 )
-
-__all__ = ["PredictionProblem"]
 
 
 class PredictionProblem:
@@ -38,8 +25,8 @@ class PredictionProblem:
     def __init__(
         self,
         operations,
-        entity_col,
-        time_col,
+        entity_col: str,
+        time_col: str,
         table_meta=None,
         cutoff_strategy=None,
     ):
@@ -93,52 +80,15 @@ class PredictionProblem:
         -------
         Bool
         """
-        # don't contaminate original table_meta
         if table_meta:
             temp_meta = table_meta.copy()
         else:
             temp_meta = self.table_meta.copy()
-        # sort each operation in its respective bucket
-        for op in self.operations:
-            # op.op_type_check returns a modified temp_meta,
-            # which accounts for the operation having taken place
-            if not hasattr(op, "op_type_check"):
-                return False
-            temp_meta = op.op_type_check(temp_meta)
-            if temp_meta is None:
-                return False
 
-        # [
-        #     ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-        #     ColumnSchema(logical_type=Boolean),
-        #     ColumnSchema(logical_type=Ordinal, semantic_tags={"category"}),
-        #     ColumnSchema(logical_type=Integer),
-        #     ColumnSchema(logical_type=Double),
-        #     ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        #     ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        #     ColumnSchema(logical_type=Datetime),
-        #     ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
-        #     ColumnSchema(logical_type=Integer, semantic_tags={"index"}),
-        #     ColumnSchema(logical_type=Categorical, semantic_tags={"index"}),
-        # ]
-        return True
-        # TYPES = [
-        #     TYPE_CATEGORY,
-        #     TYPE_BOOL,
-        #     TYPE_ORDERED,
-        #     TYPE_TEXT,
-        #     TYPE_INTEGER,
-        #     TYPE_FLOAT,
-        #     TYPE_TIME,
-        #     TYPE_IDENTIFIER,
-        # ]
-
-        # not sure what this is for
-        # if temp_meta in TYPES:
-        #     self.label_type = temp_meta
-        #     return True
-        # else:
-        #     return False
+        result, _ = _check_operations_valid(self.operations, temp_meta)
+        if result:
+            return True
+        return False
 
     def execute(
         self,
@@ -168,20 +118,14 @@ class PredictionProblem:
                 ),
             )
 
-        default_kwarg = (
-            self.cutoff_strategy.kwarg_dict() if self.cutoff_strategy else {}
-        )
-        search_kwargs = {
-            "minimum_data": minimum_data or default_kwarg.get("minimum_data"),
-            "maximum_data": maximum_data or default_kwarg.get("maximum_data"),
-            "gap": gap or default_kwarg.get("gap"),
-        }
+        minimum_data = minimum_data or self.cutoff_strategy.minimum_data
+        maximum_data = maximum_data or self.cutoff_strategy.maximum_data
         lt = self._label_maker.search(
             df=df,
             num_examples_per_instance=num_examples_per_instance,
-            minimum_data=search_kwargs["minimum_data"],
-            maximum_data=search_kwargs["maximum_data"],
-            gap=search_kwargs["gap"],
+            minimum_data=minimum_data,
+            maximum_data=maximum_data,
+            gap=gap,
             drop_empty=drop_empty,
             verbose=verbose,
             *args,
@@ -205,7 +149,7 @@ class PredictionProblem:
         """
         df = df.copy()
         for operation in self.operations:
-            df = operation.execute(df)
+            df = operation.label_function(df)
         return df
 
     def __repr__(self) -> str:
@@ -251,18 +195,7 @@ class PredictionProblem:
         return description
 
     def _describe_aggop(self, op):
-        agg_op_str_dict = {
-            SumAggregationOp: " the total <{}> in all related records",
-            AvgAggregationOp: " the average <{}> in all related records",
-            MaxAggregationOp: " the maximum <{}> in all related records",
-            MinAggregationOp: " the minimum <{}> in all related records",
-            MajorityAggregationOp: " the majority <{}> in all related records",
-        }
-
-        if isinstance(op, CountAggregationOp):
-            return " the number of records"
-        if type(op) in agg_op_str_dict:
-            return agg_op_str_dict[type(op)].format(op.column_name)
+        return op.generate_description()
 
     def _describe_filter(self, op):
         filter_op_str_dict = {
@@ -285,7 +218,7 @@ class PredictionProblem:
             op_desc = "<{col}> {op} {threshold}".format(
                 col=op.column_name,
                 op=filter_op_str_dict[type(op)],
-                threshold=op.hyper_parameter_settings.get("threshold", "__"),
+                threshold=op.__dict__.get("threshold", "__"),
             )
             desc += op_desc
 
@@ -293,129 +226,6 @@ class PredictionProblem:
                 desc += " and "
 
         return desc
-
-    def save(self, path, problem_name):
-        """
-        Saves the pediction problem in two files.
-
-        One file is a dill of the cutoff strategy.
-        The other file is the jsonified operations and the relative path to
-        that cutoff strategy.
-
-        Parameters
-        ----------
-        path: str - the directory in which save the problem
-        problem_name: str - the filename to assign the problem
-
-        Returns
-        -------
-        dict
-        {'saved_correctly': bool,
-         'directory_created': bool,
-         'problem_name': str}
-        The new problem_name may have changed due to a filename collision
-
-        """
-        json_saved = False
-        dill_saved = False
-        created_directory = False
-
-        # create directory if it doesn't exist
-        if not os.path.isdir(path):
-            os.makedirs(path)
-            created_directory = True
-
-        # rename the problem_name if already exists
-        json_file_exists = os.path.exists(os.path.join(path, problem_name + ".json"))
-        dill_file_exists = os.path.exists(os.path.join(path, problem_name + ".dill"))
-
-        i = 1
-        while json_file_exists or dill_file_exists:
-            problem_name += str(i)
-
-            i += 1
-            json_file_exists = os.path.exists(
-                os.path.join(path, problem_name + ".json"),
-            )
-            dill_file_exists = os.path.exists(
-                os.path.join(path, problem_name + ".dill"),
-            )
-
-        # get the cutoff_strategy bytes
-        cutoff_dill_bytes = self._dill_cutoff_strategy()
-
-        # add a key to the problem json
-        json_dict = json.loads(self.to_json())
-        json_dict["cutoff_dill"] = problem_name + ".dill"
-
-        # write the files
-        with open(os.path.join(path, problem_name + ".json"), "w") as f:
-            json.dump(obj=json_dict, fp=f, indent=4, sort_keys=True)
-            json_saved = True
-
-        with open(os.path.join(path, problem_name + ".dill"), "wb") as f:
-            f.write(cutoff_dill_bytes)
-            dill_saved = True
-
-        return {
-            "saved_correctly": json_saved & dill_saved,
-            "created_directory": created_directory,
-            "problem_name": problem_name,
-        }
-
-    @classmethod
-    def load(cls, json_file_path):
-        """
-        Load a prediction problem from json file.
-        If the file links to a dill (binary) cutoff_srategy, also load that
-        and assign it to the prediction problem.
-
-        Parameters
-        ----------
-        json_file_path: str, path and filename for the json file
-
-        Returns
-        -------
-        PredictionProblem
-
-        """
-        with open(json_file_path, "r") as f:
-            problem_dict = json.load(f)
-            problem = cls.from_json(problem_dict)
-
-        cutoff_strategy_file_name = problem_dict.get("cutoff_dill", None)
-
-        if cutoff_strategy_file_name:
-            # reconstruct cutoff strategy filename
-            pickle_path = os.path.join(
-                os.path.dirname(json_file_path),
-                cutoff_strategy_file_name,
-            )
-
-            # load cutoff strategy from file
-            with open(pickle_path, "rb") as f:
-                cutoff_strategy = dill.load(f)
-
-            # assign cutoff strategy to problem
-            problem.cutoff_strategy = cutoff_strategy
-
-        return problem
-
-    def _dill_cutoff_strategy(self):
-        """
-        Function creates a dill for the problem's associated cutoff strategy
-
-        This function requires cutoff time to be assigned.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        a dill of the cutoff strategy
-        """
-        cutoff_dill = dill.dumps(self.cutoff_strategy)
-        return cutoff_dill
 
     def __eq__(self, other):
         """Overrides the default implementation"""
@@ -495,10 +305,3 @@ class PredictionProblem:
 
         # else:
         #     logging.critical("check_type function received an unexpected type.")
-
-    def set_parameters(self, **parameters):
-        for operation in self.operations:
-            settings = operation.hyper_parameter_settings
-            for parameter in operation.REQUIRED_PARAMETERS:
-                for key in parameter:
-                    settings[key] = parameters.get(key, 0)

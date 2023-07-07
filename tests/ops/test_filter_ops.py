@@ -1,7 +1,6 @@
 import pandas as pd
 import pytest
 
-from trane.column_schema import ColumnSchema
 from trane.ops.filter_ops import (
     AllFilterOp,
     EqFilterOp,
@@ -17,28 +16,47 @@ def df():
     return df
 
 
-@pytest.mark.parametrize(
-    "filter_operation,threshold,expected_values",
-    [
-        (AllFilterOp, None, [1, 2, 3, 4, 5]),
-        (GreaterFilterOp, 2, [3, 4, 5]),
-        (EqFilterOp, 3, [3]),
-        (NeqFilterOp, 1, [2, 3, 4, 5]),
-        (LessFilterOp, 4, [1, 2, 3]),
-    ],
-)
-def test_agg_ops(df, filter_operation, threshold, expected_values):
-    op = filter_operation("col")
-    if threshold:
-        op.hyper_parameter_settings["threshold"] = threshold
-    if op.IOTYPES:
-        assert isinstance(op.IOTYPES, list)
-        for input_type, output_type in op.IOTYPES:
-            assert isinstance(input_type, ColumnSchema)
-            assert isinstance(output_type, ColumnSchema)
+def test_all_filter_op(df):
+    op = AllFilterOp("col")
     output = op(df)
-    # because filter check some criteria and return the rows which match the criteria
-    # we do greater than, equal, not equal, less than, and all
-    # so we are checking index values
-    output = output["col"].tolist()
-    assert output == expected_values
+    assert output["col"].tolist() == df["col"].tolist()
+    assert op.generate_description() == ""
+
+
+def test_all_filter_op_empty():
+    op = AllFilterOp("col")
+    df = pd.DataFrame()
+    output = op(df)
+    assert pd.isna(output)
+
+
+def test_eq_filter_op(df):
+    op = EqFilterOp("col")
+    op.set_parameters(threshold=3)
+    output = op(df)
+    assert output["col"].tolist() == [3]
+    assert op.generate_description() == "equal to"
+
+
+def test_neq_filter_op(df):
+    op = NeqFilterOp("col")
+    op.set_parameters(threshold=3)
+    output = op(df)
+    assert output["col"].tolist() == [1, 2, 4, 5]
+    assert op.generate_description() == "not equal to"
+
+
+def test_less_filter_op(df):
+    op = LessFilterOp("col")
+    op.set_parameters(threshold=3)
+    output = op(df)
+    assert output["col"].tolist() == [1, 2]
+    assert op.generate_description() == "less than"
+
+
+def test_greater_filter_op(df):
+    op = GreaterFilterOp("col")
+    op.set_parameters(threshold=3)
+    output = op(df)
+    assert output["col"].tolist() == [4, 5]
+    assert op.generate_description() == "greater than"

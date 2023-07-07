@@ -1,50 +1,11 @@
 import sys
-from typing import Any, Callable, Iterable, Union
+from typing import Any, Iterable, Union
 
 import numpy as np
 import pandas as pd
-import woodwork as ww
+from dateutil.parser import ParserError
 from importlib_resources import files
 from pandas.api import types as pdtypes
-from woodwork.config import config
-from woodwork.type_sys.utils import _is_categorical_series, col_is_datetime
-
-
-def _infer_series_type(series):
-    inference_functions = {
-        boolean_func: ("Boolean", "bool"),
-        boolean_nullable_func: ("BooleanNullable", "boolean"),
-        categorical_func: ("Categorical", "category"),
-        datetime_func: ("Datetime", "datetime64[ns]"),
-        double_func: ("Double", "float64"),
-        email_address_func: ("EmailAddress", "string"),
-        integer_func: ("Integer", "int64"),
-        integer_nullable_func: ("IntegerNullable", "Int64"),
-        ip_address_func: ("IPAddress", "string"),
-        natural_language_func: ("NaturalLanguage", "string"),
-        phone_number_func: ("PhoneNumber", "string"),
-        postal_code_func: ("PostalCode", "string"),
-        timedelta_func: ("Timedelta", "timedelta64[ns]"),
-        url_func: ("URL", "string"),
-    }
-    for infer_func, (ltype, dtype) in inference_functions.items():
-        if infer_func(series) is True:
-            return ltype, dtype
-    return ("Unknown", "string")
-
-
-def infer_types(df):
-    if isinstance(df, pd.Series):
-        _, dtype = _infer_series_type(df)
-        df = df.astype(dtype)
-        return df
-    col_to_dtype = {}
-    for col in df:
-        _, dtype = _infer_series_type(df[col])
-        df[col] = df[col].astype(dtype)
-        col_to_dtype[col] = dtype
-    return df
-
 
 MAX_INT = sys.maxsize
 MIN_INT = -sys.maxsize - 1
@@ -64,14 +25,12 @@ def categorical_func(series):
         return True
 
     if pdtypes.is_string_dtype(series.dtype) and not col_is_datetime(series):
-        categorical_threshold = ww.config.get_option("categorical_threshold")
+        categorical_threshold = 0.2
 
         return _is_categorical_series(series, categorical_threshold)
 
     if pdtypes.is_float_dtype(series.dtype) or pdtypes.is_integer_dtype(series.dtype):
-        numeric_categorical_threshold = ww.config.get_option(
-            "numeric_categorical_threshold",
-        )
+        numeric_categorical_threshold = None
         if numeric_categorical_threshold is not None:
             return _is_categorical_series(series, numeric_categorical_threshold)
         else:
@@ -90,7 +49,7 @@ def integer_func(series):
 
 def integer_nullable_func(series):
     if pdtypes.is_integer_dtype(series.dtype):
-        threshold = ww.config.get_option("numeric_categorical_threshold")
+        threshold = None
         if threshold is not None:
             return not _is_categorical_series(series, threshold)
         else:
@@ -118,7 +77,7 @@ def integer_nullable_func(series):
 
 def double_func(series):
     if pdtypes.is_float_dtype(series.dtype):
-        threshold = ww.config.get_option("numeric_categorical_threshold")
+        threshold = None
         if threshold is not None:
             return not _is_categorical_series(series, threshold)
         else:
@@ -142,12 +101,21 @@ def boolean_func(series):
     return False
 
 
+boolean_inference_strings = [
+    ["yes", "no"],
+    ["y", "n"],
+    ["true", "false"],
+    ["t", "f"],
+]
+boolean_inference_ints = []
+
+
 def boolean_nullable_func(series):
     if pdtypes.is_bool_dtype(series.dtype) and not pdtypes.is_categorical_dtype(
         series.dtype,
     ):
         return True
-    elif pdtypes.is_object_dtype(series.dtype) or pdtypes.is_string_dtype(series.dtype):
+    elif pdtypes.is_object_dtype(series.dtype):
         series_no_null = series.dropna()
         try:
             series_no_null_unq = set(series_no_null)
@@ -159,8 +127,7 @@ def boolean_nullable_func(series):
                 return True
             series_lower = set(str(s).lower() for s in set(series_no_null))
             if series_lower in [
-                set(boolean_list)
-                for boolean_list in config.get_option("boolean_inference_strings")
+                set(boolean_list) for boolean_list in boolean_inference_strings
             ]:
                 return True
         except (
@@ -168,22 +135,16 @@ def boolean_nullable_func(series):
         ):  # Necessary to check for non-hashable values because of object dtype consideration
             return False
     elif pdtypes.is_integer_dtype(series.dtype) and len(
-        config.get_option("boolean_inference_ints"),
+        boolean_inference_ints,
     ):
         series_unique = set(series)
-        if series_unique == set(config.get_option("boolean_inference_ints")):
+        if series_unique == set(boolean_inference_ints):
             return True
     return False
 
 
 def datetime_func(series):
     if col_is_datetime(series):
-        return True
-    return False
-
-
-def timedelta_func(series):
-    if pdtypes.is_timedelta64_dtype(series.dtype):
         return True
     return False
 
@@ -202,55 +163,68 @@ def natural_language_func(series):
     tokens = series.astype("string").str.split(NL_delimiters)
     mean_num_common_words = np.nanmean(tokens.map(num_common_words))
 
-    return (
-        mean_num_common_words > 1.14
-    )  # determined through https://github.com/alteryx/nl_inference
+    return mean_num_common_words > 1.14
 
 
-class InferWithRegex:
-    def __init__(self, get_regex: Callable[[], str]):
-        self.get_regex = get_regex
+def col_is_datetime(col, datetime_format=None):
+    """Determine if a dataframe column contains datetime values or not. Returns True if column
+    contains datetimes, False if not. Optionally specify the datetime format string for the column.
+    Will not infer numeric data as datetime."""
 
-    def __call__(self, series: pd.Series) -> bool:
-        series = series.dropna()
-        regex = self.get_regex()
+    if pd.api.types.is_datetime64_any_dtype(col):
+        return True
 
-        # Includes a check for object dtypes
-        if not (
-            pdtypes.is_categorical_dtype(series.dtype)
-            or pdtypes.is_string_dtype(series.dtype)
-        ):
+    col = col.dropna()
+    if len(col) == 0:
+        return False
+
+    try:
+        if pd.api.types.is_numeric_dtype(pd.Series(col.values.tolist())):
             return False
+    except AttributeError:
+        # given our current minimum dependencies (pandas 1.3.0 and pyarrow 4.0.1)
+        # if we have a string dtype series, calling `col.values.tolist()` throws an error
+        # AttributeError: 'StringArray' object has no attribute 'tolist'
+        # this try/except block handles that, among other potential issues for experimental dtypes
+        # until we find a more appropriate solution
+        pass
 
-        try:
-            series_match_method = series.str.match
-        except (AttributeError, TypeError):
-            # This can happen either when the inferred dtype for a series is not
-            # compatible with the pandas string API (AttributeError) *or* when the
-            # inferred dtype is not compatible with the string API `match` method
-            # (TypeError)
+    col = col.astype(str)
+
+    try:
+        pd.to_datetime(
+            col,
+            errors="raise",
+            format=datetime_format,
+            infer_datetime_format=True,
+        )
+        return True
+
+    except (ParserError, ValueError, OverflowError, TypeError):
+        return False
+
+
+def _is_categorical_series(series: pd.Series, threshold: float) -> bool:
+    """
+    Return ``True`` if the given series is "likely" to be categorical.
+    Otherwise, return ``False``.  We say that a series is "likely" to be
+    categorical if the percentage of unique values relative to total non-NA
+    values is below a certain threshold.  In other words, if all values in the
+    series are accounted for by a sufficiently small collection of unique
+    values, then the series is categorical.
+    """
+    try:
+        nunique = series.nunique()
+    except TypeError as e:
+        # It doesn't seem like there's a more elegant way to do this.  Pandas
+        # doesn't provide an API that would give you any indication ahead of
+        # time if a series with object dtype has any unhashable elements.
+        if "unhashable type" in e.args[0]:
             return False
-        matches = series_match_method(pat=regex)
+        else:
+            raise  # pragma: no cover
+    if nunique == 0:
+        return False
 
-        return matches.sum() == len(matches)
-
-
-email_address_func = InferWithRegex(
-    lambda: ww.config.get_option("email_inference_regex"),
-)
-phone_number_func = InferWithRegex(
-    lambda: ww.config.get_option("phone_inference_regex"),
-)
-postal_code_func = InferWithRegex(
-    lambda: ww.config.get_option("postal_code_inference_regex"),
-)
-url_func = InferWithRegex(lambda: ww.config.get_option("url_inference_regex"))
-ip_address_func = InferWithRegex(
-    lambda: (
-        "("
-        + ww.config.get_option("ipv4_inference_regex")
-        + "|"
-        + ww.config.get_option("ipv6_inference_regex")
-        + ")"
-    ),
-)
+    pct_unique = nunique / series.count()
+    return pct_unique <= threshold

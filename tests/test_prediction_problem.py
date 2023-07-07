@@ -31,20 +31,11 @@ def make_fake_df():
 @pytest.fixture()
 def make_fake_meta():
     meta = {
-        "id": ("Categorical", {"index", "category"}),
+        "id": ("Integer", {"index"}),
         "date": ("Datetime", {}),
         "state": ("Categorical", {"category"}),
         "amount": ("Double", {"numeric"}),
     }
-
-    #     "id": ColumnSchema(
-    #         logical_type=Categorical,
-    #         semantic_tags={"index", "category"},
-    #     ),
-    #     "date": ColumnSchema(logical_type=Datetime),
-    #     "country": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-    #     "amount": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-    # }
     return meta
 
 
@@ -113,6 +104,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
         maximum_data=maximum_data,
     )
     problem_generator = trane.PredictionProblemGenerator(
+        df=df,
         table_meta=meta,
         entity_col=entity_col,
         cutoff_strategy=cutoff_strategy,
@@ -126,7 +118,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
     for p in problems:
         label_times = p.execute(df, -1)
         label_times.rename(columns={"_execute_operations_on_df": "label"}, inplace=True)
-        threshold = p.operations[0].hyper_parameter_settings.get("threshold", None)
+        threshold = p.operations[0].threshold
 
         if str(p) == "For each <id> predict the number of records in next 2d days":
             assert label_times["label"].tolist() == [1, 2, 2, 1]
@@ -135,6 +127,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=num_observations,
                 operation=None,
             )
@@ -163,6 +156,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=label_function,
                 operation=None,
             )
@@ -177,6 +171,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=sum_column,
                 operation=None,
             )
@@ -194,6 +189,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=column_gt_op,
                 operation="sum",
             )
@@ -211,6 +207,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=column_lt_op,
                 operation="sum",
             )
@@ -225,6 +222,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=avg_column,
                 operation=None,
             )
@@ -242,6 +240,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=column_gt_op,
                 operation="mean",
             )
@@ -259,6 +258,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=column_lt_op,
                 operation="mean",
             )
@@ -273,6 +273,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=max_column,
                 operation="max",
             )
@@ -288,6 +289,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=column_gt_op,
                 operation="max",
             )
@@ -303,6 +305,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=column_lt_op,
                 operation="max",
             )
@@ -317,6 +320,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=min_column,
                 operation="min",
             )
@@ -334,6 +338,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=column_gt_op,
                 operation="min",
             )
@@ -349,6 +354,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 df,
                 p,
                 label_times,
+                threshold=threshold,
                 function=column_lt_op,
                 operation="min",
             )
@@ -363,10 +369,9 @@ def verify_label_times(
     label_times,
     function,
     operation,
+    threshold,
     column="amount",
 ):
-    threshold = p.operations[0].hyper_parameter_settings.get("threshold", None)
-
     window_size = cutoff_strategy.window_size
     minimum_data = cutoff_strategy.minimum_data
     maximum_data = cutoff_strategy.maximum_data

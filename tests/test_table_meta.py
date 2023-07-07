@@ -1,6 +1,6 @@
-from trane.column_schema import ColumnSchema
 from trane.core.prediction_problem import _parse_table_meta
-from trane.logical_types import (
+from trane.typing.column_schema import ColumnSchema
+from trane.typing.logical_types import (
     Categorical,
     Datetime,
     Double,

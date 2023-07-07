@@ -1,6 +1,6 @@
 from inspect import isclass
 
-from trane.logical_types import Boolean, Datetime, Ordinal
+from trane.typing.logical_types import Boolean, Datetime
 
 
 class ColumnSchema(object):
@@ -61,15 +61,9 @@ class ColumnSchema(object):
     @property
     def is_datetime(self):
         """Whether the ColumnSchema is a Datetime column"""
-        return type(self.logical_type) == Datetime
+        return issubclass(self.logical_type, Datetime)
 
     @property
     def is_boolean(self):
         """Whether the ColumnSchema is a Boolean column"""
-        ltype_class = type(self.logical_type)
-        return ltype_class == Boolean
-
-    @property
-    def is_ordinal(self):
-        """Whether the ColumnSchema is a Ordinal column"""
-        return type(self.logical_type) == Ordinal
+        return issubclass(self.logical_type, Boolean)

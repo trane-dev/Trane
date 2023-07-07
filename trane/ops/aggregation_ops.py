@@ -1,5 +1,3 @@
-from trane.column_schema import ColumnSchema
-from trane.logical_types import Double, Integer
 from trane.ops.op_base import OpBase
 
 AGGREGATION_OPS = [
@@ -35,9 +33,6 @@ class AggregationOpBase(OpBase):
     Requirements
     ------------
     REQUIRED_PARAMETERS: the hyper parameters needed for the operation
-    IOTYPES: the input and output types of the operation using TableMeta types
-    execute method: transform dataframe according to the operation and return
-      the new dataframe
 
     Filter operations filter data
     row operations transform data within a row and return a dataframe of the same dimensions,
@@ -48,151 +43,76 @@ class AggregationOpBase(OpBase):
 
 
 class CountAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [
-        (
-            ColumnSchema(),
-            ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        ),
-    ]
+    """
+    CountAggregation will not be given any columns.
+    It will apply to the whole dataslice and return 1 number (integer).
+    Basically, its then number of rows in the dataslice.
+    So a customer's transactions (within the window_size).
+    """
 
-    def op_type_check(self, table_meta):
-        self.output_type = ColumnSchema(logical_type=Integer, semantic_tags={"numeric"})
-        return ColumnSchema(logical_type=Integer, semantic_tags={"numeric"})
+    input_output_types = [(None, "Integer")]
+    description = " the number of records"
 
-    def execute(self, dataframe):
-        return len(dataframe)
+    def label_function(self, dataslice):
+        return len(dataslice)
 
 
 class SumAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [
-        (
-            ColumnSchema(semantic_tags={"numeric"}),
-            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        ),
-    ]
+    input_output_types = [("numeric", "Double")]
+    description = " the total <{}> in all related records"
 
-    def __init__(self, column_name):
-        self.column_name = column_name
-        self.input_type = ColumnSchema(semantic_tags={"numeric"})
-        self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
-        self.hyper_parameter_settings = {}
-
-    def op_type_check(self, table_meta):
-        if table_meta[self.column_name].is_numeric:
-            return table_meta
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
+    def label_function(self, dataslice):
+        if len(dataslice) == 0:
             return None
-        return dataframe[self.column_name].sum()
+        return dataslice[self.column_name].sum()
 
 
 class AvgAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [
-        (
-            ColumnSchema(semantic_tags={"numeric"}),
-            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        ),
-    ]
+    input_output_types = [("numeric", "Double")]
+    description = " the average <{}> in all related records"
 
-    def __init__(self, column_name):
-        self.column_name = column_name
-        self.input_type = ColumnSchema(semantic_tags={"numeric"})
-        self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
-        self.hyper_parameter_settings = {}
-
-    def op_type_check(self, table_meta):
-        if table_meta[self.column_name].is_numeric:
-            return table_meta
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
+    def label_function(self, dataslice):
+        if len(dataslice) == 0:
             return None
-        return dataframe[self.column_name].mean()
+        return dataslice[self.column_name].mean()
 
 
 class MaxAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [
-        (
-            ColumnSchema(semantic_tags={"numeric"}),
-            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        ),
-    ]
+    input_output_types = [("numeric", "Double")]
+    description = " the maximum <{}> in all related records"
 
-    def __init__(self, column_name):
-        self.column_name = column_name
-        self.input_type = ColumnSchema(semantic_tags={"numeric"})
-        self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
-        self.hyper_parameter_settings = {}
-
-    def op_type_check(self, table_meta):
-        if table_meta[self.column_name].is_numeric:
-            return table_meta
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
+    def label_function(self, dataslice):
+        if len(dataslice) == 0:
             return None
-        return dataframe[self.column_name].max()
+        return dataslice[self.column_name].max()
 
 
 class MinAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [
-        (
-            ColumnSchema(semantic_tags={"numeric"}),
-            ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        ),
-    ]
+    input_output_types = [("numeric", "Double")]
+    description = " the minimum <{}> in all related records"
 
-    def __init__(self, column_name):
-        self.column_name = column_name
-        self.input_type = ColumnSchema(semantic_tags={"numeric"})
-        self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
-        self.hyper_parameter_settings = {}
-
-    def op_type_check(self, table_meta):
-        if table_meta[self.column_name].is_numeric:
-            return table_meta
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
+    def label_function(self, dataslice):
+        if len(dataslice) == 0:
             return None
-        return dataframe[self.column_name].min()
+        return dataslice[self.column_name].min()
 
 
 class MajorityAggregationOp(AggregationOpBase):
-    REQUIRED_PARAMETERS = []
-    IOTYPES = [
-        (
-            ColumnSchema(semantic_tags={"category"}),
-            ColumnSchema(semantic_tags={"category"}),
-        ),
-        (
-            ColumnSchema(semantic_tags={"index"}),
-            ColumnSchema(semantic_tags={"index"}),
-        ),
-    ]
+    input_output_types = [("category", "category")]
+    # input_output_types = [("category", "category"), ("index", "index")]
+    description = " the majority <{}> in all related records"
 
-    def __init__(self, column_name):
-        self.column_name = column_name
-        # self.input_type = ColumnSchema(semantic_tags={"category"})
-        # doesn't seem right
-        # self.output_type = ColumnSchema(logical_type=Double, semantic_tags={"numeric"})
-        self.hyper_parameter_settings = {}
-
-    def op_type_check(self, table_meta):
-        if table_meta[self.column_name].is_categorical:
-            self.output_type = ColumnSchema(
-                logical_type=table_meta[self.column_name].logical_type,
-                semantic_tags={"category"},
-            )
-            return table_meta
-
-    def execute(self, dataframe):
-        if len(dataframe) == 0:
+    def label_function(self, dataslice):
+        if len(dataslice) == 0:
             return None
-        return str(dataframe[self.column_name].mode()[0])
+        return str(dataslice[self.column_name].mode()[0])
+
+
+AGG_OPS = [
+    CountAggregationOp,
+    SumAggregationOp,
+    AvgAggregationOp,
+    MaxAggregationOp,
+    MinAggregationOp,
+    MajorityAggregationOp,
+]

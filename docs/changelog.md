@@ -8,6 +8,7 @@ What’s new in 0.4.0 (X, 2023)
     * Add detailed walkthroughts in Examples directory [#60][#60]
     * Add code coverage analysis from Codecov [#77][#77]
     * Clean up input and output for operations [#87][#87]
+    * Add additional unit tests for _check_operations_valid [#93][#93]
 * Fixes
     * Remove TableMeta class and replace with ColumnSchema [#83][#83] [#85][#85]
 
@@ -16,6 +17,7 @@ What’s new in 0.4.0 (X, 2023)
     [#83]: <https://github.com/HDI-Project/Trane/pull/83>
     [#85]: <https://github.com/HDI-Project/Trane/pull/85>
     [#87]: <https://github.com/HDI-Project/Trane/pull/87>
+    [#93]: <https://github.com/HDI-Project/Trane/pull/93>
 
 What’s new in 0.3.0 (February 24, 2023)
 =======================================

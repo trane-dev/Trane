@@ -1,3 +1,5 @@
+from typing import Dict
+
 import pandas as pd
 
 from trane.typing.column_schema import ColumnSchema
@@ -20,7 +22,7 @@ from trane.typing.logical_types import (
 )
 
 
-def _infer_series_schema(series):
+def _infer_series_schema(series: pd.Series) -> ColumnSchema:
     inference_functions = {
         boolean_func: ColumnSchema(logical_type=Boolean),
         categorical_func: ColumnSchema(
@@ -38,7 +40,7 @@ def _infer_series_schema(series):
     return ColumnSchema(logical_type=Unknown)
 
 
-def infer_table_meta(df: pd.DataFrame):
+def infer_table_meta(df: pd.DataFrame) -> Dict[str, ColumnSchema]:
     table_meta = {}
     for col in df.columns:
         column_schema = _infer_series_schema(df[col])

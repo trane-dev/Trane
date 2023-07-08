@@ -7,8 +7,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
-__all__ = ["PredictionProblemEvaluator"]
-
 
 class PredictionProblemEvaluator(object):
     """docstring for PredictionProblemEvaluator."""

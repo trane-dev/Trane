@@ -20,7 +20,7 @@ def make_fake_df():
             datetime(2023, 1, 5),
         ],
         "state": ["MA", "NY", "NY", "NJ", "NJ", "CT"],
-        "amount": [10, 20, 30, 40, 50, 60],
+        "amount": [10.0, 20.0, 30.0, 40.0, 50.0, 60.0],
     }
     df = pd.DataFrame(data)
     df["date"] = pd.to_datetime(df["date"])
@@ -31,7 +31,7 @@ def make_fake_df():
 @pytest.fixture()
 def make_fake_meta():
     meta = {
-        "id": ("Integer", {"index"}),
+        "id": ("Integer", {"numeric", "index"}),
         "date": ("Datetime", {}),
         "state": ("Categorical", {"category"}),
         "amount": ("Double", {"numeric"}),
@@ -87,13 +87,9 @@ def min_column(data_slice, column, **kwargs):
     return data_slice[column].min()
 
 
-def test_prediction_problem(make_fake_df, make_fake_meta):
-    df = make_fake_df
-    meta = make_fake_meta
-    for column in df.columns:
-        assert column in meta
+@pytest.fixture()
+def make_cutoff_strategy():
     entity_col = "id"
-    time_col = "date"
     window_size = "2d"
     minimum_data = "2023-01-01"
     maximum_data = "2023-01-05"
@@ -103,6 +99,18 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
         minimum_data=minimum_data,
         maximum_data=maximum_data,
     )
+    return cutoff_strategy
+
+
+def test_prediction_problem(make_fake_df, make_fake_meta, make_cutoff_strategy):
+    entity_col = "id"
+    time_col = "date"
+    df = make_fake_df
+    meta = make_fake_meta
+    for column in df.columns:
+        assert column in meta
+    cutoff_strategy = make_cutoff_strategy
+
     problem_generator = trane.PredictionProblemGenerator(
         df=df,
         table_meta=meta,
@@ -112,6 +120,10 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
     )
 
     problems = problem_generator.generate(df, generate_thresholds=True)
+    verify_problems(problems, df, cutoff_strategy)
+
+
+def verify_problems(problems, df, cutoff_strategy):
     problems_verified = 0
     # bad integration testing
     # not ideal but okay to test for now
@@ -359,8 +371,6 @@ def test_prediction_problem(make_fake_df, make_fake_meta):
                 operation="min",
             )
             problems_verified += 1
-        else:
-            print(p)
     assert problems_verified >= 35
 
 

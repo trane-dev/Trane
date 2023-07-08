@@ -155,6 +155,10 @@ def test_parse_table_cat():
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
 
+    operations = [AllFilterOp(None), SumAggregationOp("state")]
+    result, modified_meta = _check_operations_valid(operations, table_meta)
+    assert result is False
+
 
 def test_clean_date():
     assert clean_date("2019-01-01") == pd.Timestamp(

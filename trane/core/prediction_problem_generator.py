@@ -44,14 +44,16 @@ class PredictionProblemGenerator:
         self.time_col = time_col
         self.cutoff_strategy = cutoff_strategy
 
+        inferred_table_meta = False
         if table_meta is None:
             self.table_meta = infer_table_meta(df)
+            inferred_table_meta = True
         else:
             self.table_meta = _parse_table_meta(table_meta)
         self.transform_data()
-        self.ensure_valid_inputs()
+        self.ensure_valid_inputs(inferred_table_meta)
 
-    def ensure_valid_inputs(self):
+    def ensure_valid_inputs(self, inferred_table_meta=False):
         """
         TypeChecking for the problem generator entity_col
         and label_col. Errors if types don't match up.
@@ -64,7 +66,10 @@ class PredictionProblemGenerator:
 
         entity_col_type = self.table_meta[self.entity_col]
         assert entity_col_type.logical_type in [Integer, Categorical]
-        assert "index" in entity_col_type.semantic_tags
+        if inferred_table_meta is False:
+            assert "index" in entity_col_type.semantic_tags
+        else:
+            self.table_meta[self.entity_col].semantic_tags.add("index")
 
         time_col_type = self.table_meta[self.time_col]
         assert time_col_type.logical_type == Datetime

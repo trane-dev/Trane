@@ -2,8 +2,9 @@
 
 Changelog
 ---------
-What’s new in 0.4.0 (X, 2023)
-=====================================
+
+v0.4.0 (July 8, 2023)
+=====================
 * Enhancements
     * Add detailed walkthroughts in Examples directory [#60][#60]
     * Add code coverage analysis from Codecov [#77][#77]
@@ -19,8 +20,8 @@ What’s new in 0.4.0 (X, 2023)
     [#87]: <https://github.com/HDI-Project/Trane/pull/87>
     [#93]: <https://github.com/HDI-Project/Trane/pull/93>
 
-What’s new in 0.3.0 (February 24, 2023)
-=======================================
+v0.3.0 (February 24, 2023)
+==========================
 
 * Enhancements
     * Add workflow to clear old caches [#57][#57]
@@ -32,8 +33,8 @@ What’s new in 0.3.0 (February 24, 2023)
     [#57]: <https://github.com/HDI-Project/Trane/pull/57>
     [#58]: <https://github.com/HDI-Project/Trane/pull/58>
 
-What’s new in 0.2.0 (January 5, 2023)
-=====================================
+v0.2.0 (January 5, 2023)
+========================
 
 * Enhancements
     * Add instructions on how to release trane and changelog updated checker [#45][#45]

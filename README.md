@@ -58,6 +58,7 @@ cutoff_strategy = trane.CutoffStrategy(
 )
 time_col = "Date"
 problem_generator = trane.PredictionProblemGenerator(
+    df=data,
     entity_col=entity_col,
     time_col=time_col,
     cutoff_strategy=cutoff_strategy,

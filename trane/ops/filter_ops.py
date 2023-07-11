@@ -2,14 +2,6 @@ import pandas as pd
 
 from trane.ops.op_base import OpBase
 
-FILTER_OPS = [
-    "AllFilterOp",
-    "GreaterFilterOp",
-    "EqFilterOp",
-    "NeqFilterOp",
-    "LessFilterOp",
-]
-
 
 class FilterOpBase(OpBase):
     """
@@ -88,12 +80,3 @@ class LessFilterOp(FilterOpBase):
 
     def label_function(self, dataslice):
         return dataslice[dataslice[self.column_name] < self.threshold]
-
-
-FILT_OPS = [
-    AllFilterOp,
-    GreaterFilterOp,
-    EqFilterOp,
-    NeqFilterOp,
-    LessFilterOp,
-]

@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from trane.ops import AggregationOpBase
+from trane.ops.aggregation_ops import AggregationOpBase
 from trane.ops.filter_ops import FilterOpBase
 from trane.typing.column_schema import ColumnSchema
 from trane.typing.logical_types import (

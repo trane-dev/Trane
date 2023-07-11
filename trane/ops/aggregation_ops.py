@@ -7,6 +7,7 @@ AGGREGATION_OPS = [
     "MaxAggregationOp",
     "MinAggregationOp",
     "MajorityAggregationOp",
+    "ExistsAggregationOp",
 ]
 
 
@@ -138,4 +139,5 @@ AGG_OPS = [
     MaxAggregationOp,
     MinAggregationOp,
     MajorityAggregationOp,
+    ExistsAggregationOp,
 ]

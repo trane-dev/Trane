@@ -40,4 +40,6 @@ def test_eq():
 
 def test_lt():
     assert GreaterFilterOp("col") < LessFilterOp("col")
+    assert GreaterFilterOp("col") <= GreaterFilterOp("col")
     assert MinAggregationOp("col") > AvgAggregationOp("col")
+    assert MinAggregationOp("col") >= MinAggregationOp("col")

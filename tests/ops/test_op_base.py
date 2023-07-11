@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+from trane.ops.aggregation_ops import AvgAggregationOp, MinAggregationOp
 from trane.ops.filter_ops import GreaterFilterOp, LessFilterOp
 
 
@@ -39,3 +40,4 @@ def test_eq():
 
 def test_lt():
     assert GreaterFilterOp("col") < LessFilterOp("col")
+    assert AvgAggregationOp("col") < MinAggregationOp("col")

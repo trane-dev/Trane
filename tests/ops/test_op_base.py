@@ -35,3 +35,7 @@ def test_find_threshold_by_fraction_of_data_to_keep(df):
 def test_eq():
     assert GreaterFilterOp("col") == GreaterFilterOp("col")
     assert GreaterFilterOp("col") != LessFilterOp("col")
+
+
+def test_lt():
+    assert GreaterFilterOp("col") < LessFilterOp("col")

@@ -7,6 +7,7 @@ from trane.ops.filter_ops import FilterOpBase
 from trane.typing.column_schema import ColumnSchema
 from trane.typing.logical_types import (
     ALL_LOGICAL_TYPES,
+    Boolean,
     Categorical,
     Datetime,
     Double,
@@ -16,10 +17,13 @@ from trane.typing.logical_types import (
 TYPE_MAPPING = {
     "category": ColumnSchema(semantic_tags={"category"}),
     "index": ColumnSchema(semantic_tags={"index"}),
-    None: ColumnSchema(),
+    "None": ColumnSchema(),
     "numeric": ColumnSchema(semantic_tags={"numeric"}),
+    "Categorical": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
     "Double": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
     "Integer": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+    "Boolean": ColumnSchema(logical_type=Boolean),
+    "Datetime": ColumnSchema(logical_type=Datetime),
 }
 
 
@@ -34,9 +38,12 @@ def _parse_table_meta(table_meta):
     parsed_schema = {}
     for col, schema in table_meta.items():
         if isinstance(schema, str):
-            parsed_schema[col] = ColumnSchema(
-                logical_type=str_to_logical_type[schema.lower()],
-            )
+            if schema.lower() in TYPE_MAPPING:
+                parsed_schema[col] = TYPE_MAPPING[schema.lower()]
+            else:
+                parsed_schema[col] = ColumnSchema(
+                    logical_type=str_to_logical_type[schema.lower()],
+                )
         elif isinstance(schema, tuple):
             logical_type = None
             semantic_tags = None
@@ -64,19 +71,31 @@ def _check_operations_valid(
     for op in operations:
         input_output_types = op.input_output_types
         for op_input_type, op_output_type in input_output_types:
-            # operation applies to all columns
-            if op_input_type is None:
-                continue
             if isinstance(op_input_type, str):
                 op_input_type = TYPE_MAPPING[op_input_type]
             if isinstance(op_output_type, str):
                 op_output_type = TYPE_MAPPING[op_output_type]
+
+            # operation applies to all columns
+            if op_input_type == ColumnSchema() and op_input_type.semantic_tags == set():
+                if (
+                    op_output_type == ColumnSchema()
+                    and op_input_type.semantic_tags == set()
+                ):
+                    # op doesn't modify the column's type
+                    pass
+                else:
+                    # update the column's type (to indicate the operation has taken place)
+                    table_meta[op.column_name] = op_output_type
+                continue
+
             # check the operation is valid for the column
             column_logical_type = table_meta[op.column_name].logical_type
             column_semantic_tags = table_meta[op.column_name].semantic_tags
 
             op_input_logical_type = op_input_type.logical_type
             op_input_semantic_tags = op_input_type.semantic_tags
+
             if op_input_logical_type and column_logical_type != op_input_logical_type:
                 return False, {}
             if not column_semantic_tags.issubset(op_input_semantic_tags):

@@ -50,7 +50,7 @@ class CountAggregationOp(AggregationOpBase):
     So a customer's transactions (within the window_size).
     """
 
-    input_output_types = [(None, "Integer")]
+    input_output_types = [("None", "Integer")]
     description = " the number of records"
 
     def label_function(self, dataslice):
@@ -106,6 +106,29 @@ class MajorityAggregationOp(AggregationOpBase):
         if len(dataslice) == 0:
             return None
         return str(dataslice[self.column_name].mode()[0])
+
+
+class ExistsAggregationOp(AggregationOpBase):
+    input_output_types = [("None", "Boolean")]
+    description = " if there exists a record with"
+
+    def label_function(self, dataslice):
+        return len(dataslice) > 0
+
+
+# class FirstAggregationOp(AggregationOpBase):
+#     input_output_types = [("category", "category")]
+#     description = " the first <{}> in all related records"
+
+#     def label_function(self, dataslice):
+#         return dataslice[self.column_name].iloc[0]
+
+# class LastAggregationOp(AggregationOpBase):
+#     input_output_types = [("category", "category")]
+#     description = " the last <{}> in all related records"
+
+#     def label_function(self, dataslice):
+#         return dataslice[self.column_name].iloc[-1]
 
 
 AGG_OPS = [

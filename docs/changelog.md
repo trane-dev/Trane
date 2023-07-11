@@ -3,6 +3,14 @@
 Changelog
 ---------
 
+v0.5.0 ()
+=====================
+* Enhancements
+    * Add ExistsAggregationOp  [#96][#96]
+* Fixes
+
+    [#96]: <https://github.com/trane-dev/Trane/pull/96>
+
 v0.4.0 (July 8, 2023)
 =====================
 * Enhancements

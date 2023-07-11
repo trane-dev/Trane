@@ -21,9 +21,20 @@ class ColumnSchema(object):
         self.semantic_tags = semantic_tags
 
     def __eq__(self, other, deep=True):
-        if self.logical_type != other.logical_type:
+        if not isinstance(other, ColumnSchema):
             return False
-        if self.semantic_tags != other.semantic_tags:
+        if (
+            self.logical_type
+            and other.logical_type
+            and self.logical_type != other.logical_type
+        ):
+            return False
+        if (
+            self.semantic_tags != other.semantic_tags
+            or self.semantic_tags.issubset(other.semantic_tags) is False
+            or other.semantic_tags.issubset(self.semantic_tags) is False
+            or len(self.semantic_tags) != len(other.semantic_tags)
+        ):
             return False
         return True
 

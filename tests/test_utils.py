@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pandas as pd
+import pytest
 
 from trane.core.utils import (
     _check_operations_valid,
@@ -10,6 +11,7 @@ from trane.core.utils import (
 from trane.ops.aggregation_ops import (
     AvgAggregationOp,
     CountAggregationOp,
+    ExistsAggregationOp,
     MajorityAggregationOp,
     MaxAggregationOp,
     MinAggregationOp,
@@ -23,22 +25,36 @@ from trane.ops.filter_ops import (
     NeqFilterOp,
 )
 from trane.typing.column_schema import ColumnSchema
-from trane.typing.logical_types import Double
+from trane.typing.logical_types import Categorical, Double
 
 
-def test_parse_table_simple():
-    table_meta = {
+@pytest.fixture(scope="function")
+def table_meta():
+    return {
         "id": ("Categorical", {"index", "category"}),
+        "amount": ("Integer", {"numeric"}),
     }
-    table_meta = _parse_table_meta(table_meta)
+
+
+def test_parse_table_simple(table_meta):
+    modified_meta = _parse_table_meta(table_meta)
+    assert len(modified_meta) == 2
+    assert modified_meta["id"] == ColumnSchema(
+        logical_type=Categorical,
+        semantic_tags={"category", "index"},
+    )
+
+
+def test_simple_check_operations(table_meta):
     # For each <id> predict the number of records
     operations = [AllFilterOp(None), CountAggregationOp(None)]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
     assert modified_meta["id"] == table_meta["id"]
+    assert all(key in table_meta.keys() for key in modified_meta.keys())
 
 
-def test_parse_table_numeric():
+def test_parse_table_numeric(table_meta):
     table_meta = {
         "id": ("Categorical", {"index", "category"}),
         "amount": ("Integer", {"numeric"}),
@@ -150,14 +166,27 @@ def test_parse_table_cat():
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
 
-    # For each <id> predict the majority <state> in all related records with <state> equal to NY in next 2d days
+    # For each <id> predict the majority <state> in all related records with <state> equal to NY
     operations = [EqFilterOp("state"), MajorityAggregationOp("state")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
 
+    # Not a valid operation
+    # cannot do GreaterFilterOp on categorical
+    operations = [GreaterFilterOp("state"), CountAggregationOp(None)]
+    result, modified_meta = _check_operations_valid(operations, table_meta)
+    assert result is False
+
+    # Not a valid operation
+    # cannot do SumAggregation on categorical
     operations = [AllFilterOp(None), SumAggregationOp("state")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is False
+
+    # For each <id> predict if there exists a record in all related records with <state> equal to NY
+    operations = [AllFilterOp(None), ExistsAggregationOp("state")]
+    result, modified_meta = _check_operations_valid(operations, table_meta)
+    assert result is True
 
 
 def test_clean_date():

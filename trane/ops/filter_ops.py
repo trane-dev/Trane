@@ -21,16 +21,21 @@ class FilterOpBase(OpBase):
     operations are defined as classes that inherit the FilterOpBase class and
     instantiate the execute method.
 
+    Old, v1 version
     Filter operations filter data
     row operations transform data within a row and return a dataframe of the same dimensions,
     transformation operations transform data across rows and return a new dataset with fewer rows,
     aggregation operations accumulate the dataframe into a single row.
 
+    New, v2 version
+    Filter operations filter data (return a subset of the rows)
+    Aggregation operations aggregate data from many rows into a single row.
+
     """
 
 
 class AllFilterOp(FilterOpBase):
-    input_output_types = [(None, None)]
+    input_output_types = [("None", "None")]
     description = ""
 
     def label_function(self, dataslice):
@@ -59,8 +64,8 @@ class NeqFilterOp(FilterOpBase):
     def set_parameters(self, threshold: float):
         self.threshold = threshold
 
-    def label_function(self, dataframe):
-        return dataframe[dataframe[self.column_name] != self.threshold]
+    def label_function(self, dataslice):
+        return dataslice[dataslice[self.column_name] != self.threshold]
 
 
 class GreaterFilterOp(FilterOpBase):
@@ -70,8 +75,8 @@ class GreaterFilterOp(FilterOpBase):
     def set_parameters(self, threshold: float):
         self.threshold = threshold
 
-    def label_function(self, dataframe):
-        return dataframe[dataframe[self.column_name] > self.threshold]
+    def label_function(self, dataslice):
+        return dataslice[dataslice[self.column_name] > self.threshold]
 
 
 class LessFilterOp(FilterOpBase):
@@ -81,8 +86,8 @@ class LessFilterOp(FilterOpBase):
     def set_parameters(self, threshold: float):
         self.threshold = threshold
 
-    def label_function(self, dataframe):
-        return dataframe[dataframe[self.column_name] < self.threshold]
+    def label_function(self, dataslice):
+        return dataslice[dataslice[self.column_name] < self.threshold]
 
 
 FILT_OPS = [

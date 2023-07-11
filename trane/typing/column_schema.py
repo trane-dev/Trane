@@ -30,9 +30,10 @@ class ColumnSchema(object):
         ):
             return False
         if (
-            self.semantic_tags
-            and other.semantic_tags
-            and self.semantic_tags != other.semantic_tags
+            self.semantic_tags != other.semantic_tags
+            or self.semantic_tags.issubset(other.semantic_tags) is False
+            or other.semantic_tags.issubset(self.semantic_tags) is False
+            or len(self.semantic_tags) != len(other.semantic_tags)
         ):
             return False
         return True

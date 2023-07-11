@@ -21,7 +21,7 @@ class ColumnSchema(object):
         self.semantic_tags = semantic_tags
 
     def __eq__(self, other, deep=True):
-        if not hasattr(other, "logical_type") or not hasattr(other, "semantic_tags"):
+        if not isinstance(other, ColumnSchema):
             return False
         if (
             self.logical_type
@@ -32,7 +32,7 @@ class ColumnSchema(object):
         if (
             self.semantic_tags
             and other.semantic_tags
-            and all(tag in other.semantic_tags for tag in self.semantic_tags)
+            and self.semantic_tags != other.semantic_tags
         ):
             return False
         return True

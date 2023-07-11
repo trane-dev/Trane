@@ -19,6 +19,7 @@ TYPE_MAPPING = {
     "index": ColumnSchema(semantic_tags={"index"}),
     "None": ColumnSchema(),
     "numeric": ColumnSchema(semantic_tags={"numeric"}),
+    "Categorical": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
     "Double": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
     "Integer": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
     "Boolean": ColumnSchema(logical_type=Boolean),
@@ -76,7 +77,7 @@ def _check_operations_valid(
                 op_output_type = TYPE_MAPPING[op_output_type]
 
             # operation applies to all columns
-            if op_input_type == ColumnSchema():
+            if op_input_type == ColumnSchema() and op_input_type.semantic_tags == set():
                 # operation applies to all column types
                 # update the column's type (to indicate the operation has taken place)
                 table_meta[op.column_name] = op_output_type

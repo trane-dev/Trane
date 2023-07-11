@@ -11,6 +11,7 @@ from trane.core.utils import (
 from trane.ops.aggregation_ops import (
     AvgAggregationOp,
     CountAggregationOp,
+    ExistsAggregationOp,
     MajorityAggregationOp,
     MaxAggregationOp,
     MinAggregationOp,
@@ -40,7 +41,7 @@ def test_parse_table_simple(table_meta):
     assert len(modified_meta) == 2
     assert modified_meta["id"] == ColumnSchema(
         logical_type=Categorical,
-        semantic_tags={"numeric", "index"},
+        semantic_tags={"category", "index"},
     )
 
 
@@ -170,19 +171,21 @@ def test_parse_table_cat():
     assert result is True
 
     # Not a valid operation
-    # For each <id> predict the total <amount> in all related records with <state> equal to NY
+    # cannot do GreaterFilterOp on categorical
+    operations = [GreaterFilterOp("state"), CountAggregationOp(None)]
+    result, modified_meta = _check_operations_valid(operations, table_meta)
+    assert result is False
+
+    # Not a valid operation
+    # cannot do SumAggregation on categorical
     operations = [AllFilterOp(None), SumAggregationOp("state")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is False
 
-    # # For each <id> predict if there exists a record with <state> equal to NY
-    # operations = [AllFilterOp(None), ExistsAggregationOp(None)]
-    # result, modified_meta = _check_operations_valid(operations, table_meta)
-    # assert result is False
-
-    # "if a user has bought a specific product or not” is something we are not generating yet
-    # The closest prompt we are generating is “how many times has a user bought a specific product”:
-    # For each <user_id> predict the number of records with <product_name> equal to Banana in next 1m days
+    # For each <id> predict if there exists a record in all related records with <state> equal to NY
+    operations = [AllFilterOp(None), ExistsAggregationOp("state")]
+    result, modified_meta = _check_operations_valid(operations, table_meta)
+    assert result is True
 
 
 def test_clean_date():

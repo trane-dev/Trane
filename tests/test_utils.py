@@ -51,6 +51,7 @@ def test_simple_check_operations(table_meta):
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
     assert modified_meta["id"] == table_meta["id"]
+    assert all(key in table_meta.keys() for key in modified_meta.keys())
 
 
 def test_parse_table_numeric(table_meta):
@@ -65,8 +66,8 @@ def test_parse_table_numeric(table_meta):
     # For categorical columns it makes sense (see below)
     operations = [EqFilterOp("amount"), CountAggregationOp(None)]
     result, modified_meta = _check_operations_valid(operations, table_meta)
-    # assert result is False
-    # assert len(modified_meta) == 0
+    assert result is False
+    assert len(modified_meta) == 0
 
     # For each <id> predict the number of records with <amount> greater than
     operations = [GreaterFilterOp("amount"), CountAggregationOp(None)]

@@ -80,7 +80,13 @@ def _check_operations_valid(
             if op_input_type == ColumnSchema() and op_input_type.semantic_tags == set():
                 # operation applies to all column types
                 # update the column's type (to indicate the operation has taken place)
-                table_meta[op.column_name] = op_output_type
+                if (
+                    op_output_type == ColumnSchema()
+                    and op_input_type.semantic_tags == set()
+                ):
+                    pass
+                else:
+                    table_meta[op.column_name] = op_output_type
                 continue
 
             # check the operation is valid for the column

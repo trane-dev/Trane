@@ -3,7 +3,6 @@ import pandas as pd
 import pytest
 
 from trane.ops.aggregation_ops import (
-    AGG_OPS,
     AvgAggregationOp,
     CountAggregationOp,
     MajorityAggregationOp,
@@ -11,6 +10,7 @@ from trane.ops.aggregation_ops import (
     MinAggregationOp,
     SumAggregationOp,
 )
+from trane.ops.utils import get_aggregation_ops
 
 
 @pytest.fixture
@@ -62,7 +62,7 @@ def test_majority_agg_op(df):
 
 
 def test_agg_None():
-    for agg_operation in AGG_OPS:
+    for agg_operation in get_aggregation_ops():
         op = agg_operation("col")
         df = pd.DataFrame()
         output = op(df)

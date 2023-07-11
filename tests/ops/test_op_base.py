@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+from trane.ops.aggregation_ops import AvgAggregationOp, MinAggregationOp
 from trane.ops.filter_ops import GreaterFilterOp, LessFilterOp
 
 
@@ -35,3 +36,10 @@ def test_find_threshold_by_fraction_of_data_to_keep(df):
 def test_eq():
     assert GreaterFilterOp("col") == GreaterFilterOp("col")
     assert GreaterFilterOp("col") != LessFilterOp("col")
+
+
+def test_lt():
+    assert GreaterFilterOp("col") < LessFilterOp("col")
+    assert GreaterFilterOp("col") <= GreaterFilterOp("col")
+    assert MinAggregationOp("col") > AvgAggregationOp("col")
+    assert MinAggregationOp("col") >= MinAggregationOp("col")

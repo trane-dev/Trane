@@ -7,6 +7,7 @@ from trane.ops.aggregation_ops import (
     AggregationOpBase,
     AvgAggregationOp,
     CountAggregationOp,
+    ExistsAggregationOp,
     MajorityAggregationOp,
     MaxAggregationOp,
     MinAggregationOp,
@@ -29,6 +30,7 @@ agg_op_str_dict = {
     MinAggregationOp: " the minimum <{}> in all related records",
     MajorityAggregationOp: " the majority <{}> in all related records",
     CountAggregationOp: "the number of records",
+    ExistsAggregationOp: "if there exists a record with",
 }
 
 filter_op_str_dict = {
@@ -68,7 +70,7 @@ def generate_and_verify_prediction_problem(
         assert p.entity_col == entity_col
         assert p.time_col == time_col
         assert isinstance(p._label_maker, LabelMaker)
-        expected_problem_pre = f"For each <{entity_col}> predict the"
+        expected_problem_pre = f"For each <{entity_col}> predict "
         expected_problem_end = f"in next {cutoff} days"
         p_str = str(p)
         assert p_str.startswith(expected_problem_pre)

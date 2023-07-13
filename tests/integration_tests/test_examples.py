@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 import pandas as pd
 import pytest
@@ -58,8 +57,8 @@ def test_youtube(df_youtube, meta_youtube, sample):
     entity_col = "category_id"
     time_col = "trending_date"
     cutoff = "4d"
-    cutoff_base = pd.Timestamp(datetime.strptime("2017-11-14", "%Y-%m-%d"))
-    cutoff_end = pd.Timestamp(datetime.strptime("2018-06-14", "%Y-%m-%d"))
+    cutoff_base = "2017-11-14"
+    cutoff_end = "2018-06-14"
     cutoff_strategy = trane.CutoffStrategy(
         entity_col=entity_col,
         window_size=cutoff,
@@ -81,8 +80,8 @@ def test_covid(df_covid, meta_covid, sample):
     entity_col = "Country/Region"
     time_col = "Date"
     cutoff = "2d"
-    cutoff_base = pd.Timestamp(datetime.strptime("2020-01-22", "%Y-%m-%d"))
-    cutoff_end = pd.Timestamp(datetime.strptime("2020-03-29", "%Y-%m-%d"))
+    cutoff_base = "2020-01-22"
+    cutoff_end = "2020-03-29"
     cutoff_strategy = trane.CutoffStrategy(
         entity_col=entity_col,
         window_size=cutoff,

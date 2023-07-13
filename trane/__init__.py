@@ -2,7 +2,6 @@ from trane.core import *  # noqa
 from trane.datasets import (
     load_covid,
     load_covid_metadata,
-    load_bike,
     load_youtube,
     load_youtube_metadata,
 )

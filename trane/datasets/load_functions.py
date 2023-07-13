@@ -33,15 +33,6 @@ def load_covid():
     return df
 
 
-def load_bike():
-    filepath = generate_local_filepath("bike-sampled.csv")
-    df = pd.read_csv(filepath)
-    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
-    df = df.sort_values(by=["date"])
-    df = df.fillna(0)
-    return df
-
-
 def load_youtube():
     time_col = "trending_date"
     filepath = generate_local_filepath("USvideos.csv")
@@ -87,31 +78,6 @@ def load_youtube_metadata():
         "likes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
         "dislikes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
         "comment_count": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-    }
-    return table_meta
-
-
-def load_bike_metadata():
-    table_meta = {
-        "date": ColumnSchema(logical_type=Datetime),
-        "hour": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-        "usertype": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-        "gender": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-        "tripduration": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "temperature": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "from_station_id": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"index"},
-        ),
-        "dpcapacity_start": ColumnSchema(
-            logical_type=Integer,
-            semantic_tags={"numeric"},
-        ),
-        "to_station_id": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"index"},
-        ),
-        "dpcapacity_end": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
     }
     return table_meta
 

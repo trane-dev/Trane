@@ -1,0 +1,53 @@
+name: Test without dev or test dependencies
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  tests:
+    name: 3.11 test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+          cache: 'pip'
+          cache-dependency-path: "pyproject.toml"
+      - name: Build trane
+        run: |
+          make package
+          python -m pip install unpacked_sdist/
+      - name: Run simple featuretools usage
+        run: |
+          import trane
+          data = trane.datasets.load_covid()
+          table_meta = trane.datasets.load_covid_metadata()
+          entity_col = "Country/Region"
+          window_size = "2d"
+          minimum_data = "2020-01-22"
+          maximum_data = "2020-03-29"
+          cutoff_strategy = trane.CutoffStrategy(
+              entity_col=entity_col,
+              window_size=window_size,
+              minimum_data=minimum_data,
+              maximum_data=maximum_data,
+          )
+          time_col = "Date"
+          problem_generator = trane.PredictionProblemGenerator(
+              df=data,
+              entity_col=entity_col,
+              time_col=time_col,
+              cutoff_strategy=cutoff_strategy,
+              table_meta=table_meta,
+          )
+          problems = problem_generator.generate(data, generate_thresholds=True)
+          assert len(problems) >= 1000
+        shell: python

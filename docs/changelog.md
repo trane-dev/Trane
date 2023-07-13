@@ -9,9 +9,11 @@ v0.5.0 ()
     * Add ``ExistsAggregationOp`` [#96][#96]
     * Add `get_aggregation_ops` and `get_filter_ops` functions [#98][#98]
 * Fixes
+    * Fix FeaturetoolsWrapper class and label times [#100]
 
     [#96]: <https://github.com/trane-dev/Trane/pull/96>
     [#98]: <https://github.com/trane-dev/Trane/pull/98>
+    [#100]: <https://github.com/trane-dev/Trane/pull/100>
 
 v0.4.0 (July 8, 2023)
 =====================

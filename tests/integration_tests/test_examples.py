@@ -6,7 +6,6 @@ import pytest
 
 import trane
 from trane.datasets.load_functions import (
-    load_bike_metadata,
     load_covid_metadata,
     load_youtube_metadata,
 )
@@ -55,23 +54,6 @@ def meta_covid(current_dir):
     return table_meta
 
 
-@pytest.fixture
-def df_chicago(current_dir):
-    datetime_col = "date"
-    filename = "bike-sampled.csv"
-    df = pd.read_csv(os.path.join(current_dir, filename))
-    df[datetime_col] = pd.to_datetime(df[datetime_col], format="%Y-%m-%d")
-    df = df.sort_values(by=[datetime_col])
-    df = df.fillna(0)
-    return df
-
-
-@pytest.fixture
-def meta_chicago(current_dir):
-    table_meta = load_bike_metadata()
-    return table_meta
-
-
 def test_youtube(df_youtube, meta_youtube, sample):
     entity_col = "category_id"
     time_col = "trending_date"
@@ -93,15 +75,6 @@ def test_youtube(df_youtube, meta_youtube, sample):
         sample=sample,
         use_multiprocess=False,
     )
-    trane.FeaturetoolsWrapper(
-        df=df_youtube,
-        entity_col=entity_col,
-        time_col=time_col,
-        name="youtube",
-    )
-    # for problem_str in prediction_problem_to_label_times:
-    #     label_times = prediction_problem_to_label_times[problem_str]
-    #     ft_wrapper.compute_features(label_times, cutoff)
 
 
 def test_covid(df_covid, meta_covid, sample):
@@ -140,38 +113,3 @@ def covid_cutoff_strategy(df_covid, meta_covid, sample):
         maximum_data=cutoff_end,
     )
     return cutoff_strategy
-
-
-# def test_covid_multi(df_covid, covid_cutoff_strategy, meta_covid, sample):
-#     time_col = "Date"
-#     generate_and_verify_prediction_problem(
-#         df=df_covid,
-#         meta=meta_covid,
-#         entity_col=covid_cutoff_strategy.entity_col,
-#         time_col=time_col,
-#         cutoff_strategy=covid_cutoff_strategy,
-#         sample=sample,
-#         use_multiprocess=True,
-#     )
-
-
-# def test_chicago(df_chicago, meta_chicago, sample):
-#     entity_col = "usertype"
-#     time_col = "date"
-#     cutoff = "1h"
-#     cutoff_base = pd.Timestamp(datetime.strptime("2017-01-02", "%Y-%m-%d"))
-#     cutoff_end = pd.Timestamp(datetime.strptime("2017-01-31", "%Y-%m-%d"))
-#     cutoff_strategy = trane.CutoffStrategy(
-#         entity_col=entity_col,
-#         window_size=cutoff,
-#         minimum_data=cutoff_base,
-#         maximum_data=cutoff_end,
-#     )
-#     generate_and_verify_prediction_problem(
-#         df=df_chicago,
-#         meta=meta_chicago,
-#         entity_col=entity_col,
-#         time_col=time_col,
-#         cutoff_strategy=cutoff_strategy,
-#         sample=sample,
-#     )

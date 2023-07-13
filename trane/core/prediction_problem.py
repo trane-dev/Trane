@@ -93,7 +93,7 @@ class PredictionProblem:
     def execute(
         self,
         df,
-        num_examples_per_instance,
+        num_examples_per_instance=-1,
         minimum_data=None,
         maximum_data=None,
         gap=None,

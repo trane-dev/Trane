@@ -45,21 +45,6 @@ def solve(entity_col, window, fwindow):
         window,
     )
 
-    features = trane.FeaturetoolsWrapper(
-        df,
-        entity_col,
-        "trending_date",
-        {"category_id": ft.variable_types.Categorical},
-        "youtube",
-    )
-    features.compute_features(df, cutoff_strategy, fwindow)
-
-    problem_generator = trane.PredictionProblemGenerator(
-        table_meta=meta,
-        time_col="trending_date",
-        entity_col=entity_col,
-    )
-
     problems = problem_generator.generate()
 
     evaluator = trane.PredictionProblemEvaluator(

@@ -57,24 +57,6 @@ def solve(entity_col):
         1,
     )
 
-    features = trane.FeaturetoolsWrapper(
-        df_ft,
-        entity_col,
-        "DATE",
-        {
-            "DAY_OF_WEEK": ft.variable_types.Categorical,
-            "AIRLINE": ft.variable_types.Categorical,
-            "FLIGHT_NUMBER": ft.variable_types.Categorical,
-            "TAIL_NUMBER": ft.variable_types.Categorical,
-            "ORIGIN_AIRPORT": ft.variable_types.Categorical,
-            "DESTINATION_AIRPORT": ft.variable_types.Categorical,
-            "CANCELLED": ft.variable_types.Categorical,
-            "CANCELLATION_REASON": ft.variable_types.Categorical,
-        },
-        "flights",
-    )
-    features.compute_features(df_ft, cutoff_strategy, 5)
-
     problem_generator = trane.PredictionProblemGenerator(
         table_meta=meta,
         entity_col=entity_col,

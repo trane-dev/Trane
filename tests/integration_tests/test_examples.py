@@ -93,12 +93,12 @@ def test_youtube(df_youtube, meta_youtube, sample):
         sample=sample,
         use_multiprocess=False,
     )
-    trane.FeaturetoolsWrapper(
-        df=df_youtube,
-        entity_col=entity_col,
-        time_col=time_col,
-        name="youtube",
-    )
+    # trane.FeaturetoolsWrapper(
+    #     df=df_youtube,
+    #     entity_col=entity_col,
+    #     time_col=time_col,
+    #     name="youtube",
+    # )
     # for problem_str in prediction_problem_to_label_times:
     #     label_times = prediction_problem_to_label_times[problem_str]
     #     ft_wrapper.compute_features(label_times, cutoff)

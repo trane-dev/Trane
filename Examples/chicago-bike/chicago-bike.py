@@ -45,21 +45,6 @@ def solve(entity_col):
         1,
     )
 
-    features = trane.FeaturetoolsWrapper(
-        df_ft,
-        entity_col,
-        "date",
-        {
-            "hour": ft.variable_types.Categorical,
-            "usertype": ft.variable_types.Categorical,
-            "gender": ft.variable_types.Categorical,
-            "from_station_id": ft.variable_types.Categorical,
-            "to_station_id": ft.variable_types.Categorical,
-        },
-        "bikes",
-    )
-    features.compute_features(df_ft, cutoff_strategy, 5)
-
     problem_generator = trane.PredictionProblemGenerator(
         table_meta=meta,
         entity_col=entity_col,

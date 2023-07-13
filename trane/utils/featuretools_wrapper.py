@@ -15,12 +15,10 @@ class FeaturetoolsWrapper(object):
         dataframe: pd.DataFrame,
         entity_col: str,
         time_col: str,
-        entityset_name=None,
+        entityset_name,
         logical_types=None,
     ):
         assert dataframe_name != entity_col
-        if entityset_name is None:
-            entityset_name = dataframe_name
 
         self.entity_col = entity_col
         self.es = ft.EntitySet(id=entityset_name)
@@ -76,8 +74,7 @@ class FeaturetoolsWrapper(object):
             feature_matrix,
             features,
         )
-        features = feature_matrix_encoded.fillna(0)
-        return feature_matrix_encoded, features_encoded
+        return feature_matrix_encoded.fillna(0), features_encoded
 
     # def get_feature(self, entity_name, cutoff_st):
     #     return list(self.features.loc[entity_name, cutoff_st - timedelta(days=1)])

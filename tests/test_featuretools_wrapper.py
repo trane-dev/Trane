@@ -36,7 +36,7 @@ def test_prediction_problem(make_fake_df, make_fake_meta, make_cutoff_strategy):
 
     logical_types = convert_logical_types_to_woodwork(meta)
 
-    features = FeaturetoolsWrapper(
+    ft_wrapper = FeaturetoolsWrapper(
         dataframe_name="customers",
         dataframe=dataframe,
         entity_col=entity_col,
@@ -44,7 +44,9 @@ def test_prediction_problem(make_fake_df, make_fake_meta, make_cutoff_strategy):
         entityset_name="customer_dataset",
         logical_types=logical_types,
     )
-    feature_matrix, features = features.compute_features(label_times)
-    for feature in features:
+    feature_matrix, feature_defs = ft_wrapper.compute_features(label_times)
+    for feature in feature_defs:
         assert isinstance(feature, (AggregationFeature, TransformFeature))
     assert feature_matrix.shape[0] == label_times.shape[0]
+
+    ft_wrapper.encode_features(feature_matrix, feature_defs)

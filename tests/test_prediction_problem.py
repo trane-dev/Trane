@@ -94,7 +94,6 @@ def verify_problems(problems, df, cutoff_strategy):
                 operation=None,
             )
             problems_verified += 1
-            breakpoint()
         elif "For each <id> predict the number of records with <amount>" in str(p):
             is_greater_than = False
             if "greater than" in str(p):

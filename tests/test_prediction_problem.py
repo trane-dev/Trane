@@ -1,42 +1,7 @@
-from datetime import datetime
-
 import composeml as cp
 import pandas as pd
-import pytest
 
 import trane
-
-
-@pytest.fixture()
-def make_fake_df():
-    data = {
-        "id": [1, 2, 2, 3, 3, 3],
-        "date": [
-            datetime(2023, 1, 1),
-            datetime(2023, 1, 3),
-            datetime(2023, 1, 4),
-            datetime(2023, 1, 3),
-            datetime(2023, 1, 4),
-            datetime(2023, 1, 5),
-        ],
-        "state": ["MA", "NY", "NY", "NJ", "NJ", "CT"],
-        "amount": [10.0, 20.0, 30.0, 40.0, 50.0, 60.0],
-    }
-    df = pd.DataFrame(data)
-    df["date"] = pd.to_datetime(df["date"])
-    df = df.sort_values(by=["date"])
-    return df
-
-
-@pytest.fixture()
-def make_fake_meta():
-    meta = {
-        "id": ("Integer", {"numeric", "index"}),
-        "date": ("Datetime", {}),
-        "state": ("Categorical", {"category"}),
-        "amount": ("Double", {"numeric"}),
-    }
-    return meta
 
 
 def num_observations(data_slice, **kwargs):
@@ -87,21 +52,6 @@ def min_column(data_slice, column, **kwargs):
     return data_slice[column].min()
 
 
-@pytest.fixture()
-def make_cutoff_strategy():
-    entity_col = "id"
-    window_size = "2d"
-    minimum_data = "2023-01-01"
-    maximum_data = "2023-01-05"
-    cutoff_strategy = trane.CutoffStrategy(
-        entity_col=entity_col,
-        window_size=window_size,
-        minimum_data=minimum_data,
-        maximum_data=maximum_data,
-    )
-    return cutoff_strategy
-
-
 def test_prediction_problem(make_fake_df, make_fake_meta, make_cutoff_strategy):
     entity_col = "id"
     time_col = "date"
@@ -144,6 +94,7 @@ def verify_problems(problems, df, cutoff_strategy):
                 operation=None,
             )
             problems_verified += 1
+            breakpoint()
         elif "For each <id> predict the number of records with <amount>" in str(p):
             is_greater_than = False
             if "greater than" in str(p):

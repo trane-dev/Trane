@@ -1,6 +1,3 @@
-__all__ = ["Labeler"]
-
-
 class Labeler:
     """
     Object for executing prediction problems on data in order

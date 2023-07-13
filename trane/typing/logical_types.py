@@ -15,6 +15,7 @@ class LogicalTypeMetaClass(type):
 
 class LogicalType(object, metaclass=LogicalTypeMetaClass):
     dtype = None
+    standard_tags = set()
 
     def __eq__(self, other, deep=False):
         return isinstance(other, self.__class__)
@@ -40,6 +41,7 @@ class Boolean(LogicalType):
 
 class Categorical(LogicalType):
     dtype = "category"
+    standard_tags = {"category"}
 
     @staticmethod
     def inference_func(series):
@@ -56,6 +58,7 @@ class Datetime(LogicalType):
 
 class Double(LogicalType):
     dtype = "float64"
+    standard_tags = {"numeric"}
 
     @staticmethod
     def inference_func(series):
@@ -64,6 +67,7 @@ class Double(LogicalType):
 
 class Integer(LogicalType):
     dtype = "int64"
+    standard_tags = {"numeric"}
 
     @staticmethod
     def inference_func(series):
@@ -80,6 +84,7 @@ class NaturalLanguage(LogicalType):
 
 class Ordinal(LogicalType):
     dtype = "category"
+    standard_tags = {"category"}
 
 
 class Unknown(LogicalType):

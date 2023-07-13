@@ -17,8 +17,6 @@ from trane.typing.logical_types import (
     Integer,
 )
 
-__all__ = ["PredictionProblemGenerator"]
-
 
 class PredictionProblemGenerator:
     """

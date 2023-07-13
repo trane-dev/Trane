@@ -77,6 +77,10 @@ namespaces = true
     "README.md",
     "Makefile",
 ]
+"trane" = [
+    "datasets/data/*.csv",
+]
+
 
 [tool.setuptools.exclude-package-data]
 "*" = [

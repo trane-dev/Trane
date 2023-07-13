@@ -72,6 +72,7 @@ namespaces = true
 [tool.setuptools.package-data]
 "*" = [
     "*.txt",
+    "*.csv",
     "README.md",
     "Makefile",
 ]
@@ -84,8 +85,6 @@ namespaces = true
 "*" = [
     "* __pycache__",
     "*.py[co]",
-    "docs",
-    "Examples",
 ]
 
 [tool.setuptools.dynamic]

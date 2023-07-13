@@ -82,31 +82,6 @@ def load_youtube_metadata():
     return table_meta
 
 
-def load_bike_metadata():
-    table_meta = {
-        "date": ColumnSchema(logical_type=Datetime),
-        "hour": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-        "usertype": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-        "gender": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
-        "tripduration": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "temperature": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "from_station_id": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"index"},
-        ),
-        "dpcapacity_start": ColumnSchema(
-            logical_type=Integer,
-            semantic_tags={"numeric"},
-        ),
-        "to_station_id": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"index"},
-        ),
-        "dpcapacity_end": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-    }
-    return table_meta
-
-
 def generate_local_filepath(key):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     return os.path.join(dir_path, key)

@@ -6,7 +6,6 @@ import pytest
 
 import trane
 from trane.datasets.load_functions import (
-    load_bike_metadata,
     load_covid_metadata,
     load_youtube_metadata,
 )
@@ -52,12 +51,6 @@ def df_covid(current_dir):
 @pytest.fixture
 def meta_covid(current_dir):
     table_meta = load_covid_metadata()
-    return table_meta
-
-
-@pytest.fixture
-def meta_chicago(current_dir):
-    table_meta = load_bike_metadata()
     return table_meta
 
 

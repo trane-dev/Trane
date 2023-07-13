@@ -1,6 +1,4 @@
 from trane.datasets.load_functions import (
-    load_bike,
-    load_bike_metadata,
     load_covid,
     load_covid_metadata,
     load_youtube,
@@ -29,26 +27,6 @@ def test_load_covid():
     assert len(df) >= 17136
     assert df["Date"].dtype == "datetime64[ns]"
     assert metadata["Date"] == ColumnSchema(logical_type=Datetime)
-
-
-def test_load_bike():
-    df = load_bike()
-    metadata = load_bike_metadata()
-    expected_columns = [
-        "date",
-        "hour",
-        "usertype",
-        "gender",
-        "tripduration",
-        "temperature",
-        "from_station_id",
-        "dpcapacity_start",
-        "to_station_id",
-        "dpcapacity_end",
-    ]
-    check_column_schema(expected_columns, df, metadata)
-    assert df["date"].dtype == "datetime64[ns]"
-    assert metadata["date"] == ColumnSchema(logical_type=Datetime)
 
 
 def test_load_youtube():

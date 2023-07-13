@@ -43,10 +43,11 @@ dependencies = [
 ]
 
 [project.urls]
-"Source Code"= "https://github.com/HDI-Project/Trane/"
-"Changes" = "https://github.com/HDI-Project/Trane/blob/main/docs/changelog.md"
-"Issue Tracker" = "https://github.com/HDI-Project/Trane/issues"
+"Source Code"= "https://github.com/trane-dev/Trane/"
+"Changes" = "https://github.com/trane-dev/Trane/blob/main/docs/changelog.md"
+"Issue Tracker" = "https://github.com/trane-dev/Trane/issues"
 "Twitter" = "https://twitter.com/lab_dai"
+"Chat" = "https://join.slack.com/t/trane-dev/shared_invite/zt-1zglnh25c-ryuQFarw0rVgKHC6ywUOlg"
 
 [project.optional-dependencies]
 test = [
@@ -63,9 +64,7 @@ dev = [
 
 [tool.setuptools]
 include-package-data = true
-license-files = [
-    "LICENSE",
-]
+license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
 namespaces = true
@@ -73,19 +72,20 @@ namespaces = true
 [tool.setuptools.package-data]
 "*" = [
     "*.txt",
-    "*.md",
     "README.md",
     "Makefile",
 ]
 "trane" = [
-    "datasets/data/*.csv",
+    "datasets/data/covid19.csv",
+    "datasets/data/USvideos.csv",
 ]
-
 
 [tool.setuptools.exclude-package-data]
 "*" = [
     "* __pycache__",
     "*.py[co]",
+    "docs",
+    "Examples",
 ]
 
 [tool.setuptools.dynamic]

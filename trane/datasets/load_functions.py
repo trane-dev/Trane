@@ -33,15 +33,6 @@ def load_covid():
     return df
 
 
-def load_bike():
-    filepath = generate_local_filepath("bike-sampled.csv")
-    df = pd.read_csv(filepath)
-    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
-    df = df.sort_values(by=["date"])
-    df = df.fillna(0)
-    return df
-
-
 def load_youtube():
     time_col = "trending_date"
     filepath = generate_local_filepath("USvideos.csv")

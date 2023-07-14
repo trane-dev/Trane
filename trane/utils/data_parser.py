@@ -22,6 +22,17 @@ def denormalize(
     merged_dataframes = []
     for relationship in relationships:
         parent_table_name, parent_key, child_table_name, child_key = relationship
+        if parent_key not in dataframes[parent_table_name].columns:
+            raise ValueError(
+                f"parent_key: {parent_key} not in parent_table: {parent_table_name}",
+            )
+        if child_key not in dataframes[child_table_name].columns:
+            raise ValueError(
+                f"child_key: {child_key} not in child_table: {child_table_name}",
+            )
+
+    for relationship in relationships:
+        parent_table_name, parent_key, child_table_name, child_key = relationship
 
         parent_table = dataframes[parent_table_name]
         child_table = dataframes[child_table_name]

@@ -51,6 +51,10 @@ class Categorical(LogicalType):
 class Datetime(LogicalType):
     dtype = "datetime64[ns]"
 
+    def __init__(self, datetime_format=None, timezone=None):
+        self.datetime_format = datetime_format
+        self.timezone = timezone
+
     @staticmethod
     def inference_func(series):
         return datetime_func(series)
@@ -86,16 +90,41 @@ class Ordinal(LogicalType):
     dtype = "category"
     standard_tags = {"category"}
 
+    def __init__(self, order=None):
+        self.order = order
 
-class Unknown(LogicalType):
+
+class PersonFullName(LogicalType):
     dtype = "string"
 
 
-ALL_LOGICAL_TYPES = [
-    Boolean,
-    Categorical,
-    Datetime,
-    Double,
-    Integer,
-    Ordinal,
-]
+class URL(LogicalType):
+    dtype = "string"
+
+
+class EmailAddress(LogicalType):
+    dtype = "string"
+
+
+class PostalCode(LogicalType):
+    dtype = "string"
+
+
+class Filepath(LogicalType):
+    dtype = "string"
+
+
+class LatLong(LogicalType):
+    dtype = "object"
+
+
+class IPAddress(LogicalType):
+    dtype = "string"
+
+
+class PhoneNumber(LogicalType):
+    dtype = "string"
+
+
+class Unknown(LogicalType):
+    dtype = "string"

@@ -1,39 +1,84 @@
 import pandas as pd
+import pytest
 
 from trane.utils.data_parser import denormalize
 
 
-def test_denormalize_simple():
-    users_df = pd.DataFrame(
+@pytest.fixture()
+def products_df():
+    return pd.DataFrame(
         {
-            "user_id": [1, 2, 3],
-            "name": ["Charlie", "Dennis", "Mac"],
+            "id": [1, 2, 3],
+            "price": [10, 20, 30],
         },
     )
-    orders_df = pd.DataFrame(
+
+
+@pytest.fixture()
+def logs_df():
+    return pd.DataFrame(
         {
-            "order_id": [1, 2, 3, 4, 5, 6],
-            "user_id": [1, 1, 1, 2, 2, 3],
+            "id": [1, 2, 3, 4, 5],
+            "product_id": [1, 2, 3, 1, 2],
+            "session_id": [1, 1, 2, 2, 2],
         },
     )
-    denormalized = denormalize(
+
+
+@pytest.fixture()
+def sessions_df():
+    return pd.DataFrame(
+        {
+            "id": [1, 2],
+        },
+    )
+
+
+def test_denormalize_simple(products_df, logs_df):
+    logs_df = logs_df.drop(columns=["session_id"])
+    assert products_df["id"].is_unique
+    assert logs_df["id"].is_unique
+    relationships = [
+        # one to many relationship
+        ("products", "id", "log", "product_id"),
+    ]
+    flattend = denormalize(
         dataframes={
-            "users": users_df,
-            "orders": orders_df,
+            "products": products_df,
+            "log": logs_df,
         },
-        relationships=[
-            # one to many relationship
-            ("users", "user_id", "orders", "user_id"),
-        ],
+        relationships=relationships,
     )
-    expected_df = pd.DataFrame(
-        {
-            "user_id": [1, 1, 1, 2, 2, 3],
-            "name": ["Charlie", "Charlie", "Charlie", "Dennis", "Dennis", "Mac"],
-            "order_id": [1, 2, 3, 4, 5, 6],
+    assert flattend.shape == (5, 3)
+    assert flattend["id"].is_unique
+    assert flattend.columns.tolist().sort() == ["id", "price", "product_id"].sort()
+    for price in flattend["price"].tolist():
+        assert price in [10, 20, 30]
+
+
+def test_denormalize_three_tables(products_df, logs_df, sessions_df):
+    assert sessions_df["id"].is_unique
+    relationships = [
+        # one to many relationship
+        ("products", "id", "log", "product_id"),
+        ("sessions", "id", "log", "session_id"),
+    ]
+    flattend = denormalize(
+        dataframes={
+            "products": products_df,
+            "log": logs_df,
+            "sessions": sessions_df,
         },
+        relationships=relationships,
     )
-    assert denormalized.equals(expected_df)
+    assert flattend.shape == (5, 4)
+    assert flattend["id"].is_unique
+    assert (
+        flattend.columns.tolist().sort()
+        == ["id", "price", "product_id", "session_id"].sort()
+    )
+    for price in flattend["price"].tolist():
+        assert price in [10, 20, 30]
 
 
 # def test_denormalize_complex():

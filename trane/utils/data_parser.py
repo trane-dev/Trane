@@ -53,11 +53,7 @@ def denormalize(
             )
             .reset_index()
         )
-        if parent_from_list:
-            merged_dataframes.remove((parent_table_name, parent_table))
-        if child_from_list:
-            pass
-            # merged_dataframes.remove((child_table_name, child_table))
+        
         merged_dataframes.append((parent_table_name, flat))
     if len(merged_dataframes) == 1:
         return merged_dataframes[0][1]

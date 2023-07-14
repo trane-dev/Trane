@@ -47,7 +47,7 @@ def denormalize(
             parent_table.set_index(parent_key)
             .merge(
                 child_table.set_index(child_key),
-                how="right",
+                how="left",
                 left_index=True,
                 right_index=True,
             )

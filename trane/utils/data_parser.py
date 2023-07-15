@@ -25,15 +25,12 @@ def denormalize(
 
         parent_table = dataframes[parent_table_name]
         child_table = dataframes[child_table_name]
-        parent_from_list = False
-        child_from_list = False
         if parent_table_name in [x[0] for x in merged_dataframes]:
             # have already used it as a parent before, so use the merged version
             parent_table = [
                 x[1] for x in merged_dataframes if x[0] == parent_table_name
             ][0]
             merged_dataframes.remove((parent_table_name, parent_table))
-            parent_from_list = True
 
         if child_table_name in [x[0] for x in merged_dataframes]:
             # have already used it as a child before, so use the merged version
@@ -41,7 +38,6 @@ def denormalize(
                 0
             ]
             merged_dataframes.remove((child_table_name, child_table))
-            child_from_list = True
 
         flat = (
             parent_table.set_index(parent_key)
@@ -53,7 +49,7 @@ def denormalize(
             )
             .reset_index()
         )
-        
+
         merged_dataframes.append((parent_table_name, flat))
     if len(merged_dataframes) == 1:
         return merged_dataframes[0][1]

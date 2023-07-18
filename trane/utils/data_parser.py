@@ -36,15 +36,12 @@ def denormalize(
 
         parent_table = dataframes[parent_table_name]
         child_table = dataframes[child_table_name]
-        parent_from_list = False
-        child_from_list = False
         if parent_table_name in [x[0] for x in merged_dataframes]:
             # have already used it as a parent before, so use the merged version
             parent_table = [
                 x[1] for x in merged_dataframes if x[0] == parent_table_name
             ][0]
             merged_dataframes.remove((parent_table_name, parent_table))
-            parent_from_list = True
 
         if child_table_name in [x[0] for x in merged_dataframes]:
             # have already used it as a child before, so use the merged version
@@ -52,29 +49,21 @@ def denormalize(
                 0
             ]
             merged_dataframes.remove((child_table_name, child_table))
-            child_from_list = True
-
         flat = (
             parent_table.set_index(parent_key)
             .merge(
                 child_table.set_index(child_key),
                 how="right",
+                # right = we want to keep all the rows in the child table
+                # left = we want to keep all the rows in the parent table
                 left_index=True,
                 right_index=True,
+                validate="one_to_many",
             )
-            .reset_index()
+            .reset_index(names=child_key)
         )
-        if parent_from_list:
-            merged_dataframes.remove((parent_table_name, parent_table))
-        if child_from_list:
-            pass
-            # merged_dataframes.remove((child_table_name, child_table))
-        merged_dataframes.append((parent_table_name, flat))
-    if len(merged_dataframes) == 1:
-        return merged_dataframes[0][1]
-    raise NotImplementedError(
-        "Not implemented for more than one to many relationships, with two dataframes",
-    )
+        merged_dataframes.append((child_table_name, flat))
+    return merged_dataframes[0][1]
 
 
 # class CsvMerge:

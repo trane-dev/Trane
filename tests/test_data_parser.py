@@ -34,7 +34,7 @@ def sessions_df():
     )
 
 
-def test_denormalize_simple(products_df, logs_df):
+def test_denormalize_two_tables(products_df, logs_df):
     logs_df = logs_df.drop(columns=["session_id"])
     assert products_df["id"].is_unique
     assert logs_df["id"].is_unique
@@ -42,24 +42,32 @@ def test_denormalize_simple(products_df, logs_df):
         # one to many relationship
         ("products", "id", "log", "product_id"),
     ]
-    flattend = denormalize(
+    flattened = denormalize(
         dataframes={
             "products": products_df,
             "log": logs_df,
         },
         relationships=relationships,
     )
-    assert flattend.shape == (5, 3)
-    assert flattend["id"].is_unique
-    assert flattend.columns.tolist().sort() == ["id", "price", "product_id"].sort()
-    for price in flattend["price"].tolist():
+    assert flattened.shape == (5, 3)
+    assert flattened["id"].is_unique
+    assert sorted(flattened.columns.tolist()) == ["id", "price", "product_id"]
+    for price in flattened["price"].tolist():
         assert price in [10, 20, 30]
+    assert sorted(flattened["id"].tolist()) == [1, 2, 3, 4, 5]
+    assert sorted(flattened["product_id"].tolist()) == [1, 1, 2, 2, 3]
 
 
 def test_denormalize_three_tables(products_df, logs_df, sessions_df):
     assert sessions_df["id"].is_unique
+
+    for session_id in logs_df["session_id"].tolist():
+        assert session_id in sessions_df["id"].tolist()
+
+    for product_id in logs_df["product_id"].tolist():
+        assert product_id in products_df["id"].tolist()
     relationships = [
-        # one to many relationship
+        # one to many relationships
         ("products", "id", "log", "product_id"),
         ("sessions", "id", "log", "session_id"),
     ]

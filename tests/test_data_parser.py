@@ -1,7 +1,8 @@
+import numpy as np
 import pandas as pd
 import pytest
 
-from trane.utils.data_parser import denormalize
+from trane.utils.data_parser import denormalize, reorder_relationships
 
 
 @pytest.fixture()
@@ -29,13 +30,48 @@ def logs_df():
 def sessions_df():
     return pd.DataFrame(
         {
-            "id": [1, 2],
+            "id": [0, 1, 2, 3, 4, 5],
+            "customer_id": pd.Categorical([0, 0, 0, 1, 1, 2]),
+        },
+    )
+
+
+@pytest.fixture()
+def régions_df():
+    return pd.DataFrame(
+        {
+            "id": ["United States", "Mexico"],
+        },
+    )
+
+
+@pytest.fixture()
+def stores_df():
+    return pd.DataFrame(
+        {
+            "id": range(6),
+            "région_id": ["United States"] * 3 + ["Mexico"] * 2 + [np.nan],
+        },
+    )
+
+
+@pytest.fixture()
+def customers_df():
+    return pd.DataFrame(
+        {
+            "id": pd.Categorical([0, 1, 2]),
+            "age": [33, 25, 56],
+            "région_id": ["United States"] * 3,
         },
     )
 
 
 def test_denormalize_two_tables(products_df, logs_df):
-    logs_df = logs_df.drop(columns=["session_id"])
+    """
+      Products
+     /
+    Log
+    """
     assert products_df["id"].is_unique
     assert logs_df["id"].is_unique
     relationships = [
@@ -48,17 +84,29 @@ def test_denormalize_two_tables(products_df, logs_df):
             "log": logs_df,
         },
         relationships=relationships,
+        target_entity="log",
     )
-    assert flattened.shape == (5, 3)
+    assert flattened.shape == (5, 4)
     assert flattened["id"].is_unique
-    assert sorted(flattened.columns.tolist()) == ["id", "price", "product_id"]
-    for price in flattened["price"].tolist():
+    print(flattened)
+    assert sorted(flattened.columns.tolist()) == [
+        "id",
+        "product_id",
+        "products.price",
+        "session_id",
+    ]
+    for price in flattened["products.price"].tolist():
         assert price in [10, 20, 30]
     assert sorted(flattened["id"].tolist()) == [1, 2, 3, 4, 5]
     assert sorted(flattened["product_id"].tolist()) == [1, 1, 2, 2, 3]
 
 
 def test_denormalize_three_tables(products_df, logs_df, sessions_df):
+    """
+    S   P   Sessions, Products
+     \\ /   .
+      L     Log
+    """
     assert sessions_df["id"].is_unique
 
     for session_id in logs_df["session_id"].tolist():
@@ -78,18 +126,113 @@ def test_denormalize_three_tables(products_df, logs_df, sessions_df):
             "sessions": sessions_df,
         },
         relationships=relationships,
+        target_entity="log",
     )
-    assert flattend.shape == (5, 4)
+    assert flattend.shape == (5, 5)
     assert flattend["id"].is_unique
-    assert (
-        flattend.columns.tolist().sort()
-        == ["id", "price", "product_id", "session_id"].sort()
-    )
-    for price in flattend["price"].tolist():
+    assert sorted(flattend.columns.tolist()) == [
+        "id",
+        "product_id",
+        "products.price",
+        "session_id",
+        "sessions.customer_id",
+    ]
+    for price in flattend["products.price"].tolist():
         assert price in [10, 20, 30]
+    for session_id in flattend["session_id"]:
+        assert session_id in [1, 2]
+    for product_id in flattend["product_id"]:
+        assert product_id in [1, 2, 3]
 
 
-# def test_denormalize_complex():
+def test_denormalize_five_tables(products_df, logs_df, sessions_df, customers_df):
+    """
+     C       Customers
+     |
+    |||
+     S   P   Sessions, Products
+     \\ //
+       L     Log
+    """
+    relationships = [
+        ("sessions", "id", "log", "session_id"),
+        ("customers", "id", "sessions", "customer_id"),
+        ("products", "id", "log", "product_id"),
+    ]
+    target_entity_index = "id"
+    flatened = denormalize(
+        dataframes={
+            "products": products_df,
+            "log": logs_df,
+            "sessions": sessions_df,
+            "customers": customers_df,
+        },
+        relationships=relationships,
+        target_entity="log",
+    )
+    assert flatened.shape == (5, 7)
+    assert flatened[target_entity_index].is_unique
+    assert sorted(flatened["products.price"].tolist()) == sorted([10, 20, 30, 10, 20])
+    for session_id in flatened["session_id"]:
+        assert session_id in [1, 2]
+    for product_id in flatened["product_id"]:
+        assert product_id in [1, 2, 3]
+    for customer_id in flatened["sessions.customer_id"]:
+        assert customer_id == 0
+    for age in flatened["sessions.customers.age"]:
+        assert age == 33
+    for région_id in flatened["sessions.customers.région_id"]:
+        assert région_id == "United States"
+
+
+def test_denormalize_change_target(products_df, logs_df, sessions_df, customers_df):
+    """
+     C       Customers
+     |
+    |||
+     S   P   Sessions, Products
+     \\ //
+       L     Log
+    """
+    relationships = [
+        ("sessions", "id", "log", "session_id"),
+        ("customers", "id", "sessions", "customer_id"),
+        ("products", "id", "log", "product_id"),
+    ]
+    flatened = denormalize(
+        dataframes={
+            "products": products_df,
+            "log": logs_df,
+            "sessions": sessions_df,
+            "customers": customers_df,
+        },
+        relationships=relationships,
+        target_entity="sessions",
+    )
+    assert flatened["id"].is_unique
+    for price in flatened["price"].tolist():
+        assert price in [10, 20, 30]
+    for session_id in flatened["session_id"]:
+        assert session_id in [1, 2]
+    for product_id in flatened["product_id"]:
+        assert product_id in [1, 2, 3]
+    for customer_id in flatened["customer_id"]:
+        assert customer_id in [0, 1, 2]
+    for région_id in flatened["région_id"]:
+        assert région_id in [np.nan, "United States"]
+
+
+def test_reorder_relationships():
+    relationships = [
+        ("sessions", "id", "log", "session_id"),
+        ("customers", "id", "sessions", "customer_id"),
+        ("products", "id", "log", "product_id"),
+    ]
+    reordered = reorder_relationships(relationships, "log")
+    assert reordered[0] == ("customers", "id", "sessions", "customer_id")
+
+
+# def test_denormalize_many_to_many():
 #     group_df = pd.DataFrame({
 #         "employee": ["Bob", "Jake", "Lisa", "Sue"],
 #         "group": ["Accounting", "Engineering", "Engineering", "HR"],
@@ -120,8 +263,12 @@ def test_denormalize_three_tables(products_df, logs_df, sessions_df):
 #             ("supervisor", "group", "group", "group"),
 #             # many to many relationship
 #             ("group", "group", "skills", "group"),
-#         ]
+#         ],
+#         target_entity="group",
+
 #     )
+#     print(denormalized)
+
 #     expected = pd.DataFrame(
 #         [
 #             ("Accounting", "Carly", "Bob", 2004, "math"),

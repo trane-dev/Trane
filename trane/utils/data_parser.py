@@ -6,6 +6,7 @@ import pandas as pd
 def denormalize(
     dataframes: Dict[str, pd.DataFrame],
     relationships: List[Tuple[str, str, str, str]],
+    target_entity: str,
 ) -> pd.DataFrame:
     """
     Convert a list of dataframes into a single dataframe
@@ -19,51 +20,92 @@ def denormalize(
     Returns:
         dataframe: a merge of all the dataframes according to the relationships
     """
-    merged_dataframes = []
+    merged_dataframes = {}
     for relationship in relationships:
         parent_table_name, parent_key, child_table_name, child_key = relationship
         if parent_key not in dataframes[parent_table_name].columns:
             raise ValueError(
-                f"parent_key: {parent_key} not in parent_table: {parent_table_name}",
+                f"{parent_key} not in table: {parent_table_name}",
             )
         if child_key not in dataframes[child_table_name].columns:
             raise ValueError(
-                f"child_key: {child_key} not in child_table: {child_table_name}",
+                f"{child_key} not in table: {child_table_name}",
             )
+    relationship_order = []
+    if target_entity is not None:
+        check_target_entity(target_entity, relationships, dataframes)
+        relationship_order = reorder_relationships(relationships, target_entity)
+    else:
+        relationship_order = relationships
 
-    for relationship in relationships:
+    for relationship in relationship_order:
         parent_table_name, parent_key, child_table_name, child_key = relationship
 
         parent_table = dataframes[parent_table_name]
         child_table = dataframes[child_table_name]
-        if parent_table_name in [x[0] for x in merged_dataframes]:
-            # have already used it as a parent before, so use the merged version
-            parent_table = [
-                x[1] for x in merged_dataframes if x[0] == parent_table_name
-            ][0]
-            merged_dataframes.remove((parent_table_name, parent_table))
 
-        if child_table_name in [x[0] for x in merged_dataframes]:
-            # have already used it as a child before, so use the merged version
-            child_table = [x[1] for x in merged_dataframes if x[0] == child_table_name][
-                0
+        if parent_table_name in merged_dataframes:
+            # have already used it as a parent before, so use the merged version (it has more information)
+            parent_table, _, _, original_parent_key = merged_dataframes[
+                parent_table_name
             ]
-            merged_dataframes.remove((child_table_name, child_table))
-        flat = (
-            parent_table.set_index(parent_key)
-            .merge(
-                child_table.set_index(child_key),
-                how="right",
-                # right = we want to keep all the rows in the child table
-                # left = we want to keep all the rows in the parent table
-                left_index=True,
-                right_index=True,
-                validate="one_to_many",
-            )
-            .reset_index(names=child_key)
+            merged_dataframes.pop(parent_table_name)
+        if child_table_name in merged_dataframes:
+            # have already used it as a child before, so use the merged version (it has more infomation)
+            child_table, _, _, original_parent_key = merged_dataframes[child_table_name]
+            merged_dataframes.pop(child_table_name)
+
+        parent_table = parent_table.add_prefix(parent_table_name + ".")
+        original_parent_key = parent_key
+        parent_key = parent_table_name + "." + parent_key
+
+        flat = flatten_dataframes(parent_table, child_table, parent_key, child_key)
+        merged_dataframes[child_table_name] = (
+            flat,
+            parent_key,
+            child_key,
+            original_parent_key,
         )
-        merged_dataframes.append((child_table_name, flat))
-    return merged_dataframes[0][1]
+        merged_dataframes[parent_table_name] = (
+            flat,
+            parent_key,
+            child_key,
+            original_parent_key,
+        )
+    return merged_dataframes[target_entity][0]
+
+
+def flatten_dataframes(parent_table, child_table, parent_key, child_key):
+    return (
+        parent_table.set_index(parent_key)
+        .merge(
+            child_table.set_index(child_key),
+            # right = we want to keep all the rows in the child table
+            how="right",
+            left_index=True,
+            right_index=True,
+            validate="one_to_many",
+        )
+        .reset_index(names=child_key)
+    )
+
+
+def reorder_relationships(relationships, target_entity):
+    reordered_relationships = []
+    for relationship in relationships:
+        parent_table_name, parent_key, child_table_name, child_key = relationship
+        if child_table_name == target_entity:
+            reordered_relationships.append(relationship)
+        else:
+            reordered_relationships.insert(0, relationship)
+    return reordered_relationships
+
+
+def check_target_entity(target_entity, relationships, dataframes):
+    if target_entity not in [x[2] for x in relationships]:
+        raise ValueError(f"{target_entity} not in relationships: {relationships}")
+    if target_entity not in dataframes:
+        raise ValueError(f"{target_entity} not in dataframes: {dataframes}")
 
 
 # class CsvMerge:

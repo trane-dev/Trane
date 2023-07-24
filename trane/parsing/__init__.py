@@ -1,1 +1,1 @@
-from trane.parsing.denormalize import *  # noqa
+from trane.parsing.denormalize import *

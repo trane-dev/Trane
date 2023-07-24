@@ -12,6 +12,7 @@ scripts/*.parquet
 docs/*.parquet
 Untitled.ipynb
 trane-*.*.*/
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

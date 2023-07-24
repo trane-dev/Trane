@@ -5,6 +5,7 @@ from trane.datasets import (
     load_youtube,
     load_youtube_metadata,
 )
+from trane.parsing import *  # noqa
 from trane.typing import *  # noqa
 from trane.utils import *  # noqa
 from trane.version import __version__

@@ -10,6 +10,7 @@ v0.5.0 ()
     * Add `get_aggregation_ops` and `get_filter_ops` functions [#98][#98]
 * Fixes
     * Fix FeaturetoolsWrapper class and label times [#100]
+    * Fix denormalize to support more than 2 tables #104
 
     [#96]: <https://github.com/trane-dev/Trane/pull/96>
     [#98]: <https://github.com/trane-dev/Trane/pull/98>

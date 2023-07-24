@@ -56,12 +56,8 @@ def denormalize(
         original_to_new = dict(zip(original_columns, new_columns))
 
         parent_key = parent_table_name + "." + parent_key
-        original_child_key = child_key
-        if child_key not in child_table.columns:
-            child_key = child_table_name + "." + child_key
 
         flat = flatten_dataframes(parent_table, child_table, parent_key, child_key)
-        flat = flat.rename(columns={child_key: original_child_key})
         merged_dataframes[child_table_name] = (flat, original_to_new)
         merged_dataframes[parent_table_name] = (flat, original_to_new)
 

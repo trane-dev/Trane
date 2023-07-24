@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from trane.utils.data_parser import (
+from trane.parsing.denormalize import (
     child_relationships,
     denormalize,
 )

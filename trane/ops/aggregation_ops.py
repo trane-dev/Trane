@@ -100,7 +100,7 @@ class MajorityAggregationOp(AggregationOpBase):
 
 
 class ExistsAggregationOp(AggregationOpBase):
-    input_output_types = [("category", "category")]
+    input_output_types = [("None", "Boolean")]
     description = " if there exists a record"
 
     def label_function(self, dataslice):

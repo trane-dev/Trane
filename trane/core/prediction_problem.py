@@ -60,7 +60,7 @@ class PredictionProblem:
         )
 
     def __hash__(self) -> int:
-        return hash((self.operations))
+        return hash(self.operations)
 
     def is_valid(self, table_meta=None):
         """

@@ -226,8 +226,8 @@ def test_generate_possible_operations():
         "department": ("Categorical", {"category"}),
         "user_id": ("Integer", {"numeric", "foreign_key"}),
     }
-    exclude_columns = _extract_exclude_columns(table_meta)
-    assert exclude_columns == ["id", "time", "user_id"]
+    exclude_columns = _extract_exclude_columns(table_meta, "id", "time")
+    assert sorted(exclude_columns) == ["id", "time", "user_id"]
     possible_operations = _generate_possible_operations(
         all_columns=table_meta.keys(),
         exclude_columns=exclude_columns,

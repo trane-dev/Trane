@@ -59,6 +59,9 @@ class PredictionProblem:
             window_size=window_size,
         )
 
+    def __hash__(self) -> int:
+        return hash((self.operations))
+
     def is_valid(self, table_meta=None):
         """
         Typechecking for operations. Insures that their input and output types

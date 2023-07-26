@@ -173,6 +173,8 @@ def _generate_possible_operations(
             else:
                 filter_instance = filter_operation(filter_col)
             possible_operations.append((filter_instance, agg_instance))
+    # TODO: why are duplicate problems being generated
+    possible_operations = list(set(possible_operations))
     return possible_operations
 
     # possible_ops = []

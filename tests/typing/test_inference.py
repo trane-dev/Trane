@@ -1,3 +1,4 @@
+import datetime
 import sys
 
 import numpy as np
@@ -118,12 +119,20 @@ def test_infer_table_meta():
             "a": [1, 2, 3],
             "b": [True, False, True],
             "c": ["a", "b", "c"],
+            "d": [
+                datetime.datetime(2019, 1, 1),
+                datetime.datetime(2019, 1, 2),
+                datetime.datetime(2019, 1, 3),
+            ],
         },
     )
-    table_meta = infer_table_meta(df)
+    table_meta = infer_table_meta(df, entity_col="a", time_col="d")
     for col, column_schema in table_meta.items():
         assert col in df.columns
         assert isinstance(column_schema, ColumnSchema)
     assert table_meta["a"].logical_type == Integer
+    assert table_meta["a"].semantic_tags == {"numeric", "primary_key"}
     assert table_meta["b"].logical_type == Boolean
     assert table_meta["c"].logical_type == Unknown
+    assert table_meta["d"].logical_type == Datetime
+    assert table_meta["d"].semantic_tags == {"time_index"}

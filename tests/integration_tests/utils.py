@@ -30,7 +30,7 @@ agg_op_str_dict = {
     MinAggregationOp: " the minimum <{}> in all related records",
     MajorityAggregationOp: " the majority <{}> in all related records",
     CountAggregationOp: "the number of records",
-    ExistsAggregationOp: "if there exists a record with",
+    ExistsAggregationOp: "if there exists a record",
 }
 
 filter_op_str_dict = {

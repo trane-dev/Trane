@@ -3,7 +3,12 @@ import pandas as pd
 from trane.ops.threshold_functions import sample_unique_values
 
 
-class OpBase(object):
+class Meta(type):
+    def __repr__(self):
+        return f"{self.__name__}"
+
+
+class OpBase(object, metaclass=Meta):
     """
     Super class of all operations.
     """
@@ -11,7 +16,7 @@ class OpBase(object):
     description = None
     threshold = None
 
-    def __init__(self, column_name, input_type=None, output_type=None):
+    def __init__(self, column_name=None, input_type=None, output_type=None):
         """
         Initalization of all operations.
         Subclasses shouldn't have their own init.
@@ -46,8 +51,10 @@ class OpBase(object):
     def __hash__(self):
         return hash((type(self).__name__, self.column_name))
 
-    def __repr__(self):
-        return type(self).__name__
+    def __repr__(self) -> str:
+        if self.column_name is not None:
+            return "{}({})".format(type(self).__name__, self.column_name)
+        return "{}".format(type(self).__name__)
 
     def __eq__(self, other):
         """Overrides the default implementation"""

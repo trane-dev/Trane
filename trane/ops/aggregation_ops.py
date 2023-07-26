@@ -90,7 +90,7 @@ class MinAggregationOp(AggregationOpBase):
 
 class MajorityAggregationOp(AggregationOpBase):
     input_output_types = [("category", "category")]
-    # input_output_types = [("category", "category"), ("index", "index")]
+    # input_output_types = [("category", "category"), ("primary_key", "primary_key")]
     description = " the majority <{}> in all related records"
 
     def label_function(self, dataslice):
@@ -100,8 +100,8 @@ class MajorityAggregationOp(AggregationOpBase):
 
 
 class ExistsAggregationOp(AggregationOpBase):
-    input_output_types = [("None", "Boolean")]
-    description = " if there exists a record with"
+    input_output_types = [("category", "category")]
+    description = " if there exists a record"
 
     def label_function(self, dataslice):
         return len(dataslice) > 0

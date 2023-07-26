@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from trane.ops.aggregation_ops import AvgAggregationOp, MinAggregationOp
-from trane.ops.filter_ops import GreaterFilterOp, LessFilterOp
+from trane.ops.filter_ops import AllFilterOp, GreaterFilterOp, LessFilterOp
 
 
 @pytest.fixture
@@ -31,6 +31,14 @@ def test_find_threshold_by_fraction_of_data_to_keep(df):
     assert best_threshold == 50.0
     assert op.threshold == original_threshold
     assert hash(op) == hash(("GreaterFilterOp", "col"))
+
+
+def test_repr():
+    assert str(AllFilterOp) == "AllFilterOp"
+    assert AllFilterOp().__repr__() == "AllFilterOp"
+    assert GreaterFilterOp("col").__repr__() == "GreaterFilterOp(col)"
+    assert GreaterFilterOp("col").__str__() == "GreaterFilterOp(col)"
+    assert str(MinAggregationOp("col")) == "MinAggregationOp(col)"
 
 
 def test_eq():

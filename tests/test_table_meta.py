@@ -9,7 +9,7 @@ from trane.typing.logical_types import (
 
 def test_parse_table_meta():
     meta = {
-        "id": ("Categorical", {"index", "category"}),
+        "id": ("Categorical", {"primary_key", "category"}),
         "date": "Datetime",
         "cost": ("Double", {"numeric"}),
         "amount": (None, {"numeric"}),
@@ -17,7 +17,7 @@ def test_parse_table_meta():
     parsed_meta = _parse_table_meta(meta)
     assert parsed_meta["id"] == ColumnSchema(
         logical_type=Categorical,
-        semantic_tags={"index", "category"},
+        semantic_tags={"primary_key", "category"},
     )
     assert parsed_meta["date"] == ColumnSchema(logical_type=Datetime, semantic_tags={})
     assert parsed_meta["cost"] == ColumnSchema(

@@ -5,10 +5,13 @@ import pytest
 
 from trane.core.utils import (
     _check_operations_valid,
+    _extract_exclude_columns,
+    _generate_possible_operations,
     _parse_table_meta,
     clean_date,
 )
 from trane.ops.aggregation_ops import (
+    AggregationOpBase,
     AvgAggregationOp,
     CountAggregationOp,
     ExistsAggregationOp,
@@ -20,28 +23,38 @@ from trane.ops.aggregation_ops import (
 from trane.ops.filter_ops import (
     AllFilterOp,
     EqFilterOp,
+    FilterOpBase,
     GreaterFilterOp,
     LessFilterOp,
     NeqFilterOp,
 )
 from trane.typing.column_schema import ColumnSchema
-from trane.typing.logical_types import Categorical, Double
+from trane.typing.logical_types import Categorical, Double, Integer
 
 
 @pytest.fixture(scope="function")
 def table_meta():
     return {
-        "id": ("Categorical", {"index", "category"}),
+        "id": ("Categorical", {"primary_key", "category"}),
         "amount": ("Integer", {"numeric"}),
+        "user_id": ("Integer", {"foreign_key"}),
     }
 
 
 def test_parse_table_simple(table_meta):
     modified_meta = _parse_table_meta(table_meta)
-    assert len(modified_meta) == 2
+    assert len(modified_meta) == 3
     assert modified_meta["id"] == ColumnSchema(
         logical_type=Categorical,
-        semantic_tags={"category", "index"},
+        semantic_tags={"category", "primary_key"},
+    )
+    assert modified_meta["amount"] == ColumnSchema(
+        logical_type=Integer,
+        semantic_tags={"numeric"},
+    )
+    assert modified_meta["user_id"] == ColumnSchema(
+        logical_type=Integer,
+        semantic_tags={"foreign_key"},
     )
 
 
@@ -54,9 +67,9 @@ def test_simple_check_operations(table_meta):
     assert all(key in table_meta.keys() for key in modified_meta.keys())
 
 
-def test_parse_table_numeric(table_meta):
+def test_parse_table_numeric():
     table_meta = {
-        "id": ("Categorical", {"index", "category"}),
+        "id": ("Categorical", {"primary_key", "category"}),
         "amount": ("Integer", {"numeric"}),
     }
     table_meta = _parse_table_meta(table_meta)
@@ -151,7 +164,7 @@ def verify_numeric_op(modified_meta, result):
 
 def test_parse_table_cat():
     table_meta = {
-        "id": ("Categorical", {"index", "category"}),
+        "id": ("Categorical", {"primary_key", "category"}),
         "state": ("Categorical", {"category"}),
     }
     table_meta = _parse_table_meta(table_meta)
@@ -187,6 +200,47 @@ def test_parse_table_cat():
     operations = [AllFilterOp(None), ExistsAggregationOp("state")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
+
+
+def test_foreign_key():
+    table_meta = {
+        "id": ("Categorical", {"primary_key", "category"}),
+        "amount": ("Integer", {"numeric"}),
+        "department": ("Categorical", {"category"}),
+        "user_id": ("Integer", {"numeric", "foreign_key"}),
+    }
+    # For each <orders.user_id> predict the total <user_id> in all related
+    # records with <products.departments.department> equal to dairy eggs in next 2w days
+    # [EqFilterOp, SumAggregationOp]
+    operations = [EqFilterOp("department"), SumAggregationOp("user_id")]
+    table_meta = _parse_table_meta(table_meta)
+    result, modified_meta = _check_operations_valid(operations, table_meta)
+    assert result is False
+
+
+def test_generate_possible_operations():
+    table_meta = {
+        "id": ("Categorical", {"primary_key", "category"}),
+        "time": ("Datetime", {"time_index"}),
+        "amount": ("Integer", {"numeric"}),
+        "department": ("Categorical", {"category"}),
+        "user_id": ("Integer", {"numeric", "foreign_key"}),
+    }
+    exclude_columns = _extract_exclude_columns(table_meta)
+    assert exclude_columns == ["id", "time", "user_id"]
+    possible_operations = _generate_possible_operations(
+        all_columns=table_meta.keys(),
+        exclude_columns=exclude_columns,
+    )
+    for filter_op, agg_op in possible_operations:
+        assert isinstance(agg_op, AggregationOpBase)
+        assert isinstance(filter_op, FilterOpBase)
+        if isinstance(agg_op, CountAggregationOp):
+            assert agg_op.column_name is None
+        if isinstance(filter_op, AllFilterOp):
+            assert filter_op.column_name is None
+        assert agg_op.column_name not in exclude_columns
+        assert filter_op.column_name not in exclude_columns
 
 
 def test_clean_date():

@@ -51,7 +51,7 @@ def load_covid_metadata():
         ),
         "Country/Region": ColumnSchema(
             logical_type=Categorical,
-            semantic_tags={"category", "index"},
+            semantic_tags={"category", "primary_key"},
         ),
         "Lat": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
         "Long": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
@@ -68,11 +68,11 @@ def load_youtube_metadata():
         "trending_date": ColumnSchema(logical_type=Datetime),
         "channel_title": ColumnSchema(
             logical_type=Categorical,
-            semantic_tags={"index"},
+            semantic_tags={"primary_key"},
         ),
         "category_id": ColumnSchema(
             logical_type=Categorical,
-            semantic_tags={"category", "index"},
+            semantic_tags={"category", "primary_key"},
         ),
         "views": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
         "likes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),

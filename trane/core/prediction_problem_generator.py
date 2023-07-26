@@ -112,7 +112,6 @@ class PredictionProblemGenerator:
 
         # a list of problems that will eventually be returned
         problems = []
-        list(self.table_meta.keys())
 
         exclude_columns = _extract_exclude_columns(
             self.table_meta,

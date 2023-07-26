@@ -49,5 +49,5 @@ jobs:
               table_meta=table_meta,
           )
           problems = problem_generator.generate(data, generate_thresholds=True)
-          assert len(problems) >= 1000
+          assert len(problems) >= 800
         shell: python

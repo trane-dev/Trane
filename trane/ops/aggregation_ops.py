@@ -101,7 +101,7 @@ class MajorityAggregationOp(AggregationOpBase):
 
 class ExistsAggregationOp(AggregationOpBase):
     input_output_types = [("None", "Boolean")]
-    description = " if there exists a record with"
+    description = " if there exists a record"
 
     def label_function(self, dataslice):
         return len(dataslice) > 0

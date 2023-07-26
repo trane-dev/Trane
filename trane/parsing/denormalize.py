@@ -60,7 +60,8 @@ def denormalize(
         flat = flatten_dataframes(parent_table, child_table, parent_key, child_key)
         merged_dataframes[child_table_name] = (flat, original_to_new)
         merged_dataframes[parent_table_name] = (flat, original_to_new)
-
+    # TODO: set primary key to be the index
+    # TODO: pass information to table meta (primary key, foreign keys)? maybe? technically relationships has this info
     return merged_dataframes[target_entity][0]
 
 

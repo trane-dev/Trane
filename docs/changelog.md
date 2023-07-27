@@ -3,12 +3,12 @@
 Changelog
 ---------
 
-v0.5.0 ()
-=====================
+v0.5.0 (July 27, 2023)
+======================
 * Enhancements
     * Add ``ExistsAggregationOp`` [#96][#96]
     * Add `get_aggregation_ops` and `get_filter_ops` functions [#98][#98]
-    * Allow Ops to restrict semantic tags [#108][#108]
+    * Enable operations to exclude columns they can be applied to with semantic tags [#108][#108]
 * Fixes
     * Fix FeaturetoolsWrapper class and label times [#100][#100]
     * Fix denormalize to support more than 2 tables [#104][#104]

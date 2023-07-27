@@ -39,7 +39,7 @@ def make_fake_df():
 @pytest.fixture()
 def make_fake_meta():
     meta = {
-        "id": ("Integer", {"numeric", "index"}),
+        "id": ("Integer", {"numeric", "primary_key"}),
         "date": ("Datetime", {}),
         "state": ("Categorical", {"category"}),
         "amount": ("Double", {"numeric"}),

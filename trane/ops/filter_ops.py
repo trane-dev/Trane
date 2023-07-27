@@ -38,7 +38,7 @@ class AllFilterOp(FilterOpBase):
 
 class EqFilterOp(FilterOpBase):
     input_output_types = [("category", "category")]
-    # input_output_types = [("category", "category"), ("index", "index")]
+    # input_output_types = [("category", "category"), ("primary_key", "primary_key")]
     description = "equal to"
 
     def set_parameters(self, threshold: float):
@@ -50,7 +50,7 @@ class EqFilterOp(FilterOpBase):
 
 class NeqFilterOp(FilterOpBase):
     input_output_types = [("category", "category")]
-    # input_output_types = [("category", "category"), ("index", "index")]
+    # input_output_types = [("category", "category"), ("primary_key", "primary_key")]
     description = "not equal to"
 
     def set_parameters(self, threshold: float):

@@ -1,14 +1,15 @@
 import copy
-import itertools
 
 from tqdm.notebook import tqdm
 
 from trane.core.prediction_problem import PredictionProblem
-from trane.core.utils import _parse_table_meta, get_semantic_tags
-from trane.ops.aggregation_ops import CountAggregationOp
+from trane.core.utils import (
+    _generate_possible_operations,
+    _parse_table_meta,
+    get_semantic_tags,
+)
 from trane.ops.filter_ops import AllFilterOp
 from trane.ops.threshold_functions import get_k_most_frequent
-from trane.ops.utils import get_aggregation_ops, get_filter_ops
 from trane.typing.column_schema import ColumnSchema
 from trane.typing.inference import infer_table_meta
 from trane.typing.logical_types import (
@@ -65,9 +66,9 @@ class PredictionProblemGenerator:
         entity_col_type = self.table_meta[self.entity_col]
         assert entity_col_type.logical_type in [Integer, Categorical]
         if inferred_table_meta is False:
-            assert "index" in entity_col_type.semantic_tags
+            assert "primary_key" in entity_col_type.semantic_tags
         else:
-            self.table_meta[self.entity_col].semantic_tags.add("index")
+            self.table_meta[self.entity_col].semantic_tags.add("primary_key")
 
         time_col_type = self.table_meta[self.time_col]
         assert time_col_type.logical_type == Datetime
@@ -108,43 +109,23 @@ class PredictionProblemGenerator:
         if generate_thresholds and df is None:
             raise ValueError("Must provide a dataframe sample to generate thresholds")
 
-        # a list of problems that will eventually be returned
+        exclude_columns = [self.entity_col, self.time_col]
         problems = []
-        all_columns = list(self.table_meta.keys())
+        possible_operations = _generate_possible_operations(
+            table_meta=self.table_meta,
+            exclude_columns=exclude_columns,
+        )
 
-        possible_ops = []
-        for agg, filter_ in itertools.product(
-            get_aggregation_ops(),
-            get_filter_ops(),
-        ):
-            filter_columns = all_columns
-            if filter_ == AllFilterOp:
-                filter_columns = [None]
-
-            agg_columns = all_columns
-            if agg == CountAggregationOp:
-                agg_columns = [None]
-            for filter_col, agg_col in itertools.product(
-                filter_columns,
-                agg_columns,
-            ):
-                if filter_col == self.time_col or agg_col == self.time_col:
-                    continue
-                if filter_col != self.entity_col and agg_col != self.entity_col:
-                    possible_ops.append((agg_col, filter_col, agg, filter_))
-        total_attempts = len(possible_ops)
+        total_attempts = len(possible_operations)
         all_attempts = 0
         success_attempts = 0
         for op_col_combo in tqdm(
-            possible_ops,
+            possible_operations,
             total=total_attempts,
             position=pbar_position,
         ):
             all_attempts += 1
-            ag_col, filter_col, agg_op_obj, filter_op_obj = op_col_combo
-
-            agg_op_obj = agg_op_obj(ag_col)
-            filter_op_obj = filter_op_obj(filter_col)
+            filter_op_obj, agg_op_obj = op_col_combo
 
             # Note: the order of the operations matters, the filter operation must be first
             operations = [filter_op_obj, agg_op_obj]

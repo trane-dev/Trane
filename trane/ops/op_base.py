@@ -1,15 +1,23 @@
+from typing import Union
+
 import pandas as pd
 
 from trane.ops.threshold_functions import sample_unique_values
 
 
-class OpBase(object):
+class Meta(type):
+    def __repr__(self):
+        return f"{self.__name__}"
+
+
+class OpBase(object, metaclass=Meta):
     """
     Super class of all operations.
     """
 
     description = None
     threshold = None
+    restricted_semantic_tags = {"time_index", "foreign_key", "primary_key"}
 
     def __init__(self, column_name, input_type=None, output_type=None):
         """
@@ -44,10 +52,12 @@ class OpBase(object):
         return (type(self).__name__) >= (type(other).__name__)
 
     def __hash__(self):
-        return hash((type(self).__name__, self.column_name))
+        return hash((type(self).__name__, self.column_name, self.threshold))
 
-    def __repr__(self):
-        return type(self).__name__
+    def __repr__(self) -> str:
+        if self.column_name is not None:
+            return "{}({})".format(type(self).__name__, self.column_name)
+        return "{}".format(type(self).__name__)
 
     def __eq__(self, other):
         """Overrides the default implementation"""
@@ -63,7 +73,7 @@ class OpBase(object):
             return self.description.format(self.column_name)
         return self.description
 
-    def set_parameters(self, threshold: float):
+    def set_parameters(self, threshold: Union[float, str]):
         raise NotImplementedError
 
     def find_threshold_by_fraction_of_data_to_keep(

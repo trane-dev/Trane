@@ -1,9 +1,14 @@
+import itertools
 from datetime import datetime
+from typing import Dict, List
 
 import pandas as pd
 
-from trane.ops.aggregation_ops import AggregationOpBase
+from trane.ops.aggregation_ops import (
+    AggregationOpBase,
+)
 from trane.ops.filter_ops import FilterOpBase
+from trane.ops.utils import get_aggregation_ops, get_filter_ops
 from trane.typing.column_schema import ColumnSchema
 from trane.typing.logical_types import (
     Boolean,
@@ -16,7 +21,8 @@ from trane.typing.logical_types import (
 
 TYPE_MAPPING = {
     "category": ColumnSchema(semantic_tags={"category"}),
-    "index": ColumnSchema(semantic_tags={"index"}),
+    "primary_key": ColumnSchema(semantic_tags={"primary_key"}),
+    "foreign_key": ColumnSchema(semantic_tags={"foreign_key"}),
     "None": ColumnSchema(),
     "numeric": ColumnSchema(semantic_tags={"numeric"}),
     "Categorical": ColumnSchema(logical_type=Categorical, semantic_tags={"category"}),
@@ -62,6 +68,12 @@ def _parse_table_meta(table_meta):
     return parsed_schema
 
 
+def convert_op_type(op_type):
+    if isinstance(op_type, str):
+        return TYPE_MAPPING[op_type]
+    return op_type
+
+
 def _check_operations_valid(
     operations,
     table_meta,
@@ -73,10 +85,8 @@ def _check_operations_valid(
     for op in operations:
         input_output_types = op.input_output_types
         for op_input_type, op_output_type in input_output_types:
-            if isinstance(op_input_type, str):
-                op_input_type = TYPE_MAPPING[op_input_type]
-            if isinstance(op_output_type, str):
-                op_output_type = TYPE_MAPPING[op_output_type]
+            op_input_type = convert_op_type(op_input_type)
+            op_output_type = convert_op_type(op_output_type)
 
             # operation applies to all columns
             if op_input_type == ColumnSchema() and op_input_type.semantic_tags == set():
@@ -107,6 +117,77 @@ def _check_operations_valid(
     return True, table_meta
 
 
+def _generate_possible_operations(
+    table_meta: Dict[str, ColumnSchema],
+    exclude_columns: List[str] = None,
+    aggregation_operations: List[AggregationOpBase] = None,
+    filter_operations: List[FilterOpBase] = None,
+):
+    if aggregation_operations is None:
+        aggregation_operations = get_aggregation_ops()
+    if filter_operations is None:
+        filter_operations = get_filter_ops()
+
+    valid_columns = list(table_meta.keys())
+    if exclude_columns is None:
+        exclude_columns = []
+    elif exclude_columns and len(exclude_columns) > 0:
+        valid_columns = [col for col in valid_columns if col not in exclude_columns]
+
+    possible_operations = []
+    column_pairs = []
+    for filter_col, agg_col in itertools.product(
+        valid_columns,
+        valid_columns,
+    ):
+        column_pairs.append((filter_col, agg_col))
+
+    for agg_operation, filter_operation in itertools.product(
+        aggregation_operations,
+        filter_operations,
+    ):
+        for filter_col, agg_col in column_pairs:
+            # not ideal, what if there is more than 1 input type in the op
+            agg_op_input_type = convert_op_type(agg_operation.input_output_types[0][0])
+            filter_op_input_type = convert_op_type(
+                filter_operation.input_output_types[0][0],
+            )
+            agg_instance = None
+            if (
+                len(
+                    agg_operation.restricted_semantic_tags.intersection(
+                        table_meta[agg_col].semantic_tags,
+                    ),
+                )
+                > 0
+            ):
+                # if the agg operation is about to apply to a column that has restricted semantic tags
+                continue
+            elif agg_op_input_type in ["None", None, ColumnSchema()]:
+                agg_instance = agg_operation(None)
+            else:
+                agg_instance = agg_operation(agg_col)
+            filter_instance = None
+            if (
+                len(
+                    filter_operation.restricted_semantic_tags.intersection(
+                        table_meta[filter_col].semantic_tags,
+                    ),
+                )
+                > 0
+            ):
+                # if the agg operation is about to apply to a column that has restricted semantic tags
+                continue
+            elif filter_op_input_type in ["None", None, ColumnSchema()]:
+                filter_instance = filter_operation(None)
+            else:
+                filter_instance = filter_operation(filter_col)
+            possible_operations.append((filter_instance, agg_instance))
+    # TODO: why are duplicate problems being generated
+    possible_operations = list(set(possible_operations))
+    return possible_operations
+
+
 def get_semantic_tags(filter_op: FilterOpBase):
     """
     Extract the semantic tags from the filter operation, looking at the input_output_types.
@@ -133,7 +214,7 @@ def check_table_meta(table_meta, entity_col, time_col):
 
     entity_col_type = table_meta[entity_col]
     assert entity_col_type.logical_type in [Integer, Categorical]
-    assert "index" in entity_col_type.semantic_tags
+    assert "primary_key" in entity_col_type.semantic_tags
 
     time_col_type = table_meta[time_col]
     assert time_col_type.logical_type == Datetime

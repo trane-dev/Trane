@@ -11,15 +11,16 @@ v0.5.0 ()
 * Fixes
     * Fix FeaturetoolsWrapper class and label times [#100][#100]
     * Fix denormalize to support more than 2 tables [#104][#104]
-    * Exclude foreign keys from being used to generate prediction problems [#108][#108]
     * Change "index" to "primary_key" [#108][#108]
     * Fixes duplicate prediction problem generation by hashing all possible prediction problems [#108][#108]
+    * Allow ops to restrict semantic tags [#109][#109]
 
     [#96]: <https://github.com/trane-dev/Trane/pull/96>
     [#98]: <https://github.com/trane-dev/Trane/pull/98>
     [#100]: <https://github.com/trane-dev/Trane/pull/100>
     [#104]: <https://github.com/trane-dev/Trane/pull/104>
     [#108]: <https://github.com/trane-dev/Trane/pull/108>
+    [#109]: <https://github.com/trane-dev/Trane/pull/109>
 
 v0.4.0 (July 8, 2023)
 =====================

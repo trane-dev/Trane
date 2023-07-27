@@ -5,7 +5,6 @@ import pytest
 
 from trane.core.utils import (
     _check_operations_valid,
-    _extract_exclude_columns,
     _generate_possible_operations,
     _parse_table_meta,
     clean_date,
@@ -235,11 +234,8 @@ def test_generate_possible_operations():
             semantic_tags={"numeric", "foreign_key"},
         ),
     }
-    exclude_columns = _extract_exclude_columns(table_meta, "id", "time")
-    assert sorted(exclude_columns) == ["id", "time", "user_id"]
     possible_operations = _generate_possible_operations(
         all_columns=table_meta,
-        exclude_columns=exclude_columns,
     )
     for filter_op, agg_op in possible_operations:
         assert isinstance(agg_op, AggregationOpBase)
@@ -248,8 +244,6 @@ def test_generate_possible_operations():
             assert agg_op.column_name is None
         if isinstance(filter_op, AllFilterOp):
             assert filter_op.column_name is None
-        assert agg_op.column_name not in exclude_columns
-        assert filter_op.column_name not in exclude_columns
 
 
 def test_clean_date():

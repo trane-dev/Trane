@@ -15,7 +15,7 @@ class OpBase(object, metaclass=Meta):
 
     description = None
     threshold = None
-    restricted_semantic_tags = set(["primary_key"])
+    restricted_semantic_tags = set(["time_index", "primary_key"])
 
     def __init__(self, column_name=None, input_type=None, output_type=None):
         """

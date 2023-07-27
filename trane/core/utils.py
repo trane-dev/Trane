@@ -114,24 +114,8 @@ def _check_operations_valid(
     return True, table_meta
 
 
-def _extract_exclude_columns(table_meta, entity_col, time_col):
-    exclude_columns = []
-    table_meta = _parse_table_meta(table_meta)
-    for col, column_schema in table_meta.items():
-        if "foreign_key" in column_schema.semantic_tags:
-            exclude_columns.append(col)
-        if "primary_key" in column_schema.semantic_tags:
-            exclude_columns.append(col)
-        if "time_index" in column_schema.semantic_tags:
-            exclude_columns.append(col)
-    exclude_columns.append(entity_col)
-    exclude_columns.append(time_col)
-    return list(set(exclude_columns))
-
-
 def _generate_possible_operations(
-    all_columns,  # this is not dict instead of dict.keys()
-    exclude_columns,
+    all_columns,
     aggregation_operations=None,
     filter_operations=None,
 ):
@@ -140,11 +124,10 @@ def _generate_possible_operations(
     if filter_operations is None:
         filter_operations = get_filter_ops()
 
-    all_columns_names = all_columns.keys()
-    if not isinstance(all_columns_names, list):
-        all_columns_names = list(all_columns_names)
+    valid_columns = all_columns.keys()
+    if not isinstance(valid_columns, list):
+        valid_columns = list(valid_columns)
 
-    valid_columns = [col for col in all_columns_names if col not in exclude_columns]
     possible_operations = []
     column_pairs = []
     for filter_col, agg_col in itertools.product(

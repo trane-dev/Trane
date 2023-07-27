@@ -4,7 +4,6 @@ from tqdm.notebook import tqdm
 
 from trane.core.prediction_problem import PredictionProblem
 from trane.core.utils import (
-    _extract_exclude_columns,
     _generate_possible_operations,
     _parse_table_meta,
     get_semantic_tags,
@@ -113,14 +112,8 @@ class PredictionProblemGenerator:
         # a list of problems that will eventually be returned
         problems = []
 
-        exclude_columns = _extract_exclude_columns(
-            self.table_meta,
-            self.entity_col,
-            self.time_col,
-        )
         possible_operations = _generate_possible_operations(
             all_columns=self.table_meta,
-            exclude_columns=exclude_columns,
         )
 
         total_attempts = len(possible_operations)

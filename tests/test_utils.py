@@ -29,7 +29,7 @@ from trane.ops.filter_ops import (
     NeqFilterOp,
 )
 from trane.typing.column_schema import ColumnSchema
-from trane.typing.logical_types import Categorical, Double, Integer
+from trane.typing.logical_types import Categorical, Datetime, Double, Integer
 
 
 @pytest.fixture(scope="function")
@@ -220,16 +220,25 @@ def test_foreign_key():
 
 def test_generate_possible_operations():
     table_meta = {
-        "id": ("Categorical", {"primary_key", "category"}),
-        "time": ("Datetime", {"time_index"}),
-        "amount": ("Integer", {"numeric"}),
-        "department": ("Categorical", {"category"}),
-        "user_id": ("Integer", {"numeric", "foreign_key"}),
+        "id": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"primary_key", "category"},
+        ),
+        "time": ColumnSchema(logical_type=Datetime, semantic_tags={"time_index"}),
+        "amount": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+        "department": ColumnSchema(
+            logical_type=Categorical,
+            semantic_tags={"category"},
+        ),
+        "user_id": ColumnSchema(
+            logical_type=Integer,
+            semantic_tags={"numeric", "foreign_key"},
+        ),
     }
     exclude_columns = _extract_exclude_columns(table_meta, "id", "time")
     assert sorted(exclude_columns) == ["id", "time", "user_id"]
     possible_operations = _generate_possible_operations(
-        all_columns=table_meta.keys(),
+        all_columns=table_meta,
         exclude_columns=exclude_columns,
     )
     for filter_op, agg_op in possible_operations:

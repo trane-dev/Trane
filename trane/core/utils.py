@@ -130,7 +130,7 @@ def _extract_exclude_columns(table_meta, entity_col, time_col):
 
 
 def _generate_possible_operations(
-    all_columns,
+    all_columns,  # this is not dict instead of dict.keys()
     exclude_columns,
     aggregation_operations=None,
     filter_operations=None,
@@ -140,10 +140,11 @@ def _generate_possible_operations(
     if filter_operations is None:
         filter_operations = get_filter_ops()
 
-    if not isinstance(all_columns, list):
-        all_columns = list(all_columns)
+    all_columns_names = all_columns.keys()
+    if not isinstance(all_columns_names, list):
+        all_columns_names = list(all_columns_names)
 
-    valid_columns = [col for col in all_columns if col not in exclude_columns]
+    valid_columns = [col for col in all_columns_names if col not in exclude_columns]
     possible_operations = []
     column_pairs = []
     for filter_col, agg_col in itertools.product(
@@ -162,16 +163,37 @@ def _generate_possible_operations(
             filter_op_input_type = convert_op_type(
                 filter_operation.input_output_types[0][0],
             )
+
             agg_instance = None
             if agg_op_input_type in ["None", None, ColumnSchema()]:
                 agg_instance = agg_operation(None)
             else:
+                if (
+                    len(
+                        agg_operation.restricted_semantic_tags.intersection(
+                            all_columns[agg_col].semantic_tags,
+                        ),
+                    )
+                    > 0
+                ):
+                    continue
                 agg_instance = agg_operation(agg_col)
+
             filter_instance = None
             if filter_op_input_type in ["None", None, ColumnSchema()]:
                 filter_instance = filter_operation(None)
             else:
+                if (
+                    len(
+                        filter_operation.restricted_semantic_tags.intersection(
+                            all_columns[filter_col].semantic_tags,
+                        ),
+                    )
+                    > 0
+                ):
+                    continue
                 filter_instance = filter_operation(filter_col)
+
             possible_operations.append((filter_instance, agg_instance))
     # TODO: why are duplicate problems being generated
     possible_operations = list(set(possible_operations))

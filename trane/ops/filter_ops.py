@@ -29,6 +29,9 @@ class FilterOpBase(OpBase):
 class AllFilterOp(FilterOpBase):
     input_output_types = [("None", "None")]
     description = ""
+    restricted_semantic_tags = FilterOpBase.restricted_semantic_tags.union(
+        {"foreign_key"},
+    )
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:
@@ -40,6 +43,9 @@ class EqFilterOp(FilterOpBase):
     input_output_types = [("category", "category")]
     # input_output_types = [("category", "category"), ("primary_key", "primary_key")]
     description = "equal to"
+    restricted_semantic_tags = FilterOpBase.restricted_semantic_tags.union(
+        {"foreign_key"},
+    )
 
     def set_parameters(self, threshold: float):
         self.threshold = threshold
@@ -52,6 +58,9 @@ class NeqFilterOp(FilterOpBase):
     input_output_types = [("category", "category")]
     # input_output_types = [("category", "category"), ("primary_key", "primary_key")]
     description = "not equal to"
+    restricted_semantic_tags = FilterOpBase.restricted_semantic_tags.union(
+        {"foreign_key"},
+    )
 
     def set_parameters(self, threshold: float):
         self.threshold = threshold
@@ -63,6 +72,9 @@ class NeqFilterOp(FilterOpBase):
 class GreaterFilterOp(FilterOpBase):
     input_output_types = [("numeric", "Double")]
     description = "greater than"
+    restricted_semantic_tags = FilterOpBase.restricted_semantic_tags.union(
+        {"foreign_key"},
+    )
 
     def set_parameters(self, threshold: float):
         self.threshold = threshold
@@ -74,6 +86,9 @@ class GreaterFilterOp(FilterOpBase):
 class LessFilterOp(FilterOpBase):
     input_output_types = [("numeric", "Double")]
     description = "less than"
+    restricted_semantic_tags = FilterOpBase.restricted_semantic_tags.union(
+        {"foreign_key"},
+    )
 
     def set_parameters(self, threshold: float):
         self.threshold = threshold

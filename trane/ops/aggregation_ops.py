@@ -51,6 +51,9 @@ class CountAggregationOp(AggregationOpBase):
 class SumAggregationOp(AggregationOpBase):
     input_output_types = [("numeric", "Double")]
     description = " the total <{}> in all related records"
+    restricted_semantic_tags = AggregationOpBase.restricted_semantic_tags.union(
+        {"foreign_key"},
+    )
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:
@@ -61,6 +64,9 @@ class SumAggregationOp(AggregationOpBase):
 class AvgAggregationOp(AggregationOpBase):
     input_output_types = [("numeric", "Double")]
     description = " the average <{}> in all related records"
+    restricted_semantic_tags = AggregationOpBase.restricted_semantic_tags.union(
+        {"foreign_key"},
+    )
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:
@@ -71,6 +77,9 @@ class AvgAggregationOp(AggregationOpBase):
 class MaxAggregationOp(AggregationOpBase):
     input_output_types = [("numeric", "Double")]
     description = " the maximum <{}> in all related records"
+    restricted_semantic_tags = AggregationOpBase.restricted_semantic_tags.union(
+        {"foreign_key"},
+    )
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:
@@ -81,6 +90,9 @@ class MaxAggregationOp(AggregationOpBase):
 class MinAggregationOp(AggregationOpBase):
     input_output_types = [("numeric", "Double")]
     description = " the minimum <{}> in all related records"
+    restricted_semantic_tags = AggregationOpBase.restricted_semantic_tags.union(
+        {"foreign_key"},
+    )
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:
@@ -92,6 +104,9 @@ class MajorityAggregationOp(AggregationOpBase):
     input_output_types = [("category", "category")]
     # input_output_types = [("category", "category"), ("primary_key", "primary_key")]
     description = " the majority <{}> in all related records"
+    restricted_semantic_tags = AggregationOpBase.restricted_semantic_tags.union(
+        {"foreign_key"},
+    )
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:

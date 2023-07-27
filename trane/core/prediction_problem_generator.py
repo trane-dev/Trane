@@ -119,7 +119,7 @@ class PredictionProblemGenerator:
             self.time_col,
         )
         possible_operations = _generate_possible_operations(
-            all_columns=self.table_meta.keys(),
+            all_columns=self.table_meta,
             exclude_columns=exclude_columns,
         )
 

@@ -15,8 +15,9 @@ class OpBase(object, metaclass=Meta):
 
     description = None
     threshold = None
+    restricted_semantic_tags = {"time_index", "foreign_key", "primary_key"}
 
-    def __init__(self, column_name=None, input_type=None, output_type=None):
+    def __init__(self, column_name, input_type=None, output_type=None):
         """
         Initalization of all operations.
         Subclasses shouldn't have their own init.

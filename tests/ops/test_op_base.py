@@ -35,7 +35,7 @@ def test_find_threshold_by_fraction_of_data_to_keep(df):
 
 def test_repr():
     assert str(AllFilterOp) == "AllFilterOp"
-    assert AllFilterOp().__repr__() == "AllFilterOp"
+    assert AllFilterOp(None).__repr__() == "AllFilterOp"
     assert GreaterFilterOp("col").__repr__() == "GreaterFilterOp(col)"
     assert GreaterFilterOp("col").__str__() == "GreaterFilterOp(col)"
     assert str(MinAggregationOp("col")) == "MinAggregationOp(col)"

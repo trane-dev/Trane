@@ -1,9 +1,12 @@
 import itertools
 from datetime import datetime
+from typing import Dict, List
 
 import pandas as pd
 
-from trane.ops.aggregation_ops import AggregationOpBase
+from trane.ops.aggregation_ops import (
+    AggregationOpBase,
+)
 from trane.ops.filter_ops import FilterOpBase
 from trane.ops.utils import get_aggregation_ops, get_filter_ops
 from trane.typing.column_schema import ColumnSchema
@@ -114,36 +117,20 @@ def _check_operations_valid(
     return True, table_meta
 
 
-def _extract_exclude_columns(table_meta, entity_col, time_col):
-    exclude_columns = []
-    table_meta = _parse_table_meta(table_meta)
-    for col, column_schema in table_meta.items():
-        if "foreign_key" in column_schema.semantic_tags:
-            exclude_columns.append(col)
-        if "primary_key" in column_schema.semantic_tags:
-            exclude_columns.append(col)
-        if "time_index" in column_schema.semantic_tags:
-            exclude_columns.append(col)
-    exclude_columns.append(entity_col)
-    exclude_columns.append(time_col)
-    return list(set(exclude_columns))
-
-
 def _generate_possible_operations(
-    all_columns,
-    exclude_columns,
-    aggregation_operations=None,
-    filter_operations=None,
+    table_meta: Dict[str, ColumnSchema],
+    exclude_columns: List[str] = None,
+    aggregation_operations: List[AggregationOpBase] = None,
+    filter_operations: List[FilterOpBase] = None,
 ):
     if aggregation_operations is None:
         aggregation_operations = get_aggregation_ops()
     if filter_operations is None:
         filter_operations = get_filter_ops()
 
-    if not isinstance(all_columns, list):
-        all_columns = list(all_columns)
-
-    valid_columns = [col for col in all_columns if col not in exclude_columns]
+    valid_columns = list(table_meta.keys())
+    if exclude_columns and len(exclude_columns) > 0:
+        valid_columns = [col for col in valid_columns if col not in exclude_columns]
     possible_operations = []
     column_pairs = []
     for filter_col, agg_col in itertools.product(
@@ -163,12 +150,32 @@ def _generate_possible_operations(
                 filter_operation.input_output_types[0][0],
             )
             agg_instance = None
-            if agg_op_input_type in ["None", None, ColumnSchema()]:
+            if (
+                len(
+                    agg_operation.restricted_semantic_tags.intersection(
+                        table_meta[agg_col].semantic_tags,
+                    ),
+                )
+                > 0
+            ):
+                # if the agg operation is about to apply to a column that has restricted semantic tags
+                continue
+            elif agg_op_input_type in ["None", None, ColumnSchema()]:
                 agg_instance = agg_operation(None)
             else:
                 agg_instance = agg_operation(agg_col)
             filter_instance = None
-            if filter_op_input_type in ["None", None, ColumnSchema()]:
+            if (
+                len(
+                    filter_operation.restricted_semantic_tags.intersection(
+                        table_meta[filter_col].semantic_tags,
+                    ),
+                )
+                > 0
+            ):
+                # if the agg operation is about to apply to a column that has restricted semantic tags
+                continue
+            elif filter_op_input_type in ["None", None, ColumnSchema()]:
                 filter_instance = filter_operation(None)
             else:
                 filter_instance = filter_operation(filter_col)
@@ -176,30 +183,6 @@ def _generate_possible_operations(
     # TODO: why are duplicate problems being generated
     possible_operations = list(set(possible_operations))
     return possible_operations
-
-    # possible_ops = []
-    # for agg_operation, filter_operation in itertools.product(
-    #     aggregation_operations,
-    #     filter_operations,
-    # ):
-    #     filter_columns = all_columns
-    #     if filter_operation == AllFilterOp:
-    #         filter_columns = [None]
-
-    #     agg_columns = all_columns
-    #     if agg_operation == CountAggregationOp:
-    #         agg_columns = [None]
-    #     for filter_col, agg_col in itertools.product(
-    #         filter_columns,
-    #         agg_columns,
-    #     ):
-    #         if time_col in [filter_col, agg_col]:
-    #             continue
-    #         if entity_col in [filter_col, agg_col]:
-    #             continue
-    #         if filter_col in foregin_keys_columns or agg_col in foregin_keys_columns:
-    #             continue
-    #         possible_ops.append((agg_col, filter_col, agg_operation, filter_operation))
 
 
 def get_semantic_tags(filter_op: FilterOpBase):

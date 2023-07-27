@@ -43,6 +43,7 @@ class CountAggregationOp(AggregationOpBase):
 
     input_output_types = [("None", "Integer")]
     description = " the number of records"
+    restricted_semantic_tags = {"time_index", "primary_key"}
 
     def label_function(self, dataslice):
         return len(dataslice)
@@ -102,6 +103,7 @@ class MajorityAggregationOp(AggregationOpBase):
 class ExistsAggregationOp(AggregationOpBase):
     input_output_types = [("None", "Boolean")]
     description = " if there exists a record"
+    restricted_semantic_tags = {"time_index", "primary_key"}
 
     def label_function(self, dataslice):
         return len(dataslice) > 0

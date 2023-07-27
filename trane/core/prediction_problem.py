@@ -59,8 +59,24 @@ class PredictionProblem:
             window_size=window_size,
         )
 
+    def __lt__(self, other):
+        return self.__str__() < (other.__str__())
+
+    def __le__(self, other):
+        return self.__str__() <= (other.__str__())
+
+    def __gt__(self, other):
+        return self.__str__() > (other.__str__())
+
+    def __ge__(self, other):
+        return self.__str__() >= (other.__str__())
+
     def __hash__(self) -> int:
-        return hash(self.operations)
+        # TODO: why is the opbase hash function not working
+        attributes = ()
+        for op in self.operations:
+            attributes += (op.column_name, op.threshold)
+        return hash(attributes)
 
     def is_valid(self, table_meta=None):
         """
@@ -186,7 +202,6 @@ class PredictionProblem:
         for op in self.operations:
             if issubclass(type(op), FilterOpBase):
                 filterop_desc_arr.append(self._describe_filter(op))
-
         # join filter ops with ands and append to the description
         if len(filterop_desc_arr) > 0:
             description += " and ".join(filterop_desc_arr)

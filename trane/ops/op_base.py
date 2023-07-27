@@ -1,3 +1,5 @@
+from typing import Union
+
 import pandas as pd
 
 from trane.ops.threshold_functions import sample_unique_values
@@ -50,7 +52,7 @@ class OpBase(object, metaclass=Meta):
         return (type(self).__name__) >= (type(other).__name__)
 
     def __hash__(self):
-        return hash((type(self).__name__, self.column_name))
+        return hash((type(self).__name__, self.column_name, self.threshold))
 
     def __repr__(self) -> str:
         if self.column_name is not None:
@@ -71,7 +73,7 @@ class OpBase(object, metaclass=Meta):
             return self.description.format(self.column_name)
         return self.description
 
-    def set_parameters(self, threshold: float):
+    def set_parameters(self, threshold: Union[float, str]):
         raise NotImplementedError
 
     def find_threshold_by_fraction_of_data_to_keep(

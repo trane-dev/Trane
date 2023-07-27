@@ -129,8 +129,11 @@ def _generate_possible_operations(
         filter_operations = get_filter_ops()
 
     valid_columns = list(table_meta.keys())
-    if exclude_columns and len(exclude_columns) > 0:
+    if exclude_columns is None:
+        exclude_columns = []
+    elif exclude_columns and len(exclude_columns) > 0:
         valid_columns = [col for col in valid_columns if col not in exclude_columns]
+
     possible_operations = []
     column_pairs = []
     for filter_col, agg_col in itertools.product(

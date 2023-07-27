@@ -110,7 +110,6 @@ class PredictionProblemGenerator:
             raise ValueError("Must provide a dataframe sample to generate thresholds")
 
         exclude_columns = [self.entity_col, self.time_col]
-        print(exclude_columns)
         problems = []
         possible_operations = _generate_possible_operations(
             table_meta=self.table_meta,

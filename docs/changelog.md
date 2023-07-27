@@ -3,8 +3,8 @@
 Changelog
 ---------
 
-v0.5.0 ()
-=====================
+v0.5.0 (July 27, 2023)
+======================
 * Enhancements
     * Add ``ExistsAggregationOp`` [#96][#96]
     * Add `get_aggregation_ops` and `get_filter_ops` functions [#98][#98]

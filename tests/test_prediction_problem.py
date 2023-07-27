@@ -323,7 +323,7 @@ def verify_problems(problems, df, cutoff_strategy):
             )
             problems_verified += 1
     assert problems_verified >= 35
-    # assert problems[0].__hash__() == problems[0].__hash__()
+    assert problems[0].__hash__() == problems[0].__hash__()
     assert problems[8].__hash__() != problems[9].__hash__()
 
 

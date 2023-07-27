@@ -75,7 +75,7 @@ class PredictionProblem:
         # TODO: why is the opbase hash function not working
         attributes = ()
         for op in self.operations:
-            attributes += (op.column_name, op.threshold)
+            attributes += (type(op), op.column_name, op.threshold)
         return hash(attributes)
 
     def is_valid(self, table_meta=None):

@@ -322,6 +322,8 @@ def verify_problems(problems, df, cutoff_strategy):
             )
             problems_verified += 1
     assert problems_verified >= 35
+    assert problems[0].hash() == problems[0].hash()
+    assert problems[0].hash() != problems[1].hash()
 
 
 def verify_label_times(

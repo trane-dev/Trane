@@ -197,10 +197,9 @@ class PredictionProblem:
         description += agg_op.generate_description()
 
         filter_op = self.operations[0]
-        if isinstance(filter_op, AllFilterOp):
-            pass
-        else:
+        if not isinstance(filter_op, AllFilterOp):
             description += " with" + filter_op.generate_description()
+
         if self.cutoff_strategy and self.cutoff_strategy.window_size:
             description += " " + "in next {} days".format(
                 self.cutoff_strategy.window_size,

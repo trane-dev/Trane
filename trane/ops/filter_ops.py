@@ -30,6 +30,9 @@ class AllFilterOp(FilterOpBase):
     input_output_types = [("None", "None")]
     description = ""
 
+    def generate_description(self):
+        return self.description
+
     def label_function(self, dataslice):
         if len(dataslice) == 0:
             return pd.NA
@@ -38,8 +41,10 @@ class AllFilterOp(FilterOpBase):
 
 class EqFilterOp(FilterOpBase):
     input_output_types = [("category", "category")]
-    # input_output_types = [("category", "category"), ("primary_key", "primary_key")]
-    description = "equal to"
+    description = " with <{}> equal to {}"
+
+    def generate_description(self):
+        return self.description.format(self.column_name, self.threshold)
 
     def set_parameters(self, threshold: float):
         self.threshold = threshold
@@ -50,8 +55,10 @@ class EqFilterOp(FilterOpBase):
 
 class NeqFilterOp(FilterOpBase):
     input_output_types = [("category", "category")]
-    # input_output_types = [("category", "category"), ("primary_key", "primary_key")]
-    description = "not equal to"
+    description = " with <{}> not equal to {}"
+
+    def generate_description(self):
+        return self.description.format(self.column_name, self.threshold)
 
     def set_parameters(self, threshold: float):
         self.threshold = threshold
@@ -62,7 +69,10 @@ class NeqFilterOp(FilterOpBase):
 
 class GreaterFilterOp(FilterOpBase):
     input_output_types = [("numeric", "Double")]
-    description = "greater than"
+    description = " with <{}> greater than {}"
+
+    def generate_description(self):
+        return self.description.format(self.column_name, self.threshold)
 
     def set_parameters(self, threshold: float):
         self.threshold = threshold
@@ -73,7 +83,10 @@ class GreaterFilterOp(FilterOpBase):
 
 class LessFilterOp(FilterOpBase):
     input_output_types = [("numeric", "Double")]
-    description = "less than"
+    description = " with <{}> less than {}"
+
+    def generate_description(self):
+        return self.description.format(self.column_name, self.threshold)
 
     def set_parameters(self, threshold: float):
         self.threshold = threshold

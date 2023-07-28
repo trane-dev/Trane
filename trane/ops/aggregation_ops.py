@@ -45,6 +45,9 @@ class CountAggregationOp(AggregationOpBase):
     description = " the number of records"
     restricted_semantic_tags = {"time_index", "primary_key"}
 
+    def generate_description(self):
+        return self.description
+
     def label_function(self, dataslice):
         return len(dataslice)
 
@@ -52,6 +55,9 @@ class CountAggregationOp(AggregationOpBase):
 class SumAggregationOp(AggregationOpBase):
     input_output_types = [("numeric", "Double")]
     description = " the total <{}> in all related records"
+
+    def generate_description(self):
+        return self.description.format(self.column_name)
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:
@@ -63,6 +69,9 @@ class AvgAggregationOp(AggregationOpBase):
     input_output_types = [("numeric", "Double")]
     description = " the average <{}> in all related records"
 
+    def generate_description(self):
+        return self.description.format(self.column_name)
+
     def label_function(self, dataslice):
         if len(dataslice) == 0:
             return None
@@ -73,6 +82,9 @@ class MaxAggregationOp(AggregationOpBase):
     input_output_types = [("numeric", "Double")]
     description = " the maximum <{}> in all related records"
 
+    def generate_description(self):
+        return self.description.format(self.column_name)
+
     def label_function(self, dataslice):
         if len(dataslice) == 0:
             return None
@@ -82,6 +94,9 @@ class MaxAggregationOp(AggregationOpBase):
 class MinAggregationOp(AggregationOpBase):
     input_output_types = [("numeric", "Double")]
     description = " the minimum <{}> in all related records"
+
+    def generate_description(self):
+        return self.description.format(self.column_name)
 
     def label_function(self, dataslice):
         if len(dataslice) == 0:
@@ -94,6 +109,9 @@ class MajorityAggregationOp(AggregationOpBase):
     # input_output_types = [("category", "category"), ("primary_key", "primary_key")]
     description = " the majority <{}> in all related records"
 
+    def generate_description(self):
+        return self.description.format(self.column_name)
+
     def label_function(self, dataslice):
         if len(dataslice) == 0:
             return None
@@ -104,6 +122,9 @@ class ExistsAggregationOp(AggregationOpBase):
     input_output_types = [("None", "Boolean")]
     description = " if there exists a record"
     restricted_semantic_tags = {"time_index", "primary_key"}
+
+    def generate_description(self):
+        return self.description
 
     def label_function(self, dataslice):
         return len(dataslice) > 0

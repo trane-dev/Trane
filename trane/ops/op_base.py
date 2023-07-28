@@ -69,8 +69,6 @@ class OpBase(object, metaclass=Meta):
         raise NotImplementedError
 
     def generate_description(self):
-        if self.description:
-            return self.description.format(self.column_name)
         return self.description
 
     def set_parameters(self, threshold: Union[float, str]):

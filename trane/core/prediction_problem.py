@@ -4,11 +4,6 @@ import pandas as pd
 from trane.core.utils import _check_operations_valid, _parse_table_meta
 from trane.ops.filter_ops import (
     AllFilterOp,
-    EqFilterOp,
-    FilterOpBase,
-    GreaterFilterOp,
-    LessFilterOp,
-    NeqFilterOp,
 )
 
 
@@ -60,6 +55,20 @@ class PredictionProblem:
 
     def __ge__(self, other):
         return self.__str__() >= (other.__str__())
+
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(self, other.__class__):
+            if (
+                self.operations == other.operations
+                and self.entity_col == other.entity_col
+                and self.time_col == other.time_col
+                and self.table_meta == other.table_meta
+                and self.cutoff_strategy == other.cutoff_strategy
+            ):
+                return True
+            return False
+        return False
 
     def __hash__(self) -> int:
         # TODO: why is the opbase hash function not working
@@ -205,46 +214,3 @@ class PredictionProblem:
                 self.cutoff_strategy.window_size,
             )
         return description
-
-    def _describe_filter(self, op):
-        filter_op_str_dict = {
-            GreaterFilterOp: "greater than",
-            EqFilterOp: "equal to",
-            NeqFilterOp: "not equal to",
-            LessFilterOp: "less than",
-        }
-
-        filter_ops = [x for x in self.operations if issubclass(type(x), FilterOpBase)]
-
-        # remove AllFilterOp
-        filter_ops = [x for x in filter_ops if not isinstance(x, AllFilterOp)]
-        if len(filter_ops) == 0:
-            return ""
-        desc = " with "
-        last_op_idx = len(filter_ops) - 1
-        for idx, op in enumerate(filter_ops):
-            op_desc = "<{col}> {op} {threshold}".format(
-                col=op.column_name,
-                op=filter_op_str_dict[type(op)],
-                threshold=op.__dict__.get("threshold", "__"),
-            )
-            desc += op_desc
-
-            if idx != last_op_idx:
-                desc += " and "
-
-        return desc
-
-    def __eq__(self, other):
-        """Overrides the default implementation"""
-        if isinstance(self, other.__class__):
-            if (
-                self.operations == other.operations
-                and self.entity_col == other.entity_col
-                and self.time_col == other.time_col
-                and self.table_meta == other.table_meta
-                and self.cutoff_strategy == other.cutoff_strategy
-            ):
-                return True
-            return False
-        return False

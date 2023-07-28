@@ -167,9 +167,6 @@ class PredictionProblemGenerator:
                 success_attempts += 1
             if n_problems and success_attempts >= n_problems:
                 break
-        # generate possible prediction problems with "fake" entity id of 1 (same value for all rows)
-        # 'predict x'
-
         return problems
 
     def _threshold_recommend(self, filter_op, df):

@@ -3,6 +3,16 @@
 Changelog
 ---------
 
+v0.5.0 (, 2023)
+======================
+* Enhancements
+* Fixes
+    * Clean up operation description generation [#118][#118]
+    * Remove PredictionProblemEvaluator [#118][#118]
+
+    [#118]: <https://github.com/trane-dev/Trane/pull/118>
+
+
 v0.5.0 (July 27, 2023)
 ======================
 * Enhancements

@@ -7,6 +7,7 @@ def denormalize(
     dataframes: Dict[str, Tuple[pd.DataFrame, str]],
     relationships: List[Tuple[str, str, str, str]],
     target_entity: str,
+    entity_col: str,
 ) -> pd.DataFrame:
     """
     Convert a list of dataframes into a single dataframe
@@ -60,9 +61,12 @@ def denormalize(
         flat = flatten_dataframes(parent_table, child_table, parent_key, child_key)
         merged_dataframes[child_table_name] = (flat, original_to_new)
         merged_dataframes[parent_table_name] = (flat, original_to_new)
+    denormalized_dataframe = merged_dataframes[target_entity][0]
+    if entity_col is None:
+        denormalized_dataframe["__identity__"] = 1
     # TODO: set primary key to be the index
     # TODO: pass information to table meta (primary key, foreign keys)? maybe? technically relationships has this info
-    return merged_dataframes[target_entity][0]
+    return denormalized_dataframe
 
 
 def flatten_dataframes(parent_table, child_table, parent_key, child_key):

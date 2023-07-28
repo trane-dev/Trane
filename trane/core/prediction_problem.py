@@ -187,7 +187,7 @@ class PredictionProblem:
         description: str natural language description of the problem
 
         """
-        if self.entity_col != "__fake_root_entity__":
+        if self.entity_col != "__identity__":
             description = "For each <" + self.entity_col + "> predict"
         else:
             description = "Predict"

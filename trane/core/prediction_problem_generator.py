@@ -39,7 +39,7 @@ class PredictionProblemGenerator:
         None
         """
         self.df = df
-        self.entity_col = entity_col
+        self.entity_col = entity_col if entity_col is not None else "__identity__"
         self.time_col = time_col
         self.cutoff_strategy = cutoff_strategy
 

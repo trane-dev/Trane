@@ -14,7 +14,6 @@ class CutoffStrategy:
         self.window_size = window_size
         self.minimum_data = clean_date(minimum_data)
         self.maximum_data = clean_date(maximum_data)
-        self.description = "in next {} days".format(window_size)
 
     # I don't think this code is needed but not 100% sure
     # def generate_cutoffs(self, df):

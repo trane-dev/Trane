@@ -1,7 +1,5 @@
 import random
 
-from composeml import LabelMaker
-
 import trane
 from trane.ops.aggregation_ops import (
     AggregationOpBase,
@@ -69,7 +67,6 @@ def generate_and_verify_prediction_problem(
     for p in problems:
         assert p.entity_col == entity_col
         assert p.time_col == time_col
-        assert isinstance(p._label_maker, LabelMaker)
         expected_problem_pre = f"For each <{entity_col}> predict "
         expected_problem_end = f"in next {cutoff} days"
         p_str = str(p)

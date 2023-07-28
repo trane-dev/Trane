@@ -52,6 +52,33 @@ def min_column(data_slice, column, **kwargs):
     return data_slice[column].min()
 
 
+def test_prediction_problem_with_no_entity(
+    make_fake_df,
+    make_fake_meta,
+    make_cutoff_strategy,
+):
+    entity_col = None
+    time_col = "date"
+    df = make_fake_df
+    meta = make_fake_meta
+    for column in df.columns:
+        assert column in meta
+    cutoff_strategy = make_cutoff_strategy
+
+    problem_generator = trane.PredictionProblemGenerator(
+        df=df,
+        table_meta=meta,
+        entity_col=entity_col,
+        cutoff_strategy=cutoff_strategy,
+        time_col=time_col,
+    )
+    problems = problem_generator.generate(df, generate_thresholds=True)
+    for problem in problems:
+        assert problem.entity_col is None
+        assert problem.time_col == time_col
+        assert problem.__str__().startswith("Predict")
+
+
 def test_prediction_problem(make_fake_df, make_fake_meta, make_cutoff_strategy):
     entity_col = "id"
     time_col = "date"

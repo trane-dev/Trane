@@ -25,8 +25,8 @@ class PredictionProblem:
     def __init__(
         self,
         operations,
-        entity_col: str,
         time_col: str,
+        entity_col: str = None,
         table_meta=None,
         cutoff_strategy=None,
     ):
@@ -47,17 +47,9 @@ class PredictionProblem:
         self.cutoff_strategy = cutoff_strategy
         self.label_type = None
 
+        self.window_size = None
         if cutoff_strategy:
-            window_size = cutoff_strategy.window_size
-        else:
-            window_size = None
-
-        self._label_maker = cp.LabelMaker(
-            target_dataframe_index=entity_col,
-            time_index=time_col,
-            labeling_function=self._execute_operations_on_df,
-            window_size=window_size,
-        )
+            self.window_size = cutoff_strategy.window_size
 
     def __lt__(self, other):
         return self.__str__() < (other.__str__())
@@ -136,7 +128,18 @@ class PredictionProblem:
                     "valid."
                 ),
             )
+        target_dataframe_index = self.entity_col
+        if self.entity_col is None:
+            # create a fake index with all rows to generate predictions problems "Predict X"
+            df["__identity__"] = 0
+            target_dataframe_index = "__identity__"
 
+        self._label_maker = cp.LabelMaker(
+            target_dataframe_index=target_dataframe_index,
+            time_index=self.time_col,
+            labeling_function=self._execute_operations_on_df,
+            window_size=self.window_size,
+        )
         minimum_data = minimum_data or self.cutoff_strategy.minimum_data
         maximum_data = maximum_data or self.cutoff_strategy.maximum_data
         lt = self._label_maker.search(
@@ -150,7 +153,8 @@ class PredictionProblem:
             *args,
             **kwargs,
         )
-
+        if "__identity__" in df.columns:
+            df.drop(columns=["__identity__"], inplace=True)
         return lt
 
     def _execute_operations_on_df(self, df):
@@ -187,10 +191,10 @@ class PredictionProblem:
         description: str natural language description of the problem
 
         """
-        if self.entity_col != "__fake_root_entity__":
-            description = "For each <" + self.entity_col + "> predict"
-        else:
+        if self.entity_col is None:
             description = "Predict"
+        else:
+            description = "For each <" + self.entity_col + "> predict"
         # cycle through each operation to create dataops
         # dataops are a series of operations containing one and only one
         # aggregation op at its end

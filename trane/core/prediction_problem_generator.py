@@ -24,7 +24,14 @@ class PredictionProblemGenerator:
     Object for generating prediction problems on data.
     """
 
-    def __init__(self, df, entity_col, time_col, table_meta=None, cutoff_strategy=None):
+    def __init__(
+        self,
+        df,
+        time_col,
+        entity_col=None,
+        table_meta=None,
+        cutoff_strategy=None,
+    ):
         """
         Parameters
         ----------
@@ -63,12 +70,13 @@ class PredictionProblemGenerator:
             assert col in self.df.columns
             assert column_schema.logical_type.dtype == str(self.df[col].dtype)
 
-        entity_col_type = self.table_meta[self.entity_col]
-        assert entity_col_type.logical_type in [Integer, Categorical]
-        if inferred_table_meta is False:
-            assert "primary_key" in entity_col_type.semantic_tags
-        else:
-            self.table_meta[self.entity_col].semantic_tags.add("primary_key")
+        if self.entity_col:
+            entity_col_type = self.table_meta[self.entity_col]
+            assert entity_col_type.logical_type in [Integer, Categorical]
+            if inferred_table_meta is False:
+                assert "primary_key" in entity_col_type.semantic_tags
+            else:
+                self.table_meta[self.entity_col].semantic_tags.add("primary_key")
 
         time_col_type = self.table_meta[self.time_col]
         assert time_col_type.logical_type == Datetime
@@ -109,7 +117,9 @@ class PredictionProblemGenerator:
         if generate_thresholds and df is None:
             raise ValueError("Must provide a dataframe sample to generate thresholds")
 
-        exclude_columns = [self.entity_col, self.time_col]
+        exclude_columns = [self.time_col]
+        if self.entity_col:
+            exclude_columns = [self.entity_col, self.time_col]
         problems = []
         possible_operations = _generate_possible_operations(
             table_meta=self.table_meta,
@@ -157,6 +167,9 @@ class PredictionProblemGenerator:
                 success_attempts += 1
             if n_problems and success_attempts >= n_problems:
                 break
+        # generate possible prediction problems with "fake" entity id of 1 (same value for all rows)
+        # 'predict x'
+
         return problems
 
     def _threshold_recommend(self, filter_op, df):

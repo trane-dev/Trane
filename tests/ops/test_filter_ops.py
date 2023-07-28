@@ -35,7 +35,7 @@ def test_eq_filter_op(df):
     op.set_parameters(threshold=3)
     output = op(df)
     assert output["col"].tolist() == [3]
-    assert op.generate_description() == "equal to"
+    assert op.generate_description() == " <col> equal to 3"
 
 
 def test_neq_filter_op(df):
@@ -43,7 +43,7 @@ def test_neq_filter_op(df):
     op.set_parameters(threshold=3)
     output = op(df)
     assert output["col"].tolist() == [1, 2, 4, 5]
-    assert op.generate_description() == "not equal to"
+    assert op.generate_description() == " <col> not equal to 3"
 
 
 def test_less_filter_op(df):
@@ -51,7 +51,7 @@ def test_less_filter_op(df):
     op.set_parameters(threshold=3)
     output = op(df)
     assert output["col"].tolist() == [1, 2]
-    assert op.generate_description() == "less than"
+    assert op.generate_description() == " <col> less than 3"
 
 
 def test_greater_filter_op(df):
@@ -59,4 +59,4 @@ def test_greater_filter_op(df):
     op.set_parameters(threshold=3)
     output = op(df)
     assert output["col"].tolist() == [4, 5]
-    assert op.generate_description() == "greater than"
+    assert op.generate_description() == " <col> greater than 3"

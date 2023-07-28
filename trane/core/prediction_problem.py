@@ -1,7 +1,5 @@
-import logging
-
 import composeml as cp
-import numpy as np
+import pandas as pd
 
 from trane.core.utils import _check_operations_valid, _parse_table_meta
 from trane.ops.filter_ops import (
@@ -157,7 +155,7 @@ class PredictionProblem:
             df.drop(columns=["__identity__"], inplace=True)
         return lt
 
-    def _execute_operations_on_df(self, df):
+    def _execute_operations_on_df(self, df: pd.DataFrame):
         """
         Execute operations on df. This method assumes that data leakage/cutoff
             times have already been taken into account, and just blindly
@@ -191,33 +189,23 @@ class PredictionProblem:
         description: str natural language description of the problem
 
         """
-        if self.entity_col is None:
-            description = "Predict"
-        else:
+        description = "Predict"
+        if self.entity_col:
             description = "For each <" + self.entity_col + "> predict"
-        # cycle through each operation to create dataops
-        # dataops are a series of operations containing one and only one
-        # aggregation op at its end
 
-        description += self._describe_aggop(self.operations[-1])
+        agg_op = self.operations[1]
+        description += agg_op.generate_description()
 
-        # cycle through ops, pick out filters and describe them
-        filterop_desc_arr = []
-        for op in self.operations:
-            if issubclass(type(op), FilterOpBase):
-                filterop_desc_arr.append(self._describe_filter(op))
-        # join filter ops with ands and append to the description
-        if len(filterop_desc_arr) > 0:
-            description += " and ".join(filterop_desc_arr)
-
-        # add the cutoff strategy description if it exists
-        if self.cutoff_strategy:
-            description += " " + self.cutoff_strategy.description
-
+        filter_op = self.operations[0]
+        if isinstance(filter_op, AllFilterOp):
+            pass
+        else:
+            description += " with" + filter_op.generate_description()
+        if self.cutoff_strategy and self.cutoff_strategy.window_size:
+            description += " " + "in next {} days".format(
+                self.cutoff_strategy.window_size,
+            )
         return description
-
-    def _describe_aggop(self, op):
-        return op.generate_description()
 
     def _describe_filter(self, op):
         filter_op_str_dict = {
@@ -233,7 +221,6 @@ class PredictionProblem:
         filter_ops = [x for x in filter_ops if not isinstance(x, AllFilterOp)]
         if len(filter_ops) == 0:
             return ""
-
         desc = " with "
         last_op_idx = len(filter_ops) - 1
         for idx, op in enumerate(filter_ops):
@@ -262,68 +249,3 @@ class PredictionProblem:
                 return True
             return False
         return False
-
-    def _check_type(self, expected_type, actual_data):
-        """
-        Asserts that the expected type matches the actual data's type.
-        Parameters
-        ----------
-        expected_type: the expected type of the data in TableMeta format
-        actual_data: a piece of the actual data
-        Returns
-        ----------
-        None
-        """
-        logging.debug(
-            "Beginning check type. Expected type is: {},             Actual data is:"
-            " {}, Actual type is: {}".format(
-                expected_type,
-                actual_data,
-                type(actual_data),
-            ),
-        )
-
-        allowed_types_bool = [bool, np.bool_]
-        allowed_types_text = [str]
-        allowed_types_int = [int, np.int64]
-        allowed_types_float = [float, np.float64, np.float32]
-        (
-            allowed_types_bool
-            + allowed_types_int
-            + allowed_types_text
-            + allowed_types_float
-        )
-        (
-            allowed_types_bool
-            + allowed_types_int
-            + allowed_types_text
-            + allowed_types_float
-        )
-        allowed_types_int + allowed_types_text + allowed_types_float
-
-        # if expected_type == TableMeta.TYPE_CATEGORY:
-        #     assert type(actual_data) in allowed_types_category
-
-        # elif expected_type == TableMeta.TYPE_BOOL:
-        #     assert type(actual_data) in allowed_types_bool
-
-        # elif expected_type == TableMeta.TYPE_ORDERED:
-        #     assert type(actual_data) in allowed_types_ordered
-
-        # elif expected_type == TableMeta.TYPE_TEXT:
-        #     assert type(actual_data) in allowed_types_text
-
-        # elif expected_type == TableMeta.TYPE_INTEGER:
-        #     assert type(actual_data) in allowed_types_int
-
-        # elif expected_type == TableMeta.TYPE_FLOAT:
-        #     assert type(actual_data) in allowed_types_float
-
-        # elif expected_type == TableMeta.TYPE_TIME:
-        #     assert type(actual_data) in allowed_types_time
-
-        # elif expected_type == TableMeta.TYPE_IDENTIFIER:
-        #     assert type(actual_data) in allowed_types_id
-
-        # else:
-        #     logging.critical("check_type function received an unexpected type.")

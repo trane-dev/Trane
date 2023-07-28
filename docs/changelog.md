@@ -3,8 +3,8 @@
 Changelog
 ---------
 
-v0.5.0 (, 2023)
-======================
+v0.6.0 (, 2023)
+===============
 * Enhancements
 * Fixes
     * Clean up operation description generation [#118][#118]

@@ -2,9 +2,6 @@ import composeml as cp
 import pandas as pd
 
 from trane.core.utils import _check_operations_valid, _parse_table_meta
-from trane.ops.filter_ops import (
-    AllFilterOp,
-)
 
 
 class PredictionProblem:
@@ -206,8 +203,7 @@ class PredictionProblem:
         description += agg_op.generate_description()
 
         filter_op = self.operations[0]
-        if not isinstance(filter_op, AllFilterOp):
-            description += " with" + filter_op.generate_description()
+        description += filter_op.generate_description()
 
         if self.cutoff_strategy and self.cutoff_strategy.window_size:
             description += " " + "in next {} days".format(

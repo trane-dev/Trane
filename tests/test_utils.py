@@ -166,7 +166,18 @@ def verify_numeric_op(modified_meta, result):
     )
 
 
-def test_parse_table_cat():
+def test_check_operations_boolean():
+    table_meta = {
+        "id": ("Categorical", {"primary_key", "category"}),
+        "is_fraud": ("Boolean", {}),
+    }
+    table_meta = _parse_table_meta(table_meta)
+    operations = [EqFilterOp("is_fraud"), MajorityAggregationOp("is_fraud")]
+    result, _ = _check_operations_valid(operations, table_meta)
+    assert result is False
+
+
+def test_check_operations_cat():
     table_meta = {
         "id": ("Categorical", {"primary_key", "category"}),
         "state": ("Categorical", {"category"}),

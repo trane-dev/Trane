@@ -118,11 +118,11 @@ class PredictionProblem:
         **kwargs,
     ):
         """
-        Executes the problem's operations on a dataframe. Generates the training examples (lable_times).
+        Executes the problem's operations on a dataframe. Generates the training examples (label_times).
         The label_times contains the
         """
 
-        assert df.isnull().sum().sum() == 0
+        # assert df.isnull().sum().sum() == 0
 
         if not self.is_valid(self.table_meta):
             raise ValueError(

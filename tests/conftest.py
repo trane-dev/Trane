@@ -29,6 +29,7 @@ def make_fake_df():
         ],
         "state": ["MA", "NY", "NY", "NJ", "NJ", "CT"],
         "amount": [10.0, 20.0, 30.0, 40.0, 50.0, 60.0],
+        "is_fraud": [False, False, False, True, False, False],
     }
     df = pd.DataFrame(data)
     df["date"] = pd.to_datetime(df["date"])
@@ -38,6 +39,7 @@ def make_fake_df():
             "date": "datetime64[ns]",
             "state": "category",
             "amount": "float64[pyarrow]",
+            "is_fraud": "boolean[pyarrow]",
         },
     )
     df = df.sort_values(by=["date"])
@@ -51,6 +53,7 @@ def make_fake_meta():
         "date": ("Datetime", {}),
         "state": ("Categorical", {"category"}),
         "amount": ("Double", {"numeric"}),
+        "is_fraud": ("Boolean", {}),
     }
     return meta
 

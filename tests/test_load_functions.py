@@ -27,6 +27,13 @@ def test_load_covid():
     assert len(df) >= 17136
     assert df["Date"].dtype == "datetime64[ns]"
     assert metadata["Date"] == ColumnSchema(logical_type=Datetime)
+    assert df["Lat"].dtype == "float64[pyarrow]"
+    assert df["Long"].dtype == "float64[pyarrow]"
+    assert df["Confirmed"].dtype == "int64[pyarrow]"
+    assert df["Deaths"].dtype == "int64[pyarrow]"
+    assert df["Recovered"].dtype == "int64[pyarrow]"
+    assert df["Country/Region"].dtype == "category"
+    assert df["Province/State"].dtype == "category"
 
 
 def test_load_youtube():
@@ -44,6 +51,11 @@ def test_load_youtube():
     check_column_schema(expected_columns, df, metadata)
     assert df["trending_date"].dtype == "datetime64[ns]"
     assert metadata["trending_date"] == ColumnSchema(logical_type=Datetime)
+    assert df["views"].dtype == "int64[pyarrow]"
+    assert df["likes"].dtype == "int64[pyarrow]"
+    assert df["dislikes"].dtype == "int64[pyarrow]"
+    assert df["channel_title"].dtype == "category"
+    assert df["category_id"].dtype == "category"
 
 
 def check_column_schema(columns, df, metadata):

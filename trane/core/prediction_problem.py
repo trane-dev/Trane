@@ -138,25 +138,24 @@ class PredictionProblem:
             df["__identity__"] = 0
             target_dataframe_index = "__identity__"
 
-        self._label_maker = cp.LabelMaker(
-            target_dataframe_index=target_dataframe_index,
-            time_index=self.time_col,
-            labeling_function=self._execute_operations_on_df,
-            window_size=self.window_size,
-        )
         minimum_data = minimum_data or self.cutoff_strategy.minimum_data
         maximum_data = maximum_data or self.cutoff_strategy.maximum_data
-        lt = self._label_maker.search(
-            df=df,
-            num_examples_per_instance=num_examples_per_instance,
-            minimum_data=minimum_data,
-            maximum_data=maximum_data,
-            gap=gap,
-            drop_empty=drop_empty,
-            verbose=verbose,
+        lt = calculate_label_times(
+            target_dataframe_index,
+            df,
+            minimum_data,
+            maximum_data,
+            gap,
+            drop_empty,
+            self._execute_operations_on_df,
+            self.time_col,
+            self.window_size,
+            num_examples_per_instance,
+            verbose,
             *args,
             **kwargs,
         )
+
         if "__identity__" in df.columns:
             df.drop(columns=["__identity__"], inplace=True)
         return lt
@@ -210,3 +209,38 @@ class PredictionProblem:
                 self.cutoff_strategy.window_size,
             )
         return description
+
+
+def calculate_label_times(
+    target_dataframe_index,
+    df,
+    minimum_data,
+    maximum_data,
+    gap,
+    drop_empty,
+    _execute_operations_on_df,
+    time_col,
+    window_size,
+    num_examples_per_instance,
+    verbose,
+    *args,
+    **kwargs,
+):
+    _label_maker = cp.LabelMaker(
+        target_dataframe_index=target_dataframe_index,
+        time_index=time_col,
+        labeling_function=_execute_operations_on_df,
+        window_size=window_size,
+    )
+    label_times = _label_maker.search(
+        df=df,
+        num_examples_per_instance=num_examples_per_instance,
+        minimum_data=minimum_data,
+        maximum_data=maximum_data,
+        gap=gap,
+        drop_empty=drop_empty,
+        verbose=verbose,
+        *args,
+        **kwargs,
+    )
+    return label_times

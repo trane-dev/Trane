@@ -33,13 +33,7 @@ def load_covid():
     df = df.astype(
         {
             "Country/Region": "category",
-            "Date": "datetime64[ns]",
             "Province/State": "category",
-            "Lat": "float64[pyarrow]",
-            "Long": "float64[pyarrow]",
-            "Confirmed": "int64[pyarrow]",
-            "Deaths": "int64[pyarrow]",
-            "Recovered": "int64[pyarrow]",
         },
     )
     df = df.sort_values(by=["Date"])
@@ -57,13 +51,8 @@ def load_youtube():
     df[time_col] = pd.to_datetime(df[time_col], format="%y.%d.%m")
     df = df.astype(
         {
-            "trending_date": "datetime64[ns]",
             "channel_title": "category",
             "category_id": "category",
-            "views": "int64[pyarrow]",
-            "likes": "int64[pyarrow]",
-            "dislikes": "int64[pyarrow]",
-            "comment_count": "int64[pyarrow]",
         },
     )
     df = df.sort_values(by=[time_col])

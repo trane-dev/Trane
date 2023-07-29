@@ -5,7 +5,6 @@ clean:
 	find . -name __pycache__ -delete
 	find . -name '*~' -delete
 	find . -name '.coverage.*' -delete
-	coverage erase
 
 .PHONY: lint
 lint:

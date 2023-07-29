@@ -28,7 +28,12 @@ from trane.ops.filter_ops import (
     NeqFilterOp,
 )
 from trane.typing.column_schema import ColumnSchema
-from trane.typing.logical_types import Categorical, Double, Integer
+from trane.typing.logical_types import (
+    Categorical,
+    Datetime,
+    Double,
+    Integer,
+)
 
 
 @pytest.fixture(scope="function")
@@ -246,3 +251,27 @@ def test_clean_date():
     )
     timestamp = pd.Timestamp(datetime.strptime("2019-01-01", "%Y-%m-%d"))
     assert clean_date(timestamp) == timestamp
+
+
+def test_parse_table_meta():
+    meta = {
+        "id": ("Categorical", {"primary_key", "category"}),
+        "date": "Datetime",
+        "cost": ("Double", {"numeric"}),
+        "amount": (None, {"numeric"}),
+    }
+    parsed_meta = _parse_table_meta(meta)
+    assert parsed_meta["id"] == ColumnSchema(
+        logical_type=Categorical,
+        semantic_tags={"primary_key", "category"},
+    )
+    assert parsed_meta["date"] == ColumnSchema(logical_type=Datetime, semantic_tags={})
+    assert parsed_meta["cost"] == ColumnSchema(
+        logical_type=Double,
+        semantic_tags={"numeric"},
+    )
+    assert parsed_meta["amount"] == ColumnSchema(
+        logical_type=None,
+        semantic_tags={"numeric"},
+    )
+    assert len(parsed_meta) == 4

@@ -68,7 +68,7 @@ class PredictionProblemGenerator:
             assert isinstance(col, str)
             assert isinstance(column_schema, ColumnSchema)
             assert col in self.df.columns
-            assert column_schema.logical_type.dtype == str(self.df[col].dtype)
+            assert column_schema.logical_type.is_valid_dtype(self.df[col].dtype)
 
         if self.entity_col:
             entity_col_type = self.table_meta[self.entity_col]

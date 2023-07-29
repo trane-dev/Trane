@@ -23,7 +23,7 @@ def test_get_k_most_frequent(dtype):
 
 
 def test_get_k_most_frequent_raises():
-    series = pd.Series([1, 2, 3, 4, 5], dtype="int64")
+    series = pd.Series([1, 2, 3, 4, 5], dtype="int64[pyarrow]")
     with pytest.raises(ValueError):
         get_k_most_frequent(series)
 

@@ -34,10 +34,10 @@ def make_fake_df():
     df["date"] = pd.to_datetime(df["date"])
     df = df.astype(
         {
-            "id": "int64",
+            "id": "int64[pyarrow]",
             "date": "datetime64[ns]",
             "state": "category",
-            "amount": "float64",
+            "amount": "float64[pyarrow]",
         },
     )
     df = df.sort_values(by=["date"])

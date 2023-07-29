@@ -3,6 +3,8 @@ from typing import Any, Iterable, Union
 
 import numpy as np
 import pandas as pd
+import pyarrow as pa
+import pyarrow.compute as pc
 from dateutil.parser import ParserError
 from importlib_resources import files
 from pandas.api import types as pdtypes
@@ -43,8 +45,21 @@ def integer_func(series):
     if integer_nullable_func(series) and not series.isnull().any():
         if pdtypes.is_object_dtype(series.dtype):
             return True
-        return all(series.mod(1).eq(0))
+        if all(pandas_modulo(series, 1).eq(0)):
+            return True
     return False
+
+
+def pandas_modulo(series, divisor):
+    if series.dtype in ["int64[pyarrow]", "int32[pyarrow]"]:
+        if series.name is None:
+            series.name = "col"
+        arr = pa.array(series)
+        tab = pa.Table.from_arrays([arr], names=[series.name])
+        my_filter = pc.bit_wise_and(pc.field(series.name), divisor - 1) == 0
+        filtered = tab.filter(my_filter).to_pandas()
+        return filtered
+    return series.mod(1)
 
 
 def integer_nullable_func(series):

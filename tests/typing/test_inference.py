@@ -24,7 +24,9 @@ def pandas_integers():
     return [
         pd.Series(4 * [-1, 2, 1, 7]),
         pd.Series(4 * [-1, 0, 5, 3]),
-        pd.Series(4 * [sys.maxsize, -sys.maxsize - 1, 0], dtype="str").astype("int64"),
+        pd.Series(4 * [sys.maxsize, -sys.maxsize - 1, 0], dtype="str").astype(
+            "int64[pyarrow]",
+        ),
     ]
 
 
@@ -86,7 +88,7 @@ def test_unknown_inference():
 
 
 def test_double_inference(pandas_doubles):
-    dtypes = ["float", "float32", "float64", "float_"]
+    dtypes = ["float", "float32", "float64[pyarrow]", "float_"]
     for series in pandas_doubles:
         for dtype in dtypes:
             column_schema = _infer_series_schema(series.astype(dtype))
@@ -104,7 +106,15 @@ def test_datetime_inference(pandas_datetimes):
 
 
 def test_integer_inference(pandas_integers):
-    dtypes = ["int8", "int16", "int32", "int64", "intp", "int", "Int64"]
+    dtypes = [
+        "int8",
+        "int16",
+        "int32",
+        "int64[pyarrow]",
+        "intp",
+        "int",
+        "int64[pyarrow]",
+    ]
 
     for series in pandas_integers:
         for dtype in dtypes:

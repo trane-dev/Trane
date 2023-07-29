@@ -72,6 +72,8 @@ class PredictionProblemGenerator:
         for col in self.df.columns:
             assert col in self.table_meta.keys()
 
+        assert len(self.df.columns) == len(self.table_meta.keys())
+
         if self.entity_col:
             entity_col_type = self.table_meta[self.entity_col]
             assert entity_col_type.logical_type in [Integer, Categorical]

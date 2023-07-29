@@ -9,6 +9,7 @@ v0.6.0 (, 2023)
 * Fixes
     * Clean up operation description generation [#118][#118]
     * Remove PredictionProblemEvaluator [#118][#118]
+    * Remove FeaturetoolsWrapper class [#100][#100]
 
     [#118]: <https://github.com/trane-dev/Trane/pull/118>
 

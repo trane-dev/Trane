@@ -25,7 +25,7 @@ jobs:
         run: |
           make package
           python -m pip install unpacked_sdist/
-      - name: Run simple featuretools usage
+      - name: Run simple usage
         run: |
           import trane
           data = trane.datasets.load_covid()

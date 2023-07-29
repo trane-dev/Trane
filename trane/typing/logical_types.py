@@ -32,7 +32,7 @@ class LogicalType(object, metaclass=LogicalTypeMetaClass):
 
 
 class Boolean(LogicalType):
-    dtype = "bool"
+    dtype = "boolean[pyarrow]"
 
     @staticmethod
     def inference_func(series):
@@ -79,7 +79,7 @@ class Integer(LogicalType):
 
 
 class NaturalLanguage(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
     @staticmethod
     def inference_func(series):
@@ -95,23 +95,23 @@ class Ordinal(LogicalType):
 
 
 class PersonFullName(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class URL(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class EmailAddress(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class PostalCode(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class Filepath(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class LatLong(LogicalType):
@@ -119,12 +119,12 @@ class LatLong(LogicalType):
 
 
 class IPAddress(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class PhoneNumber(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class Unknown(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"

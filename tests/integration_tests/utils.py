@@ -103,7 +103,7 @@ def generate_and_verify_prediction_problem(
         if not use_multiprocess:
             label_times = p.execute(df, -1)
             assert label_times.target_dataframe_index == entity_col
-            # TODO: fix bug with Filter Operation results in labels that has _execute_operations_on_df == 0
+            # TODO: fix bug with Filter Operation results in labels that has target == 0
             # Below is not an ideal way to check the prediction problems
             # (because it has less than, rather than exact number of unique instances)
             if not label_times.empty:
@@ -120,7 +120,7 @@ def generate_and_verify_prediction_problem(
 
 def check_label_times(label_times, entity_col, unique_entity_ids):
     assert label_times.target_dataframe_index == entity_col
-    # TODO: fix bug with Filter Operation results in labels that has _execute_operations_on_df == 0
+    # TODO: fix bug with Filter Operation results in labels that has target == 0
     # Below is not an ideal way to check the prediction problems
     # (because it has less than, rather than exact number of unique instances)
     if not label_times.empty:

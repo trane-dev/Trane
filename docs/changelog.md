@@ -7,10 +7,12 @@ v0.6.0 (, 2023)
 ===============
 * Enhancements
 * Fixes
+    * Rename `_execute_operations_on_df` to `target` in executed prediction problem dataframe [#124][#124]
     * Clean up operation description generation [#118][#118]
     * Remove PredictionProblemEvaluator [#118][#118]
     * Remove FeaturetoolsWrapper class [#100][#100]
 
+    [#124]: <https://github.com/trane-dev/Trane/pull/124>
     [#118]: <https://github.com/trane-dev/Trane/pull/118>
 
 

@@ -108,7 +108,6 @@ def _check_operations_valid(
             op_input_logical_type = op_input_type.logical_type
             op_input_semantic_tags = op_input_type.semantic_tags
             op_restricted_semantic_tags = op.restricted_semantic_tags
-            # breakpoint()
             if op_input_logical_type and column_logical_type != op_input_logical_type:
                 return False, {}
             if (

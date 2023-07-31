@@ -98,7 +98,7 @@ def test_double_inference(pandas_doubles):
 
 
 def test_datetime_inference(pandas_datetimes):
-    dtypes = ["object", "string", "datetime64[ns]", "datetime64[ns]"]
+    dtypes = ["object", "string", "datetime64[ns]"]
     for series in pandas_datetimes:
         for dtype in dtypes:
             column_schema = _infer_series_schema(series.astype(dtype))

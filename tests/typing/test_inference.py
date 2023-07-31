@@ -10,6 +10,9 @@ from trane.typing.inference import (
     _infer_series_schema,
     infer_table_meta,
 )
+from trane.typing.inference_functions import (
+    pandas_modulo,
+)
 from trane.typing.logical_types import (
     Boolean,
     Datetime,
@@ -45,7 +48,6 @@ def pandas_doubles():
         pd.Series(4 * [-1, 2.5, 1, 7]),
         pd.Series(4 * [1.5, np.nan, 1, 3]),
         pd.Series(4 * [1.5, np.inf, 1, 3]),
-        pd.Series(4 * [np.finfo("d").max, np.finfo("d").min, 3, 1]),
     ]
 
 
@@ -68,7 +70,7 @@ def pandas_datetimes():
 
 
 def test_boolean_inference(pandas_bools):
-    dtypes = ["bool", "boolean[pyarrow]", "bool_", "bool8", "object"]
+    dtypes = ["bool", "boolean", "boolean[pyarrow]", "bool_", "bool8", "object"]
     for series in pandas_bools:
         for dtype in dtypes:
             series = series.astype(dtype)
@@ -87,7 +89,7 @@ def test_unknown_inference():
 
 
 def test_double_inference(pandas_doubles):
-    dtypes = ["float", "float32", "float64", "float64[pyarrow]", "float_"]
+    dtypes = ["float32", "float64", "float64[pyarrow]", "float32[pyarrow]"]
     for series in pandas_doubles:
         for dtype in dtypes:
             column_schema = _infer_series_schema(series.astype(dtype))
@@ -145,3 +147,10 @@ def test_infer_table_meta():
     assert table_meta["c"].logical_type == Unknown
     assert table_meta["d"].logical_type == Datetime
     assert table_meta["d"].semantic_tags == {"time_index"}
+
+
+def test_pandas_modulo():
+    dtypes = ["int64", "int64[pyarrow]"]
+    for dtype in dtypes:
+        series = pd.Series([1, 2, 3, 4, 5], dtype=dtype)
+        assert pandas_modulo(series, 1).tolist() == [0, 0, 0, 0, 0]

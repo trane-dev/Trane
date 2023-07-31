@@ -4,7 +4,6 @@ from typing import Any, Iterable, Union
 import numpy as np
 import pandas as pd
 import pyarrow as pa
-import pyarrow.compute as pc
 from dateutil.parser import ParserError
 from importlib_resources import files
 from pandas.api import types as pdtypes
@@ -51,14 +50,10 @@ def integer_func(series):
 
 
 def pandas_modulo(series, divisor):
-    if series.dtype in ["int64[pyarrow]", "int32[pyarrow]"]:
-        if series.name is None:
-            series.name = "col"
-        arr = pa.array(series)
-        tab = pa.Table.from_arrays([arr], names=[series.name])
-        my_filter = pc.bit_wise_and(pc.field(series.name), divisor - 1) == 0
-        filtered = tab.filter(my_filter).to_pandas()
-        return filtered
+    if series.dtype in [pd.ArrowDtype(pa.int64()), pd.ArrowDtype(pa.int32())]:
+        # mod is not supported for pyarrow int64 and int32
+        # https://github.com/apache/arrow/pull/11116
+        series = series.astype("int64")
     return series.mod(1)
 
 
@@ -181,10 +176,9 @@ def natural_language_func(series):
     return mean_num_common_words > 1.14
 
 
-def col_is_datetime(col, datetime_format=None):
+def col_is_datetime(col):
     """Determine if a dataframe column contains datetime values or not. Returns True if column
-    contains datetimes, False if not. Optionally specify the datetime format string for the column.
-    Will not infer numeric data as datetime."""
+    contains datetimes, False if not."""
 
     if pd.api.types.is_datetime64_any_dtype(col):
         return True
@@ -210,8 +204,7 @@ def col_is_datetime(col, datetime_format=None):
         pd.to_datetime(
             col,
             errors="raise",
-            format=datetime_format,
-            infer_datetime_format=True,
+            format="mixed",
         )
         return True
 

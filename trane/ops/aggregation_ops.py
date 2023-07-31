@@ -117,7 +117,12 @@ class MajorityAggregationOp(AggregationOpBase):
         modes = dataslice[self.column_name].mode()
         if len(modes) == 0:
             return None
-        return str(modes[0])
+        if dataslice[self.column_name].dtype in ["int64", "int64[pyarrow]"]:
+            return int(modes[0])
+        elif dataslice[self.column_name].dtype in ["float64", "float64[pyarrow]"]:
+            return float(modes[0])
+        else:
+            return str(modes[0])
 
 
 class ExistsAggregationOp(AggregationOpBase):

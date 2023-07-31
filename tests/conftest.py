@@ -32,7 +32,6 @@ def make_fake_df():
         "is_fraud": [False, False, False, True, False, False],
     }
     df = pd.DataFrame(data)
-    df["date"] = pd.to_datetime(df["date"])
     df = df.astype(
         {
             "id": "int64[pyarrow]",

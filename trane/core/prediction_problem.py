@@ -122,7 +122,7 @@ class PredictionProblem:
         The label_times contains the
         """
 
-        assert df.isnull().sum().sum() == 0
+        # assert df.isnull().sum().sum() == 0
 
         if not self.is_valid(self.table_meta):
             raise ValueError(

@@ -2,14 +2,22 @@ import random
 
 import numpy as np
 import pandas as pd
+from pandas.api.types import (
+    is_object_dtype,
+    is_string_dtype,
+)
 from scipy import stats
 
 
 def get_k_most_frequent(series, k=3):
     # get the top k most frequent values
-    if series.dtype in ["category", "object", "string"]:
+    if (
+        is_object_dtype(series.dtype)
+        or isinstance(series.dtype, pd.CategoricalDtype)
+        or is_string_dtype(series.dtype)
+    ):
         return series.value_counts()[:k].index.tolist()
-    raise ValueError("Series must be categorical or object dtype")
+    raise ValueError("Series must be categorical, string or object dtype")
 
 
 def sample_unique_values(series, max_num_unique_values=10, random_state=None):

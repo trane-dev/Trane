@@ -117,7 +117,7 @@ class MajorityAggregationOp(AggregationOpBase):
         modes = dataslice[self.column_name].mode()
         if len(modes) == 0:
             return None
-        return modes[0]
+        return str(modes[0])
 
 
 class ExistsAggregationOp(AggregationOpBase):

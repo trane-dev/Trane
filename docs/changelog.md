@@ -6,6 +6,9 @@ Changelog
 v0.6.0 (, 2023)
 ===============
 * Enhancements
+    * Add Instacart demo dataset [#123][#123]
+
+    [#123]: <https://github.com/trane-dev/Trane/pull/123>
 * Fixes
     * Clean up operation description generation [#118][#118]
     * Remove PredictionProblemEvaluator [#118][#118]

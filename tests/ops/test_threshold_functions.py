@@ -22,8 +22,15 @@ def test_get_k_most_frequent(dtype):
     assert most_frequent == ["r", "b", "g"]
 
 
-def test_get_k_most_frequent_raises():
-    series = pd.Series([1, 2, 3, 4, 5], dtype="int64")
+@pytest.mark.parametrize(
+    "dtype",
+    [
+        ("int64"),
+        ("int64[pyarrow]"),
+    ],
+)
+def test_get_k_most_frequent_raises(dtype):
+    series = pd.Series([1, 2, 3, 4, 5], dtype=dtype)
     with pytest.raises(ValueError):
         get_k_most_frequent(series)
 

@@ -27,6 +27,7 @@ def test_count_agg_op(df):
 
 
 def test_sum_agg_op(df):
+    op = CountAggregationOp("col")
     op = SumAggregationOp("col")
     output = op(df)
     assert output == np.sum(df["col"])
@@ -54,10 +55,27 @@ def test_min_agg_op(df):
     assert "the minimum <col> in all related records" in op.generate_description()
 
 
-def test_majority_agg_op(df):
+@pytest.mark.parametrize(
+    "dtype",
+    [
+        ("string"),
+        ("string[pyarrow]"),
+        ("int64"),
+        ("int64[pyarrow]"),
+        ("float64"),
+        ("float64[pyarrow]"),
+    ],
+)
+def test_majority_agg_op(df, dtype):
     op = MajorityAggregationOp("col")
+    df["col"] = df["col"].astype(dtype)
     output = op(df)
-    assert output == str(1)
+    if dtype in ["string", "string[pyarrow]"]:
+        assert output == str(1)
+    elif dtype in ["int64", "int64[pyarrow]"]:
+        assert output == int(1)
+    else:
+        assert output == float(1.0)
     assert "the majority <col> in all related records" in op.generate_description()
 
 

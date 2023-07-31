@@ -13,7 +13,10 @@ from trane.typing.logical_types import (
 
 def load_covid():
     filepath = generate_local_filepath("covid19.csv")
-    df = pd.read_csv(filepath)
+    df = pd.read_csv(
+        filepath,
+        dtype_backend="pyarrow",
+    )
     df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%y")
     df = df[
         [
@@ -27,7 +30,12 @@ def load_covid():
             "Recovered",
         ]
     ]
-    df = df.fillna(0)
+    df = df.astype(
+        {
+            "Country/Region": "category",
+            "Province/State": "category",
+        },
+    )
     df = df.sort_values(by=["Date"])
     df = df.reset_index(drop=True)
     return df
@@ -36,10 +44,18 @@ def load_covid():
 def load_youtube():
     time_col = "trending_date"
     filepath = generate_local_filepath("USvideos.csv")
-    df = pd.read_csv(filepath)
+    df = pd.read_csv(
+        filepath,
+        dtype_backend="pyarrow",
+    )
     df[time_col] = pd.to_datetime(df[time_col], format="%y.%d.%m")
+    df = df.astype(
+        {
+            "channel_title": "category",
+            "category_id": "category",
+        },
+    )
     df = df.sort_values(by=[time_col])
-    df = df.fillna(0)
     return df
 
 

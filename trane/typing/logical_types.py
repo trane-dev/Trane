@@ -23,16 +23,16 @@ class LogicalType(object, metaclass=LogicalTypeMetaClass):
     def __str__(self):
         return str(self.__class__)
 
+    def transform(self, series):
+        return series.astype(self.dtype)
+
     @staticmethod
     def inference_func(series):
         raise NotImplementedError
 
-    def transform(self, series):
-        return series.astype(self.dtype)
-
 
 class Boolean(LogicalType):
-    dtype = "bool"
+    dtype = "boolean[pyarrow]"
 
     @staticmethod
     def inference_func(series):
@@ -61,7 +61,7 @@ class Datetime(LogicalType):
 
 
 class Double(LogicalType):
-    dtype = "float64"
+    dtype = "float64[pyarrow]"
     standard_tags = {"numeric"}
 
     @staticmethod
@@ -70,7 +70,7 @@ class Double(LogicalType):
 
 
 class Integer(LogicalType):
-    dtype = "int64"
+    dtype = "int64[pyarrow]"
     standard_tags = {"numeric"}
 
     @staticmethod
@@ -79,7 +79,7 @@ class Integer(LogicalType):
 
 
 class NaturalLanguage(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
     @staticmethod
     def inference_func(series):
@@ -95,23 +95,23 @@ class Ordinal(LogicalType):
 
 
 class PersonFullName(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class URL(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class EmailAddress(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class PostalCode(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class Filepath(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class LatLong(LogicalType):
@@ -119,12 +119,12 @@ class LatLong(LogicalType):
 
 
 class IPAddress(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class PhoneNumber(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"
 
 
 class Unknown(LogicalType):
-    dtype = "string"
+    dtype = "string[pyarrow]"

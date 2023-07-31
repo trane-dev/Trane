@@ -106,7 +106,6 @@ class MinAggregationOp(AggregationOpBase):
 
 class MajorityAggregationOp(AggregationOpBase):
     input_output_types = [("category", "category")]
-    # input_output_types = [("category", "category"), ("primary_key", "primary_key")]
     description = " the majority <{}> in all related records"
 
     def generate_description(self):
@@ -115,7 +114,15 @@ class MajorityAggregationOp(AggregationOpBase):
     def label_function(self, dataslice):
         if len(dataslice) == 0:
             return None
-        return str(dataslice[self.column_name].mode()[0])
+        modes = dataslice[self.column_name].mode()
+        if len(modes) == 0:
+            return None
+        if dataslice[self.column_name].dtype in ["int64", "int64[pyarrow]"]:
+            return int(modes[0])
+        elif dataslice[self.column_name].dtype in ["float64", "float64[pyarrow]"]:
+            return float(modes[0])
+        else:
+            return str(modes[0])
 
 
 class ExistsAggregationOp(AggregationOpBase):

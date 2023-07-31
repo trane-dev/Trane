@@ -107,11 +107,21 @@ def _check_operations_valid(
 
             op_input_logical_type = op_input_type.logical_type
             op_input_semantic_tags = op_input_type.semantic_tags
-
+            op_restricted_semantic_tags = op.restricted_semantic_tags
             if op_input_logical_type and column_logical_type != op_input_logical_type:
                 return False, {}
-            if not column_semantic_tags.issubset(op_input_semantic_tags):
+            if (
+                op_input_semantic_tags
+                and len(column_semantic_tags.intersection(op_input_semantic_tags)) == 0
+            ):
                 return False, {}
+            if (
+                op_restricted_semantic_tags
+                and len(column_semantic_tags.intersection(op_restricted_semantic_tags))
+                > 0
+            ):
+                return False, {}
+
             # update the column's type (to indicate the operation has taken place)
             table_meta[op.column_name] = op_output_type
     return True, table_meta

@@ -3,6 +3,7 @@ from typing import Any, Iterable, Union
 
 import numpy as np
 import pandas as pd
+import pyarrow as pa
 from dateutil.parser import ParserError
 from importlib_resources import files
 from pandas.api import types as pdtypes
@@ -43,8 +44,17 @@ def integer_func(series):
     if integer_nullable_func(series) and not series.isnull().any():
         if pdtypes.is_object_dtype(series.dtype):
             return True
-        return all(series.mod(1).eq(0))
+        if all(pandas_modulo(series, 1).eq(0)):
+            return True
     return False
+
+
+def pandas_modulo(series, divisor):
+    if series.dtype in [pd.ArrowDtype(pa.int64()), pd.ArrowDtype(pa.int32())]:
+        # mod is not supported for pyarrow int64 and int32
+        # https://github.com/apache/arrow/pull/11116
+        series = series.astype("int64")
+    return series.mod(1)
 
 
 def integer_nullable_func(series):
@@ -166,10 +176,9 @@ def natural_language_func(series):
     return mean_num_common_words > 1.14
 
 
-def col_is_datetime(col, datetime_format=None):
+def col_is_datetime(col):
     """Determine if a dataframe column contains datetime values or not. Returns True if column
-    contains datetimes, False if not. Optionally specify the datetime format string for the column.
-    Will not infer numeric data as datetime."""
+    contains datetimes, False if not."""
 
     if pd.api.types.is_datetime64_any_dtype(col):
         return True
@@ -195,8 +204,7 @@ def col_is_datetime(col, datetime_format=None):
         pd.to_datetime(
             col,
             errors="raise",
-            format=datetime_format,
-            infer_datetime_format=True,
+            format="mixed",
         )
         return True
 

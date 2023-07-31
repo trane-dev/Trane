@@ -107,7 +107,7 @@ def verify_problems(problems, df, cutoff_strategy):
     problems = sorted(problems)
     for p in problems:
         label_times = p.execute(df, -1)
-        label_times.rename(columns={"_execute_operations_on_df": "label"}, inplace=True)
+        label_times.rename(columns={"target": "label"}, inplace=True)
         threshold = p.operations[0].threshold
 
         if str(p) == "For each <id> predict the number of records in next 2d days":

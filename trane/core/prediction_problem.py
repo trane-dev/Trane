@@ -158,6 +158,7 @@ class PredictionProblem:
 
         if "__identity__" in df.columns:
             df.drop(columns=["__identity__"], inplace=True)
+        lt = lt.rename(columns={"_execute_operations_on_df": "target"})
         return lt
 
     def _execute_operations_on_df(self, df: pd.DataFrame):

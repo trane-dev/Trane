@@ -3,5 +3,5 @@ from trane.datasets.load_functions import (
     load_covid_metadata,
     load_youtube,
     load_youtube_metadata,
-    load_airbnb_reviews
+    load_airbnb_reviews,
 )

@@ -14,6 +14,7 @@ The demo dataset used in this package has been modified from its original versio
 In this package, we have made the following modification to the original dataset:
 
 - Applied sentiment analysis to the comments column to derive rating scores for each entry.
+- Subsampled the listing_id to make for quicker analysis.
 
 Please note that while we have made modifications to the dataset, the original data is still covered under the CC BY 4.0 license. The modifications performed in this package do not change the license of the original dataset.
 

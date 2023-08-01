@@ -101,7 +101,7 @@ def load_youtube_metadata():
 def load_airbnb_reviews():
     time_col = "date"
     filepath = generate_local_filepath(
-        "data/airbnb_reviews/airbnb_reviews_no_text.csv.bz2"
+        "data/airbnb_reviews/airbnb_reviews.csv.bz2"
     )
     df = pd.read_csv(filepath, dtype_backend="pyarrow")
     df = df.dropna()

@@ -1,10 +1,14 @@
-## Modified Demo Dataset Attribution
+## Modified Airbnb Reviews Demo Dataset Attribution
 
 The demo dataset used in this package has been modified from its original version, which is licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
 
 **Original Dataset Information:**
 
-- Title: New York City, New York, United States - Detailed Review Data (05 June, 2023)
+- Titles:
+    New York City, New York, United States - Detailed Review Data (05 June, 2023)
+    London, England, United Kingdom - Detailed Review Data (05 June, 2023)
+    Paris, Île-de-France, France - Detailed Review Data (05 June, 2023)
+    San Francisco, California, United States - Detailed Review Data (05 June, 2023)
 - Author(s): Inside Airbnb
 - License: [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/)
 - Source: [Inside Airbnb Data](http://insideairbnb.com/get-the-data)
@@ -13,6 +17,7 @@ The demo dataset used in this package has been modified from its original versio
 
 In this package, we have made the following modification to the original dataset:
 
+- Combined data from New York City, London, Paris, and San Francisco
 - Applied sentiment analysis to the comments column to derive rating scores for each entry.
 - Subsampled the listing_id to make for quicker analysis.
 

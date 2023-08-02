@@ -19,16 +19,16 @@ def minimize_requirements(requirements):
     minimized = []
     for req in requirements:
         if ">=" in req:
-            minimized.append(req.replace(">=", "=="))
+            minimized.append(req.replace(">=", "==").replace(" ", ""))
         elif "==" in req:
-            minimized.append(req)
+            minimized.append(req.replace(" ", ""))
     return minimized
 
 
 def write_to_file(requirements):
     with open("tests/minimal_requirements.txt", "w") as file:
         for req in requirements:
-            file.write(req.strip() + "\n")
+            file.write(req + "\n")
 
 
 if __name__ == "__main__":

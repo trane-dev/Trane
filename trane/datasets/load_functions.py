@@ -41,24 +41,6 @@ def load_covid():
     return df
 
 
-def load_youtube():
-    time_col = "trending_date"
-    filepath = generate_local_filepath("USvideos.csv")
-    df = pd.read_csv(
-        filepath,
-        dtype_backend="pyarrow",
-    )
-    df[time_col] = pd.to_datetime(df[time_col], format="%y.%d.%m")
-    df = df.astype(
-        {
-            "channel_title": "category",
-            "category_id": "category",
-        },
-    )
-    df = df.sort_values(by=[time_col])
-    return df
-
-
 def load_covid_metadata():
     table_meta = {
         "Province/State": ColumnSchema(
@@ -79,6 +61,24 @@ def load_covid_metadata():
     return table_meta
 
 
+def load_youtube():
+    time_col = "trending_date"
+    filepath = generate_local_filepath("USvideos.csv")
+    df = pd.read_csv(
+        filepath,
+        dtype_backend="pyarrow",
+    )
+    df[time_col] = pd.to_datetime(df[time_col], format="%y.%d.%m")
+    df = df.astype(
+        {
+            "channel_title": "category",
+            "category_id": "category",
+        },
+    )
+    df = df.sort_values(by=[time_col])
+    return df
+
+
 def load_youtube_metadata():
     table_meta = {
         "trending_date": ColumnSchema(logical_type=Datetime),
@@ -96,6 +96,17 @@ def load_youtube_metadata():
         "comment_count": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
     }
     return table_meta
+
+
+def load_airbnb_reviews():
+    time_col = "date"
+    filepath = generate_local_filepath("data/airbnb_reviews/airbnb_reviews.csv.bz2")
+    df = pd.read_csv(filepath, dtype_backend="pyarrow")
+    df = df.dropna()
+    df[time_col] = pd.to_datetime(df[time_col], format="%Y-%m-%d")
+    df = df.sort_values(by=["date"])
+
+    return df
 
 
 def generate_local_filepath(key):

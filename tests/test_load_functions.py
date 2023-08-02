@@ -1,4 +1,5 @@
 from trane.datasets.load_functions import (
+    load_airbnb_reviews,
     load_covid,
     load_covid_metadata,
     load_youtube,
@@ -56,6 +57,15 @@ def test_load_youtube():
     assert df["dislikes"].dtype == "int64[pyarrow]"
     assert df["channel_title"].dtype == "category"
     assert df["category_id"].dtype == "category"
+
+
+def test_load_airbnb_reviews():
+    df = load_airbnb_reviews()
+
+    assert df["date"].dtype == "datetime64[ns]"
+    assert df["listing_id"].dtype == "int64[pyarrow]"
+    assert df["id"].dtype == "int64[pyarrow]"
+    assert df["rating"].dtype == "int64[pyarrow]"
 
 
 def check_column_schema(columns, df, metadata):

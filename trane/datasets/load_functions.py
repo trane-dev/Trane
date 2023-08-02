@@ -11,91 +11,179 @@ from trane.typing.logical_types import (
 )
 
 
-def load_covid():
-    filepath = generate_local_filepath("covid19.csv")
-    df = pd.read_csv(
-        filepath,
-        dtype_backend="pyarrow",
-    )
-    df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%y")
-    df = df[
-        [
-            "Country/Region",
-            "Date",
-            "Province/State",
-            "Lat",
-            "Long",
-            "Confirmed",
-            "Deaths",
-            "Recovered",
-        ]
-    ]
-    df = df.astype(
+def sales_data():
+    # The organizations your business interacts with.
+    accounts = pd.DataFrame(
         {
-            "Country/Region": "category",
-            "Province/State": "category",
+            "account_id": ["a1", "a2", "a3", "a4", "a5"],
+            "account_name": [
+                "Acme Corporation",
+                "Stark Industries",
+                "Wayne Enterprises",
+                "LexCorp",
+                "Umbrella Corporation",
+            ],
+            "account_type": [
+                "Partners",
+                "Customer",
+                "Customer",
+                "Customer",
+                "Competitors",
+            ],
         },
     )
-    df = df.sort_values(by=["Date"])
-    df = df.reset_index(drop=True)
-    return df
-
-
-def load_youtube():
-    time_col = "trending_date"
-    filepath = generate_local_filepath("USvideos.csv")
-    df = pd.read_csv(
-        filepath,
-        dtype_backend="pyarrow",
-    )
-    df[time_col] = pd.to_datetime(df[time_col], format="%y.%d.%m")
-    df = df.astype(
+    # The people your business interacts with. This can include customers, prospects, or other stakeholders.
+    contacts = pd.DataFrame(
         {
-            "channel_title": "category",
-            "category_id": "category",
+            "contact_id": ["001", "002", "003", "004", "005"],
+            "contact_name": [
+                "Wile E. Coyote",
+                "Tony Stark",
+                "Bruce Wayne",
+                "Lex Luthor",
+                "Albert Wesker",
+            ],
+            "contact_title": [
+                "Director of Finance",
+                "CEO",
+                "CEO",
+                "CEO",
+                "VP of Marketing",
+            ],
+            "contact_email": [
+                "coyote@gmail.com",
+                "tony@stark.com",
+                "bruce@wayne.com",
+                "lex@luthor.com",
+                "albert@wesker.com",
+            ],
+            "contact_phone": [
+                "(555) 234-5678",
+                "(555) 345-6789",
+                "(555) 456-7890",
+                "(555) 567-8901",
+                "(555) 678-9012",
+            ],
         },
     )
-    df = df.sort_values(by=[time_col])
-    return df
-
-
-def load_covid_metadata():
-    table_meta = {
-        "Province/State": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"category"},
-        ),
-        "Country/Region": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"category", "primary_key"},
-        ),
-        "Lat": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "Long": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "Date": ColumnSchema(logical_type=Datetime),
-        "Confirmed": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "Deaths": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "Recovered": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+    # Potential sales deals. This can include the deal value, expected close date, and other relevant sales pipeline information.
+    opportunities = pd.DataFrame(
+        {
+            "opportunity_id": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            "opportunity_stage": [
+                "Closed Won",
+                "Prospecting",
+                "Prospecting",
+                "Closed Won",
+                "Lost",
+                "Proposal",
+                "Proposal",
+                "Proposal",
+                "Proposal",
+                "Proposal",
+            ],
+            "account_id": ["a1", "a2", "a3", "a4", "a5", "a1", "a2", "a3", "a4", "a5"],
+            "deal_value": [
+                100000,
+                200000,
+                300000,
+                400000,
+                500000,
+                600000,
+                700000,
+                800000,
+                900000,
+                1000000,
+            ],
+            "expected_close_date": [
+                "2018-01-01",
+                "2018-02-01",
+                "2018-03-01",
+                "2018-04-01",
+                "2018-05-01",
+                "2018-06-01",
+                "2018-07-01",
+                "2018-08-01",
+                "2018-09-01",
+                "2018-10-01",
+            ],
+        },
+    )
+    dataframes = {
+        "accounts": accounts,
+        "contacts": contacts,
+        "opportunities": opportunities,
     }
-    return table_meta
-
-
-def load_youtube_metadata():
-    table_meta = {
-        "trending_date": ColumnSchema(logical_type=Datetime),
-        "channel_title": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"primary_key"},
-        ),
-        "category_id": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"category", "primary_key"},
-        ),
-        "views": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "likes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "dislikes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "comment_count": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
+    metadata = {
+        "relationships": [
+            ("accounts", "account_id", "contacts", "account_id"),
+            ("accounts", "account_id", "opportunities", "account_id"),
+        ],
+        "accounts": {
+            "account_id": ColumnSchema(
+                logical_type=Categorical,
+                semantic_tags={"index"},
+            ),
+            "account_name": ColumnSchema(
+                logical_type=Categorical,
+                semantic_tags={"category"},
+            ),
+            "account_type": ColumnSchema(
+                logical_type=Categorical,
+                semantic_tags={"category"},
+            ),
+            "account_site": ColumnSchema(
+                logical_type=Categorical,
+                semantic_tags={"category"},
+            ),
+            "account_address": ColumnSchema(
+                logical_type=Categorical,
+                semantic_tags={"category"},
+            ),
+        },
+        "contacts": {
+            "contact_id": ColumnSchema(
+                logical_type=Categorical,
+                semantic_tags={"index"},
+            ),
+            "contact_name": ColumnSchema(
+                logical_type=Categorical,
+                semantic_tags={"category"},
+            ),
+            "contact_title": ColumnSchema(
+                logical_type=Categorical,
+                semantic_tags={"category"},
+            ),
+            "contact_email": ColumnSchema(
+                logical_type=Categorical,
+                semantic_tags={"category"},
+            ),
+            "contact_phone": ColumnSchema(
+                logical_type=Categorical,
+                semantic_tags={"category"},
+            ),
+        },
+        "opportunities": {
+            "opportunity_id": ColumnSchema(
+                logical_type=Integer,
+                semantic_tags={"index"},
+            ),
+            "opportunity_stage": ColumnSchema(
+                logical_type=Categorical,
+                semantic_tags={"category"},
+            ),
+            "account_id": ColumnSchema(
+                logical_type=Categorical,
+                semantic_tags={"foreign_key"},
+            ),
+            "deal_value": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
+            "expected_close_date": ColumnSchema(
+                logical_type=Datetime,
+                semantic_tags={"time_index"},
+            ),
+        },
     }
-    return table_meta
+    return dataframes, metadata
 
 
 def generate_local_filepath(key):

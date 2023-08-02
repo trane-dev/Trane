@@ -13,6 +13,9 @@ jobs:
   tests:
     name: 3.11 test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: ["latest", "minimal"]
     steps:
       - uses: actions/checkout@v3
       - name: Set up python 3.11
@@ -22,9 +25,14 @@ jobs:
           cache: 'pip'
           cache-dependency-path: "pyproject.toml"
       - name: Build trane
+        if: ${{ matrix.python_version == 'latest' }}
         run: |
           make package
           python -m pip install unpacked_sdist/
+      - name: Install trane
+        if: ${{ matrix.python_version == 'minimal' }}
+        run: |
+          python -m pip install -r tests/minimum_requirements.txt
       - name: Run simple usage
         run: |
           import trane

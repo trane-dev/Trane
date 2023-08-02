@@ -28,7 +28,7 @@ def minimize_requirements(requirements):
 def write_to_file(requirements):
     with open("tests/minimal_requirements.txt", "w") as file:
         for req in requirements:
-            file.write(req + "\n")
+            file.write(req.strip() + "\n")
 
 
 if __name__ == "__main__":

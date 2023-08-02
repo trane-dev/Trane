@@ -32,6 +32,7 @@ jobs:
       - name: Install trane
         if: ${{ matrix.python_version == 'minimal' }}
         run: |
+          python -m pip install . --no-deps
           python -m pip install -r tests/minimal_requirements.txt
       - name: Run simple usage
         run: |

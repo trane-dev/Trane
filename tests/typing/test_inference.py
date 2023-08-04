@@ -13,7 +13,7 @@ from trane.typing.inference import (
 from trane.typing.inference_functions import (
     pandas_modulo,
 )
-from trane.typing.logical_types import (
+from trane.typing.ml_types import (
     Boolean,
     Datetime,
     Double,

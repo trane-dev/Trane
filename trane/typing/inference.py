@@ -11,7 +11,7 @@ from trane.typing.inference_functions import (
     integer_func,
     natural_language_func,
 )
-from trane.typing.logical_types import (
+from trane.typing.ml_types import (
     Boolean,
     Categorical,
     Datetime,

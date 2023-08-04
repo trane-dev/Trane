@@ -1,6 +1,6 @@
 from inspect import isclass
 
-from trane.typing.logical_types import Boolean, Datetime
+from trane.typing.ml_types import Boolean, Datetime
 
 
 class ColumnSchema(object):
@@ -11,7 +11,7 @@ class ColumnSchema(object):
     ):
         """Create ColumnSchema
         Args:
-            logical_type (LogicalType, optional): The column's LogicalType.
+            logical_type (MLType, optional): The column's MLType.
             semantic_tags (str, list, set, optional): The semantic tag(s) specified for the column.
         """
         if isclass(logical_type):

@@ -10,13 +10,13 @@ from trane.ops.aggregation_ops import (
 from trane.ops.filter_ops import FilterOpBase
 from trane.ops.utils import get_aggregation_ops, get_filter_ops
 from trane.typing.column_schema import ColumnSchema
-from trane.typing.logical_types import (
+from trane.typing.ml_types import (
     Boolean,
     Categorical,
     Datetime,
     Double,
     Integer,
-    LogicalType,
+    MLType,
 )
 
 TYPE_MAPPING = {
@@ -41,7 +41,7 @@ def clean_date(date):
 
 def _parse_table_meta(table_meta):
     str_to_logical_type = {
-        ltype.__name__.lower(): ltype for ltype in LogicalType.__subclasses__()
+        ltype.__name__.lower(): ltype for ltype in MLType.__subclasses__()
     }
     parsed_schema = {}
     for col, schema in table_meta.items():

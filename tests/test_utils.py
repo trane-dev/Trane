@@ -28,7 +28,7 @@ from trane.ops.filter_ops import (
     NeqFilterOp,
 )
 from trane.typing.column_schema import ColumnSchema
-from trane.typing.logical_types import (
+from trane.typing.ml_types import (
     Categorical,
     Datetime,
     Double,

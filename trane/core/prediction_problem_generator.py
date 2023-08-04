@@ -12,7 +12,7 @@ from trane.ops.filter_ops import AllFilterOp
 from trane.ops.threshold_functions import get_k_most_frequent
 from trane.typing.column_schema import ColumnSchema
 from trane.typing.inference import infer_table_meta
-from trane.typing.logical_types import (
+from trane.typing.ml_types import (
     Categorical,
     Datetime,
     Integer,

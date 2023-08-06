@@ -13,6 +13,7 @@ def load_airbnb_reviews():
 
     return df
 
+
 def load_store():
     filepaths = {
         "categories": generate_local_filepath("data/store/categories.csv.bz2"),
@@ -27,8 +28,11 @@ def load_store():
 
     dataframes = {}
     for filepath in filepaths.items():
-        dataframes[filepath[0]] = (pd.read_csv(filepath[1], dtype_backend="pyarrow"), "id")
-    
+        dataframes[filepath[0]] = (
+            pd.read_csv(filepath[1], dtype_backend="pyarrow"),
+            "id",
+        )
+
     relationships = [
         ("customers", "customerid", "cust_hist", "customerid"),
         ("products", "prod_id", "cust_hist", "prod_id"),
@@ -40,6 +44,7 @@ def load_store():
     ]
 
     return dataframes, relationships
+
 
 def generate_local_filepath(key):
     dir_path = os.path.dirname(os.path.realpath(__file__))

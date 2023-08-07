@@ -5,7 +5,7 @@ import pandas as pd
 
 def load_airbnb_reviews():
     time_col = "date"
-    filepath = generate_local_filepath("data/airbnb_reviews/airbnb_reviews.csv.bz2")
+    filepath = generate_local_filepath("data/airbnb_reviews/airbnb_reviews.csv")
     df = pd.read_csv(filepath, dtype_backend="pyarrow")
     df = df.dropna()
     df[time_col] = pd.to_datetime(df[time_col], format="%Y-%m-%d")
@@ -16,14 +16,14 @@ def load_airbnb_reviews():
 
 def load_store():
     filepaths = {
-        "categories": generate_local_filepath("data/store/categories.csv.bz2"),
-        "cust_hist": generate_local_filepath("data/store/cust_hist.csv.bz2"),
-        "customers": generate_local_filepath("data/store/customers.csv.bz2"),
-        "inventory": generate_local_filepath("data/store/inventory.csv.bz2"),
-        "orderlines": generate_local_filepath("data/store/orderlines.csv.bz2"),
-        "orders": generate_local_filepath("data/store/orders.csv.bz2"),
-        "products": generate_local_filepath("data/store/products.csv.bz2"),
-        "reorder": generate_local_filepath("data/store/reorder.csv.bz2"),
+        "categories": generate_local_filepath("data/store/categories.csv"),
+        "cust_hist": generate_local_filepath("data/store/cust_hist.csv"),
+        "customers": generate_local_filepath("data/store/customers.csv"),
+        "inventory": generate_local_filepath("data/store/inventory.csv"),
+        "orderlines": generate_local_filepath("data/store/orderlines.csv"),
+        "orders": generate_local_filepath("data/store/orders.csv"),
+        "products": generate_local_filepath("data/store/products.csv"),
+        "reorder": generate_local_filepath("data/store/reorder.csv"),
     }
 
     dataframes = {}

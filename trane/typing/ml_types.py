@@ -1,3 +1,5 @@
+import pandas as pd
+
 from trane.typing.inference_functions import (
     boolean_func,
     categorical_func,
@@ -16,6 +18,7 @@ class MLTypeMetaClass(type):
 class MLType(object, metaclass=MLTypeMetaClass):
     dtype = None
     tags = set()
+    mandatory_tags = set()
 
     def __init__(self, tags=None):
         if tags is None:
@@ -28,12 +31,18 @@ class MLType(object, metaclass=MLTypeMetaClass):
     def __str__(self):
         return str(self.__class__)
 
-    def transform(self, series):
+    def transform(self, series: pd.Series):
         return series.astype(self.dtype)
 
     @staticmethod
     def inference_func(series):
         raise NotImplementedError
+
+    def get_tags(self):
+        return self.tags | self.mandatory_tags
+
+    def add_tags(self, tags):
+        self.tags.add(tags)
 
 
 class Boolean(MLType):
@@ -46,7 +55,7 @@ class Boolean(MLType):
 
 class Categorical(MLType):
     dtype = "category"
-    tags = {"category"}
+    mandatory_tags = {"category"}
 
     @staticmethod
     def inference_func(series):
@@ -68,7 +77,7 @@ class Datetime(MLType):
 
 class Double(MLType):
     dtype = "float64[pyarrow]"
-    tags = {"numeric"}
+    mandatory_tags = {"numeric"}
 
     @staticmethod
     def inference_func(series):
@@ -77,7 +86,7 @@ class Double(MLType):
 
 class Integer(MLType):
     dtype = "int64[pyarrow]"
-    tags = {"numeric"}
+    mandatory_tags = {"numeric"}
 
     @staticmethod
     def inference_func(series):
@@ -94,7 +103,7 @@ class NaturalLanguage(MLType):
 
 class Ordinal(MLType):
     dtype = "category"
-    tags = {"category"}
+    mandatory_tags = {"category"}
 
     def __init__(self, order=None):
         self.order = order

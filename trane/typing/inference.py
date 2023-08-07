@@ -17,6 +17,7 @@ from trane.typing.ml_types import (
     Datetime,
     Double,
     Integer,
+    MLType,
     NaturalLanguage,
     Unknown,
 )
@@ -54,3 +55,27 @@ def infer_table_meta(
     if time_col:
         table_meta[time_col].semantic_tags.add("time_index")
     return table_meta
+
+
+def _infer_ml_type(series: pd.Series) -> MLType:
+    inference_functions = {
+        boolean_func: Boolean,
+        categorical_func: Categorical,
+        datetime_func: Datetime,
+        double_func: Double,
+        integer_func: Integer,
+        natural_language_func: NaturalLanguage,
+    }
+    for infer_func, ml_type in inference_functions.items():
+        if infer_func(series) is True:
+            return ml_type
+    return Unknown
+
+
+def infer_metadata(
+    df: pd.DataFrame,
+) -> Dict[str, ColumnSchema]:
+    metadata = {}
+    for col in df.columns:
+        metadata[col] = _infer_ml_type(df[col])
+    return metadata

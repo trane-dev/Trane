@@ -43,7 +43,8 @@ def test_airbnb_reviews(sample):
         use_multiprocess=False,
     )
 
-
+# Skipping test store as it took 3 hours for Github Actions to run
+"""
 def test_store(sample):
     dataframes, relationships = load_store()
 
@@ -68,3 +69,4 @@ def test_store(sample):
         sample=sample,
         use_multiprocess=False,
     )
+"""

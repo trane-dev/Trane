@@ -3,8 +3,7 @@ import os
 import pytest
 
 import trane
-from trane.datasets.load_functions import load_airbnb_reviews, load_store
-from trane.parsing import denormalize
+from trane.datasets.load_functions import load_airbnb_reviews
 from trane.typing import infer_table_meta
 from trane.typing.column_schema import ColumnSchema
 from trane.typing.logical_types import Categorical
@@ -42,6 +41,7 @@ def test_airbnb_reviews(sample):
         sample=sample,
         use_multiprocess=False,
     )
+
 
 # Skipping test store as it took 3 hours for Github Actions to run
 """

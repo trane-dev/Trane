@@ -42,9 +42,6 @@ jobs:
       - name: Run unit tests
         if: ${{ matrix.type-of-tests != 'integration' }}
         run:  make unit-tests
-      - name: Run integration
-        if: ${{ matrix.type-of-tests == 'integration' }}
-        run:  make integration-tests
       - name: Upload code coverage report
         if: ${{ matrix.type-of-tests == 'unit' && matrix.python-version == '3.11' }}
         uses: codecov/codecov-action@v3

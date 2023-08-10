@@ -66,7 +66,7 @@ dev = [
 
 [tool.setuptools]
 include-package-data = true
-license-files = ["LICENSE"]
+license-files = ["LICENSE", "trane/datasets/data/store/LICENSE"]
 
 [tool.setuptools.packages.find]
 namespaces = true
@@ -79,8 +79,15 @@ namespaces = true
     "Makefile",
 ]
 "trane" = [
-    "datasets/data/covid19.csv",
-    "datasets/data/USvideos.csv",
+    "trane/datasets/data/airbnb_reviews/airbnb_reviews.csv",
+    "trane/datasets/data/store/categories.csv",
+    "trane/datasets/data/store/cust_hist.csv",
+    "trane/datasets/data/store/customers.csv",
+    "trane/datasets/data/store/inventory.csv",
+    "trane/datasets/data/store/orderlines.csv",
+    "trane/datasets/data/store/orders.csv",
+    "trane/datasets/data/store/products.csv",
+    "trane/datasets/data/store/reorder.csv",
 ]
 
 [tool.setuptools.exclude-package-data]

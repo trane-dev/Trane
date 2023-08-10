@@ -1,10 +1,5 @@
 from trane.core import *
-from trane.datasets import (
-    load_covid,
-    load_covid_metadata,
-    load_youtube,
-    load_youtube_metadata,
-)
+from trane.datasets import load_airbnb_reviews, load_store
 from trane.parsing import *
 from trane.typing import *
 from trane.utils import *

@@ -2,111 +2,48 @@ import os
 
 import pandas as pd
 
-from trane.typing.column_schema import ColumnSchema
-from trane.typing.logical_types import (
-    Categorical,
-    Datetime,
-    Double,
-    Integer,
-)
-
-
-def load_covid():
-    filepath = generate_local_filepath("covid19.csv")
-    df = pd.read_csv(
-        filepath,
-        dtype_backend="pyarrow",
-    )
-    df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%y")
-    df = df[
-        [
-            "Country/Region",
-            "Date",
-            "Province/State",
-            "Lat",
-            "Long",
-            "Confirmed",
-            "Deaths",
-            "Recovered",
-        ]
-    ]
-    df = df.astype(
-        {
-            "Country/Region": "category",
-            "Province/State": "category",
-        },
-    )
-    df = df.sort_values(by=["Date"])
-    df = df.reset_index(drop=True)
-    return df
-
-
-def load_covid_metadata():
-    table_meta = {
-        "Province/State": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"category"},
-        ),
-        "Country/Region": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"category", "primary_key"},
-        ),
-        "Lat": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "Long": ColumnSchema(logical_type=Double, semantic_tags={"numeric"}),
-        "Date": ColumnSchema(logical_type=Datetime),
-        "Confirmed": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "Deaths": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "Recovered": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-    }
-    return table_meta
-
-
-def load_youtube():
-    time_col = "trending_date"
-    filepath = generate_local_filepath("USvideos.csv")
-    df = pd.read_csv(
-        filepath,
-        dtype_backend="pyarrow",
-    )
-    df[time_col] = pd.to_datetime(df[time_col], format="%y.%d.%m")
-    df = df.astype(
-        {
-            "channel_title": "category",
-            "category_id": "category",
-        },
-    )
-    df = df.sort_values(by=[time_col])
-    return df
-
-
-def load_youtube_metadata():
-    table_meta = {
-        "trending_date": ColumnSchema(logical_type=Datetime),
-        "channel_title": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"primary_key"},
-        ),
-        "category_id": ColumnSchema(
-            logical_type=Categorical,
-            semantic_tags={"category", "primary_key"},
-        ),
-        "views": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "likes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "dislikes": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-        "comment_count": ColumnSchema(logical_type=Integer, semantic_tags={"numeric"}),
-    }
-    return table_meta
-
 
 def load_airbnb_reviews():
     time_col = "date"
-    filepath = generate_local_filepath("data/airbnb_reviews/airbnb_reviews.csv.bz2")
+    filepath = generate_local_filepath("data/airbnb_reviews/airbnb_reviews.csv")
     df = pd.read_csv(filepath, dtype_backend="pyarrow")
     df = df.dropna()
     df[time_col] = pd.to_datetime(df[time_col], format="%Y-%m-%d")
     df = df.sort_values(by=["date"])
 
     return df
+
+
+def load_store():
+    filepaths = {
+        "categories": generate_local_filepath("data/store/categories.csv"),
+        "cust_hist": generate_local_filepath("data/store/cust_hist.csv"),
+        "customers": generate_local_filepath("data/store/customers.csv"),
+        "inventory": generate_local_filepath("data/store/inventory.csv"),
+        "orderlines": generate_local_filepath("data/store/orderlines.csv"),
+        "orders": generate_local_filepath("data/store/orders.csv"),
+        "products": generate_local_filepath("data/store/products.csv"),
+        "reorder": generate_local_filepath("data/store/reorder.csv"),
+    }
+
+    dataframes = {}
+    for filepath in filepaths.items():
+        dataframes[filepath[0]] = (
+            pd.read_csv(filepath[1], dtype_backend="pyarrow"),
+            "id",
+        )
+
+    relationships = [
+        ("customers", "customerid", "cust_hist", "customerid"),
+        ("products", "prod_id", "cust_hist", "prod_id"),
+        ("products", "prod_id", "inventory", "prod_id"),
+        ("products", "prod_id", "orderlines", "prod_id"),
+        ("orders", "orderid", "orderlines", "orderid"),
+        ("customers", "customerid", "orders", "customerid"),
+        ("categories", "category", "products", "category"),
+    ]
+
+    return dataframes, relationships
 
 
 def generate_local_filepath(key):

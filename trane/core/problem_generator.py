@@ -39,9 +39,6 @@ class ProblemGenerator:
             self.metadata,
             self.target_table,
         )
-        # return _generate_possible_operations(
-        #     table_meta=self.metadata
-        # )
 
 
 def denormalize_metadata(metadata, target_table: str):
@@ -100,89 +97,3 @@ def denormalize_metadata(metadata, target_table: str):
         index=metadata.indices.get(target_table, None),
         time_index=metadata.time_indices.get(target_table, None),
     )
-
-
-#     check_target_entity(target_entity, relationships, list(dataframes.keys()))
-#     relationship_order = child_relationships(target_entity, relationships)
-#     relationship_order = reorder_relationships(target_entity, relationship_order)
-
-
-#         parent_key = parent_table_name + "." + parent_key
-
-#         flat = flatten_dataframes(parent_table, child_table, parent_key, child_key)
-#         merged_dataframes[child_table_name] = (flat, original_to_new)
-#         merged_dataframes[parent_table_name] = (flat, original_to_new)
-#     # TODO: set primary key to be the index
-#     # TODO: pass information to table meta (primary key, foreign keys)? maybe? technically relationships has this info
-#     return merged_dataframes[target_entity][0]
-
-
-# def _generate_possible_operations(
-#     metadata,
-#     exclude_columns,
-#     aggregation_operations,
-#     filter_operations,
-# ):
-#     if aggregation_operations is None:
-#         aggregation_operations = get_aggregation_ops()
-#     if filter_operations is None:
-#         filter_operations = get_filter_ops()
-
-#     valid_columns = list(metadata.keys())
-#     if exclude_columns is None:
-#         exclude_columns = []
-#     elif exclude_columns and len(exclude_columns) > 0:
-#         valid_columns = [col for col in valid_columns if col not in exclude_columns]
-
-#     possible_operations = []
-#     column_pairs = []
-#     for filter_col, agg_col in itertools.product(
-#         valid_columns,
-#         valid_columns,
-#     ):
-#         column_pairs.append((filter_col, agg_col))
-
-#     for agg_operation, filter_operation in itertools.product(
-#         aggregation_operations,
-#         filter_operations,
-#     ):
-#         for filter_col, agg_col in column_pairs:
-#             # not ideal, what if there is more than 1 input type in the op
-#             agg_op_input_type = convert_op_type(agg_operation.input_output_types[0][0])
-#             filter_op_input_type = convert_op_type(
-#                 filter_operation.input_output_types[0][0],
-#             )
-#             agg_instance = None
-#             if (
-#                 len(
-#                     agg_operation.restricted_semantic_tags.intersection(
-#                         metadata[agg_col].semantic_tags,
-#                     ),
-#                 )
-#                 > 0
-#             ):
-#                 # if the agg operation is about to apply to a column that has restricted semantic tags
-#                 continue
-#             elif agg_op_input_type in ["None", None, ColumnSchema()]:
-#                 agg_instance = agg_operation(None)
-#             else:
-#                 agg_instance = agg_operation(agg_col)
-#             filter_instance = None
-#             if (
-#                 len(
-#                     filter_operation.restricted_semantic_tags.intersection(
-#                         metadata[filter_col].semantic_tags,
-#                     ),
-#                 )
-#                 > 0
-#             ):
-#                 # if the agg operation is about to apply to a column that has restricted semantic tags
-#                 continue
-#             elif filter_op_input_type in ["None", None, ColumnSchema()]:
-#                 filter_instance = filter_operation(None)
-#             else:
-#                 filter_instance = filter_operation(filter_col)
-#             possible_operations.append((filter_instance, agg_instance))
-#     # TODO: why are duplicate problems being generated
-#     possible_operations = list(set(possible_operations))
-#     return possible_operations

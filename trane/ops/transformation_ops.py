@@ -29,8 +29,6 @@ class OrderByOp(TransformationOpBase):
     description = " sorted by <{}>"
 
     def generate_description(self):
-        if self.column_name is None:
-            return ""
         return self.description.format(self.column_name)
 
     def label_function(self, dataslice):

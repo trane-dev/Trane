@@ -23,8 +23,6 @@ class IdentityOp(TransformationOpBase):
         return self.description
 
     def label_function(self, dataslice):
-        if len(dataslice) == 0:
-            return pd.NA
         return dataslice
 
 

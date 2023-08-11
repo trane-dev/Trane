@@ -1,4 +1,3 @@
-import pandas as pd
 
 from trane.ops.op_base import OpBase
 

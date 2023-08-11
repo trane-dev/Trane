@@ -8,7 +8,8 @@ from trane.ops.aggregation_ops import (
     AggregationOpBase,
 )
 from trane.ops.filter_ops import FilterOpBase
-from trane.ops.utils import get_aggregation_ops, get_filter_ops
+from trane.ops.transformation_ops import TransformationOpBase
+from trane.ops.utils import get_aggregation_ops, get_filter_ops, get_transformation_ops
 from trane.typing.column_schema import ColumnSchema
 from trane.typing.logical_types import (
     Boolean,
@@ -80,7 +81,9 @@ def _check_operations_valid(
 ):
     if not isinstance(operations[0], FilterOpBase):
         raise ValueError
-    if not isinstance(operations[1], AggregationOpBase):
+    if not isinstance(operations[1], TransformationOpBase):
+        raise ValueError
+    if not isinstance(operations[2], AggregationOpBase):
         raise ValueError
     for op in operations:
         input_output_types = op.input_output_types
@@ -132,11 +135,14 @@ def _generate_possible_operations(
     exclude_columns: List[str] = None,
     aggregation_operations: List[AggregationOpBase] = None,
     filter_operations: List[FilterOpBase] = None,
+    transformation_operations: List[TransformationOpBase] = None,
 ):
     if aggregation_operations is None:
         aggregation_operations = get_aggregation_ops()
     if filter_operations is None:
         filter_operations = get_filter_ops()
+    if transformation_operations is None:
+        transformation_operations = get_transformation_ops()
 
     valid_columns = list(table_meta.keys())
     if exclude_columns is None:
@@ -145,20 +151,23 @@ def _generate_possible_operations(
         valid_columns = [col for col in valid_columns if col not in exclude_columns]
 
     possible_operations = []
-    column_pairs = []
-    for filter_col, agg_col in itertools.product(
+    column_combinations = []
+    for filter_col, transform_col, agg_col in itertools.product(
+        valid_columns,
         valid_columns,
         valid_columns,
     ):
-        column_pairs.append((filter_col, agg_col))
+        column_combinations.append((filter_col, transform_col, agg_col))
 
-    for agg_operation, filter_operation in itertools.product(
+    for agg_operation, transform_operation, filter_operation in itertools.product(
         aggregation_operations,
+        transformation_operations,
         filter_operations,
     ):
-        for filter_col, agg_col in column_pairs:
+        for filter_col, transform, agg_col in column_combinations:
             # not ideal, what if there is more than 1 input type in the op
             agg_op_input_type = convert_op_type(agg_operation.input_output_types[0][0])
+            transform_op_input_type = convert_op_type(transform_operation.input_output_types[0][0])
             filter_op_input_type = convert_op_type(
                 filter_operation.input_output_types[0][0],
             )
@@ -177,6 +186,21 @@ def _generate_possible_operations(
                 agg_instance = agg_operation(None)
             else:
                 agg_instance = agg_operation(agg_col)
+            transform_instance = None
+            if (
+                len(
+                    transform_operation.restricted_semantic_tags.intersection(
+                        table_meta[transform_col].semantic_tags,
+                    ),
+                )
+                > 0
+            ):
+                # if the agg operation is about to apply to a column that has restricted semantic tags
+                continue
+            elif transform_op_input_type in ["None", None, ColumnSchema()]:
+                transform_instance = transform_operation(None)
+            else:
+                transform_instance = transform_operation(transform_col)
             filter_instance = None
             if (
                 len(
@@ -192,7 +216,7 @@ def _generate_possible_operations(
                 filter_instance = filter_operation(None)
             else:
                 filter_instance = filter_operation(filter_col)
-            possible_operations.append((filter_instance, agg_instance))
+            possible_operations.append((filter_instance, transform_instance, agg_instance))
     # TODO: why are duplicate problems being generated
     possible_operations = list(set(possible_operations))
     return possible_operations

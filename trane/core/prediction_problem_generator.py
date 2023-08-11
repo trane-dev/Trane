@@ -139,10 +139,10 @@ class PredictionProblemGenerator:
             position=pbar_position,
         ):
             all_attempts += 1
-            filter_op_obj, agg_op_obj = op_col_combo
+            filter_op_obj, transform_op_obj, agg_op_obj = op_col_combo
 
             # Note: the order of the operations matters, the filter operation must be first
-            operations = [filter_op_obj, agg_op_obj]
+            operations = [filter_op_obj, transform_op_obj, agg_op_obj]
 
             problem = PredictionProblem(
                 operations=operations,

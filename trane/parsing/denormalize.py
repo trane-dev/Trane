@@ -43,26 +43,22 @@ def denormalize(
 
         if parent_table_name in merged_dataframes:
             # have already used it as a parent before, so use the merged version (it has more information)
-            parent_table, col_renames = merged_dataframes[parent_table_name]
+            parent_table = merged_dataframes[parent_table_name]
             merged_dataframes.pop(parent_table_name)
         if child_table_name in merged_dataframes:
             # have already used it as a child before, so use the merged version (it has more infomation)
-            child_table, col_renames = merged_dataframes[child_table_name]
+            child_table = merged_dataframes[child_table_name]
             merged_dataframes.pop(child_table_name)
 
-        original_columns = parent_table.columns
         parent_table = parent_table.add_prefix(parent_table_name + ".")
-        new_columns = parent_table.columns
-        original_to_new = dict(zip(original_columns, new_columns))
-
         parent_key = parent_table_name + "." + parent_key
 
         flat = flatten_dataframes(parent_table, child_table, parent_key, child_key)
-        merged_dataframes[child_table_name] = (flat, original_to_new)
-        merged_dataframes[parent_table_name] = (flat, original_to_new)
+        merged_dataframes[child_table_name] = flat
+        merged_dataframes[parent_table_name] = flat
     # TODO: set primary key to be the index
     # TODO: pass information to table meta (primary key, foreign keys)? maybe? technically relationships has this info
-    return merged_dataframes[target_entity][0]
+    return merged_dataframes[target_entity]
 
 
 def flatten_dataframes(parent_table, child_table, parent_key, child_key):

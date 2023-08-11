@@ -78,6 +78,8 @@ class MultiTableMetadata(BaseMetadata):
             self.set_indices(indices)
         if time_indices:
             self.set_time_indices(time_indices)
+        if relationships:
+            self.add_relationships(relationships)
 
     @staticmethod
     def get_metadata_type():
@@ -121,7 +123,9 @@ class MultiTableMetadata(BaseMetadata):
         if not isinstance(relationships, list):
             relationships = [relationships]
         self.check_relationships(relationships)
-        self.relationships.append(relationships)
+        for rel in relationships:
+            if rel not in self.relationships:
+                self.relationships.append(rel)
 
     def check_if_table_exists(self, table):
         if table not in self.ml_types:
@@ -133,9 +137,13 @@ class MultiTableMetadata(BaseMetadata):
         for rel in self.relationships:
             self.relationships.remove(rel)
 
+    def clear_relationships(self):
+        self.relationships = []
+
     def check_relationships(self, relationships):
         for rel in relationships:
             if not isinstance(rel, tuple) or len(rel) != 4:
+                breakpoint()
                 raise ValueError(
                     "Relationship must be a tuple (parent_table_name, parent_join_key, child_table_name, child_join_key)",
                 )

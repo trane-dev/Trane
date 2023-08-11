@@ -27,6 +27,10 @@ from trane.ops.filter_ops import (
     LessFilterOp,
     NeqFilterOp,
 )
+from trane.ops.transformation_ops import (
+    TransformationOpBase,
+    OrderByOp
+)
 from trane.typing.column_schema import ColumnSchema
 from trane.typing.logical_types import (
     Categorical,
@@ -64,7 +68,7 @@ def test_parse_table_simple(table_meta):
 
 def test_simple_check_operations(table_meta):
     # For each <id> predict the number of records
-    operations = [AllFilterOp(None), CountAggregationOp(None)]
+    operations = [AllFilterOp(None), OrderByOp(None), CountAggregationOp(None)]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
     assert modified_meta["id"] == table_meta["id"]
@@ -81,79 +85,79 @@ def test_parse_table_numeric():
     # For each <id> predict the number of records with <amount> equal to
     # Technically could be a valid operation, but we don't support it yet
     # For categorical columns it makes sense (see below)
-    operations = [EqFilterOp("amount"), CountAggregationOp(None)]
+    operations = [EqFilterOp("amount"), OrderByOp(None), CountAggregationOp(None)]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is False
     assert len(modified_meta) == 0
 
     # For each <id> predict the number of records with <amount> greater than
-    operations = [GreaterFilterOp("amount"), CountAggregationOp(None)]
+    operations = [GreaterFilterOp("amount"), OrderByOp(None), CountAggregationOp(None)]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
     # For each <id> predict the number of records with <amount> less than
-    operations = [LessFilterOp("amount"), CountAggregationOp(None)]
+    operations = [LessFilterOp("amount"), OrderByOp(None), CountAggregationOp(None)]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
     # For each <id> predict the total <amount> in all related records
-    operations = [AllFilterOp("amount"), SumAggregationOp("amount")]
+    operations = [AllFilterOp("amount"), OrderByOp(None), SumAggregationOp("amount")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
     assert modified_meta["id"] == table_meta["id"]
 
     # For each <id> predict the total <amount> in all related records with <amount> greater than
-    operations = [GreaterFilterOp("amount"), SumAggregationOp("amount")]
+    operations = [GreaterFilterOp("amount"), OrderByOp(None), SumAggregationOp("amount")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
     # For each <id> predict the total <amount> in all related records with <amount> less than
-    operations = [LessFilterOp("amount"), SumAggregationOp("amount")]
+    operations = [LessFilterOp("amount"), OrderByOp(None), SumAggregationOp("amount")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
     # For each <id> predict the average <amount> in all related records
-    operations = [AllFilterOp("amount"), AvgAggregationOp("amount")]
+    operations = [AllFilterOp("amount"), OrderByOp(None), AvgAggregationOp("amount")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
     # For each <id> predict the average <amount> in all related records with <amount> greater than
-    operations = [GreaterFilterOp("amount"), AvgAggregationOp("amount")]
+    operations = [GreaterFilterOp("amount"), OrderByOp(None), AvgAggregationOp("amount")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
     # For each <id> predict the average <amount> in all related records with <amount> less than
-    operations = [LessFilterOp("amount"), AvgAggregationOp("amount")]
+    operations = [LessFilterOp("amount"), OrderByOp(None), AvgAggregationOp("amount")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
     # For each <id> predict the maximum <amount> in all related records
-    operations = [AllFilterOp("amount"), MaxAggregationOp("amount")]
+    operations = [AllFilterOp("amount"), OrderByOp(None), MaxAggregationOp("amount")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
     # For each <id> predict the maximum <amount> in all related records with <amount> greater than
-    operations = [GreaterFilterOp("amount"), MaxAggregationOp("amount")]
+    operations = [GreaterFilterOp("amount"), OrderByOp(None), MaxAggregationOp("amount")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
     # For each <id> predict the maximum <amount> in all related records with <amount> less than
-    operations = [LessFilterOp("amount"), MaxAggregationOp("amount")]
+    operations = [LessFilterOp("amount"), OrderByOp(None), MaxAggregationOp("amount")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
     # For each <id> predict the minimum <amount> in all related records
-    operations = [AllFilterOp("amount"), MinAggregationOp("amount")]
+    operations = [AllFilterOp("amount"), OrderByOp(None), MinAggregationOp("amount")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
     # For each <id> predict the minimum <amount> in all related records with <amount> greater than
-    operations = [GreaterFilterOp("amount"), MinAggregationOp("amount")]
+    operations = [GreaterFilterOp("amount"), OrderByOp(None), MinAggregationOp("amount")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
     # For each <id> predict the minimum <amount> in all related records with <amount> less than
-    operations = [LessFilterOp("amount"), MinAggregationOp("amount")]
+    operations = [LessFilterOp("amount"), OrderByOp(None), MinAggregationOp("amount")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     verify_numeric_op(modified_meta, result)
 
@@ -172,7 +176,7 @@ def test_check_operations_boolean():
         "is_fraud": ("Boolean", {}),
     }
     table_meta = _parse_table_meta(table_meta)
-    operations = [EqFilterOp("is_fraud"), MajorityAggregationOp("is_fraud")]
+    operations = [EqFilterOp("is_fraud"), OrderByOp(None), MajorityAggregationOp("is_fraud")]
     result, _ = _check_operations_valid(operations, table_meta)
     assert result is False
 
@@ -185,34 +189,34 @@ def test_check_operations_cat():
     table_meta = _parse_table_meta(table_meta)
 
     # For each <id> predict the number of records with <state> equal to
-    operations = [EqFilterOp("state"), CountAggregationOp(None)]
+    operations = [EqFilterOp("state"), OrderByOp(None), CountAggregationOp(None)]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
 
     # For each <id> predict the number of records with <state> not equal to
-    operations = [NeqFilterOp("state"), CountAggregationOp(None)]
+    operations = [NeqFilterOp("state"), OrderByOp(None), CountAggregationOp(None)]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
 
     # For each <id> predict the majority <state> in all related records with <state> equal to NY
-    operations = [EqFilterOp("state"), MajorityAggregationOp("state")]
+    operations = [EqFilterOp("state"), OrderByOp(None), MajorityAggregationOp("state")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
 
     # Not a valid operation
     # cannot do GreaterFilterOp on categorical
-    operations = [GreaterFilterOp("state"), CountAggregationOp(None)]
+    operations = [GreaterFilterOp("state"), OrderByOp(None), CountAggregationOp(None)]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is False
 
     # Not a valid operation
     # cannot do SumAggregation on categorical
-    operations = [AllFilterOp(None), SumAggregationOp("state")]
+    operations = [AllFilterOp(None), OrderByOp(None), SumAggregationOp("state")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is False
 
     # For each <id> predict if there exists a record in all related records with <state> equal to NY
-    operations = [AllFilterOp(None), ExistsAggregationOp("state")]
+    operations = [AllFilterOp(None), OrderByOp(None), ExistsAggregationOp("state")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
 
@@ -227,7 +231,7 @@ def test_foreign_key():
     # For each <orders.user_id> predict the total <user_id> in all related
     # records with <products.departments.department> equal to dairy eggs in next 2w days
     # [EqFilterOp, SumAggregationOp]
-    operations = [EqFilterOp("department"), SumAggregationOp("user_id")]
+    operations = [EqFilterOp("department"), OrderByOp(None), SumAggregationOp("user_id")]
     table_meta = _parse_table_meta(table_meta)
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is False
@@ -245,8 +249,9 @@ def test_generate_possible_operations():
     possible_operations = _generate_possible_operations(
         table_meta=table_meta,
     )
-    for filter_op, agg_op in possible_operations:
+    for filter_op, transform_op, agg_op in possible_operations:
         assert isinstance(agg_op, AggregationOpBase)
+        assert isinstance(transform_op, TransformationOpBase)
         assert isinstance(filter_op, FilterOpBase)
         if isinstance(agg_op, CountAggregationOp):
             assert agg_op.column_name is None

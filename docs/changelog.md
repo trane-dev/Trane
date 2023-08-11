@@ -9,7 +9,7 @@ v0.6.0 (, 2023)
     * Add pyarrow dependency and use pyarrow backed dtypes [#120][#120]
     * Add Airbnb Reviews dataset [#125][#125]
     * Add Store dataset [#131][#131]
-    * Add Order By Operation [#138][#138]
+    * Add Order By Operation (and new base - TransformationOpBase, along with IdentityOp) [#138][#138]
 * Fixes
     * Rename `_execute_operations_on_df` to `target` in executed prediction problem dataframe [#124][#124]
     * Clean up operation description generation [#118][#118]

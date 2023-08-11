@@ -164,10 +164,12 @@ def _generate_possible_operations(
         transformation_operations,
         filter_operations,
     ):
-        for filter_col, transform, agg_col in column_combinations:
+        for filter_col, transform_col, agg_col in column_combinations:
             # not ideal, what if there is more than 1 input type in the op
             agg_op_input_type = convert_op_type(agg_operation.input_output_types[0][0])
-            transform_op_input_type = convert_op_type(transform_operation.input_output_types[0][0])
+            transform_op_input_type = convert_op_type(
+                transform_operation.input_output_types[0][0]
+            )
             filter_op_input_type = convert_op_type(
                 filter_operation.input_output_types[0][0],
             )
@@ -216,7 +218,9 @@ def _generate_possible_operations(
                 filter_instance = filter_operation(None)
             else:
                 filter_instance = filter_operation(filter_col)
-            possible_operations.append((filter_instance, transform_instance, agg_instance))
+            possible_operations.append(
+                (filter_instance, transform_instance, agg_instance)
+            )
     # TODO: why are duplicate problems being generated
     possible_operations = list(set(possible_operations))
     return possible_operations

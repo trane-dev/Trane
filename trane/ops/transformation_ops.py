@@ -1,4 +1,3 @@
-import pandas as pd
 
 from trane.ops.op_base import OpBase
 
@@ -14,8 +13,9 @@ class TransformationOpBase(OpBase):
     TransformationOpBase class and instantiate the execute method.
     """
 
+
 class OrderByOp(TransformationOpBase):
-    input_output_types = [("None", "None")]
+    input_output_types = [("numeric", "Double")]
     description = " sorted by <{}>"
 
     def generate_description(self):

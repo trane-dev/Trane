@@ -1,4 +1,3 @@
-import copy
 from datetime import datetime
 
 import pandas as pd
@@ -19,7 +18,7 @@ def single_metadata():
         index="column_1",
         time_index="column_3",
     )
-    return copy.deepcopy(single_metadata)
+    return single_metadata
 
 
 def test_init_single(single_metadata):

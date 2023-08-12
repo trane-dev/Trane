@@ -1,5 +1,3 @@
-import copy
-
 import pytest
 
 from trane.core.problem_generator import denormalize_metadata
@@ -46,7 +44,7 @@ def four_table_metadata():
         time_indices={},
         relationships=relationships,
     )
-    return copy.deepcopy(multi_metadata)
+    return multi_metadata
 
 
 def test_denormalize_two_tables():

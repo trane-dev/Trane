@@ -22,7 +22,7 @@ def single_metadata():
 
 def test_init_single(single_metadata):
     assert single_metadata.ml_types == {
-        "column_1": Categorical,  # ntest
+        "column_1": Categorical,
         "column_2": Integer,
         "column_3": Datetime,
     }

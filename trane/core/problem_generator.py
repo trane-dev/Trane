@@ -56,12 +56,12 @@ def denormalize_metadata(metadata, target_table: str):
             # have already used it as a parent before, so use the merged version (it has more information)
             parent_table = merged_dataframes[parent_table_name]
             merged_dataframes.pop(parent_table_name)
-            original_columns = list(parent_table.columns)
         else:
             parent_table = pd.DataFrame(
                 columns=metadata.ml_types[parent_table_name].keys(),
             )
-            original_columns = list(parent_table.columns)
+        original_columns = list(parent_table.columns)
+
         if child_table_name in merged_dataframes:
             # have already used it as a child before, so use the merged version (it has more infomation)
             child_table = merged_dataframes[child_table_name]

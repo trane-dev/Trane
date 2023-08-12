@@ -61,15 +61,18 @@ def test_denormalize_two_tables():
         time_indices={},
         relationships=relationships,
     )
-    single_metadata = denormalize_metadata(metadata=multi_metadata, target_table="log")
-    assert isinstance(single_metadata, SingleTableMetadata)
-    assert single_metadata.ml_types == {
+    normalized_metadata = denormalize_metadata(
+        metadata=multi_metadata,
+        target_table="log",
+    )
+    assert isinstance(normalized_metadata, SingleTableMetadata)
+    assert normalized_metadata.ml_types == {
         "id": Integer,
         "product_id": Integer,
         "session_id": Integer,
         "products.price": Double,
     }
-    assert single_metadata.index == multi_metadata.indices["log"]
+    assert normalized_metadata.index == multi_metadata.indices["log"]
 
 
 def test_denormalize_three_tables():
@@ -97,8 +100,11 @@ def test_denormalize_three_tables():
         time_indices={},
         relationships=relationships,
     )
-    single_metadata = denormalize_metadata(metadata=multi_metadata, target_table="log")
-    assert single_metadata.ml_types == {
+    normalized_metadata = denormalize_metadata(
+        metadata=multi_metadata,
+        target_table="log",
+    )
+    assert normalized_metadata.ml_types == {
         "id": Integer,
         "product_id": Integer,
         "session_id": Integer,

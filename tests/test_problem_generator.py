@@ -5,6 +5,48 @@ from trane.metadata import MultiTableMetadata, SingleTableMetadata
 from trane.typing.ml_types import Categorical, Double, Integer
 
 
+@pytest.fixture(scope="module")
+def four_table_metadata():
+    """
+     C       Customers
+     |
+    |||
+     S   P   Sessions, Products
+     \\ //
+       L     Log
+    """
+    relationships = [
+        ("sessions", "id", "log", "session_id"),
+        ("customers", "id", "sessions", "customer_id"),
+        ("products", "id", "log", "product_id"),
+    ]
+    multi_metadata = MultiTableMetadata(
+        ml_types={
+            "products": {"id": "Integer", "price": "Double"},
+            "log": {
+                "id": "Integer",
+                "product_id": "Integer",
+                "session_id": "Integer",
+            },
+            "sessions": {"id": "Integer", "customer_id": "Categorical"},
+            "customers": {
+                "id": "Integer",
+                "age": "Integer",
+                "région_id": "Categorical",
+            },
+        },
+        indices={
+            "products": "id",
+            "log": "id",
+            "sessions": "id",
+            "customers": "id",
+        },
+        time_indices={},
+        relationships=relationships,
+    )
+    return multi_metadata
+
+
 def test_denormalize_two_tables():
     relationships = [
         # one to many relationship
@@ -63,48 +105,6 @@ def test_denormalize_three_tables():
         "products.price": Double,
         "sessions.customer_id": Categorical,
     }
-
-
-@pytest.fixture
-def four_table_metadata():
-    """
-     C       Customers
-     |
-    |||
-     S   P   Sessions, Products
-     \\ //
-       L     Log
-    """
-    relationships = [
-        ("sessions", "id", "log", "session_id"),
-        ("customers", "id", "sessions", "customer_id"),
-        ("products", "id", "log", "product_id"),
-    ]
-    multi_metadata = MultiTableMetadata(
-        ml_types={
-            "products": {"id": "Integer", "price": "Double"},
-            "log": {
-                "id": "Integer",
-                "product_id": "Integer",
-                "session_id": "Integer",
-            },
-            "sessions": {"id": "Integer", "customer_id": "Categorical"},
-            "customers": {
-                "id": "Integer",
-                "age": "Integer",
-                "région_id": "Categorical",
-            },
-        },
-        indices={
-            "products": "id",
-            "log": "id",
-            "sessions": "id",
-            "customers": "id",
-        },
-        time_indices={},
-        relationships=relationships,
-    )
-    return multi_metadata
 
 
 def test_denormalize_four_tables(four_table_metadata):

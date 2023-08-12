@@ -7,7 +7,7 @@ from trane.metadata.metadata import MultiTableMetadata, SingleTableMetadata
 from trane.typing.ml_types import Categorical, Datetime, Double, Integer, Unknown
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def single_metadata():
     return SingleTableMetadata(
         ml_types={

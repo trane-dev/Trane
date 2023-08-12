@@ -108,11 +108,11 @@ def test_denormalize_three_tables():
 
 
 def test_denormalize_four_tables(four_table_metadata):
-    single_metadata = denormalize_metadata(
+    normalized_metadata = denormalize_metadata(
         metadata=four_table_metadata,
         target_table="log",
     )
-    assert single_metadata.ml_types == {
+    assert normalized_metadata.ml_types == {
         "id": Integer,
         "product_id": Integer,
         "session_id": Integer,
@@ -124,11 +124,11 @@ def test_denormalize_four_tables(four_table_metadata):
 
 
 def test_denormalize_change_target(four_table_metadata):
-    single_metadata = denormalize_metadata(
+    normalized_metadata = denormalize_metadata(
         metadata=four_table_metadata,
         target_table="sessions",
     )
-    assert single_metadata.ml_types == {
+    assert normalized_metadata.ml_types == {
         "id": Integer,
         "customer_id": Categorical,
         "customers.age": Integer,

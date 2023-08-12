@@ -1,3 +1,5 @@
+import copy
+
 import pytest
 
 from trane.core.problem_generator import denormalize_metadata
@@ -5,7 +7,7 @@ from trane.metadata import MultiTableMetadata, SingleTableMetadata
 from trane.typing.ml_types import Categorical, Double, Integer
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def four_table_metadata():
     """
      C       Customers
@@ -44,7 +46,7 @@ def four_table_metadata():
         time_indices={},
         relationships=relationships,
     )
-    return multi_metadata
+    return copy.deepcopy(multi_metadata)
 
 
 def test_denormalize_two_tables():

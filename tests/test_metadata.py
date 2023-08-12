@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 
 import pandas as pd
@@ -9,7 +10,7 @@ from trane.typing.ml_types import Categorical, Datetime, Double, Integer, Unknow
 
 @pytest.fixture(scope="function")
 def single_metadata():
-    return SingleTableMetadata(
+    single_metadata = SingleTableMetadata(
         ml_types={
             "column_1": "Categorical",
             "column_2": "Integer",
@@ -18,6 +19,7 @@ def single_metadata():
         index="column_1",
         time_index="column_3",
     )
+    return copy.deepcopy(single_metadata)
 
 
 def test_init_single(single_metadata):

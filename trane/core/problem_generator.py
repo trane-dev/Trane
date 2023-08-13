@@ -3,7 +3,6 @@ import pandas as pd
 from trane.metadata import BaseMetadata, SingleTableMetadata
 from trane.parsing.denormalize import (
     child_relationships,
-    flatten_dataframes,
     reorder_relationships,
 )
 
@@ -97,3 +96,16 @@ def denormalize_metadata(metadata, target_table: str):
         index=metadata.indices.get(target_table, None),
         time_index=metadata.time_indices.get(target_table, None),
     )
+
+
+def flatten_dataframes(parent_table, child_table, parent_key, child_key):
+    parent_table = parent_table.set_index(parent_key, inplace=False)
+    child_table = child_table.set_index(child_key, inplace=False)
+    return parent_table.merge(
+        child_table,
+        # right = we want to keep all the rows in the child table
+        how="right",
+        left_index=True,
+        right_index=True,
+        validate="one_to_many",
+    ).reset_index(names=child_key)

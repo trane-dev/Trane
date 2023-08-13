@@ -47,7 +47,7 @@ def four_table_metadata():
     return multi_metadata
 
 
-def test_denormalize_two_tables():
+def test_denormalize_metadata_two_tables():
     relationships = [
         # one to many relationship
         ("products", "id", "log", "product_id"),
@@ -75,7 +75,7 @@ def test_denormalize_two_tables():
     assert normalized_metadata.index == multi_metadata.indices["log"]
 
 
-def test_denormalize_three_tables():
+def test_denormalize_metadata_three_tables():
     """
     S   P   Sessions, Products
      \\ /   .
@@ -113,7 +113,7 @@ def test_denormalize_three_tables():
     }
 
 
-def test_denormalize_four_tables(four_table_metadata):
+def test_denormalize_metadata_four_tables(four_table_metadata):
     normalized_metadata = denormalize_metadata(
         metadata=four_table_metadata,
         target_table="log",
@@ -129,7 +129,7 @@ def test_denormalize_four_tables(four_table_metadata):
     }
 
 
-def test_denormalize_change_target(four_table_metadata):
+def test_denormalize_metadata_change_target(four_table_metadata):
     normalized_metadata = denormalize_metadata(
         metadata=four_table_metadata,
         target_table="sessions",

@@ -93,8 +93,8 @@ def denormalize_metadata(metadata, target_table: str):
     valid_ml_types = {col: column_to_ml_type[col] for col in valid_columns}
     return SingleTableMetadata(
         ml_types=valid_ml_types,
-        index=metadata.indices.get(target_table, None),
-        time_index=metadata.time_indices.get(target_table, None),
+        index=metadata.primary_keys.get(target_table, None),
+        time_index=metadata.time_primary_keys.get(target_table, None),
     )
 
 

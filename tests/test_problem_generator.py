@@ -3,6 +3,7 @@ import pytest
 from trane.core.problem_generator import denormalize_metadata
 from trane.metadata import MultiTableMetadata, SingleTableMetadata
 from trane.typing.ml_types import Categorical, Double, Integer
+from trane.utils.testing_utils import generate_mock_data
 
 
 @pytest.fixture(scope="function")
@@ -15,55 +16,34 @@ def four_table_metadata():
      \\ //
        L     Log
     """
-    relationships = [
-        ("sessions", "id", "log", "session_id"),
-        ("customers", "id", "sessions", "customer_id"),
-        ("products", "id", "log", "product_id"),
-    ]
+    _, ml_types, relationships = generate_mock_data(
+        tables=["products", "logs", "sessions", "customers"],
+    )
     multi_metadata = MultiTableMetadata(
-        ml_types={
-            "products": {"id": "Integer", "price": "Double"},
-            "log": {
-                "id": "Integer",
-                "product_id": "Integer",
-                "session_id": "Integer",
-            },
-            "sessions": {"id": "Integer", "customer_id": "Categorical"},
-            "customers": {
-                "id": "Integer",
-                "age": "Integer",
-                "région_id": "Categorical",
-            },
-        },
-        indices={
+        ml_types=ml_types,
+        primary_keys={
             "products": "id",
-            "log": "id",
+            "logs": "id",
             "sessions": "id",
             "customers": "id",
         },
-        time_indices={},
+        time_primary_keys={},
         relationships=relationships,
     )
     return multi_metadata
 
 
 def test_denormalize_metadata_two_tables():
-    relationships = [
-        # one to many relationship
-        ("products", "id", "log", "product_id"),
-    ]
+    _, ml_types, relationships = generate_mock_data(tables=["products", "logs"])
     multi_metadata = MultiTableMetadata(
-        ml_types={
-            "products": {"id": "Integer", "price": "Double"},
-            "log": {"id": "Integer", "product_id": "Integer", "session_id": "Integer"},
-        },
-        indices={"products": "id", "log": "id"},
-        time_indices={},
+        ml_types=ml_types,
+        primary_keys={"products": "id", "logs": "id"},
+        time_primary_keys={},
         relationships=relationships,
     )
     normalized_metadata = denormalize_metadata(
         metadata=multi_metadata,
-        target_table="log",
+        target_table="logs",
     )
     assert isinstance(normalized_metadata, SingleTableMetadata)
     assert normalized_metadata.ml_types == {
@@ -72,7 +52,7 @@ def test_denormalize_metadata_two_tables():
         "session_id": Integer,
         "products.price": Double,
     }
-    assert normalized_metadata.index == multi_metadata.indices["log"]
+    assert normalized_metadata.index == multi_metadata.primary_keys["logs"]
 
 
 def test_denormalize_metadata_three_tables():
@@ -81,28 +61,18 @@ def test_denormalize_metadata_three_tables():
      \\ /   .
       L     Log
     """
-    relationships = [
-        # one to many relationships
-        ("products", "id", "log", "product_id"),
-        ("sessions", "id", "log", "session_id"),
-    ]
+    _, ml_types, relationships = generate_mock_data(
+        tables=["products", "logs", "sessions"],
+    )
     multi_metadata = MultiTableMetadata(
-        ml_types={
-            "products": {"id": "Integer", "price": "Double"},
-            "log": {
-                "id": "Integer",
-                "product_id": "Integer",
-                "session_id": "Integer",
-            },
-            "sessions": {"id": "Integer", "customer_id": "Categorical"},
-        },
-        indices={"products": "id", "log": "id", "sessions": "id"},
-        time_indices={},
+        ml_types=ml_types,
+        primary_keys={"products": "id", "logs": "id", "sessions": "id"},
+        time_primary_keys={},
         relationships=relationships,
     )
     normalized_metadata = denormalize_metadata(
         metadata=multi_metadata,
-        target_table="log",
+        target_table="logs",
     )
     assert normalized_metadata.ml_types == {
         "id": Integer,
@@ -116,7 +86,7 @@ def test_denormalize_metadata_three_tables():
 def test_denormalize_metadata_four_tables(four_table_metadata):
     normalized_metadata = denormalize_metadata(
         metadata=four_table_metadata,
-        target_table="log",
+        target_table="logs",
     )
     assert normalized_metadata.ml_types == {
         "id": Integer,

@@ -1,93 +1,33 @@
-import numpy as np
-import pandas as pd
-import pytest
-
 from trane.parsing.denormalize import (
     child_relationships,
     denormalize,
 )
+from trane.utils.testing_utils import generate_mock_data
 
 
-@pytest.fixture()
-def products_df():
-    return pd.DataFrame(
-        {
-            "id": [1, 2, 3],
-            "price": [10, 20, 30],
-        },
-    )
-
-
-@pytest.fixture()
-def logs_df():
-    return pd.DataFrame(
-        {
-            "id": [1, 2, 3, 4, 5],
-            "product_id": [1, 2, 3, 1, 2],
-            "session_id": [1, 1, 2, 2, 2],
-        },
-    )
-
-
-@pytest.fixture()
-def sessions_df():
-    return pd.DataFrame(
-        {
-            "id": [0, 1, 2, 3, 4, 5],
-            "customer_id": pd.Categorical([0, 0, 0, 1, 1, 2]),
-        },
-    )
-
-
-@pytest.fixture()
-def régions_df():
-    return pd.DataFrame(
-        {
-            "id": ["United States", "Mexico"],
-        },
-    )
-
-
-@pytest.fixture()
-def stores_df():
-    return pd.DataFrame(
-        {
-            "id": range(6),
-            "région_id": ["United States"] * 3 + ["Mexico"] * 2 + [np.nan],
-        },
-    )
-
-
-@pytest.fixture()
-def customers_df():
-    return pd.DataFrame(
-        {
-            "id": pd.Categorical([0, 1, 2]),
-            "age": [33, 25, 56],
-            "région_id": ["United States"] * 3,
-        },
-    )
-
-
-def test_denormalize_two_tables(products_df, logs_df):
+def test_denormalize_two_tables():
     """
       Products
      /
-    Log
+    Logs
     """
+    dataframes, _, relationships = generate_mock_data(tables=["products", "logs"])
+    products_df = dataframes["products"]
+    logs_df = dataframes["logs"]
+
     assert products_df["id"].is_unique
     assert logs_df["id"].is_unique
     relationships = [
         # one to many relationship
-        ("products", "id", "log", "product_id"),
+        ("products", "id", "logs", "product_id"),
     ]
     flat = denormalize(
         dataframes={
-            "products": (products_df, "id"),
-            "log": (logs_df, "id"),
+            "products": products_df,
+            "logs": logs_df,
         },
         relationships=relationships,
-        target_entity="log",
+        target_entity="logs",
     )
     assert flat.shape == (5, 4)
     assert flat["id"].is_unique
@@ -104,12 +44,18 @@ def test_denormalize_two_tables(products_df, logs_df):
     assert flat["products.price"].tolist() == [10, 20, 30, 10, 20]
 
 
-def test_denormalize_three_tables(products_df, logs_df, sessions_df):
+def test_denormalize_three_tables():
     """
     S   P   Sessions, Products
      \\ /   .
-      L     Log
+      L     Logs
     """
+    dataframes, _, relationships = generate_mock_data(
+        tables=["products", "logs", "sessions"],
+    )
+    products_df = dataframes["products"]
+    logs_df = dataframes["logs"]
+    sessions_df = dataframes["sessions"]
     assert sessions_df["id"].is_unique
 
     for session_id in logs_df["session_id"].tolist():
@@ -119,17 +65,17 @@ def test_denormalize_three_tables(products_df, logs_df, sessions_df):
         assert product_id in products_df["id"].tolist()
     relationships = [
         # one to many relationships
-        ("products", "id", "log", "product_id"),
-        ("sessions", "id", "log", "session_id"),
+        ("products", "id", "logs", "product_id"),
+        ("sessions", "id", "logs", "session_id"),
     ]
     flat = denormalize(
         dataframes={
-            "products": (products_df, "id"),
-            "log": (logs_df, "id"),
-            "sessions": (sessions_df, "id"),
+            "products": products_df,
+            "logs": logs_df,
+            "sessions": sessions_df,
         },
         relationships=relationships,
-        target_entity="log",
+        target_entity="logs",
     )
     assert flat.shape == (5, 5)
     assert flat["id"].is_unique
@@ -141,29 +87,31 @@ def test_denormalize_three_tables(products_df, logs_df, sessions_df):
     assert flat["sessions.customer_id"].tolist() == [0, 0, 0, 0, 0]
 
 
-def test_denormalize_four_tables(products_df, logs_df, sessions_df, customers_df):
+def test_denormalize_four_tables():
     """
      C       Customers
      |
     |||
      S   P   Sessions, Products
      \\ //
-       L     Log
+       L     Logs
     """
-    relationships = [
-        ("sessions", "id", "log", "session_id"),
-        ("customers", "id", "sessions", "customer_id"),
-        ("products", "id", "log", "product_id"),
-    ]
+    dataframes, _, relationships = generate_mock_data(
+        tables=["products", "logs", "sessions", "customers"],
+    )
+    products_df = dataframes["products"]
+    logs_df = dataframes["logs"]
+    sessions_df = dataframes["sessions"]
+    customers_df = dataframes["customers"]
     flat = denormalize(
         dataframes={
-            "products": (products_df, "id"),
-            "log": (logs_df, "id"),
-            "sessions": (sessions_df, "id"),
-            "customers": (customers_df, "id"),
+            "products": products_df,
+            "logs": logs_df,
+            "sessions": sessions_df,
+            "customers": customers_df,
         },
         relationships=relationships,
-        target_entity="log",
+        target_entity="logs",
     )
     assert flat.shape == (5, 7)
     assert flat["id"].is_unique
@@ -177,7 +125,7 @@ def test_denormalize_four_tables(products_df, logs_df, sessions_df, customers_df
     assert flat["product_id"].tolist() == [1, 2, 3, 1, 2]
 
 
-def test_denormalize_change_target(products_df, logs_df, sessions_df, customers_df):
+def test_denormalize_change_target():
     """
      C       Customers
      |
@@ -185,19 +133,21 @@ def test_denormalize_change_target(products_df, logs_df, sessions_df, customers_
       S   P   Sessions, Products
      ||| |||
        ||
-        L     Log
+        L     Logs
     """
-    relationships = [
-        ("sessions", "id", "log", "session_id"),
-        ("customers", "id", "sessions", "customer_id"),
-        ("products", "id", "log", "product_id"),
-    ]
+    dataframes, _, relationships = generate_mock_data(
+        tables=["products", "logs", "sessions", "customers"],
+    )
+    products_df = dataframes["products"]
+    logs_df = dataframes["logs"]
+    sessions_df = dataframes["sessions"]
+    customers_df = dataframes["customers"]
     flat = denormalize(
         dataframes={
-            "products": (products_df, "id"),
-            "log": (logs_df, "id"),
-            "sessions": (sessions_df, "id"),
-            "customers": (customers_df, "id"),
+            "products": products_df,
+            "logs": logs_df,
+            "sessions": sessions_df,
+            "customers": customers_df,
         },
         relationships=relationships,
         target_entity="sessions",
@@ -213,11 +163,11 @@ def test_denormalize_change_target(products_df, logs_df, sessions_df, customers_
 
 def test_child_relationships():
     relationships = [
-        ("sessions", "id", "log", "session_id"),
+        ("sessions", "id", "logs", "session_id"),
         ("customers", "id", "sessions", "customer_id"),
-        ("products", "id", "log", "product_id"),
+        ("products", "id", "logs", "product_id"),
     ]
-    valid = child_relationships("log", relationships=relationships)
+    valid = child_relationships("logs", relationships=relationships)
     assert len(valid) == 3
     for relationship in relationships:
         assert relationship in valid

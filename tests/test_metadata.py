@@ -92,11 +92,11 @@ def multi_metadata():
                 "column_7": "Datetime",
             },
         },
-        indices={
+        primary_keys={
             "orders": "column_1",
             "customers": "column_5",
         },
-        time_indices={
+        time_primary_keys={
             "orders": "column_3",
             "customers": "column_7",
         },
@@ -119,11 +119,11 @@ def test_init_multi(multi_metadata):
             "column_7": Datetime,
         },
     }
-    assert multi_metadata.indices == {
+    assert multi_metadata.primary_keys == {
         "orders": "column_1",
         "customers": "column_5",
     }
-    assert multi_metadata.time_indices == {
+    assert multi_metadata.time_primary_keys == {
         "orders": "column_3",
         "customers": "column_7",
     }
@@ -134,7 +134,7 @@ def test_init_multi(multi_metadata):
 
 def test_set_index_multi(multi_metadata):
     multi_metadata.set_index("orders", "column_2")
-    assert multi_metadata.indices == {
+    assert multi_metadata.primary_keys == {
         "orders": "column_2",
         "customers": "column_5",
     }

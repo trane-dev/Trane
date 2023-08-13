@@ -62,22 +62,22 @@ class SingleTableMetadata(BaseMetadata):
 
 class MultiTableMetadata(BaseMetadata):
     ml_types = defaultdict(dict)
-    indices = defaultdict(dict)
-    time_indices = defaultdict(dict)
+    primary_keys = defaultdict(dict)
+    time_primary_keys = defaultdict(dict)
     relationships = []
 
     def __init__(
         self,
         ml_types: dict,
-        indices: str = None,
-        time_indices: str = None,
+        primary_keys: str = None,
+        time_primary_keys: str = None,
         relationships: list = None,
     ):
         self.ml_types = _parse_ml_types(ml_types, type_=self.get_metadata_type())
-        if indices:
-            self.set_indices(indices)
-        if time_indices:
-            self.set_time_indices(time_indices)
+        if primary_keys:
+            self.set_primary_keys(primary_keys)
+        if time_primary_keys:
+            self.set_time_primary_keys(time_primary_keys)
         if relationships:
             self.add_relationships(relationships)
 
@@ -85,26 +85,26 @@ class MultiTableMetadata(BaseMetadata):
     def get_metadata_type():
         return "multi"
 
-    def set_time_indices(self, time_indices):
-        for table, time_index_column in time_indices.items():
+    def set_time_primary_keys(self, time_primary_keys):
+        for table, time_index_column in time_primary_keys.items():
             self.set_time_index(table, time_index_column)
 
     def set_time_index(self, table, column):
         self.check_if_table_exists(table)
         if self.get_ml_type(table, column) not in [Datetime, Datetime()]:
             raise ValueError("Time index must be of type Datetime")
-        self.time_indices[table] = column
+        self.time_primary_keys[table] = column
         self.ml_types[table][column] = Datetime
 
-    def set_indices(self, indices):
-        for table, index_column in indices.items():
+    def set_primary_keys(self, primary_keys):
+        for table, index_column in primary_keys.items():
             self.set_index(table, index_column)
 
     def set_index(self, table, column):
         self.check_if_table_exists(table)
         if column not in self.ml_types[table]:
             raise ValueError("Index does not exist in ml_types")
-        self.indices[table] = column
+        self.primary_keys[table] = column
 
     def add_table(self, table, ml_types):
         if table in self.ml_types:
@@ -129,7 +129,7 @@ class MultiTableMetadata(BaseMetadata):
 
     def check_if_table_exists(self, table):
         if table not in self.ml_types:
-            raise ValueError("Table does not exist")
+            raise ValueError(f"Table: {table} does not exist")
 
     def remove_relationship(self, relationships):
         if not isinstance(relationships, list):

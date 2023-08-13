@@ -1,10 +1,7 @@
 import pandas as pd
 import pytest
 
-from trane.ops.transformation_ops import (
-    OrderByOp,
-    IdentityOp
-)
+from trane.ops.transformation_ops import IdentityOp, OrderByOp
 
 
 @pytest.fixture

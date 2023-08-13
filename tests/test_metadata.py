@@ -7,9 +7,9 @@ from trane.metadata.metadata import MultiTableMetadata, SingleTableMetadata
 from trane.typing.ml_types import Categorical, Datetime, Double, Integer, Unknown
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def single_metadata():
-    return SingleTableMetadata(
+    single_metadata = SingleTableMetadata(
         ml_types={
             "column_1": "Categorical",
             "column_2": "Integer",
@@ -18,6 +18,7 @@ def single_metadata():
         index="column_1",
         time_index="column_3",
     )
+    return single_metadata
 
 
 def test_init_single(single_metadata):
@@ -100,7 +101,7 @@ def multi_metadata():
             "customers": "column_7",
         },
         relationships=[
-            ("parent_table", "parent_column", "child_table", "child_column"),
+            ("orders", "column_1", "customers", "column_5"),
         ],
     )
 
@@ -164,11 +165,12 @@ def test_set_type_multi(multi_metadata):
 
 
 def test_add_relationships(multi_metadata):
+    multi_metadata.clear_relationships()
     multi_metadata.add_relationships(
         ("orders", "column_1", "customers", "column_6"),
     )
     assert multi_metadata.relationships == [
-        [("orders", "column_1", "customers", "column_6")],
+        ("orders", "column_1", "customers", "column_6"),
     ]
 
 

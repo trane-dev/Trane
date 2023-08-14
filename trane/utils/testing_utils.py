@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 
@@ -14,20 +13,42 @@ def generate_mock_data(tables):
     ml_types = {}
     dataframes = {}
     if "products" in tables:
-        dataframes["products"] = products_df()
+        dataframes["products"] = pd.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "price": [10, 20, 30],
+            },
+        )
         ml_types["products"] = {"id": "Integer", "price": "Double"}
     if "logs" in tables:
-        dataframes["logs"] = logs_df()
+        dataframes["logs"] = pd.DataFrame(
+            {
+                "id": [1, 2, 3, 4, 5],
+                "product_id": [1, 2, 3, 1, 2],
+                "session_id": [1, 1, 2, 2, 2],
+            },
+        )
         ml_types["logs"] = {
             "id": "Integer",
             "product_id": "Integer",
             "session_id": "Integer",
         }
     if "sessions" in tables:
-        dataframes["sessions"] = sessions_df()
+        dataframes["sessions"] = pd.DataFrame(
+            {
+                "id": [0, 1, 2, 3, 4, 5],
+                "customer_id": pd.Categorical([0, 0, 0, 1, 1, 2]),
+            },
+        )
         ml_types["sessions"] = {"id": "Integer", "customer_id": "Categorical"}
     if "customers" in tables:
-        dataframes["customers"] = customers_df()
+        dataframes["customers"] = pd.DataFrame(
+            {
+                "id": pd.Categorical([0, 1, 2]),
+                "age": [33, 25, 56],
+                "région_id": ["United States"] * 3,
+            },
+        )
         ml_types["customers"] = {
             "id": "Integer",
             "age": "Integer",
@@ -42,58 +63,3 @@ def generate_mock_data(tables):
     if "customers" in tables and "sessions" in tables:
         relationships.append(("customers", "id", "sessions", "customer_id"))
     return dataframes, ml_types, relationships
-
-
-def products_df():
-    return pd.DataFrame(
-        {
-            "id": [1, 2, 3],
-            "price": [10, 20, 30],
-        },
-    )
-
-
-def logs_df():
-    return pd.DataFrame(
-        {
-            "id": [1, 2, 3, 4, 5],
-            "product_id": [1, 2, 3, 1, 2],
-            "session_id": [1, 1, 2, 2, 2],
-        },
-    )
-
-
-def sessions_df():
-    return pd.DataFrame(
-        {
-            "id": [0, 1, 2, 3, 4, 5],
-            "customer_id": pd.Categorical([0, 0, 0, 1, 1, 2]),
-        },
-    )
-
-
-def régions_df():
-    return pd.DataFrame(
-        {
-            "id": ["United States", "Mexico"],
-        },
-    )
-
-
-def stores_df():
-    return pd.DataFrame(
-        {
-            "id": range(6),
-            "région_id": ["United States"] * 3 + ["Mexico"] * 2 + [np.nan],
-        },
-    )
-
-
-def customers_df():
-    return pd.DataFrame(
-        {
-            "id": pd.Categorical([0, 1, 2]),
-            "age": [33, 25, 56],
-            "région_id": ["United States"] * 3,
-        },
-    )

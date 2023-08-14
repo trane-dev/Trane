@@ -99,8 +99,8 @@ def denormalize_metadata(metadata, target_table: str):
 
 
 def flatten_dataframes(parent_table, child_table, parent_key, child_key):
-    parent_table = parent_table.set_index(parent_key, inplace=False)
-    child_table = child_table.set_index(child_key, inplace=False)
+    parent_table.set_index(parent_key, inplace=True)
+    child_table.set_index(child_key, inplace=True)
     return parent_table.merge(
         child_table,
         # right = we want to keep all the rows in the child table

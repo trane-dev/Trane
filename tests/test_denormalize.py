@@ -11,21 +11,14 @@ def test_denormalize_two_tables():
      /
     Logs
     """
-    dataframes, _, relationships = generate_mock_data(tables=["products", "logs"])
+    dataframes, _, relationships, _ = generate_mock_data(tables=["products", "logs"])
     products_df = dataframes["products"]
     logs_df = dataframes["logs"]
 
     assert products_df["id"].is_unique
     assert logs_df["id"].is_unique
-    relationships = [
-        # one to many relationship
-        ("products", "id", "logs", "product_id"),
-    ]
     flat = denormalize(
-        dataframes={
-            "products": products_df,
-            "logs": logs_df,
-        },
+        dataframes=dataframes,
         relationships=relationships,
         target_entity="logs",
     )
@@ -50,30 +43,18 @@ def test_denormalize_three_tables():
      \\ /   .
       L     Logs
     """
-    dataframes, _, relationships = generate_mock_data(
+    dataframes, _, relationships, _ = generate_mock_data(
         tables=["products", "logs", "sessions"],
     )
-    products_df = dataframes["products"]
-    logs_df = dataframes["logs"]
-    sessions_df = dataframes["sessions"]
-    assert sessions_df["id"].is_unique
+    assert dataframes["sessions"]["id"].is_unique
 
-    for session_id in logs_df["session_id"].tolist():
-        assert session_id in sessions_df["id"].tolist()
+    for session_id in dataframes["logs"]["session_id"].tolist():
+        assert session_id in dataframes["sessions"]["id"].tolist()
 
-    for product_id in logs_df["product_id"].tolist():
-        assert product_id in products_df["id"].tolist()
-    relationships = [
-        # one to many relationships
-        ("products", "id", "logs", "product_id"),
-        ("sessions", "id", "logs", "session_id"),
-    ]
+    for product_id in dataframes["logs"]["product_id"].tolist():
+        assert product_id in dataframes["products"]["id"].tolist()
     flat = denormalize(
-        dataframes={
-            "products": products_df,
-            "logs": logs_df,
-            "sessions": sessions_df,
-        },
+        dataframes=dataframes,
         relationships=relationships,
         target_entity="logs",
     )
@@ -96,20 +77,11 @@ def test_denormalize_four_tables():
      \\ //
        L     Logs
     """
-    dataframes, _, relationships = generate_mock_data(
+    dataframes, _, relationships, _ = generate_mock_data(
         tables=["products", "logs", "sessions", "customers"],
     )
-    products_df = dataframes["products"]
-    logs_df = dataframes["logs"]
-    sessions_df = dataframes["sessions"]
-    customers_df = dataframes["customers"]
     flat = denormalize(
-        dataframes={
-            "products": products_df,
-            "logs": logs_df,
-            "sessions": sessions_df,
-            "customers": customers_df,
-        },
+        dataframes=dataframes,
         relationships=relationships,
         target_entity="logs",
     )
@@ -135,20 +107,11 @@ def test_denormalize_change_target():
        ||
         L     Logs
     """
-    dataframes, _, relationships = generate_mock_data(
+    dataframes, _, relationships, _ = generate_mock_data(
         tables=["products", "logs", "sessions", "customers"],
     )
-    products_df = dataframes["products"]
-    logs_df = dataframes["logs"]
-    sessions_df = dataframes["sessions"]
-    customers_df = dataframes["customers"]
     flat = denormalize(
-        dataframes={
-            "products": products_df,
-            "logs": logs_df,
-            "sessions": sessions_df,
-            "customers": customers_df,
-        },
+        dataframes=dataframes,
         relationships=relationships,
         target_entity="sessions",
     )

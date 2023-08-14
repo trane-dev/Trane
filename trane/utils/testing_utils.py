@@ -12,6 +12,7 @@ def generate_mock_data(tables):
     """
     ml_types = {}
     dataframes = {}
+    primary_keys = {}
     if "products" in tables:
         dataframes["products"] = pd.DataFrame(
             {
@@ -20,6 +21,7 @@ def generate_mock_data(tables):
             },
         )
         ml_types["products"] = {"id": "Integer", "price": "Double"}
+        primary_keys["products"] = "id"
     if "logs" in tables:
         dataframes["logs"] = pd.DataFrame(
             {
@@ -33,6 +35,7 @@ def generate_mock_data(tables):
             "product_id": "Integer",
             "session_id": "Integer",
         }
+        primary_keys["logs"] = "id"
     if "sessions" in tables:
         dataframes["sessions"] = pd.DataFrame(
             {
@@ -41,6 +44,7 @@ def generate_mock_data(tables):
             },
         )
         ml_types["sessions"] = {"id": "Integer", "customer_id": "Categorical"}
+        primary_keys["sessions"] = "id"
     if "customers" in tables:
         dataframes["customers"] = pd.DataFrame(
             {
@@ -54,6 +58,7 @@ def generate_mock_data(tables):
             "age": "Integer",
             "région_id": "Categorical",
         }
+        primary_keys["customers"] = "id"
 
     relationships = []
     if "sessions" in tables and "logs" in tables:
@@ -62,4 +67,4 @@ def generate_mock_data(tables):
         relationships.append(("products", "id", "logs", "product_id"))
     if "customers" in tables and "sessions" in tables:
         relationships.append(("customers", "id", "sessions", "customer_id"))
-    return dataframes, ml_types, relationships
+    return dataframes, ml_types, relationships, primary_keys

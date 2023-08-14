@@ -8,7 +8,7 @@ class BaseMetadata:
     def __init__(self):
         raise NotImplementedError
 
-    def set_index(self):
+    def set_primary_key(self):
         raise NotImplementedError
 
     def set_time_index(self):
@@ -26,11 +26,11 @@ class SingleTableMetadata(BaseMetadata):
     def __init__(self, ml_types: dict, index: str = None, time_index: str = None):
         self.ml_types = _parse_ml_types(ml_types, type_=self.get_metadata_type())
         if index:
-            self.set_index(index)
+            self.set_primary_key(index)
         if time_index:
             self.set_time_index(time_index)
 
-    def set_index(self, index):
+    def set_primary_key(self, index):
         if index not in self.ml_types:
             raise ValueError("Index does not exist in ml_types")
         self.index = index
@@ -62,22 +62,22 @@ class SingleTableMetadata(BaseMetadata):
 
 class MultiTableMetadata(BaseMetadata):
     ml_types = defaultdict(dict)
-    primary_keys = defaultdict(dict)
-    time_primary_keys = defaultdict(dict)
-    relationships = []
 
     def __init__(
         self,
         ml_types: dict,
-        primary_keys: str = None,
-        time_primary_keys: str = None,
+        primary_keys=None,
+        time_primary_keys=None,
         relationships: list = None,
     ):
         self.ml_types = _parse_ml_types(ml_types, type_=self.get_metadata_type())
+        self.primary_keys = {}
         if primary_keys:
             self.set_primary_keys(primary_keys)
+        self.time_primary_keys = {}
         if time_primary_keys:
             self.set_time_primary_keys(time_primary_keys)
+        self.relationships = []
         if relationships:
             self.add_relationships(relationships)
 
@@ -98,9 +98,9 @@ class MultiTableMetadata(BaseMetadata):
 
     def set_primary_keys(self, primary_keys):
         for table, index_column in primary_keys.items():
-            self.set_index(table, index_column)
+            self.set_primary_key(table, index_column)
 
-    def set_index(self, table, column):
+    def set_primary_key(self, table, column):
         self.check_if_table_exists(table)
         if column not in self.ml_types[table]:
             raise ValueError("Index does not exist in ml_types")
@@ -131,6 +131,11 @@ class MultiTableMetadata(BaseMetadata):
         if table not in self.ml_types:
             raise ValueError(f"Table: {table} does not exist")
 
+    def remove_table(self, table):
+        self.ml_types.pop(table, None)
+        self.primary_keys.pop(table, None)
+        self.time_primary_keys.pop(table, None)
+
     def remove_relationship(self, relationships):
         if not isinstance(relationships, list):
             relationships = [relationships]
@@ -143,7 +148,6 @@ class MultiTableMetadata(BaseMetadata):
     def check_relationships(self, relationships):
         for rel in relationships:
             if not isinstance(rel, tuple) or len(rel) != 4:
-                breakpoint()
                 raise ValueError(
                     "Relationship must be a tuple (parent_table_name, parent_join_key, child_table_name, child_join_key)",
                 )

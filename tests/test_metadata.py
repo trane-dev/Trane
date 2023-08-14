@@ -30,11 +30,11 @@ def test_init_single(single_metadata):
     assert single_metadata.index == "column_1"
     assert single_metadata.time_index == "column_3"
     with pytest.raises(ValueError):
-        single_metadata.set_index("column_4")
+        single_metadata.set_primary_key("column_4")
 
 
-def test_set_index(single_metadata):
-    single_metadata.set_index("column_2")
+def test_set_primary_key(single_metadata):
+    single_metadata.set_primary_key("column_2")
     assert single_metadata.index == "column_2"
     assert single_metadata.ml_types == {
         "column_1": Categorical,
@@ -42,7 +42,7 @@ def test_set_index(single_metadata):
         "column_3": Datetime,
     }
     with pytest.raises(ValueError):
-        single_metadata.set_index("column_4")
+        single_metadata.set_primary_key("column_4")
 
 
 def test_set_time_index(single_metadata):
@@ -77,8 +77,8 @@ def test_from_dataframe():
     }
 
 
-@pytest.fixture
-def multi_metadata():
+@pytest.fixture(scope="module")
+def multitable_metadata():
     return MultiTableMetadata(
         ml_types={
             "orders": {
@@ -106,8 +106,8 @@ def multi_metadata():
     )
 
 
-def test_init_multi(multi_metadata):
-    assert multi_metadata.ml_types == {
+def test_init_multi(multitable_metadata):
+    assert multitable_metadata.ml_types == {
         "orders": {
             "column_1": Categorical,
             "column_2": Integer,
@@ -119,29 +119,30 @@ def test_init_multi(multi_metadata):
             "column_7": Datetime,
         },
     }
-    assert multi_metadata.primary_keys == {
+    assert multitable_metadata.primary_keys == {
         "orders": "column_1",
         "customers": "column_5",
     }
-    assert multi_metadata.time_primary_keys == {
+    assert multitable_metadata.time_primary_keys == {
         "orders": "column_3",
         "customers": "column_7",
     }
-    assert "column_4" not in multi_metadata.ml_types["orders"]
+    assert "column_4" not in multitable_metadata.ml_types["orders"]
     with pytest.raises(ValueError):
-        multi_metadata.set_index("orders", "column_4")
+        multitable_metadata.set_primary_key("orders", "column_4")
 
 
-def test_set_index_multi(multi_metadata):
-    multi_metadata.set_index("orders", "column_2")
-    assert multi_metadata.primary_keys == {
+def test_set_primary_key_multi(multitable_metadata):
+    multitable_metadata.set_primary_key("orders", "column_2")
+    assert multitable_metadata.primary_keys == {
         "orders": "column_2",
         "customers": "column_5",
     }
 
 
-def test_set_time_index_multi(multi_metadata):
-    multi_metadata.add_table(
+def test_set_time_index_multi(multitable_metadata):
+    multitable_metadata.remove_table("products")
+    multitable_metadata.add_table(
         table="products",
         ml_types={
             "column_8": "Categorical",
@@ -149,33 +150,34 @@ def test_set_time_index_multi(multi_metadata):
             "column_10": "Datetime",
         },
     )
-    multi_metadata.set_index("products", "column_9")
-    multi_metadata.set_time_index("products", "column_10")
+    multitable_metadata.set_primary_key("products", "column_9")
+    multitable_metadata.set_time_index("products", "column_10")
     with pytest.raises(ValueError):
-        multi_metadata.set_time_index("products", "column_9")
+        multitable_metadata.set_time_index("products", "column_9")
 
 
-def test_set_type_multi(multi_metadata):
-    multi_metadata.set_type("orders", "column_1", "double")
-    assert multi_metadata.ml_types["orders"] == {
+def test_set_type_multi(multitable_metadata):
+    multitable_metadata.set_type("orders", "column_1", "double")
+    assert multitable_metadata.ml_types["orders"] == {
         "column_1": Double,
         "column_2": Integer,
         "column_3": Datetime,
     }
 
 
-def test_add_relationships(multi_metadata):
-    multi_metadata.clear_relationships()
-    multi_metadata.add_relationships(
+def test_add_relationships(multitable_metadata):
+    multitable_metadata.clear_relationships()
+    multitable_metadata.add_relationships(
         ("orders", "column_1", "customers", "column_6"),
     )
-    assert multi_metadata.relationships == [
+    assert multitable_metadata.relationships == [
         ("orders", "column_1", "customers", "column_6"),
     ]
 
 
-def test_add_relationships_new_table(multi_metadata):
-    multi_metadata.add_table(
+def test_add_relationships_new_table(multitable_metadata):
+    multitable_metadata.remove_table("products")
+    multitable_metadata.add_table(
         table="products",
         ml_types={
             "column_8": "Categorical",
@@ -184,8 +186,8 @@ def test_add_relationships_new_table(multi_metadata):
         },
     )
     relationships = [("orders", "column_1", "products", "column_9")]
-    multi_metadata.add_relationships(relationships)
-    multi_metadata.remove_relationship(relationships)
+    multitable_metadata.add_relationships(relationships)
+    multitable_metadata.remove_relationship(relationships)
     relationships = [("orders", "column_1", "products", "column_1")]
     with pytest.raises(ValueError):
-        multi_metadata.add_relationships(relationships)
+        multitable_metadata.add_relationships(relationships)

@@ -62,18 +62,16 @@ def denormalize(
 
 
 def flatten_dataframes(parent_table, child_table, parent_key, child_key):
-    return (
-        parent_table.set_index(parent_key)
-        .merge(
-            child_table.set_index(child_key),
-            # right = we want to keep all the rows in the child table
-            how="right",
-            left_index=True,
-            right_index=True,
-            validate="one_to_many",
-        )
-        .reset_index(names=child_key)
-    )
+    parent_table = parent_table.set_index(parent_key, inplace=False)
+    child_table = child_table.set_index(child_key, inplace=False)
+    return parent_table.merge(
+        child_table,
+        # right = we want to keep all the rows in the child table
+        how="right",
+        left_index=True,
+        right_index=True,
+        validate="one_to_many",
+    ).reset_index(names=child_key)
 
 
 def child_relationships(parent_table, relationships):

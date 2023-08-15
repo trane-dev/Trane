@@ -1,10 +1,26 @@
-from trane.core.problem_generator import denormalize_metadata
+import pytest
+
 from trane.metadata import MultiTableMetadata, SingleTableMetadata
+from trane.parsing.denormalize import denormalize
 from trane.typing.ml_types import Categorical, Double, Integer
 from trane.utils.testing_utils import generate_mock_data
 
 
-def test_denormalize_metadata_two_tables():
+@pytest.fixture
+def four_table_metadata():
+    _, ml_types, relationships, primary_keys = generate_mock_data(
+        tables=["products", "logs", "sessions", "customers"],
+    )
+    metadata = MultiTableMetadata(
+        ml_types=ml_types,
+        primary_keys=primary_keys,
+        time_primary_keys={},
+        relationships=relationships,
+    )
+    return metadata
+
+
+def test_denormalize_two_tables():
     _, ml_types, relationships, primary_keys = generate_mock_data(
         tables=["products", "logs"],
     )
@@ -14,7 +30,7 @@ def test_denormalize_metadata_two_tables():
         time_primary_keys={},
         relationships=relationships,
     )
-    normalized_metadata = denormalize_metadata(
+    dataframes, normalized_metadata = denormalize(
         metadata=multi_metadata,
         target_table="logs",
     )
@@ -28,7 +44,7 @@ def test_denormalize_metadata_two_tables():
     assert normalized_metadata.index == multi_metadata.primary_keys["logs"]
 
 
-def test_denormalize_metadata_three_tables():
+def test_denormalize_three_tables():
     """
     S   P   Sessions, Products
      \\ /   .
@@ -43,7 +59,7 @@ def test_denormalize_metadata_three_tables():
         time_primary_keys={},
         relationships=relationships,
     )
-    normalized_metadata = denormalize_metadata(
+    dataframes, normalized_metadata = denormalize(
         metadata=multi_metadata,
         target_table="logs",
     )
@@ -56,7 +72,7 @@ def test_denormalize_metadata_three_tables():
     }
 
 
-def test_denormalize_metadata_four_tables():
+def test_denormalize_four_tables(four_table_metadata):
     """
      C       Customers
      |
@@ -65,16 +81,7 @@ def test_denormalize_metadata_four_tables():
      \\ //
        L     Log
     """
-    _, ml_types, relationships, primary_keys = generate_mock_data(
-        tables=["products", "logs", "sessions", "customers"],
-    )
-    four_table_metadata = MultiTableMetadata(
-        ml_types=ml_types,
-        primary_keys=primary_keys,
-        time_primary_keys={},
-        relationships=relationships,
-    )
-    normalized_metadata = denormalize_metadata(
+    dataframes, normalized_metadata = denormalize(
         metadata=four_table_metadata,
         target_table="logs",
     )
@@ -89,7 +96,7 @@ def test_denormalize_metadata_four_tables():
     }
 
 
-def test_denormalize_metadata_change_target():
+def test_denormalize_change_target(four_table_metadata):
     """
      C       Customers
      |
@@ -98,16 +105,8 @@ def test_denormalize_metadata_change_target():
      \\ //
        L     Log
     """
-    _, ml_types, relationships, primary_keys = generate_mock_data(
-        tables=["products", "logs", "sessions", "customers"],
-    )
-    four_table_metadata = MultiTableMetadata(
-        ml_types=ml_types,
-        primary_keys=primary_keys,
-        time_primary_keys={},
-        relationships=relationships,
-    )
-    normalized_metadata = denormalize_metadata(
+
+    dataframes, normalized_metadata = denormalize(
         metadata=four_table_metadata,
         target_table="sessions",
     )

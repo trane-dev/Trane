@@ -199,8 +199,11 @@ class PredictionProblem:
         if self.entity_col:
             description = "For each <" + self.entity_col + "> predict"
 
-        agg_op = self.operations[1]
+        agg_op = self.operations[2]
         description += agg_op.generate_description()
+
+        transform_op = self.operations[1]
+        description += transform_op.generate_description()
 
         filter_op = self.operations[0]
         description += filter_op.generate_description()

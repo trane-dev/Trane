@@ -6,7 +6,7 @@ import trane
 from trane.datasets.load_functions import load_airbnb_reviews
 from trane.typing import infer_table_meta
 from trane.typing.column_schema import ColumnSchema
-from trane.typing.logical_types import Categorical
+from trane.typing.ml_types import Categorical
 
 from .utils import generate_and_verify_prediction_problem
 

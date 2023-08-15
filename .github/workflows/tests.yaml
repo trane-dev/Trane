@@ -32,7 +32,7 @@ jobs:
         id: cache
         with:
           path: ${{ env.pythonLocation }}
-          key: py-${{ matrix.python-version }}-tests-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-v01
+          key: py-${{ matrix.python-version }}-tests-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-v02
       - name: Install core deps (if cache has changed)
         if: (steps.cache.outputs.cache-hit != 'true') || ( github.event.pull_request.title == 'Automated Latest Dependency Updates')
         run: python -m pip install ".[test]"

@@ -19,6 +19,7 @@ from trane.ops.filter_ops import (
     LessFilterOp,
     NeqFilterOp,
 )
+from trane.ops.transformation_ops import IdentityOp, OrderByOp, TransformationOpBase
 from trane.utils import multiprocess_prediction_problem
 
 agg_op_str_dict = {
@@ -29,6 +30,11 @@ agg_op_str_dict = {
     MajorityAggregationOp: " the majority <{}> in all related records",
     CountAggregationOp: "the number of records",
     ExistsAggregationOp: "if there exists a record",
+}
+
+transform_op_str_dict = {
+    IdentityOp: "",
+    OrderByOp: " sorted by <{}>",
 }
 
 filter_op_str_dict = {
@@ -85,6 +91,16 @@ def generate_and_verify_prediction_problem(
                 assert expected_agg_str in p_str
                 if op.column_name:
                     # agg_column_name
+                    _ = op.column_name
+            elif isinstance(op, TransformationOpBase):
+                expected_transform_str = transform_op_str_dict[op.__class__]
+                expected_transform_str = expected_transform_str.replace(
+                    "<{}>",
+                    f"<{op.column_name}>",
+                )
+                assert expected_transform_str in p_str
+                if op.column_name:
+                    # filter_column_name
                     _ = op.column_name
             elif isinstance(op, FilterOpBase):
                 expected_filter_str = filter_op_str_dict[op.__class__]

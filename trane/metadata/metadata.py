@@ -20,20 +20,20 @@ class BaseMetadata:
 
 class SingleTableMetadata(BaseMetadata):
     ml_types = defaultdict(dict)
-    index = None
+    primary_key = None
     time_index = None
 
-    def __init__(self, ml_types: dict, index: str = None, time_index: str = None):
+    def __init__(self, ml_types: dict, primary_key: str = None, time_index: str = None):
         self.ml_types = _parse_ml_types(ml_types, type_=self.get_metadata_type())
-        if index:
-            self.set_primary_key(index)
+        if primary_key:
+            self.set_primary_key(primary_key)
         if time_index:
             self.set_time_index(time_index)
 
-    def set_primary_key(self, index):
-        if index not in self.ml_types:
+    def set_primary_key(self, primary_key):
+        if primary_key not in self.ml_types:
             raise ValueError("Index does not exist in ml_types")
-        self.index = index
+        self.primary_key = primary_key
 
     def set_time_index(self, time_index):
         if time_index not in self.ml_types:

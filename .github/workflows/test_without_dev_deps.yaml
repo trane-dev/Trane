@@ -43,7 +43,7 @@ jobs:
           window_size = "1m"
           table_meta = trane.typing.infer_table_meta(df, entity_col, time_col)
           table_meta["location"] = trane.typing.column_schema.ColumnSchema(
-              trane.typing.logical_types.Categorical, semantic_tags={"category", "primary_key"}
+              trane.typing.ml_types.Categorical, semantic_tags={"category", "primary_key"}
           )
           cutoff_strategy = trane.CutoffStrategy(
               entity_col=entity_col,

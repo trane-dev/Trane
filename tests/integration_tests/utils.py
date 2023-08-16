@@ -10,6 +10,8 @@ from trane.ops.aggregation_ops import (
     MaxAggregationOp,
     MinAggregationOp,
     SumAggregationOp,
+    FirstAggregationOp,
+    LastAggregationOp,
 )
 from trane.ops.filter_ops import (
     AllFilterOp,
@@ -28,8 +30,10 @@ agg_op_str_dict = {
     MaxAggregationOp: " the maximum <{}> in all related records",
     MinAggregationOp: " the minimum <{}> in all related records",
     MajorityAggregationOp: " the majority <{}> in all related records",
-    CountAggregationOp: "the number of records",
-    ExistsAggregationOp: "if there exists a record",
+    CountAggregationOp: " the number of records",
+    ExistsAggregationOp: " if there exists a record",
+    FirstAggregationOp: " the first <{}> in all related records",
+    LastAggregationOp: " the last <{}> in all related records",
 }
 
 transform_op_str_dict = {

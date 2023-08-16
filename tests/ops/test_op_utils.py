@@ -7,6 +7,8 @@ from trane.ops.aggregation_ops import (
     MaxAggregationOp,
     MinAggregationOp,
     SumAggregationOp,
+    FirstAggregationOp,
+    LastAggregationOp
 )
 from trane.ops.filter_ops import (
     AllFilterOp,
@@ -33,6 +35,8 @@ def test_get_aggregation_ops():
         MinAggregationOp,
         MajorityAggregationOp,
         ExistsAggregationOp,
+        FirstAggregationOp,
+        LastAggregationOp,
     ]
 
 

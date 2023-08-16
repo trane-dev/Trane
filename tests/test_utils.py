@@ -18,6 +18,8 @@ from trane.ops.aggregation_ops import (
     MaxAggregationOp,
     MinAggregationOp,
     SumAggregationOp,
+    FirstAggregationOp,
+    LastAggregationOp
 )
 from trane.ops.filter_ops import (
     AllFilterOp,
@@ -237,6 +239,15 @@ def test_check_operations_cat():
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
 
+    # For each <id> predict the first <state> in all related records
+    operations = [AllFilterOp(None), IdentityOp(None), FirstAggregationOp("state")]
+    result, modified_meta = _check_operations_valid(operations, table_meta)
+    assert result is True
+
+    # For each <id> predict the last <state> in all related records
+    operations = [AllFilterOp(None), IdentityOp(None), LastAggregationOp("state")]
+    result, modified_meta = _check_operations_valid(operations, table_meta)
+    assert result is True
 
 def test_foreign_key():
     table_meta = {

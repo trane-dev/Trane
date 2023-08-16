@@ -5,12 +5,12 @@ import pytest
 from trane.ops.aggregation_ops import (
     AvgAggregationOp,
     CountAggregationOp,
+    FirstAggregationOp,
+    LastAggregationOp,
     MajorityAggregationOp,
     MaxAggregationOp,
     MinAggregationOp,
     SumAggregationOp,
-    FirstAggregationOp,
-    LastAggregationOp
 )
 from trane.ops.utils import get_aggregation_ops
 
@@ -56,11 +56,13 @@ def test_min_agg_op(df):
     assert output == np.min(df["col"])
     assert "the minimum <col> in all related records" in op.generate_description()
 
+
 def test_first_agg_op(df):
     op = FirstAggregationOp("col")
     output = op(df)
     assert output == df["col"].iloc[0]
     assert "the first <col> in all related records" in op.generate_description()
+
 
 def test_last_agg_op(df):
     op = LastAggregationOp("col")

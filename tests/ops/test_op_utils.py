@@ -3,12 +3,12 @@ from trane.ops.aggregation_ops import (
     AvgAggregationOp,
     CountAggregationOp,
     ExistsAggregationOp,
+    FirstAggregationOp,
+    LastAggregationOp,
     MajorityAggregationOp,
     MaxAggregationOp,
     MinAggregationOp,
     SumAggregationOp,
-    FirstAggregationOp,
-    LastAggregationOp
 )
 from trane.ops.filter_ops import (
     AllFilterOp,

@@ -149,6 +149,7 @@ class FirstAggregationOp(AggregationOpBase):
             return None
         return dataslice[self.column_name].iloc[0]
 
+
 class LastAggregationOp(AggregationOpBase):
     input_output_types = [("category", "category")]
     description = " the last <{}> in all related records"

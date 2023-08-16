@@ -14,12 +14,12 @@ from trane.ops.aggregation_ops import (
     AvgAggregationOp,
     CountAggregationOp,
     ExistsAggregationOp,
+    FirstAggregationOp,
+    LastAggregationOp,
     MajorityAggregationOp,
     MaxAggregationOp,
     MinAggregationOp,
     SumAggregationOp,
-    FirstAggregationOp,
-    LastAggregationOp
 )
 from trane.ops.filter_ops import (
     AllFilterOp,
@@ -248,6 +248,7 @@ def test_check_operations_cat():
     operations = [AllFilterOp(None), IdentityOp(None), LastAggregationOp("state")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
+
 
 def test_foreign_key():
     table_meta = {

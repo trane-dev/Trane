@@ -31,6 +31,9 @@ class MLType(object, metaclass=MLTypeMetaClass):
     def __str__(self):
         return str(self.__class__)
 
+    def __repr__(self):
+        return self.__str__()
+
     def transform(self, series: pd.Series):
         return series.astype(self.dtype)
 
@@ -42,7 +45,10 @@ class MLType(object, metaclass=MLTypeMetaClass):
         return self.tags | self.mandatory_tags
 
     def add_tags(self, tags):
-        self.tags.add(tags)
+        if isinstance(tags, set):
+            self.tags.update(tags)
+        else:
+            self.tags.add(tags)
 
 
 class Boolean(MLType):

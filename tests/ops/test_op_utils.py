@@ -3,6 +3,8 @@ from trane.ops.aggregation_ops import (
     AvgAggregationOp,
     CountAggregationOp,
     ExistsAggregationOp,
+    FirstAggregationOp,
+    LastAggregationOp,
     MajorityAggregationOp,
     MaxAggregationOp,
     MinAggregationOp,
@@ -33,6 +35,8 @@ def test_get_aggregation_ops():
         MinAggregationOp,
         MajorityAggregationOp,
         ExistsAggregationOp,
+        FirstAggregationOp,
+        LastAggregationOp,
     ]
 
 

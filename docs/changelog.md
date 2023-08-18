@@ -10,6 +10,7 @@ v0.6.0 (, 2023)
     * Add Airbnb Reviews dataset [#125][#125]
     * Add Store dataset [#131][#131]
     * Add Order By Operation (OrderByOp, along with IdentityOp and TransformationOpBase) [#138][#138]
+    * Add First and Last Aggregation Operations [#144][#144]
 * Fixes
     * Rename `_execute_operations_on_df` to `target` in executed prediction problem dataframe [#124][#124]
     * Clean up operation description generation [#118][#118]
@@ -23,6 +24,7 @@ v0.6.0 (, 2023)
     [#125]: <https://github.com/trane-dev/Trane/pull/125>
     [#131]: <https://github.com/trane-dev/Trane/pull/131>
     [#138]: <https://github.com/trane-dev/Trane/pull/138>
+    [#144]: <https://github.com/trane-dev/Trane/pull/144>
 
 
 v0.5.0 (July 27, 2023)

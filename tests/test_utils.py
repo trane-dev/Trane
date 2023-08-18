@@ -14,6 +14,8 @@ from trane.ops.aggregation_ops import (
     AvgAggregationOp,
     CountAggregationOp,
     ExistsAggregationOp,
+    FirstAggregationOp,
+    LastAggregationOp,
     MajorityAggregationOp,
     MaxAggregationOp,
     MinAggregationOp,
@@ -234,6 +236,16 @@ def test_check_operations_cat():
 
     # For each <id> predict if there exists a record in all related records with <state> equal to NY
     operations = [AllFilterOp(None), IdentityOp(None), ExistsAggregationOp("state")]
+    result, modified_meta = _check_operations_valid(operations, table_meta)
+    assert result is True
+
+    # For each <id> predict the first <state> in all related records
+    operations = [AllFilterOp(None), IdentityOp(None), FirstAggregationOp("state")]
+    result, modified_meta = _check_operations_valid(operations, table_meta)
+    assert result is True
+
+    # For each <id> predict the last <state> in all related records
+    operations = [AllFilterOp(None), IdentityOp(None), LastAggregationOp("state")]
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
 

@@ -137,14 +137,27 @@ class ExistsAggregationOp(AggregationOpBase):
         return len(dataslice) > 0
 
 
-# class FirstAggregationOp(AggregationOpBase):
-#     input_output_types = [("category", "category")]
-#     description = " the first <{}> in all related records"
-#     def label_function(self, dataslice):
-#         return dataslice[self.column_name].iloc[0]
+class FirstAggregationOp(AggregationOpBase):
+    input_output_types = [("category", "category")]
+    description = " the first <{}> in all related records"
 
-# class LastAggregationOp(AggregationOpBase):
-#     input_output_types = [("category", "category")]
-#     description = " the last <{}> in all related records"
-#     def label_function(self, dataslice):
-#         return dataslice[self.column_name].iloc[-1]
+    def generate_description(self):
+        return self.description.format(self.column_name)
+
+    def label_function(self, dataslice):
+        if len(dataslice) == 0:
+            return None
+        return dataslice[self.column_name].iloc[0]
+
+
+class LastAggregationOp(AggregationOpBase):
+    input_output_types = [("category", "category")]
+    description = " the last <{}> in all related records"
+
+    def generate_description(self):
+        return self.description.format(self.column_name)
+
+    def label_function(self, dataslice):
+        if len(dataslice) == 0:
+            return None
+        return dataslice[self.column_name].iloc[-1]

@@ -292,9 +292,15 @@ def test_generate_possible_operations():
             assert filter_op.column_name is None
         assert agg_op.column_name not in ["id", "time", "user_id"]
         assert filter_op.column_name not in ["id", "time", "user_id"]
-        assert {filter_op, transform_op, agg_op}.intersection(filter_op.restricted_ops) == set()
-        assert {filter_op, transform_op, agg_op}.intersection(transform_op.restricted_ops) == set()
-        assert {filter_op, transform_op, agg_op}.intersection(agg_op.restricted_ops) == set()
+        assert {filter_op, transform_op, agg_op}.intersection(
+            filter_op.restricted_ops
+        ) == set()
+        assert {filter_op, transform_op, agg_op}.intersection(
+            transform_op.restricted_ops
+        ) == set()
+        assert {filter_op, transform_op, agg_op}.intersection(
+            agg_op.restricted_ops
+        ) == set()
 
 
 def test_clean_date():

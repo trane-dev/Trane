@@ -293,19 +293,19 @@ def test_generate_possible_operations():
         assert agg_op.column_name not in ["id", "time", "user_id"]
         assert filter_op.column_name not in ["id", "time", "user_id"]
         assert {
-            filter_op.__name__,
-            transform_op.__name__,
-            agg_op.__name__,
+            filter_op.__class__.__name__,
+            transform_op.__class__.__name__,
+            agg_op.__class__.__name__,
         }.intersection(filter_op.restricted_ops) == set()
         assert {
-            filter_op.__name__,
-            transform_op.__name__,
-            agg_op.__name__,
+            filter_op.__class__.__name__,
+            transform_op.__class__.__name__,
+            agg_op.__class__.__name__,
         }.intersection(transform_op.restricted_ops) == set()
         assert {
-            filter_op.__name__,
-            transform_op.__name__,
-            agg_op.__name__,
+            filter_op.__class__.__name__,
+            transform_op.__class__.__name__,
+            agg_op.__class__.__name__,
         }.intersection(agg_op.restricted_ops) == set()
 
 

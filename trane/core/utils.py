@@ -166,7 +166,11 @@ def _generate_possible_operations(
     ):
         if (
             len(
-                {agg_operation, transform_operation, filter_operation}.intersection(
+                {
+                    agg_operation.__name__,
+                    transform_operation.__name__,
+                    filter_operation.__name__,
+                }.intersection(
                     agg_operation.restricted_ops.union(
                         transform_operation.restricted_ops.union(
                             filter_operation.restricted_ops

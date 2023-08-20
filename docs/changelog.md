@@ -19,6 +19,7 @@ v0.6.0 (, 2023)
     * Remove FeaturetoolsWrapper class [#100][#100]
     * Remove covid19 and youtube datasets [#131][#131]
     * Prevent Aggregation operations besides `FirstAggregationOp` and `LastAggregationOp` to be paired with `OrderByOp` [#147][#147]
+    * Prevent `FirstAggregationOp` and `LastAggregationOp` from being paired with `IdentityByOp` (hence only allowing `IdentityByOp`) [#147][#147]
 
     [#124]: <https://github.com/trane-dev/Trane/pull/124>
     [#118]: <https://github.com/trane-dev/Trane/pull/118>

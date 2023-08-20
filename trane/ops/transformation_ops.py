@@ -1,8 +1,3 @@
-from trane.ops.aggregation_ops import (
-    AggregationOpBase,
-    FirstAggregationOp,
-    LastAggregationOp,
-)
 from trane.ops.op_base import OpBase
 
 
@@ -32,9 +27,14 @@ class IdentityOp(TransformationOpBase):
 class OrderByOp(TransformationOpBase):
     input_output_types = [("numeric", "Double")]
     description = " sorted by <{}>"
-    restricted_ops = set(AggregationOpBase.__subclasses__()) - {
-        FirstAggregationOp,
-        LastAggregationOp,
+    restricted_ops = {
+        "CountAggregationOp",
+        "SumAggregationOp",
+        "AvgAggregationOp",
+        "MaxAggregationOp",
+        "MinAggregationOp",
+        "MajorityAggregationOp",
+        "ExistsAggregationOp",
     }
 
     def generate_description(self):

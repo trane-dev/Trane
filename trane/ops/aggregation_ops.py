@@ -140,6 +140,7 @@ class ExistsAggregationOp(AggregationOpBase):
 class FirstAggregationOp(AggregationOpBase):
     input_output_types = [("category", "category")]
     description = " the first <{}> in all related records"
+    restricted_ops = {"IdentityOp"}
 
     def generate_description(self):
         return self.description.format(self.column_name)
@@ -153,6 +154,7 @@ class FirstAggregationOp(AggregationOpBase):
 class LastAggregationOp(AggregationOpBase):
     input_output_types = [("category", "category")]
     description = " the last <{}> in all related records"
+    restricted_ops = {"IdentityOp"}
 
     def generate_description(self):
         return self.description.format(self.column_name)

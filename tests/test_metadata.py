@@ -15,7 +15,7 @@ def single_metadata():
             "column_2": "Integer",
             "column_3": "Datetime",
         },
-        index="column_1",
+        primary_key="column_1",
         time_index="column_3",
     )
     return single_metadata

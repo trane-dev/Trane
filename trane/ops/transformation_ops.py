@@ -27,6 +27,15 @@ class IdentityOp(TransformationOpBase):
 class OrderByOp(TransformationOpBase):
     input_output_types = [("numeric", "Double")]
     description = " sorted by <{}>"
+    restricted_ops = {
+        "CountAggregationOp",
+        "SumAggregationOp",
+        "AvgAggregationOp",
+        "MaxAggregationOp",
+        "MinAggregationOp",
+        "MajorityAggregationOp",
+        "ExistsAggregationOp",
+    }
 
     def generate_description(self):
         return self.description.format(self.column_name)

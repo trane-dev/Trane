@@ -14,6 +14,8 @@ from trane.ops.aggregation_ops import (
     AvgAggregationOp,
     CountAggregationOp,
     ExistsAggregationOp,
+    FirstAggregationOp,
+    LastAggregationOp,
     MajorityAggregationOp,
     MaxAggregationOp,
     MinAggregationOp,
@@ -237,6 +239,16 @@ def test_check_operations_cat():
     result, modified_meta = _check_operations_valid(operations, table_meta)
     assert result is True
 
+    # For each <id> predict the first <state> in all related records
+    operations = [AllFilterOp(None), IdentityOp(None), FirstAggregationOp("state")]
+    result, modified_meta = _check_operations_valid(operations, table_meta)
+    assert result is True
+
+    # For each <id> predict the last <state> in all related records
+    operations = [AllFilterOp(None), IdentityOp(None), LastAggregationOp("state")]
+    result, modified_meta = _check_operations_valid(operations, table_meta)
+    assert result is True
+
 
 def test_foreign_key():
     table_meta = {
@@ -280,6 +292,21 @@ def test_generate_possible_operations():
             assert filter_op.column_name is None
         assert agg_op.column_name not in ["id", "time", "user_id"]
         assert filter_op.column_name not in ["id", "time", "user_id"]
+        assert {
+            filter_op.__class__.__name__,
+            transform_op.__class__.__name__,
+            agg_op.__class__.__name__,
+        }.intersection(filter_op.restricted_ops) == set()
+        assert {
+            filter_op.__class__.__name__,
+            transform_op.__class__.__name__,
+            agg_op.__class__.__name__,
+        }.intersection(transform_op.restricted_ops) == set()
+        assert {
+            filter_op.__class__.__name__,
+            transform_op.__class__.__name__,
+            agg_op.__class__.__name__,
+        }.intersection(agg_op.restricted_ops) == set()
 
 
 def test_clean_date():

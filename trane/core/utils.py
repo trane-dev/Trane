@@ -164,11 +164,29 @@ def _generate_possible_operations(
         transformation_operations,
         filter_operations,
     ):
+        if (
+            len(
+                {
+                    agg_operation.__name__,
+                    transform_operation.__name__,
+                    filter_operation.__name__,
+                }.intersection(
+                    agg_operation.restricted_ops.union(
+                        transform_operation.restricted_ops.union(
+                            filter_operation.restricted_ops,
+                        ),
+                    ),
+                ),
+            )
+            > 0
+        ):
+            # if one of the operations is restricted by another opration, skip
+            continue
         for filter_col, transform_col, agg_col in column_combinations:
             # not ideal, what if there is more than 1 input type in the op
             agg_op_input_type = convert_op_type(agg_operation.input_output_types[0][0])
             transform_op_input_type = convert_op_type(
-                transform_operation.input_output_types[0][0]
+                transform_operation.input_output_types[0][0],
             )
             filter_op_input_type = convert_op_type(
                 filter_operation.input_output_types[0][0],
@@ -219,7 +237,7 @@ def _generate_possible_operations(
             else:
                 filter_instance = filter_operation(filter_col)
             possible_operations.append(
-                (filter_instance, transform_instance, agg_instance)
+                (filter_instance, transform_instance, agg_instance),
             )
     # TODO: why are duplicate problems being generated
     possible_operations = list(set(possible_operations))

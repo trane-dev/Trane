@@ -49,11 +49,8 @@ class SingleTableMetadata(BaseMetadata):
     def set_time_index(self, time_index):
         if time_index not in self.ml_types:
             raise ValueError("Time index does not exist in ml_types")
-        elif (
-            self.time_index
-            and "time_index" in self.ml_types[self.time_index].get_tags()
-        ):
-            self.ml_types[time_index].remove_tag("time_index")
+        elif self.time_index and self.ml_types[self.time_index].has_tag("time_index"):
+            self.ml_types[self.time_index].remove_tag("time_index")
 
         if time_index and not isinstance(self.get_ml_type(time_index), Datetime):
             raise ValueError("Time index must be of type Datetime")

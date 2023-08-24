@@ -16,7 +16,7 @@ def test_eq():
 
 def test_neq():
     assert Boolean != Categorical
-    assert Boolean != Boolean(tags={"category"})
+    assert Boolean != Boolean(tags={"category5"})
     assert Datetime != Datetime()
     assert Boolean() != Datetime()
 
@@ -45,7 +45,8 @@ def test_parse_column_tags():
 def test_add_remove_tags():
     boolean_ = Boolean()
     assert boolean_.get_tags() == set()
-    assert Categorical().get_tags() == {"category"}
+    category_primary = Categorical()
+    assert category_primary.get_tags() == {"category"}
     category_primary = Categorical()
     category_primary.add_tags({"primary_key"})
     assert category_primary.get_tags() == {"category", "primary_key"}

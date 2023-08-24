@@ -47,9 +47,9 @@ def test_init_single(single_metadata):
     verify_ml_types(
         single_metadata,
         {
-            "id": Integer(),
+            "id": Integer(tags="primary_key"),
             "price": Double(),
-            "purchase_date": Datetime(),
+            "purchase_date": Datetime(tags="time_index"),
             "first_purchase": Boolean(),
             "card_type": Categorical(),
         },
@@ -104,14 +104,14 @@ def test_from_dataframe():
 def test_init_multi(multitable_metadata):
     expected_ml_types = {
         "products": {
-            "id": Integer(),
+            "id": Integer(tags="primary_key"),
             "price": Double(),
-            "purchase_date": Datetime(),
+            "purchase_date": Datetime(tags="time_index"),
             "first_purchase": Boolean(),
             "card_type": Categorical(),
         },
         "logs": {
-            "id": Integer(),
+            "id": Integer(tags="primary_key"),
             "product_id": Integer(),
             "session_id": Integer(),
             "log_date": Datetime(),
@@ -161,14 +161,14 @@ def test_set_type_multi(multitable_metadata):
     multitable_metadata.set_type("products", "card_type", "NaturalLanguage")
     expected_ml_types = {
         "products": {
-            "id": Integer(),
+            "id": Integer(tags="primary_key"),
             "price": Double(),
-            "purchase_date": Datetime(),
+            "purchase_date": Datetime(tags="time_index"),
             "first_purchase": Boolean(),
             "card_type": NaturalLanguage(),
         },
         "logs": {
-            "id": Integer(),
+            "id": Integer(tags="primary_key"),
             "product_id": Integer(),
             "session_id": Integer(),
             "log_date": Datetime(),

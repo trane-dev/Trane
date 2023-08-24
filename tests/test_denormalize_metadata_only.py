@@ -36,11 +36,11 @@ def test_denormalize_two_tables():
     )
     assert isinstance(normalized_metadata, SingleTableMetadata)
     assert normalized_metadata.ml_types == {
-        "id": Integer(),
+        "id": Integer(tags="primary_key"),
         "product_id": Integer(),
         "session_id": Integer(),
         "products.price": Double(),
-        "log_date": Datetime(),
+        "log_date": Datetime(tags="time_index"),
         "products.card_type": Categorical(),
         "products.first_purchase": Boolean(),
         "products.purchase_date": Datetime(),
@@ -68,12 +68,12 @@ def test_denormalize_three_tables():
         target_table="logs",
     )
     assert normalized_metadata.ml_types == {
-        "id": Integer(),
+        "id": Integer(tags="primary_key"),
         "product_id": Integer(),
         "session_id": Integer(),
         "products.price": Double(),
         "sessions.customer_id": Categorical(),
-        "log_date": Datetime(),
+        "log_date": Datetime(tags="time_index"),
         "products.card_type": Categorical(),
         "products.first_purchase": Boolean(),
         "products.purchase_date": Datetime(),
@@ -94,14 +94,14 @@ def test_denormalize_four_tables(four_table_metadata):
         target_table="logs",
     )
     assert normalized_metadata.ml_types == {
-        "id": Integer(),
+        "id": Integer(tags="primary_key"),
         "product_id": Integer(),
         "session_id": Integer(),
         "products.price": Double(),
         "sessions.customer_id": Categorical(),
         "sessions.customers.age": Integer(),
         "sessions.customers.région_id": Categorical(),
-        "log_date": Datetime(),
+        "log_date": Datetime(tags="time_index"),
         "products.card_type": Categorical(),
         "products.first_purchase": Boolean(),
         "products.purchase_date": Datetime(),
@@ -123,7 +123,7 @@ def test_denormalize_change_target(four_table_metadata):
         target_table="sessions",
     )
     assert normalized_metadata.ml_types == {
-        "id": Integer(),
+        "id": Integer(tags="primary_key"),
         "customer_id": Categorical(),
         "customers.age": Integer(),
         "customers.région_id": Categorical(),

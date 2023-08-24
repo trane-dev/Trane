@@ -17,10 +17,10 @@ class MLTypeMetaClass(type):
 
 class MLType(object, metaclass=MLTypeMetaClass):
     dtype = None
-    tags = set()
     mandatory_tags = set()
 
     def __init__(self, tags=None):
+        self.tags = set()
         if tags is not None:
             self.add_tags(tags)
 
@@ -31,8 +31,8 @@ class MLType(object, metaclass=MLTypeMetaClass):
             return False
         if (
             self.get_tags() != other.get_tags()
-            or self.get_tags().issubset(other.get_tags()) is False
-            or other.get_tags().issubset(self.get_tags()) is False
+            or not self.get_tags().issubset(other.get_tags())
+            or not other.get_tags().issubset(self.get_tags())
             or len(self.get_tags()) != len(other.get_tags())
         ):
             return False
@@ -158,7 +158,7 @@ class NaturalLanguage(MLType):
 
 class Ordinal(MLType):
     dtype = "category"
-    mandatory_tags = {}
+    mandatory_tags = {"category"}
 
     @property
     def is_categorical(self):
@@ -202,10 +202,10 @@ class Unknown(MLType):
 
 
 TYPE_MAPPING = {
-    # "None": MLType,
-    # "category": (MLType, {"category"}),
-    # "numeric": (MLType, {"numeric"}),
-    # "Categorical": Categorical,
+    "None": MLType,
+    "category": (MLType, {"category"}),
+    "numeric": (MLType, {"numeric"}),
+    "Categorical": Categorical,
     "Double": Double,
     "Integer": Integer,
     "Boolean": Boolean,
@@ -219,5 +219,5 @@ def convert_op_type(op_type):
             ml_type = TYPE_MAPPING[op_type][0]
             tags = TYPE_MAPPING[op_type][1]
             return ml_type(tags=tags)
-        return TYPE_MAPPING[op_type]()
+        return TYPE_MAPPING[op_type]
     return op_type

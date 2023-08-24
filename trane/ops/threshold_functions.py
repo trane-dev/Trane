@@ -8,6 +8,67 @@ from pandas.api.types import (
 )
 from scipy import stats
 
+from trane.typing.ml_types import (
+    TYPE_MAPPING,
+)
+
+
+def _threshold_recommend(filter_op, df):
+    yielded_thresholds = []
+    valid_semantic_tags = get_semantic_tags(filter_op)
+
+    if "category" in valid_semantic_tags:
+        yielded_thresholds = recommend_categorical_thresholds(
+            df,
+            filter_op,
+        )
+    elif "numeric" in valid_semantic_tags:
+        yielded_thresholds = recommend_numeric_thresholds(
+            df=df,
+            filter_op=filter_op,
+        )
+    return yielded_thresholds
+
+
+def get_semantic_tags(filter_op):
+    """
+    Extract the semantic tags from the filter operation, looking at the input_output_types.
+
+    Return:
+        valid_semantic_tags(set(str)): a set of semantic tags that the filter operation can be applied to.
+    """
+    valid_semantic_tags = set()
+    for op_input_type, _ in filter_op.input_output_types:
+        if isinstance(op_input_type, str):
+            op_input_type = TYPE_MAPPING[op_input_type]
+        valid_semantic_tags.update(op_input_type.semantic_tags)
+    return valid_semantic_tags
+
+
+def recommend_categorical_thresholds(df, filter_op, k=3):
+    thresholds = get_k_most_frequent(
+        df[filter_op.column_name],
+        k=k,
+    )
+    thresholds = list(set(thresholds))
+    return thresholds
+
+
+def recommend_numeric_thresholds(
+    df,
+    filter_op,
+    keep_rates=[0.25, 0.5, 0.75],
+):
+    thresholds = []
+    for keep_rate in keep_rates:
+        threshold = filter_op.find_threshold_by_fraction_of_data_to_keep(
+            fraction_of_data_target=keep_rate,
+            df=df,
+            label_col=filter_op.column_name,
+        )
+        thresholds.append(threshold)
+    return thresholds
+
 
 def get_k_most_frequent(series, k=3):
     # get the top k most frequent values

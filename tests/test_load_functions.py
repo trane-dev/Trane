@@ -1,5 +1,5 @@
 from trane.datasets.load_functions import load_airbnb_reviews, load_store
-from trane.typing.column_schema import ColumnSchema
+from trane.typing.ml_types import MLType
 
 
 def test_load_airbnb_reviews():
@@ -91,4 +91,4 @@ def check_column_schema(columns, df, metadata):
     for col in columns:
         assert col in df.columns
         assert col in metadata.keys()
-        assert isinstance(metadata[col], ColumnSchema)
+        assert issubclass(metadata[col], MLType)

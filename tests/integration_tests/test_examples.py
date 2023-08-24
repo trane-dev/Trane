@@ -4,8 +4,7 @@ import pytest
 
 import trane
 from trane.datasets.load_functions import load_airbnb_reviews
-from trane.typing import infer_table_meta
-from trane.typing.column_schema import ColumnSchema
+from trane.typing import infer_metadata
 from trane.typing.ml_types import Categorical
 
 from .utils import generate_and_verify_prediction_problem
@@ -23,11 +22,8 @@ def test_airbnb_reviews(sample):
     time_col = "date"
     window_size = "1m"
 
-    meta = infer_table_meta(df, entity_col, time_col)
-    meta["location"] = ColumnSchema(
-        Categorical,
-        semantic_tags={"category", "primary_key"},
-    )
+    meta = infer_metadata(df, entity_col, time_col)
+    meta["location"] = Categorical(tags="primary_key")
 
     cutoff_strategy = trane.CutoffStrategy(
         entity_col=entity_col,
@@ -55,7 +51,7 @@ def test_store(sample):
     window_size = "1m"
 
     df = denormalize(dataframes, relationships, target_entity)
-    meta = infer_table_meta(df, entity_col, time_col)
+    meta = infer_metadata(df, entity_col, time_col)
 
     cutoff_strategy = trane.CutoffStrategy(
         entity_col=entity_col,

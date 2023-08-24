@@ -35,7 +35,7 @@ def denormalize(
     )
     single_metadata = SingleTableMetadata(
         ml_types=col_to_ml_types,
-        index=metadata.primary_keys.get(target_table, None),
+        primary_key=metadata.primary_keys.get(target_table, None),
         time_index=metadata.time_primary_keys.get(target_table, None),
     )
     return dataframes[target_table], single_metadata

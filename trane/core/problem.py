@@ -1,45 +1,26 @@
 import composeml as cp
-import pandas as pd
 
-from trane.core.utils import _check_operations_valid, _parse_table_meta
+from trane.ops.aggregation_ops import AggregationOpBase
+from trane.ops.filter_ops import AllFilterOp, FilterOpBase
+from trane.ops.threshold_functions import (
+    _threshold_recommend,
+)
+from trane.ops.transformation_ops import TransformationOpBase
+from trane.typing.ml_types import MLType, convert_op_type
 
 
 class Problem:
-
-    """
-    Problem is made up of a series of Operations. It also contains
-    information about the types expected as the input and output of
-    each operation.
-    """
-
     def __init__(
         self,
+        metadata,
         operations,
-        time_col: str,
-        entity_col: str = None,
-        table_meta=None,
-        cutoff_strategy=None,
+        entity_column=None,
+        window_size=None,
     ):
-        """
-        Parameters
-        ----------
-        operations: list of Operations of type op_base
-        cutoff_strategy: a CutoffStrategy object
-
-        Returns
-        -------
-        None
-        """
         self.operations = operations
-        self.entity_col = entity_col
-        self.time_col = time_col
-        self.table_meta = _parse_table_meta(table_meta)
-        self.cutoff_strategy = cutoff_strategy
-        self.label_type = None
-
-        self.window_size = None
-        if cutoff_strategy:
-            self.window_size = cutoff_strategy.window_size
+        self.metadata = metadata
+        self.entity_column = entity_column
+        self.window_size = window_size
 
     def __lt__(self, other):
         return self.__str__() < (other.__str__())
@@ -54,150 +35,73 @@ class Problem:
         return self.__str__() >= (other.__str__())
 
     def __eq__(self, other):
-        """Overrides the default implementation"""
         if isinstance(self, other.__class__):
             if (
                 self.operations == other.operations
-                and self.entity_col == other.entity_col
-                and self.time_col == other.time_col
-                and self.table_meta == other.table_meta
-                and self.cutoff_strategy == other.cutoff_strategy
+                and self.metadata == other.metadata
+                and self.window_size == other.window_size
             ):
                 return True
             return False
         return False
 
-    def __hash__(self) -> int:
-        # TODO: why is the opbase hash function not working
-        attributes = ()
-        for op in self.operations:
-            attributes += (type(op), op.column_name, op.threshold)
-        return hash(attributes)
+    def create_target_values(self, dataframes):
+        # Won't this always be normalized?
+        normalized_dataframe = None
+        if len(dataframes) == 1 and self.metadata.get_metadata_type() == "single":
+            normalized_dataframe = dataframes[list(dataframes.keys())[0]]
 
-    def is_valid(self, table_meta=None):
-        """
-        Typechecking for operations. Insures that their input and output types
-        match. Allows a user to use the problem's existing table_meta, or pass
-        in a new one
+        self.generate_threshold(normalized_dataframe)
 
-        Parameters
-        ----------
-        table_meta: TableMeta object. Contains meta information about the data
-            example:
-            {
-                'id': ColumnSchema(logical_type=Categorial, semantic_tags={'index'}),
-                'time': ColumnSchema(logical_type=Datetime, semantic_tags={'time_index'}),
-                'price': ColumnSchema(logical_type=Double, semantic_tags={'numeric'}),
-                'product': ColumnSchema(logical_type=Categorial, semantic_tags={'category'}),
-            }
-
-        Returns
-        -------
-        Bool
-        """
-        if table_meta:
-            temp_meta = table_meta.copy()
-        else:
-            temp_meta = self.table_meta.copy()
-
-        result, _ = _check_operations_valid(self.operations, temp_meta)
-        if result:
-            return True
-        return False
-
-    def execute(
-        self,
-        df,
-        num_examples_per_instance=-1,
-        minimum_data=None,
-        maximum_data=None,
-        gap=None,
-        drop_empty=True,
-        verbose=True,
-        *args,
-        **kwargs,
-    ):
-        """
-        Executes the problem's operations on a dataframe. Generates the training examples (label_times).
-        The label_times contains the
-        """
-
-        # assert df.isnull().sum().sum() == 0
-
-        if not self.is_valid(self.table_meta):
-            raise ValueError(
-                (
-                    "Your Problem's specified operations do not match with the "
-                    "problem's table meta. Therefore, the problem is not "
-                    "valid."
-                ),
-            )
-        target_dataframe_index = self.entity_col
-        if self.entity_col is None:
+        target_dataframe_index = self.entity_column
+        if self.entity_column is None:
             # create a fake index with all rows to generate predictions problems "Predict X"
-            df["__identity__"] = 0
+            normalized_dataframe["__identity__"] = 0
             target_dataframe_index = "__identity__"
 
-        minimum_data = minimum_data or self.cutoff_strategy.minimum_data
-        maximum_data = maximum_data or self.cutoff_strategy.maximum_data
         lt = calculate_label_times(
-            target_dataframe_index,
-            df,
-            minimum_data,
-            maximum_data,
-            gap,
-            drop_empty,
-            self._execute_operations_on_df,
-            self.time_col,
-            self.window_size,
-            num_examples_per_instance,
-            verbose,
-            *args,
-            **kwargs,
+            normalized_dataframe=normalized_dataframe,
+            target_dataframe_index=target_dataframe_index,
+            labeling_function=self._execute_operations_on_df,
+            time_index=self.metadata.time_index,
+            window_size=self.window_size,
         )
 
-        if "__identity__" in df.columns:
-            df.drop(columns=["__identity__"], inplace=True)
+        if "__identity__" in normalized_dataframe.columns:
+            normalized_dataframe.drop(columns=["__identity__"], inplace=True)
         lt = lt.rename(columns={"_execute_operations_on_df": "target"})
         return lt
 
-    def _execute_operations_on_df(self, df: pd.DataFrame):
-        """
-        Execute operations on df. This method assumes that data leakage/cutoff
-            times have already been taken into account, and just blindly
-            executes the operations.
-        Parameters
-        ----------
-        df: dataframe to be operated on
-
-        Returns
-        -------
-        df: dataframe after operations
-        """
+    def _execute_operations_on_df(self, df):
         df = df.copy()
         for operation in self.operations:
             df = operation.label_function(df)
         return df
 
+    def generate_threshold(self, normalized_dataframe):
+        filter_op = self.operations[0]
+        if isinstance(filter_op, AllFilterOp):
+            return
+
+        _threshold_recommend(filter_op, normalized_dataframe)
+        breakpoint()
+
+    def is_valid(self):
+        result, _ = _check_operations_valid(
+            operations=self.operations,
+            ml_types=self.metadata.ml_types,
+        )
+        if result:
+            return True
+        return False
+
     def __repr__(self) -> str:
         return self.__str__()
 
     def __str__(self):
-        """
-        This function converts Prediction Problems to English.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        description: str natural language description of the problem
-
-        """
         description = "Predict"
-        if self.entity_col:
-            description = "For each <" + self.entity_col + "> predict"
+        if self.entity_column:
+            description = "For each <" + self.entity_column + "> predict"
 
         agg_op = self.operations[2]
         description += agg_op.generate_description()
@@ -208,43 +112,105 @@ class Problem:
         filter_op = self.operations[0]
         description += filter_op.generate_description()
 
-        if self.cutoff_strategy and self.cutoff_strategy.window_size:
+        if self.window_size:
             description += " " + "in next {} days".format(
-                self.cutoff_strategy.window_size,
+                self.window_size,
             )
         return description
 
 
 def calculate_label_times(
+    normalized_dataframe,
     target_dataframe_index,
-    df,
-    minimum_data,
-    maximum_data,
-    gap,
-    drop_empty,
-    _execute_operations_on_df,
-    time_col,
+    labeling_function,
+    time_index,
     window_size,
-    num_examples_per_instance,
-    verbose,
-    *args,
-    **kwargs,
+    minimum_data=None,
+    maximum_data=None,
+    gap=None,
+    drop_empty=True,
+    verbose=False,
+    num_examples_per_instance=-1,
 ):
     _label_maker = cp.LabelMaker(
         target_dataframe_index=target_dataframe_index,
-        time_index=time_col,
-        labeling_function=_execute_operations_on_df,
+        time_index=time_index,
+        labeling_function=labeling_function,
         window_size=window_size,
     )
     label_times = _label_maker.search(
-        df=df,
+        df=normalized_dataframe,
         num_examples_per_instance=num_examples_per_instance,
         minimum_data=minimum_data,
         maximum_data=maximum_data,
         gap=gap,
         drop_empty=drop_empty,
         verbose=verbose,
-        *args,
-        **kwargs,
     )
     return label_times
+
+
+def _check_operations_valid(
+    operations,
+    metadata,
+):
+    ml_types = metadata.ml_types
+    if not isinstance(operations[0], FilterOpBase):
+        raise ValueError
+    if not isinstance(operations[1], TransformationOpBase):
+        raise ValueError
+    if not isinstance(operations[2], AggregationOpBase):
+        raise ValueError
+    for op in operations:
+        input_output_types = op.input_output_types
+        for op_input_ml_type, op_output_type in input_output_types:
+            op_input_ml_type = convert_op_type(op_input_ml_type)
+            op_output_type = convert_op_type(op_output_type)
+
+            # operation applies to all columns
+            op_input_has_no_tags = op_input_ml_type.get_tags() == set()
+            if isinstance(op_input_ml_type, MLType) and op_input_has_no_tags:
+                if isinstance(op_output_type, MLType) and op_input_has_no_tags:
+                    # op doesn't modify the column's type
+                    pass
+                elif op.column_name is None:
+                    # TODO: fix CountAggregationOp modifies output type
+                    # TODO: Related to problem type generated?
+                    pass
+                else:
+                    # update the column's type (to indicate the operation has taken place)
+                    ml_types[op.column_name] = op_output_type
+                continue
+
+            # check the operation is valid for the column
+            column_ml_type = ml_types[op.column_name]
+            column_tags = ml_types[op.column_name].get_tags()
+
+            op_input_tags = op_input_ml_type.get_tags()
+            op_restricted_tags = op.restricted_tags
+            if not check_ml_type_valid(op_input_ml_type, column_ml_type):
+                breakpoint()
+                return False, {}
+            if op_input_tags and len(column_tags.intersection(op_input_tags)) == 0:
+                return False, {}
+            if (
+                op_restricted_tags
+                and len(column_tags.intersection(op_restricted_tags)) > 0
+            ):
+                return False, {}
+
+            # update the column's type (to indicate the operation has taken place)
+            if isinstance(op_output_type, MLType):
+                ml_types[op.column_name] = op_output_type
+            else:
+                ml_types[op.column_name] = op_output_type()
+    return True, ml_types
+
+
+def check_ml_type_valid(op_input_ml_type, column_ml_type):
+    if isinstance(op_input_ml_type, MLType):
+        # if the op takes in anything, the column ml type doesn't matter
+        return True
+    if column_ml_type == op_input_ml_type:
+        return True
+    return False

@@ -1,6 +1,7 @@
 import itertools
 from typing import Dict, List
 
+from trane.core.problem import Problem
 from trane.ops.aggregation_ops import (
     AggregationOpBase,
 )
@@ -11,26 +12,11 @@ from trane.parsing.denormalize import (
     denormalize,
 )
 from trane.typing.ml_types import (
-    Boolean,
     Categorical,
-    Datetime,
-    Double,
     Integer,
     MLType,
+    convert_op_type,
 )
-
-TYPE_MAPPING = {
-    # "category": Categorical,
-    # "primary_key": ColumnSchema(semantic_tags={"primary_key"}),
-    # "foreign_key": ColumnSchema(semantic_tags={"foreign_key"}),
-    # "numeric": ColumnSchema(semantic_tags={"numeric"}),
-    "None": MLType,
-    "Categorical": Categorical(tags={"category"}),
-    "Double": Double(tags={"numeric"}),
-    "Integer": Integer(tags={"numeric"}),
-    "Boolean": Boolean,
-    "Datetime": Datetime,
-}
 
 
 class ProblemGenerator:
@@ -38,23 +24,18 @@ class ProblemGenerator:
     target_table = None
     window_size = None
     entity_columns = []
-    problem_type = ["classification", "regression"]
 
     def __init__(
         self,
         metadata,
         window_size,
         target_table: str = None,
-        entity_columns: List[str] = None,
-        problem_type: str = None,
     ):
         self.metadata = metadata
         self.window_size = window_size
         self.target_table = target_table
-        self.entity_columns = entity_columns
-        self.problem_type = problem_type
 
-    def generate(self):
+    def generate(self, entity_columns: List[str] = None):
         # denormalize and create single metadata table
         if self.metadata.get_metadata_type() == "single":
             single_metadata = self.metadata
@@ -63,47 +44,45 @@ class ProblemGenerator:
                 metadata=self.metadata,
                 target_table=self.target_table,
             )
+            single_metadata.time_index = self.metadata.time_indices[self.target_table]
         possible_operations = _generate_possible_operations(
             ml_types=single_metadata.ml_types,
             primary_key=single_metadata.primary_key,
+            time_index=single_metadata.time_index,
         )
+        problems = []
+        # TODO: add logic to check entity_columns
+        valid_entity_columns = get_valid_entity_columns(single_metadata)
+        # Force create with no entity column to generate problems "Predict X"
+        valid_entity_columns.append(None)
+        for entity_column in valid_entity_columns:
+            for op_col_combo in possible_operations:
+                filter_op, transform_op, agg_op = op_col_combo
+                # Note: the order of the operations matters, the filter operation must be first
+                operations = [filter_op, transform_op, agg_op]
+                problem = Problem(
+                    operations=operations,
+                    metadata=single_metadata,
+                    entity_column=entity_column,
+                    window_size=self.window_size,
+                )
+                if problem.is_valid():
+                    problems.append(problem)
+        return problems
 
-        all_attempts = 0
-        for op_col_combo in possible_operations:
-            all_attempts += 1
-            filter_op_obj, transform_op_obj, agg_op_obj = op_col_combo
 
-            # Note: the order of the operations matters, the filter operation must be first
-            operations = [filter_op_obj, transform_op_obj, agg_op_obj]
-            print(operations)
-
-            # problem = Problem(
-            #     operations=operations,
-            #     entity_col=self.entity_col,
-            #     time_col=self.time_col,
-            #     table_meta=self.table_meta,
-            #     cutoff_strategy=self.cutoff_strategy,
-            # )
-            # filter_op = problem.operations[0]
-            # if isinstance(filter_op, AllFilterOp):
-            #     # the filter operation does not require a threshold
-            #     problems.append(problem)
-            #     success_attempts += 1
-            # else:
-            #     yielded_thresholds = self._threshold_recommend(filter_op, df)
-            #     for threshold in yielded_thresholds:
-            #         final_problem = copy.deepcopy(problem)
-            #         final_problem.operations[0].set_parameters(
-            #             threshold=threshold,
-            #         )
-            #         problems.append(final_problem)
-            #         success_attempts += 1
+def get_valid_entity_columns(metadata):
+    entity_columns = []
+    for col, ml_type in metadata.ml_types.items():
+        if ml_type in [Categorical, Integer]:
+            entity_columns.append(col)
+    return entity_columns
 
 
 def _generate_possible_operations(
     ml_types: Dict[str, MLType],
     primary_key: str = None,
-    exclude_columns: List[str] = None,
+    time_index: str = None,
     aggregation_operations: List[AggregationOpBase] = None,
     filter_operations: List[FilterOpBase] = None,
     transformation_operations: List[TransformationOpBase] = None,
@@ -116,6 +95,10 @@ def _generate_possible_operations(
         transformation_operations = get_transformation_ops()
 
     valid_columns = list(ml_types.keys())
+    if primary_key is not None:
+        valid_columns.remove(primary_key)
+    if time_index is not None:
+        valid_columns.remove(time_index)
 
     possible_operations = []
     column_combinations = []
@@ -143,8 +126,8 @@ def _generate_possible_operations(
             agg_instance = None
             if (
                 len(
-                    agg_operation.restricted_semantic_tags.intersection(
-                        ml_types[agg_col]().get_tags(),
+                    agg_operation.restricted_tags.intersection(
+                        ml_types[agg_col].get_tags(),
                     ),
                 )
                 > 0
@@ -158,8 +141,8 @@ def _generate_possible_operations(
             transform_instance = None
             if (
                 len(
-                    transform_operation.restricted_semantic_tags.intersection(
-                        ml_types[transform_col]().get_tags(),
+                    transform_operation.restricted_tags.intersection(
+                        ml_types[transform_col].get_tags(),
                     ),
                 )
                 > 0
@@ -173,8 +156,8 @@ def _generate_possible_operations(
             filter_instance = None
             if (
                 len(
-                    filter_operation.restricted_semantic_tags.intersection(
-                        ml_types[filter_col]().get_tags(),
+                    filter_operation.restricted_tags.intersection(
+                        ml_types[filter_col].get_tags(),
                     ),
                 )
                 > 0
@@ -191,9 +174,3 @@ def _generate_possible_operations(
     # TODO: why are duplicate problems being generated
     possible_operations = list(set(possible_operations))
     return possible_operations
-
-
-def convert_op_type(op_type):
-    if isinstance(op_type, str) and op_type in TYPE_MAPPING:
-        return TYPE_MAPPING[op_type]
-    return op_type

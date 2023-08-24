@@ -4,8 +4,7 @@ from trane.typing.ml_types import (
     Double,
     Integer,
 )
-from trane.typing.column_schema import ColumnSchema
 from trane.typing.inference import (
-    _infer_series_schema,
-    infer_table_meta,
+    _infer_ml_type,
+    infer_metadata,
 )

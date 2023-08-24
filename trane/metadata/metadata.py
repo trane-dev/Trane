@@ -33,14 +33,37 @@ class SingleTableMetadata(BaseMetadata):
     def set_primary_key(self, primary_key):
         if primary_key not in self.ml_types:
             raise ValueError("Index does not exist in ml_types")
+        elif (
+            self.primary_key
+            and "primary_key" in self.ml_types[self.primary_key].get_tags()
+        ):
+            self.ml_types[self.primary_key].remove_tag("primary_key")
         self.primary_key = primary_key
+        self.ml_types[primary_key].tags.add("primary_key")
+
+    def reset_primary_key(self):
+        if self.primary_key:
+            self.ml_types[self.primary_key].remove_tag("primary_key")
+        self.primary_key = None
 
     def set_time_index(self, time_index):
         if time_index not in self.ml_types:
             raise ValueError("Time index does not exist in ml_types")
-        if self.get_ml_type(time_index) not in [Datetime, Datetime()]:
+        elif (
+            self.time_index
+            and "time_index" in self.ml_types[self.time_index].get_tags()
+        ):
+            self.ml_types[time_index].remove_tag("time_index")
+
+        if time_index and not isinstance(self.get_ml_type(time_index), Datetime):
             raise ValueError("Time index must be of type Datetime")
         self.time_index = time_index
+        self.ml_types[time_index].tags.add("time_index")
+
+    def reset_time_index(self):
+        if self.time_index:
+            self.ml_types[self.time_index].remove_tag("time_index")
+        self.time_index = None
 
     def set_type(self, column, ml_type, tags=set()):
         ml_type = check_ml_type(ml_type)
@@ -91,10 +114,10 @@ class MultiTableMetadata(BaseMetadata):
 
     def set_time_index(self, table, column):
         self.check_if_table_exists(table)
-        if self.get_ml_type(table, column) not in [Datetime, Datetime()]:
+        if not isinstance(self.get_ml_type(table, column), Datetime):
             raise ValueError("Time index must be of type Datetime")
         self.time_primary_keys[table] = column
-        self.ml_types[table][column] = Datetime
+        self.ml_types[table][column] = Datetime()
 
     def set_primary_keys(self, primary_keys):
         for table, index_column in primary_keys.items():
@@ -105,11 +128,22 @@ class MultiTableMetadata(BaseMetadata):
         if column not in self.ml_types[table]:
             raise ValueError("Index does not exist in ml_types")
         self.primary_keys[table] = column
+        self.ml_types[table][column].tags.add("primary_key")
+
+    def reset_primary_key(self, table):
+        self.check_if_table_exists(table)
+        if self.primary_keys:
+            primary_key = self.primary_keys[table]
+            self.ml_types[table][primary_key].remove_tag("primary_key")
+        self.primary_keys.pop(table)
 
     def add_table(self, table, ml_types):
         if table in self.ml_types:
             raise ValueError("Table already exists")
-        self.ml_types[table] = _parse_ml_types(ml_types, type_="single")
+        self.ml_types[table] = _parse_ml_types(
+            ml_types,
+            type_="single",
+        )
 
     def get_ml_type(self, table, column):
         self.check_if_table_exists(table)
@@ -176,7 +210,7 @@ def check_ml_type(ml_type):
         str_to_ml_type = _str_to_ml_types()
         if ml_type.lower() not in str_to_ml_type.keys():
             raise ValueError("ML Type is Invalid")
-        return str_to_ml_type[ml_type.lower()]
+        return str_to_ml_type[ml_type.lower()]()
     if isinstance(ml_type, MLType) or issubclass(ml_type, MLType):
         return ml_type
     return ml_type

@@ -17,24 +17,10 @@ class OpBase(object, metaclass=Meta):
 
     description = None
     threshold = None
-    restricted_semantic_tags = {"time_index", "foreign_key", "primary_key"}
+    restricted_tags = {"time_index", "foreign_key", "primary_key"}
     restricted_ops = set()
 
     def __init__(self, column_name, input_type=None, output_type=None):
-        """
-        Initalization of all operations.
-        Subclasses shouldn't have their own init.
-
-        Parameters
-        ----------
-        column_name: the column this operation applies to
-        input_type: the ColumnSchema of the input column
-        output_type: the ColumnSchema of the output column
-
-        Returns
-        -------
-        None
-        """
         self.column_name = column_name
 
     def __call__(self, dataslice):

@@ -12,13 +12,20 @@ def test_denormalize_two_tables():
      /
     Logs
     """
-    dataframes, ml_types, relationships, primary_keys = generate_mock_data(
+    (
+        dataframes,
+        ml_types,
+        relationships,
+        primary_keys,
+        time_primary_keys,
+    ) = generate_mock_data(
         tables=["products", "logs"],
     )
     metadata = MultiTableMetadata(
         ml_types=ml_types,
         relationships=relationships,
         primary_keys=primary_keys,
+        time_primary_keys=time_primary_keys,
     )
     products_df = dataframes["products"]
     logs_df = dataframes["logs"]
@@ -30,12 +37,16 @@ def test_denormalize_two_tables():
         metadata=metadata,
         target_table="logs",
     )
-    assert flat.shape == (5, 4)
+    assert flat.shape == (5, 8)
     assert flat["id"].is_unique
     assert sorted(flat.columns.tolist()) == [
         "id",
+        "log_date",
         "product_id",
+        "products.card_type",
+        "products.first_purchase",
         "products.price",
+        "products.purchase_date",
         "session_id",
     ]
     assert sorted(flat["id"].tolist()) == [1, 2, 3, 4, 5]
@@ -51,13 +62,20 @@ def test_denormalize_three_tables():
      \\ /   .
       L     Logs
     """
-    dataframes, ml_types, relationships, primary_keys = generate_mock_data(
+    (
+        dataframes,
+        ml_types,
+        relationships,
+        primary_keys,
+        time_primary_keys,
+    ) = generate_mock_data(
         tables=["products", "logs", "sessions"],
     )
     metadata = MultiTableMetadata(
         ml_types=ml_types,
         relationships=relationships,
         primary_keys=primary_keys,
+        time_primary_keys=time_primary_keys,
     )
     assert dataframes["sessions"]["id"].is_unique
 
@@ -71,7 +89,7 @@ def test_denormalize_three_tables():
         metadata=metadata,
         target_table="logs",
     )
-    assert flat.shape == (5, 5)
+    assert flat.shape == (5, 9)
     assert flat["id"].is_unique
     assert sorted(flat["id"].tolist()) == [1, 2, 3, 4, 5]
     flat = flat.set_index("id").sort_values("id")
@@ -90,20 +108,27 @@ def test_denormalize_four_tables():
      \\ //
        L     Logs
     """
-    dataframes, ml_types, relationships, primary_keys = generate_mock_data(
+    (
+        dataframes,
+        ml_types,
+        relationships,
+        primary_keys,
+        time_primary_keys,
+    ) = generate_mock_data(
         tables=["products", "logs", "sessions", "customers"],
     )
     metadata = MultiTableMetadata(
         ml_types=ml_types,
         relationships=relationships,
         primary_keys=primary_keys,
+        time_primary_keys=time_primary_keys,
     )
     flat, _ = denormalize(
         dataframes=dataframes,
         metadata=metadata,
         target_table="logs",
     )
-    assert flat.shape == (5, 7)
+    assert flat.shape == (5, 11)
     assert flat["id"].is_unique
     assert sorted(flat["id"].tolist()) == [1, 2, 3, 4, 5]
     flat = flat.set_index("id").sort_values("id")
@@ -125,13 +150,20 @@ def test_denormalize_change_target():
        ||
         L     Logs
     """
-    dataframes, ml_types, relationships, primary_keys = generate_mock_data(
+    (
+        dataframes,
+        ml_types,
+        relationships,
+        primary_keys,
+        time_primary_keys,
+    ) = generate_mock_data(
         tables=["products", "logs", "sessions", "customers"],
     )
     metadata = MultiTableMetadata(
         ml_types=ml_types,
         relationships=relationships,
         primary_keys=primary_keys,
+        time_primary_keys=time_primary_keys,
     )
     flat, _ = denormalize(
         dataframes=dataframes,

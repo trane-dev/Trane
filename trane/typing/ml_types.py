@@ -21,12 +21,22 @@ class MLType(object, metaclass=MLTypeMetaClass):
     mandatory_tags = set()
 
     def __init__(self, tags=None):
-        if tags is None:
-            tags = set()
-        self.tags = tags
+        if tags is not None:
+            self.add_tags(tags)
 
     def __eq__(self, other, deep=False):
-        return isinstance(other, self.__class__)
+        if not isinstance(other, self.__class__):
+            return False
+        if self.dtype and other.dtype and self.dtype != other.dtype:
+            return False
+        if (
+            self.get_tags() != other.get_tags()
+            or self.get_tags().issubset(other.get_tags()) is False
+            or other.get_tags().issubset(self.get_tags()) is False
+            or len(self.get_tags()) != len(other.get_tags())
+        ):
+            return False
+        return True
 
     def __str__(self):
         return str(self.__class__)
@@ -44,11 +54,35 @@ class MLType(object, metaclass=MLTypeMetaClass):
     def get_tags(self):
         return self.tags | self.mandatory_tags
 
-    def add_tags(self, tags):
-        if isinstance(tags, set):
-            self.tags.update(tags)
+    def add_tags(self, new_tags):
+        if isinstance(new_tags, set) or isinstance(new_tags, list):
+            self.tags.update(new_tags)
+        elif isinstance(new_tags, str):
+            self.tags.add(new_tags)
         else:
-            self.tags.add(tags)
+            self.tags.update(set(new_tags))
+
+    def remove_tag(self, tag):
+        self.tags.remove(tag)
+
+    def has_tag(self, tag):
+        return tag in self.tags
+
+    @property
+    def is_categorical(self):
+        False
+
+    @property
+    def is_numeric(self):
+        return False
+
+    @property
+    def is_boolean(self):
+        return False
+
+    @property
+    def is_datetime(self):
+        False
 
 
 class Boolean(MLType):
@@ -57,6 +91,10 @@ class Boolean(MLType):
     @staticmethod
     def inference_func(series):
         return boolean_func(series)
+
+    @property
+    def is_boolean(self):
+        return True
 
 
 class Categorical(MLType):
@@ -67,18 +105,21 @@ class Categorical(MLType):
     def inference_func(series):
         return categorical_func(series)
 
+    @property
+    def is_categorical(self):
+        True
+
 
 class Datetime(MLType):
     dtype = "datetime64[ns]"
 
-    def __init__(self, datetime_format=None, timezone=None, **kwargs):
-        self.datetime_format = datetime_format
-        self.timezone = timezone
-        super().__init__(**kwargs)
-
     @staticmethod
     def inference_func(series):
         return datetime_func(series)
+
+    @property
+    def is_datetime(self):
+        return True
 
 
 class Double(MLType):
@@ -89,6 +130,10 @@ class Double(MLType):
     def inference_func(series):
         return double_func(series)
 
+    @property
+    def is_numeric(self):
+        return True
+
 
 class Integer(MLType):
     dtype = "int64[pyarrow]"
@@ -97,6 +142,10 @@ class Integer(MLType):
     @staticmethod
     def inference_func(series):
         return integer_func(series)
+
+    @property
+    def is_numeric(self):
+        return True
 
 
 class NaturalLanguage(MLType):
@@ -109,10 +158,11 @@ class NaturalLanguage(MLType):
 
 class Ordinal(MLType):
     dtype = "category"
-    mandatory_tags = {"category"}
+    mandatory_tags = {}
 
-    def __init__(self, order=None):
-        self.order = order
+    @property
+    def is_categorical(self):
+        True
 
 
 class PersonFullName(MLType):
@@ -149,3 +199,25 @@ class PhoneNumber(MLType):
 
 class Unknown(MLType):
     dtype = "string[pyarrow]"
+
+
+TYPE_MAPPING = {
+    # "None": MLType,
+    # "category": (MLType, {"category"}),
+    # "numeric": (MLType, {"numeric"}),
+    # "Categorical": Categorical,
+    "Double": Double,
+    "Integer": Integer,
+    "Boolean": Boolean,
+    "Datetime": Datetime,
+}
+
+
+def convert_op_type(op_type):
+    if isinstance(op_type, str):
+        if isinstance(TYPE_MAPPING[op_type], tuple):
+            ml_type = TYPE_MAPPING[op_type][0]
+            tags = TYPE_MAPPING[op_type][1]
+            return ml_type(tags=tags)
+        return TYPE_MAPPING[op_type]()
+    return op_type

@@ -25,6 +25,8 @@ class FilterOpBase(OpBase):
 
     """
 
+    restricted_ops = set()
+
 
 class AllFilterOp(FilterOpBase):
     input_output_types = [("None", "None")]

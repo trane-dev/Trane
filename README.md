@@ -67,8 +67,11 @@ problem_generator = trane.PredictionProblemGenerator(
 problems = problem_generator.generate(data, generate_thresholds=True)
 ```
 
+# Community
+- Need help? Use a [GitHub issue](https://github.com/trane-dev/Trane/issues)
+- Prefer chatting? [Join Slack](https://join.slack.com/t/trane-dev/shared_invite/zt-1zglnh25c-ryuQFarw0rVgKHC6ywUOlg)
 
-## Citing Trane
+# Citing Trane
 If you use Trane, please consider citing the following paper:
 
 Ben Schreck, Kalyan Veeramachaneni. [What Would a Data Scientist Ask? Automatically Formulating and Solving Predictive Problems.](https://dai.lids.mit.edu/wp-content/uploads/2017/10/Trane1.pdf) *IEEE DSAA 2016*, 440-451

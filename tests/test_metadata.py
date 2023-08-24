@@ -4,53 +4,78 @@ import pandas as pd
 import pytest
 
 from trane.metadata.metadata import MultiTableMetadata, SingleTableMetadata
-from trane.typing.ml_types import Categorical, Datetime, Double, Integer, Unknown
+from trane.typing.ml_types import (
+    Boolean,
+    Categorical,
+    Datetime,
+    Double,
+    Integer,
+    NaturalLanguage,
+    Unknown,
+)
+from trane.utils.testing_utils import generate_mock_data
 
 
 @pytest.fixture(scope="function")
 def single_metadata():
+    _, ml_types, _, primary_key, time_index = generate_mock_data(
+        tables=["products"],
+    )
     single_metadata = SingleTableMetadata(
-        ml_types={
-            "column_1": "Categorical",
-            "column_2": "Integer",
-            "column_3": "Datetime",
-        },
-        primary_key="column_1",
-        time_index="column_3",
+        ml_types=ml_types,
+        primary_key=primary_key,
+        time_index=time_index,
     )
     return single_metadata
 
 
+@pytest.fixture(scope="function")
+def multitable_metadata():
+    _, ml_types, relationships, primary_keys, time_primary_keys = generate_mock_data(
+        tables=["products", "logs"],
+    )
+    multitable_metadata = MultiTableMetadata(
+        ml_types=ml_types,
+        primary_keys=primary_keys,
+        time_primary_keys=time_primary_keys,
+        relationships=relationships,
+    )
+    return multitable_metadata
+
+
 def test_init_single(single_metadata):
-    assert single_metadata.ml_types == {
-        "column_1": Categorical,
-        "column_2": Integer,
-        "column_3": Datetime,
-    }
-    assert single_metadata.index == "column_1"
-    assert single_metadata.time_index == "column_3"
+    verify_ml_types(
+        single_metadata,
+        {
+            "id": Integer(),
+            "price": Double(),
+            "purchase_date": Datetime(),
+            "first_purchase": Boolean(),
+            "card_type": Categorical(),
+        },
+    )
+    assert single_metadata.primary_key == "id"
+    assert single_metadata.time_index == "purchase_date"
     with pytest.raises(ValueError):
         single_metadata.set_primary_key("column_4")
 
 
 def test_set_primary_key(single_metadata):
-    single_metadata.set_primary_key("column_2")
-    assert single_metadata.index == "column_2"
-    assert single_metadata.ml_types == {
-        "column_1": Categorical,
-        "column_2": Integer,
-        "column_3": Datetime,
-    }
+    single_metadata.reset_primary_key()
+    assert single_metadata.primary_key is None
+    single_metadata.set_primary_key("purchase_date")
+    assert single_metadata.primary_key == "purchase_date"
     with pytest.raises(ValueError):
         single_metadata.set_primary_key("column_4")
 
 
 def test_set_time_index(single_metadata):
-    single_metadata.set_type("column_2", "Datetime")
-    single_metadata.set_time_index("column_2")
+    single_metadata.reset_time_index()
+    assert single_metadata.time_index is None
+    single_metadata.set_time_index("purchase_date")
     match = "Time index must be of type Datetime"
     with pytest.raises(ValueError, match=match):
-        single_metadata.set_time_index("column_1")
+        single_metadata.set_time_index("card_type")
 
 
 def test_from_dataframe():
@@ -70,62 +95,36 @@ def test_from_dataframe():
     )
     metadata = SingleTableMetadata.from_data(data)
     assert isinstance(metadata, SingleTableMetadata)
-    assert metadata.ml_types == {
-        "column_1": Integer,
-        "column_2": Unknown,
-        "column_3": Datetime,
-    }
-
-
-@pytest.fixture(scope="module")
-def multitable_metadata():
-    return MultiTableMetadata(
-        ml_types={
-            "orders": {
-                "column_1": "Categorical",
-                "column_2": "Integer",
-                "column_3": "Datetime",
-            },
-            "customers": {
-                "column_5": "Categorical",
-                "column_6": "Integer",
-                "column_7": "Datetime",
-            },
-        },
-        primary_keys={
-            "orders": "column_1",
-            "customers": "column_5",
-        },
-        time_primary_keys={
-            "orders": "column_3",
-            "customers": "column_7",
-        },
-        relationships=[
-            ("orders", "column_1", "customers", "column_5"),
-        ],
-    )
+    assert list(metadata.ml_types.keys()) == ["column_1", "column_2", "column_3"]
+    assert metadata.ml_types["column_1"] == Integer()
+    assert metadata.ml_types["column_2"] == Unknown()
+    assert metadata.ml_types["column_3"] == Datetime()
 
 
 def test_init_multi(multitable_metadata):
-    assert multitable_metadata.ml_types == {
-        "orders": {
-            "column_1": Categorical,
-            "column_2": Integer,
-            "column_3": Datetime,
+    expected_ml_types = {
+        "products": {
+            "id": Integer(),
+            "price": Double(),
+            "purchase_date": Datetime(),
+            "first_purchase": Boolean(),
+            "card_type": Categorical(),
         },
-        "customers": {
-            "column_5": Categorical,
-            "column_6": Integer,
-            "column_7": Datetime,
+        "logs": {
+            "id": Integer(),
+            "product_id": Integer(),
+            "session_id": Integer(),
+            "log_date": Datetime(),
         },
     }
+    verify_ml_types(multitable_metadata, expected_ml_types)
     assert multitable_metadata.primary_keys == {
-        "orders": "column_1",
-        "customers": "column_5",
+        "products": "id",
+        "logs": "id",
     }
     assert multitable_metadata.time_primary_keys == {
-        "orders": "column_3",
-        "customers": "column_7",
+        "products": "purchase_date",
+        "logs": "log_date",
     }
     assert "column_4" not in multitable_metadata.ml_types["orders"]
     with pytest.raises(ValueError):
@@ -133,10 +132,12 @@ def test_init_multi(multitable_metadata):
 
 
 def test_set_primary_key_multi(multitable_metadata):
-    multitable_metadata.set_primary_key("orders", "column_2")
+    multitable_metadata.reset_primary_key("products")
+    assert multitable_metadata.primary_keys == {"logs": "id"}
+    multitable_metadata.set_primary_key("products", "id")
     assert multitable_metadata.primary_keys == {
-        "orders": "column_2",
-        "customers": "column_5",
+        "products": "id",
+        "logs": "id",
     }
 
 
@@ -157,37 +158,75 @@ def test_set_time_index_multi(multitable_metadata):
 
 
 def test_set_type_multi(multitable_metadata):
-    multitable_metadata.set_type("orders", "column_1", "double")
-    assert multitable_metadata.ml_types["orders"] == {
-        "column_1": Double,
-        "column_2": Integer,
-        "column_3": Datetime,
+    multitable_metadata.set_type("products", "card_type", "NaturalLanguage")
+    expected_ml_types = {
+        "products": {
+            "id": Integer(),
+            "price": Double(),
+            "purchase_date": Datetime(),
+            "first_purchase": Boolean(),
+            "card_type": NaturalLanguage(),
+        },
+        "logs": {
+            "id": Integer(),
+            "product_id": Integer(),
+            "session_id": Integer(),
+            "log_date": Datetime(),
+        },
     }
+    verify_ml_types(multitable_metadata, expected_ml_types)
 
 
 def test_add_relationships(multitable_metadata):
+    relationships = multitable_metadata.relationships
     multitable_metadata.clear_relationships()
-    multitable_metadata.add_relationships(
-        ("orders", "column_1", "customers", "column_6"),
-    )
+    assert multitable_metadata.relationships == []
+    multitable_metadata.add_relationships(relationships)
     assert multitable_metadata.relationships == [
-        ("orders", "column_1", "customers", "column_6"),
+        ("products", "id", "logs", "product_id"),
     ]
 
 
 def test_add_relationships_new_table(multitable_metadata):
     multitable_metadata.remove_table("products")
+    multitable_metadata.clear_relationships()
+    assert "products" not in multitable_metadata.ml_types
+    assert multitable_metadata.relationships == []
     multitable_metadata.add_table(
         table="products",
         ml_types={
-            "column_8": "Categorical",
-            "column_9": "Integer",
-            "column_10": "Datetime",
+            "id": "Integer",
+            "price": "Double",
+            "purchase_date": "Datetime",
+            "first_purchase": "Boolean",
+            "card_type": "Categorical",
         },
     )
-    relationships = [("orders", "column_1", "products", "column_9")]
-    multitable_metadata.add_relationships(relationships)
-    multitable_metadata.remove_relationship(relationships)
-    relationships = [("orders", "column_1", "products", "column_1")]
+    assert "id" in multitable_metadata.ml_types["products"]
+    multitable_metadata.add_relationships(
+        [("products", "id", "logs", "product_id")],
+    )
+    multitable_metadata.clear_relationships()
     with pytest.raises(ValueError):
-        multitable_metadata.add_relationships(relationships)
+        multitable_metadata.add_relationships(
+            [("orders", "column_1", "products", "column_1")],
+        )
+
+
+def verify_ml_types(metadata, expected_ml_types):
+    if metadata.get_metadata_type() == "single":
+        for key in expected_ml_types:
+            assert key in metadata.ml_types
+            assert metadata.ml_types[key] == expected_ml_types[key]
+    else:
+        for table in expected_ml_types:
+            assert table in metadata.ml_types
+            for column in expected_ml_types[table]:
+                assert column in metadata.ml_types[table]
+                if isinstance(expected_ml_types[table][column], Datetime):
+                    assert isinstance(metadata.ml_types[table][column], Datetime)
+                else:
+                    assert (
+                        metadata.ml_types[table][column]
+                        == expected_ml_types[table][column]
+                    )

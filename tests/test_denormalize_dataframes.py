@@ -17,7 +17,7 @@ def test_denormalize_two_tables():
         ml_types,
         relationships,
         primary_keys,
-        time_primary_keys,
+        time_indices,
     ) = generate_mock_data(
         tables=["products", "logs"],
     )
@@ -25,7 +25,7 @@ def test_denormalize_two_tables():
         ml_types=ml_types,
         relationships=relationships,
         primary_keys=primary_keys,
-        time_primary_keys=time_primary_keys,
+        time_indices=time_indices,
     )
     products_df = dataframes["products"]
     logs_df = dataframes["logs"]
@@ -56,6 +56,36 @@ def test_denormalize_two_tables():
     assert flat["products.price"].tolist() == [10, 20, 30, 10, 20]
 
 
+def test_denormalize_two_tables_change():
+    """
+      Products
+     /
+    Logs
+    """
+    (
+        dataframes,
+        ml_types,
+        relationships,
+        primary_keys,
+        time_indices,
+    ) = generate_mock_data(
+        tables=["products", "logs"],
+    )
+    metadata = MultiTableMetadata(
+        ml_types=ml_types,
+        relationships=relationships,
+        primary_keys=primary_keys,
+        time_indices=time_indices,
+    )
+    flat, _ = denormalize(
+        dataframes=dataframes,
+        metadata=metadata,
+        target_table="products",
+    )
+    # should not bring in logs
+    assert flat.shape == dataframes["products"].shape
+
+
 def test_denormalize_three_tables():
     """
     S   P   Sessions, Products
@@ -67,7 +97,7 @@ def test_denormalize_three_tables():
         ml_types,
         relationships,
         primary_keys,
-        time_primary_keys,
+        time_indices,
     ) = generate_mock_data(
         tables=["products", "logs", "sessions"],
     )
@@ -75,7 +105,7 @@ def test_denormalize_three_tables():
         ml_types=ml_types,
         relationships=relationships,
         primary_keys=primary_keys,
-        time_primary_keys=time_primary_keys,
+        time_indices=time_indices,
     )
     assert dataframes["sessions"]["id"].is_unique
 
@@ -113,7 +143,7 @@ def test_denormalize_four_tables():
         ml_types,
         relationships,
         primary_keys,
-        time_primary_keys,
+        time_indices,
     ) = generate_mock_data(
         tables=["products", "logs", "sessions", "customers"],
     )
@@ -121,7 +151,7 @@ def test_denormalize_four_tables():
         ml_types=ml_types,
         relationships=relationships,
         primary_keys=primary_keys,
-        time_primary_keys=time_primary_keys,
+        time_indices=time_indices,
     )
     flat, _ = denormalize(
         dataframes=dataframes,
@@ -155,7 +185,7 @@ def test_denormalize_change_target():
         ml_types,
         relationships,
         primary_keys,
-        time_primary_keys,
+        time_indices,
     ) = generate_mock_data(
         tables=["products", "logs", "sessions", "customers"],
     )
@@ -163,7 +193,7 @@ def test_denormalize_change_target():
         ml_types=ml_types,
         relationships=relationships,
         primary_keys=primary_keys,
-        time_primary_keys=time_primary_keys,
+        time_indices=time_indices,
     )
     flat, _ = denormalize(
         dataframes=dataframes,

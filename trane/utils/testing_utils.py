@@ -14,6 +14,9 @@ def generate_mock_data(tables):
     dataframes = {}
     primary_keys = {}
     time_indices = {}
+    for table in tables:
+        if table not in ["products", "logs", "sessions", "customers"]:
+            raise ValueError("Invalid table name: {}".format(table))
     if "products" in tables:
         dataframes["products"] = pd.DataFrame(
             {

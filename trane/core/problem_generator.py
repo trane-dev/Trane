@@ -40,11 +40,16 @@ class ProblemGenerator:
         if self.metadata.get_metadata_type() == "single":
             single_metadata = self.metadata
         else:
+            if self.target_table is None:
+                raise ValueError(
+                    "target_table must be specified for multi table metadata",
+                )
             _, single_metadata = denormalize(
                 metadata=self.metadata,
                 target_table=self.target_table,
             )
             single_metadata.time_index = self.metadata.time_indices[self.target_table]
+            single_metadata.original_multi_table_metadata = self.metadata
         possible_operations = _generate_possible_operations(
             ml_types=single_metadata.ml_types,
             primary_key=single_metadata.primary_key,
@@ -66,6 +71,7 @@ class ProblemGenerator:
                     entity_column=entity_column,
                     window_size=self.window_size,
                 )
+                problem.target_table = self.target_table
                 if problem.is_valid():
                     problems.append(problem)
         return problems

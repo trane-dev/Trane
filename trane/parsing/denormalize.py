@@ -36,7 +36,7 @@ def denormalize(
     single_metadata = SingleTableMetadata(
         ml_types=col_to_ml_types,
         primary_key=metadata.primary_keys.get(target_table, None),
-        time_index=metadata.time_primary_keys.get(target_table, None),
+        time_index=metadata.time_indices.get(target_table, None),
     )
     return dataframes[target_table], single_metadata
 
@@ -60,8 +60,13 @@ def denormalize_dataframes(
             )
     check_target_table(target_table, relationships, list(dataframes.keys()))
     relationship_order = child_relationships(target_table, relationships)
-    relationship_order = reorder_relationships(target_table, relationship_order)
+    if len(relationship_order) == 0:
+        # No child relationships, so just return the target table
+        col_to_ml_type = ml_types[target_table]
+        merged_dataframes = {target_table: dataframes[target_table]}
+        return merged_dataframes, col_to_ml_type
 
+    relationship_order = reorder_relationships(target_table, relationship_order)
     column_to_ml_type = {}
     new_to_original_col = {}
 
@@ -151,7 +156,9 @@ def reorder_relationships(target_table, relationships):
 
 
 def check_target_table(target_table, relationships, dataframe_names):
-    if target_table not in [x[2] for x in relationships]:
-        raise ValueError(f"{target_table} not in relationships: {relationships}")
+    # parent_tables = [x[0] for x in relationships]
+    # child_tables = [x[2] for x in relationships]
+    # if target_table not in parent_tables or target_table not in child_tables:
+    #     raise ValueError(f"{target_table} not in relationships: {relationships}")
     if target_table not in dataframe_names:
         raise ValueError(f"{target_table} not in dataframes: {dataframe_names}")

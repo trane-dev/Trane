@@ -31,13 +31,13 @@ def single_metadata():
 
 @pytest.fixture(scope="function")
 def multitable_metadata():
-    _, ml_types, relationships, primary_keys, time_primary_keys = generate_mock_data(
+    _, ml_types, relationships, primary_keys, time_indices = generate_mock_data(
         tables=["products", "logs"],
     )
     multitable_metadata = MultiTableMetadata(
         ml_types=ml_types,
         primary_keys=primary_keys,
-        time_primary_keys=time_primary_keys,
+        time_indices=time_indices,
         relationships=relationships,
     )
     return multitable_metadata
@@ -122,7 +122,7 @@ def test_init_multi(multitable_metadata):
         "products": "id",
         "logs": "id",
     }
-    assert multitable_metadata.time_primary_keys == {
+    assert multitable_metadata.time_indices == {
         "products": "purchase_date",
         "logs": "log_date",
     }

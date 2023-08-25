@@ -19,16 +19,21 @@ class BaseMetadata:
 
 
 class SingleTableMetadata(BaseMetadata):
-    ml_types = defaultdict(dict)
-    primary_key = None
-    time_index = None
-
-    def __init__(self, ml_types: dict, primary_key: str = None, time_index: str = None):
+    def __init__(
+        self,
+        ml_types: dict,
+        primary_key: str = None,
+        time_index: str = None,
+        original_multi_table_metadata=None,
+    ):
         self.ml_types = _parse_ml_types(ml_types, type_=self.get_metadata_type())
+        self.primary_key = None
         if primary_key:
             self.set_primary_key(primary_key)
+        self.time_index = None
         if time_index:
             self.set_time_index(time_index)
+        self.original_multi_table_metadata = original_multi_table_metadata
 
     def set_primary_key(self, primary_key):
         if primary_key not in self.ml_types:
@@ -81,22 +86,20 @@ class SingleTableMetadata(BaseMetadata):
 
 
 class MultiTableMetadata(BaseMetadata):
-    ml_types = defaultdict(dict)
-
     def __init__(
         self,
         ml_types: dict,
         primary_keys=None,
-        time_primary_keys=None,
+        time_indices=None,
         relationships: list = None,
     ):
         self.ml_types = _parse_ml_types(ml_types, type_=self.get_metadata_type())
         self.primary_keys = {}
         if primary_keys:
             self.set_primary_keys(primary_keys)
-        self.time_primary_keys = {}
-        if time_primary_keys:
-            self.set_time_primary_keys(time_primary_keys)
+        self.time_indices = {}
+        if time_indices:
+            self.set_time_indices(time_indices)
         self.relationships = []
         if relationships:
             self.add_relationships(relationships)
@@ -105,15 +108,15 @@ class MultiTableMetadata(BaseMetadata):
     def get_metadata_type():
         return "multi"
 
-    def set_time_primary_keys(self, time_primary_keys):
-        for table, time_index_column in time_primary_keys.items():
+    def set_time_indices(self, time_indices):
+        for table, time_index_column in time_indices.items():
             self.set_time_index(table, time_index_column)
 
     def set_time_index(self, table, column):
         self.check_if_table_exists(table)
         if not isinstance(self.get_ml_type(table, column), Datetime):
             raise ValueError("Time index must be of type Datetime")
-        self.time_primary_keys[table] = column
+        self.time_indices[table] = column
         self.ml_types[table][column] = Datetime()
 
     def set_primary_keys(self, primary_keys):
@@ -165,7 +168,7 @@ class MultiTableMetadata(BaseMetadata):
     def remove_table(self, table):
         self.ml_types.pop(table, None)
         self.primary_keys.pop(table, None)
-        self.time_primary_keys.pop(table, None)
+        self.time_indices.pop(table, None)
 
     def remove_relationship(self, relationships):
         if not isinstance(relationships, list):

@@ -8,6 +8,9 @@ from trane.ops.threshold_functions import (
     recommend_numeric_thresholds,
 )
 from trane.ops.transformation_ops import TransformationOpBase
+from trane.parsing.denormalize import (
+    denormalize,
+)
 from trane.typing.ml_types import MLType, convert_op_type
 
 
@@ -67,11 +70,19 @@ class Problem:
             normalized_dataframe = dataframes
         elif len(dataframes) == 1 and self.metadata.get_metadata_type() == "single":
             normalized_dataframe = dataframes[list(dataframes.keys())[0]]
+        else:
+            multi_metadata = self.metadata.original_multi_table_metadata
+            normalized_dataframe, _ = denormalize(
+                dataframes=dataframes,
+                metadata=multi_metadata,
+                target_table=self.target_table,
+            )
         return normalized_dataframe
 
     def get_recommended_thresholds(self, dataframes):
         # not an ideal threshold function
         # TODO: Add better threshold generation
+
         normalized_dataframe = self.get_normalized_dataframe(dataframes)
         thresholds = []
         for _, type_ in self.get_required_parameters().items():
@@ -96,7 +107,6 @@ class Problem:
     def create_target_values(self, dataframes):
         # Won't this always be normalized?
         normalized_dataframe = self.get_normalized_dataframe(dataframes)
-
         if self.has_parameters_set() is False:
             raise ValueError("Filter operation's parameters are not set")
 
@@ -116,6 +126,7 @@ class Problem:
 
         if "__identity__" in normalized_dataframe.columns:
             normalized_dataframe.drop(columns=["__identity__"], inplace=True)
+            lt.drop(columns=["__identity__"], inplace=True)
         lt = lt.rename(columns={"_execute_operations_on_df": "target"})
         return lt
 

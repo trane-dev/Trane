@@ -8,27 +8,27 @@ from trane.utils.testing_utils import generate_mock_data
 
 @pytest.fixture
 def four_table_metadata():
-    _, ml_types, relationships, primary_keys, time_primary_keys = generate_mock_data(
+    _, ml_types, relationships, primary_keys, time_indices = generate_mock_data(
         tables=["products", "logs", "sessions", "customers"],
     )
     metadata = MultiTableMetadata(
         ml_types=ml_types,
         primary_keys=primary_keys,
         relationships=relationships,
-        time_primary_keys=time_primary_keys,
+        time_indices=time_indices,
     )
     return metadata
 
 
 def test_denormalize_two_tables():
-    _, ml_types, relationships, primary_keys, time_primary_keys = generate_mock_data(
+    _, ml_types, relationships, primary_keys, time_indices = generate_mock_data(
         tables=["products", "logs"],
     )
     multi_metadata = MultiTableMetadata(
         ml_types=ml_types,
         primary_keys=primary_keys,
         relationships=relationships,
-        time_primary_keys=time_primary_keys,
+        time_indices=time_indices,
     )
     dataframes, normalized_metadata = denormalize(
         metadata=multi_metadata,
@@ -48,19 +48,38 @@ def test_denormalize_two_tables():
     assert normalized_metadata.primary_key == multi_metadata.primary_keys["logs"]
 
 
+def test_denormalize_two_tables_change_target():
+    _, ml_types, relationships, primary_keys, time_indices = generate_mock_data(
+        tables=["products", "logs"],
+    )
+    multi_metadata = MultiTableMetadata(
+        ml_types=ml_types,
+        primary_keys=primary_keys,
+        relationships=relationships,
+        time_indices=time_indices,
+    )
+    dataframes, normalized_metadata = denormalize(
+        metadata=multi_metadata,
+        target_table="products",
+    )
+    # should not bring in logs
+    for col in normalized_metadata.ml_types.keys():
+        assert col in ml_types["products"]
+
+
 def test_denormalize_three_tables():
     """
     S   P   Sessions, Products
      \\ /   .
       L     Log
     """
-    _, ml_types, relationships, primary_keys, time_primary_keys = generate_mock_data(
+    _, ml_types, relationships, primary_keys, time_indices = generate_mock_data(
         tables=["products", "logs", "sessions"],
     )
     multi_metadata = MultiTableMetadata(
         ml_types=ml_types,
         primary_keys=primary_keys,
-        time_primary_keys=time_primary_keys,
+        time_indices=time_indices,
         relationships=relationships,
     )
     dataframes, normalized_metadata = denormalize(

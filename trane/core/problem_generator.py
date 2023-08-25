@@ -74,7 +74,7 @@ class ProblemGenerator:
 def get_valid_entity_columns(metadata):
     entity_columns = []
     for col, ml_type in metadata.ml_types.items():
-        if ml_type in [Categorical, Integer]:
+        if isinstance(ml_type, Categorical) or isinstance(ml_type, Integer):
             entity_columns.append(col)
     return entity_columns
 

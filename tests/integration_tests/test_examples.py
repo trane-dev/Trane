@@ -1,69 +1,30 @@
-import os
-
-import pytest
-
-import trane
+from trane.core.problem_generator import ProblemGenerator
 from trane.datasets.load_functions import load_airbnb_reviews
-from trane.typing import infer_metadata
+from trane.metadata import SingleTableMetadata
 from trane.typing.ml_types import Categorical
 
-from .utils import generate_and_verify_prediction_problem
 
-
-@pytest.fixture
-def current_dir():
-    return os.path.dirname(__file__)
-
-
-def test_airbnb_reviews(sample):
-    df = load_airbnb_reviews()
-
-    entity_col = "location"
-    time_col = "date"
+def test_airbnb_reviews():
+    data = load_airbnb_reviews()
+    ml_types = {
+        "listing_id": "Categorical",
+        "id": "Categorical",
+        "date": "Datetime",
+        "reviewer_id": "Categorical",
+        "location": Categorical(tags="primary_key"),
+        "rating": "Categorical",
+    }
+    assert data["id"].is_unique
+    metadata = SingleTableMetadata(
+        ml_types=ml_types,
+        primary_key="id",
+        time_index="date",
+    )
     window_size = "1m"
-
-    meta = infer_metadata(df, entity_col, time_col)
-    meta["location"] = Categorical(tags="primary_key")
-
-    cutoff_strategy = trane.CutoffStrategy(
-        entity_col=entity_col,
+    problem_generator = ProblemGenerator(
+        metadata=metadata,
         window_size=window_size,
     )
-    generate_and_verify_prediction_problem(
-        df=df,
-        meta=meta,
-        entity_col=entity_col,
-        time_col=time_col,
-        cutoff_strategy=cutoff_strategy,
-        sample=sample,
-        use_multiprocess=False,
-    )
-
-
-# Skipping test store as it took 3 hours for Github Actions to run
-"""
-def test_store(sample):
-    dataframes, relationships = load_store()
-
-    target_entity = "orderlines"
-    entity_col = "orderid"
-    time_col = "orderdate"
-    window_size = "1m"
-
-    df = denormalize(dataframes, relationships, target_entity)
-    meta = infer_metadata(df, entity_col, time_col)
-
-    cutoff_strategy = trane.CutoffStrategy(
-        entity_col=entity_col,
-        window_size=window_size,
-    )
-    generate_and_verify_prediction_problem(
-        df=df,
-        meta=meta,
-        entity_col=entity_col,
-        time_col=time_col,
-        cutoff_strategy=cutoff_strategy,
-        sample=sample,
-        use_multiprocess=False,
-    )
-"""
+    problems = problem_generator.generate()
+    for p in problems:
+        p.create_target_values(data)

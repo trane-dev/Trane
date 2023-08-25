@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from trane.typing.inference import infer_metadata
+from trane.typing.inference import infer_ml_types
 from trane.typing.ml_types import Datetime, MLType
 
 
@@ -72,7 +72,7 @@ class SingleTableMetadata(BaseMetadata):
 
     @staticmethod
     def from_data(dataframe):
-        ml_types = infer_metadata(dataframe)
+        ml_types = infer_ml_types(dataframe)
         return SingleTableMetadata(ml_types)
 
     @staticmethod

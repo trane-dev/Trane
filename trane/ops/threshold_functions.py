@@ -9,7 +9,7 @@ from pandas.api.types import (
 from scipy import stats
 
 from trane.typing.ml_types import (
-    TYPE_MAPPING,
+    convert_op_type,
 )
 
 
@@ -39,9 +39,8 @@ def get_semantic_tags(filter_op):
     """
     valid_semantic_tags = set()
     for op_input_type, _ in filter_op.input_output_types:
-        if isinstance(op_input_type, str):
-            op_input_type = TYPE_MAPPING[op_input_type]
-        valid_semantic_tags.update(op_input_type.semantic_tags)
+        op_input_type = convert_op_type(op_input_type)
+        valid_semantic_tags.update(op_input_type.get_tags())
     return valid_semantic_tags
 
 

@@ -2,6 +2,8 @@ import os
 
 import pandas as pd
 
+from trane.typing import Categorical
+
 
 def load_airbnb_reviews():
     time_col = "date"
@@ -10,8 +12,19 @@ def load_airbnb_reviews():
     df = df.dropna()
     df[time_col] = pd.to_datetime(df[time_col], format="%Y-%m-%d")
     df = df.sort_values(by=["date"])
-
     return df
+
+
+def load_airbnb_ml_types():
+    ml_types = {
+        "listing_id": "Categorical",
+        "id": Categorical("primary_key"),
+        "date": "Datetime",
+        "reviewer_id": "Categorical",
+        "location": "Categorical",
+        "rating": "Categorical",
+    }
+    return ml_types
 
 
 def load_store():

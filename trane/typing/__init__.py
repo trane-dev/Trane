@@ -6,5 +6,5 @@ from trane.typing.ml_types import (
 )
 from trane.typing.inference import (
     _infer_ml_type,
-    infer_metadata,
+    infer_ml_types,
 )

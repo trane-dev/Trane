@@ -1,3 +1,5 @@
+import pandas as pd
+
 from trane.core.problem import Problem
 from trane.core.problem_generator import ProblemGenerator
 from trane.metadata import SingleTableMetadata
@@ -5,9 +7,10 @@ from trane.utils.testing_utils import generate_mock_data
 
 
 def test_problem_generator_single_table():
-    dataframes, ml_types, _, primary_key, time_index = generate_mock_data(
+    dataframe, ml_types, _, primary_key, time_index = generate_mock_data(
         tables=["products"],
     )
+    dataframe = dataframe["products"]
 
     # 1. User creates single table metadata
     metadata = SingleTableMetadata(
@@ -28,17 +31,15 @@ def test_problem_generator_single_table():
 
     # 3. Generate target values for each problem
     for p in problems:
-        # TODO: how should threshold be generated?
-
-        # 1. User specifies threshold
-        # p.create_target_values(dataframes, threshold=0.5)
-
-        # TODO: Add better threshold generation
-        p.create_target_values(dataframes)
-
-
-#         print(p)
-#         print(label_times)
+        if p.has_parameters_set() is True:
+            labels = p.create_target_values(dataframe)
+            check_problem_type(labels, p)
+        else:
+            thresholds = p.get_recommended_thresholds(dataframe)
+            for threshold in thresholds:
+                p.set_parameters(threshold)
+                labels = p.create_target_values(dataframe)
+                check_problem_type(labels, p)
 
 
 # def test_problem_generator_multi_table():
@@ -47,3 +48,10 @@ def test_problem_generator_single_table():
 #         primary_key={"order"},
 #         time_index=time_index,
 #     )
+
+
+def check_problem_type(labels, p):
+    if pd.api.types.is_bool_dtype(labels["target"].dtype):
+        assert p.get_problem_type() == "classification"
+    else:
+        assert p.get_problem_type() == "regression"

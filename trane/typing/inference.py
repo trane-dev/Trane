@@ -35,10 +35,10 @@ def _infer_ml_type(series: pd.Series) -> MLType:
     return Unknown()
 
 
-def infer_metadata(
+def infer_ml_types(
     df: pd.DataFrame,
 ):
-    metadata = {}
+    ml_types = {}
     for col in df.columns:
-        metadata[col] = _infer_ml_type(df[col])
-    return metadata
+        ml_types[col] = _infer_ml_type(df[col])
+    return ml_types

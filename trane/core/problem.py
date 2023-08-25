@@ -1,9 +1,11 @@
 import composeml as cp
+import pandas as pd
 
-from trane.ops.aggregation_ops import AggregationOpBase
-from trane.ops.filter_ops import AllFilterOp, FilterOpBase
+from trane.ops.aggregation_ops import AggregationOpBase, ExistsAggregationOp
+from trane.ops.filter_ops import FilterOpBase
 from trane.ops.threshold_functions import (
-    _threshold_recommend,
+    get_k_most_frequent,
+    recommend_numeric_thresholds,
 )
 from trane.ops.transformation_ops import TransformationOpBase
 from trane.typing.ml_types import MLType, convert_op_type
@@ -45,13 +47,58 @@ class Problem:
             return False
         return False
 
+    def has_parameters_set(self):
+        return self.operations[0].has_parameters_set()
+
+    def get_required_parameters(self):
+        return self.operations[0].required_parameters
+
+    def set_parameters(self, threshold):
+        return self.operations[0].set_parameters(threshold)
+
+    def get_problem_type(self):
+        if isinstance(self.operations[2], ExistsAggregationOp):
+            return "classification"
+        return "regression"
+
+    def get_normalized_dataframe(self, dataframes):
+        normalized_dataframe = None
+        if isinstance(dataframes, pd.DataFrame):
+            normalized_dataframe = dataframes
+        elif len(dataframes) == 1 and self.metadata.get_metadata_type() == "single":
+            normalized_dataframe = dataframes[list(dataframes.keys())[0]]
+        return normalized_dataframe
+
+    def get_recommended_thresholds(self, dataframes):
+        # not an ideal threshold function
+        # TODO: Add better threshold generation
+        normalized_dataframe = self.get_normalized_dataframe(dataframes)
+        thresholds = []
+        for _, type_ in self.get_required_parameters().items():
+            if type_ in [int, float]:
+                filter_op = self.operations[0]
+                thresholds.extend(
+                    recommend_numeric_thresholds(
+                        normalized_dataframe,
+                        filter_op,
+                    ),
+                )
+            else:
+                column_name = self.operations[0].column_name
+                thresholds.extend(
+                    get_k_most_frequent(
+                        normalized_dataframe[column_name],
+                        k=3,
+                    ),
+                )
+        return thresholds
+
     def create_target_values(self, dataframes):
         # Won't this always be normalized?
-        normalized_dataframe = None
-        if len(dataframes) == 1 and self.metadata.get_metadata_type() == "single":
-            normalized_dataframe = dataframes[list(dataframes.keys())[0]]
+        normalized_dataframe = self.get_normalized_dataframe(dataframes)
 
-        self.generate_threshold(normalized_dataframe)
+        if self.has_parameters_set() is False:
+            raise ValueError("Filter operation's parameters are not set")
 
         target_dataframe_index = self.entity_column
         if self.entity_column is None:
@@ -78,18 +125,10 @@ class Problem:
             df = operation.label_function(df)
         return df
 
-    def generate_threshold(self, normalized_dataframe):
-        filter_op = self.operations[0]
-        if isinstance(filter_op, AllFilterOp):
-            return
-
-        _threshold_recommend(filter_op, normalized_dataframe)
-        breakpoint()
-
     def is_valid(self):
         result, _ = _check_operations_valid(
             operations=self.operations,
-            ml_types=self.metadata.ml_types,
+            metadata=self.metadata,
         )
         if result:
             return True
@@ -189,7 +228,6 @@ def _check_operations_valid(
             op_input_tags = op_input_ml_type.get_tags()
             op_restricted_tags = op.restricted_tags
             if not check_ml_type_valid(op_input_ml_type, column_ml_type):
-                breakpoint()
                 return False, {}
             if op_input_tags and len(column_tags.intersection(op_input_tags)) == 0:
                 return False, {}

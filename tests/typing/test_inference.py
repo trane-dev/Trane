@@ -8,7 +8,7 @@ import pytest
 from trane.metadata.metadata import _str_to_ml_types
 from trane.typing.inference import (
     _infer_ml_type,
-    infer_metadata,
+    infer_ml_types,
 )
 from trane.typing.inference_functions import (
     pandas_modulo,
@@ -122,7 +122,7 @@ def test_integer_inference(pandas_integers):
             assert Integer.inference_func(series.astype(dtype)) is True
 
 
-def test_infer_metadata():
+def test_infer_ml_types():
     df = pd.DataFrame(
         {
             "a": [1, 2, 3],
@@ -135,7 +135,7 @@ def test_infer_metadata():
             ],
         },
     )
-    metadata = infer_metadata(df)
+    metadata = infer_ml_types(df)
     for col, ml_type in metadata.items():
         assert col in df.columns
         assert str(ml_type).lower() in _str_to_ml_types()

@@ -69,10 +69,6 @@ class MLType(object, metaclass=MLTypeMetaClass):
         return tag in self.tags
 
     @property
-    def is_categorical(self):
-        False
-
-    @property
     def is_numeric(self):
         return False
 
@@ -104,10 +100,6 @@ class Categorical(MLType):
     @staticmethod
     def inference_func(series):
         return categorical_func(series)
-
-    @property
-    def is_categorical(self):
-        True
 
 
 class Datetime(MLType):
@@ -159,10 +151,6 @@ class NaturalLanguage(MLType):
 class Ordinal(MLType):
     dtype = "category"
     mandatory_tags = {"category"}
-
-    @property
-    def is_categorical(self):
-        True
 
 
 class PersonFullName(MLType):
@@ -219,5 +207,5 @@ def convert_op_type(op_type):
             ml_type = TYPE_MAPPING[op_type][0]
             tags = TYPE_MAPPING[op_type][1]
             return ml_type(tags=tags)
-        return TYPE_MAPPING[op_type]
+        return TYPE_MAPPING[op_type]()
     return op_type

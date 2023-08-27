@@ -30,12 +30,14 @@ class ProblemGenerator:
         metadata,
         window_size,
         target_table: str = None,
+        entity_columns: List[str] = None,
     ):
         self.metadata = metadata
         self.window_size = window_size
         self.target_table = target_table
+        self.entity_columns = entity_columns
 
-    def generate(self, entity_columns: List[str] = None):
+    def generate(self):
         # denormalize and create single metadata table
         if self.metadata.get_metadata_type() == "single":
             single_metadata = self.metadata
@@ -56,10 +58,12 @@ class ProblemGenerator:
             time_index=single_metadata.time_index,
         )
         problems = []
-        # TODO: add logic to check entity_columns
-        valid_entity_columns = get_valid_entity_columns(single_metadata)
-        # Force create with no entity column to generate problems "Predict X"
-        valid_entity_columns.append(None)
+        valid_entity_columns = self.entity_columns
+        if self.entity_columns is None:
+            # TODO: add logic to check entity_columns
+            valid_entity_columns = get_valid_entity_columns(single_metadata)
+            # Force create with no entity column to generate problems "Predict X"
+            valid_entity_columns.append(None)
         for entity_column in valid_entity_columns:
             for op_col_combo in possible_operations:
                 filter_op, transform_op, agg_op = op_col_combo
@@ -74,6 +78,8 @@ class ProblemGenerator:
                 problem.target_table = self.target_table
                 if problem.is_valid():
                     problems.append(problem)
+        # sort by string representation
+        problems = sorted(problems, key=lambda p: str(p))
         return problems
 
 

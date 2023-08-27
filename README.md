@@ -33,31 +33,29 @@ python -m pip install trane
 Below is an example of using Trane:
 ```python
 import trane
-
 data, metadata = trane.load_airbnb()
-
-entity_col = "location"
+entity_columns = ["location"]
 window_size = "2d"
-
 problem_generator = trane.ProblemGenerator(
     metadata=metadata,
     window_size=window_size,
+    entity_columns=entity_columns
 )
 problems = problem_generator.generate()
 print(f'Generated {len(problems)} problems')
-print(problems[210])
-print(problems[210].create_target_values(data).head(5))
+print(problems[108])
+print(problems[108].create_target_values(data).head(5))
 ```
 
 ```text
-Generated 1008 problems
-Predict the majority <rating> in all related records in next 2d days
-  listing_id       time  target
-0  720325039 2021-01-01       3
-1  720340530 2021-01-01       3
-2  720340983 2021-01-01       2
-3  720342549 2021-01-01       4
-4  720347253 2021-01-01       5
+Generated 168 problems
+For each <location> predict the majority <rating> in all related records in next 2d days
+  location       time  target
+0   London 2021-01-01       5
+1   London 2021-01-03       4
+2   London 2021-01-05       5
+3   London 2021-01-07       4
+4   London 2021-01-09       5
 ```
 
 # Community

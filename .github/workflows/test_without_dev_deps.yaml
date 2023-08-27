@@ -37,18 +37,16 @@ jobs:
       - name: Run simple usage
         run: |
           import trane
-
           data, metadata = trane.load_airbnb()
-
-          entity_col = "location"
+          entity_columns = ["location"]
           window_size = "2d"
-
           problem_generator = trane.ProblemGenerator(
               metadata=metadata,
               window_size=window_size,
+              entity_columns=entity_columns
           )
           problems = problem_generator.generate()
           print(f'Generated {len(problems)} problems')
-          print(problems[210])
-          print(problems[210].create_target_values(data).head(5))
+          print(problems[96])
+          print(problems[96].create_target_values(data).head(5))
         shell: python

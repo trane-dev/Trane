@@ -115,8 +115,8 @@ def denormalize_dataframes(
 
 
 def flatten_dataframes(parent_table, child_table, parent_key, child_key):
-    parent_table.set_index(parent_key, inplace=True)
-    child_table.set_index(child_key, inplace=True)
+    parent_table = parent_table.set_index(parent_key, inplace=False)
+    child_table = child_table.set_index(child_key, inplace=False)
     return parent_table.merge(
         child_table,
         # right = we want to keep all the rows in the child table

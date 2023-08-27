@@ -77,6 +77,9 @@ class Problem:
                 metadata=multi_metadata,
                 target_table=self.target_table,
             )
+            normalized_dataframe = normalized_dataframe.sort_values(
+                by=[self.metadata.time_index],
+            )
         return normalized_dataframe
 
     def get_recommended_thresholds(self, dataframes):

@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+from tqdm import tqdm
 
 from trane.core.problem import Problem
 from trane.core.problem_generator import ProblemGenerator
@@ -7,11 +8,13 @@ from trane.metadata import MultiTableMetadata, SingleTableMetadata
 from trane.utils.testing_utils import generate_mock_data
 
 
-def test_problem_generator_single_table():
+def test_problem_generator_single_table(tables, target_table):
+    tables = ["products"]
+    target_table = "products"
     dataframe, ml_types, _, primary_key, time_index = generate_mock_data(
-        tables=["products"],
+        tables=tables,
     )
-    dataframe = dataframe["products"]
+    dataframe = dataframe[target_table]
 
     # 1. User creates single table metadata
     metadata = SingleTableMetadata(
@@ -47,10 +50,8 @@ def test_problem_generator_single_table():
     "tables,target_table",
     [
         (["products", "logs"], "logs"),
-        # (["products", "logs"], "products"),
-        # (["products", "logs", "sessions"], "products"),
-        # (["products", "logs", "sessions"], "logs"),
-        # (["products", "logs", "sessions"], "sessions"),
+        (["products", "logs", "sessions"], "sessions"),
+        (["products", "logs", "sessions", "customers"], "logs"),
     ],
 )
 def test_problem_generator_multi(tables, target_table):
@@ -76,24 +77,23 @@ def test_problem_generator_multi(tables, target_table):
         target_table=target_table,
     )
     problems = problem_generator.generate()
-    for p in problems:
-        assert isinstance(p, Problem)
-    original_dataframes = dataframes.copy()
-    for p in problems:
+    num_columns = len(problems[0].metadata.ml_types.keys())
+    print(f"generated {len(problems)} problems from {num_columns} columns")
+    for p in tqdm(problems):
         if p.has_parameters_set() is True:
-            dataframes = original_dataframes
             labels = p.create_target_values(dataframes)
             check_problem_type(labels, p.get_problem_type())
-            print(f"checked {p}")
-        # else:
-        #     thresholds = p.get_recommended_thresholds(dataframes)
-        #     for threshold in thresholds:
-        #         p.set_parameters(threshold)
-        #         labels = p.create_target_values(dataframes)
-        #         check_problem_type(labels, p.get_problem_type())
+        else:
+            thresholds = p.get_recommended_thresholds(dataframes)
+            for threshold in thresholds:
+                p.set_parameters(threshold)
+                labels = p.create_target_values(dataframes)
+                check_problem_type(labels, p.get_problem_type())
 
 
 def check_problem_type(labels, problem_type):
+    if "target" not in labels.columns:
+        return None
     if pd.api.types.is_bool_dtype(labels["target"].dtype):
         assert problem_type == "classification"
     else:

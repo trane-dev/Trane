@@ -1,9 +1,9 @@
-from trane.datasets.load_functions import load_airbnb_reviews, load_store
+from trane.datasets.load_functions import load_airbnb, load_store
 from trane.typing.ml_types import MLType
 
 
-def test_load_airbnb_reviews():
-    df = load_airbnb_reviews()
+def test_load_airbnb():
+    df = load_airbnb()
 
     assert df["date"].dtype == "datetime64[ns]"
     assert df["listing_id"].dtype == "int64[pyarrow]"

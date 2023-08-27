@@ -1,1 +1,1 @@
-from trane.datasets.load_functions import load_airbnb_reviews, load_store
+from trane.datasets.load_functions import load_airbnb, load_store

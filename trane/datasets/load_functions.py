@@ -2,29 +2,45 @@ import os
 
 import pandas as pd
 
-from trane.typing import Categorical
+from trane.metadata import MultiTableMetadata, SingleTableMetadata
+from trane.typing import Categorical, Datetime
+from trane.utils.testing_utils import generate_mock_data
 
 
-def load_airbnb_reviews():
+def load_airbnb():
     time_col = "date"
     filepath = generate_local_filepath("data/airbnb_reviews/airbnb_reviews.csv")
     df = pd.read_csv(filepath, dtype_backend="pyarrow")
     df = df.dropna()
     df[time_col] = pd.to_datetime(df[time_col], format="%Y-%m-%d")
     df = df.sort_values(by=["date"])
-    return df
+    metadata = SingleTableMetadata(
+        primary_key="id",
+        time_index=time_col,
+        ml_types={
+            "listing_id": Categorical("foreign_key"),
+            "id": Categorical("primary_key"),
+            "date": Datetime("time_index"),
+            "reviewer_id": Categorical("foreign_key"),
+            "location": Categorical(),
+            "rating": Categorical(),
+        },
+    )
+    return df, metadata
 
 
-def load_airbnb_ml_types():
-    ml_types = {
-        "listing_id": "Categorical",
-        "id": Categorical("primary_key"),
-        "date": "Datetime",
-        "reviewer_id": "Categorical",
-        "location": "Categorical",
-        "rating": "Categorical",
-    }
-    return ml_types
+def load_mock_data():
+    tables = ["products", "logs", "sessions", "customers"]
+    dataframes, ml_types, relationships, primary_key, time_index = generate_mock_data(
+        tables=tables,
+    )
+    metadata = MultiTableMetadata(
+        ml_types=ml_types,
+        primary_key=primary_key,
+        time_index=time_index,
+        relationships=relationships,
+    )
+    return dataframes, metadata
 
 
 def load_store():

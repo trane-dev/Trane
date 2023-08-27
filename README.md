@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/HDI-Project/Trane/actions/workflows/tests.yaml" target="_blank">
-      <img src="https://github.com/HDI-Project/Trane/actions/workflows/tests.yaml/badge.svg" alt="Tests" />
+    <a href="https://github.com/trane-dev/Trane/actions/workflows/tests.yaml" target="_blank">
+      <img src="https://github.com/trane-dev/Trane/actions/workflows/tests.yaml/badge.svg" alt="Tests" />
     </a>
     <a href="https://codecov.io/gh/trane-dev/Trane" >
       <img src="https://codecov.io/gh/trane-dev/Trane/branch/main/graph/badge.svg?token=HafAlYGH8F"/>
@@ -24,10 +24,6 @@
 
 Trane is a software package for automatically generating prediction problems and generating labels for supervised learning. Trane is a system designed to advance the automation of the machine learning problem solving pipeline.
 
-<p align="center">
-  <a href="https://www.youtube-nocookie.com/embed/TrK5Tm9ic28"><img src="https://img.youtube.com/vi/TrK5Tm9ic28/0.jpg" width="70%" target="_blank" alt="Trane About Video"></a>
-</p>
-
 # Install
 
 To install Trane, run the following command:
@@ -39,32 +35,35 @@ python -m pip install trane
 # Example
 
 Below is an example of using Trane:
-
 ```python
 import trane
 
-data = trane.datasets.load_covid()
-table_meta = trane.datasets.load_covid_metadata()
+data, metadata = trane.load_airbnb()
 
-entity_col = "Country/Region"
+entity_col = "location"
 window_size = "2d"
-minimum_data = "2020-01-22"
-maximum_data = "2020-03-29"
-cutoff_strategy = trane.CutoffStrategy(
-    entity_col=entity_col,
+
+problem_generator = trane.ProblemGenerator(
+    metadata=metadata,
     window_size=window_size,
-    minimum_data=minimum_data,
-    maximum_data=maximum_data,
 )
-time_col = "Date"
-problem_generator = trane.PredictionProblemGenerator(
-    df=data,
-    entity_col=entity_col,
-    time_col=time_col,
-    cutoff_strategy=cutoff_strategy,
-    table_meta=table_meta,
-)
-problems = problem_generator.generate(data, generate_thresholds=True)
+problems = problem_generator.generate()
+print(f'Generated {len(problems)} problems')
+```
+
+Here is an example of the labels that can be generated:
+```python
+print(problems[210])
+print(problems[210].create_target_values(data).head(5))
+```
+
+```text
+          id       time  target
+0  720325039 2021-01-01       3
+1  720340530 2021-01-01       3
+2  720340983 2021-01-01       2
+3  720342549 2021-01-01       4
+4  720347253 2021-01-01       5
 ```
 
 # Community

@@ -68,10 +68,25 @@ def generate_mock_data(tables):
             {
                 "id": [0, 1, 2, 3, 4, 5],
                 "customer_id": pd.Categorical([0, 0, 0, 1, 1, 2]),
+                "session_date": pd.to_datetime(
+                    [
+                        "2020-05-01",
+                        "2020-05-02",
+                        "2020-05-03",
+                        "2020-05-04",
+                        "2020-05-05",
+                        "2020-05-06",
+                    ],
+                ),
             },
         )
-        ml_types["sessions"] = {"id": "Integer", "customer_id": "Categorical"}
+        ml_types["sessions"] = {
+            "id": "Integer",
+            "customer_id": "Categorical",
+            "session_date": "Datetime",
+        }
         primary_keys["sessions"] = "id"
+        time_indices["sessions"] = "session_date"
     if "customers" in tables:
         dataframes["customers"] = pd.DataFrame(
             {

@@ -8,7 +8,7 @@ from trane.metadata import MultiTableMetadata, SingleTableMetadata
 from trane.utils.testing_utils import generate_mock_data
 
 
-def test_problem_generator_single_table(tables, target_table):
+def test_problem_generator_single_table():
     tables = ["products"]
     target_table = "products"
     dataframe, ml_types, _, primary_key, time_index = generate_mock_data(

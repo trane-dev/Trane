@@ -12,6 +12,8 @@ v0.6.0 (, 2023)
     * Add Order By Operation (OrderByOp, along with IdentityOp and TransformationOpBase) [#138][#138]
     * Add First and Last Aggregation Operations [#144][#144]
     * Enable operations to exclude other operations they can be applied with [#147][#147]
+    * Cleaned up Readme with new Problem class example [#136][#136]
+    * Add denormalize function with metadata and data only support [#136][#136]
 * Fixes
     * Rename `_execute_operations_on_df` to `target` in executed prediction problem dataframe [#124][#124]
     * Clean up operation description generation [#118][#118]
@@ -20,6 +22,11 @@ v0.6.0 (, 2023)
     * Remove covid19 and youtube datasets [#131][#131]
     * Prevent Aggregation operations besides `FirstAggregationOp` and `LastAggregationOp` to be paired with `OrderByOp` [#147][#147]
     * Prevent `FirstAggregationOp` and `LastAggregationOp` from being paired with `IdentityByOp` (hence only allowing `IdentityByOp`) [#147][#147]
+    * Changed Logical Types to ML Types [#136][#136]
+    * Removed the ColumnSchema class [#136][#136]
+    * Removed the CutoffStrategy class [#136][#136]
+    * Make threshold more clear in Problem string output [#136][#136]
+    * Add MultiTableMetadata and SingleTableMetadata class [#136][#136]
 
     [#124]: <https://github.com/trane-dev/Trane/pull/124>
     [#118]: <https://github.com/trane-dev/Trane/pull/118>
@@ -29,6 +36,7 @@ v0.6.0 (, 2023)
     [#138]: <https://github.com/trane-dev/Trane/pull/138>
     [#144]: <https://github.com/trane-dev/Trane/pull/144>
     [#147]: <https://github.com/trane-dev/Trane/pull/147>
+    [#136]: <https://github.com/trane-dev/Trane/pull/136>
 
 
 v0.5.0 (July 27, 2023)

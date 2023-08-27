@@ -119,7 +119,7 @@ def test_denormalize_three_tables():
         metadata=metadata,
         target_table="logs",
     )
-    assert flat.shape == (5, 9)
+    assert flat.shape == (5, 10)
     assert flat["id"].is_unique
     assert sorted(flat["id"].tolist()) == [1, 2, 3, 4, 5]
     flat = flat.set_index("id").sort_values("id")
@@ -158,7 +158,7 @@ def test_denormalize_four_tables():
         metadata=metadata,
         target_table="logs",
     )
-    assert flat.shape == (5, 11)
+    assert flat.shape == (5, 12)
     assert flat["id"].is_unique
     assert sorted(flat["id"].tolist()) == [1, 2, 3, 4, 5]
     flat = flat.set_index("id").sort_values("id")
@@ -200,7 +200,7 @@ def test_denormalize_change_target():
         metadata=metadata,
         target_table="sessions",
     )
-    assert flat.shape == (6, 4)
+    assert flat.shape == (6, 5)
     assert flat["id"].is_unique
     assert sorted(flat["id"].tolist()) == [0, 1, 2, 3, 4, 5]
     flat = flat.set_index("id").sort_values("id")

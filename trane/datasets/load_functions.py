@@ -7,10 +7,10 @@ from trane.typing import Categorical, Datetime
 from trane.utils.testing_utils import generate_mock_data
 
 
-def load_airbnb():
+def load_airbnb(nrows=None):
     time_col = "date"
     filepath = generate_local_filepath("data/airbnb_reviews/airbnb_reviews.csv")
-    df = pd.read_csv(filepath, dtype_backend="pyarrow")
+    df = pd.read_csv(filepath, dtype_backend="pyarrow", nrows=nrows)
     df = df.dropna()
     df[time_col] = pd.to_datetime(df[time_col], format="%Y-%m-%d")
     df = df.sort_values(by=["date"])

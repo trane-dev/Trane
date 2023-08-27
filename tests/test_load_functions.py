@@ -1,14 +1,18 @@
 from trane.datasets.load_functions import load_airbnb, load_store
-from trane.typing.ml_types import MLType
+from trane.typing.ml_types import Categorical, Datetime, MLType
 
 
 def test_load_airbnb():
-    df = load_airbnb()
+    df, metadata = load_airbnb()
 
     assert df["date"].dtype == "datetime64[ns]"
+    assert isinstance(metadata.ml_types["date"], Datetime)
     assert df["listing_id"].dtype == "int64[pyarrow]"
+    assert isinstance(metadata.ml_types["rating"], Categorical)
     assert df["id"].dtype == "int64[pyarrow]"
+    assert isinstance(metadata.ml_types["rating"], Categorical)
     assert df["rating"].dtype == "int64[pyarrow]"
+    assert isinstance(metadata.ml_types["rating"], Categorical)
 
 
 def test_load_store():

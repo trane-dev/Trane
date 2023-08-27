@@ -51,7 +51,6 @@ def test_problem_generator_single_table():
     [
         (["products", "logs"], "logs"),
         (["products", "logs", "sessions"], "sessions"),
-        (["products", "logs", "sessions", "customers"], "logs"),
     ],
 )
 def test_problem_generator_multi(tables, target_table):

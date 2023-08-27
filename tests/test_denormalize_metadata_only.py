@@ -96,6 +96,7 @@ def test_denormalize_three_tables():
         "products.card_type": Categorical(),
         "products.first_purchase": Boolean(),
         "products.purchase_date": Datetime(),
+        "sessions.session_date": Datetime(),
     }
 
 
@@ -124,6 +125,7 @@ def test_denormalize_four_tables(four_table_metadata):
         "products.card_type": Categorical(),
         "products.first_purchase": Boolean(),
         "products.purchase_date": Datetime(),
+        "sessions.session_date": Datetime(),
     }
 
 
@@ -146,4 +148,5 @@ def test_denormalize_change_target(four_table_metadata):
         "customer_id": Categorical(),
         "customers.age": Integer(),
         "customers.région_id": Categorical(),
+        "session_date": Datetime(tags="time_index"),
     }

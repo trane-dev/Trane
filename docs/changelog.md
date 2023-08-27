@@ -3,8 +3,8 @@
 Changelog
 ---------
 
-v0.6.0 (, 2023)
-===============
+v0.6.0 (August 27, 2023)
+========================
 * Enhancements
     * Add pyarrow dependency and use pyarrow backed dtypes [#120][#120]
     * Add Airbnb Reviews dataset [#125][#125]

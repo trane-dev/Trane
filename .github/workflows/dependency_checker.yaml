@@ -18,7 +18,6 @@ jobs:
         make checkdeps OUTPUT_FILEPATH=tests/latest_requirements.txt
         make lint-fix
         pre-commit autoupdate
-        python scripts/create_minimal_requirements.py
     - name: Create pull request
       id: cpr
       uses: peter-evans/create-pull-request@v4

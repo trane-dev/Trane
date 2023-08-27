@@ -23,7 +23,7 @@ jobs:
       id: cpr
       uses: peter-evans/create-pull-request@v4
       with:
-        token: ${{ secrets.REPO_SCOPED_TOKEN }}
+        token: ${{ secrets.ORG_SCOPED_TOKEN }}
         commit-message: Update latest dependencies
         title: Automated Latest Dependency Updates
         body: "This is an auto-generated PR with **latest** dependency updates."

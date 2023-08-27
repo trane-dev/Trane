@@ -1,14 +1,18 @@
-from trane.datasets.load_functions import load_airbnb_reviews, load_store
-from trane.typing.column_schema import ColumnSchema
+from trane.datasets.load_functions import load_airbnb, load_store
+from trane.typing.ml_types import Categorical, Datetime, MLType
 
 
-def test_load_airbnb_reviews():
-    df = load_airbnb_reviews()
+def test_load_airbnb():
+    df, metadata = load_airbnb()
 
     assert df["date"].dtype == "datetime64[ns]"
+    assert isinstance(metadata.ml_types["date"], Datetime)
     assert df["listing_id"].dtype == "int64[pyarrow]"
+    assert isinstance(metadata.ml_types["rating"], Categorical)
     assert df["id"].dtype == "int64[pyarrow]"
+    assert isinstance(metadata.ml_types["rating"], Categorical)
     assert df["rating"].dtype == "int64[pyarrow]"
+    assert isinstance(metadata.ml_types["rating"], Categorical)
 
 
 def test_load_store():
@@ -91,4 +95,4 @@ def check_column_schema(columns, df, metadata):
     for col in columns:
         assert col in df.columns
         assert col in metadata.keys()
-        assert isinstance(metadata[col], ColumnSchema)
+        assert issubclass(metadata[col], MLType)

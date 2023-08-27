@@ -37,25 +37,16 @@ jobs:
       - name: Run simple usage
         run: |
           import trane
-          df = trane.datasets.load_airbnb_reviews()
-          entity_col = "location"
-          time_col = "date"
-          window_size = "1m"
-          table_meta = trane.typing.infer_table_meta(df, entity_col, time_col)
-          table_meta["location"] = trane.typing.column_schema.ColumnSchema(
-              trane.typing.logical_types.Categorical, semantic_tags={"category", "primary_key"}
-          )
-          cutoff_strategy = trane.CutoffStrategy(
-              entity_col=entity_col,
+          data, metadata = trane.load_airbnb()
+          entity_columns = ["location"]
+          window_size = "2d"
+          problem_generator = trane.ProblemGenerator(
+              metadata=metadata,
               window_size=window_size,
+              entity_columns=entity_columns
           )
-          problem_generator = trane.PredictionProblemGenerator(
-              df=df,
-              entity_col=entity_col,
-              time_col=time_col,
-              cutoff_strategy=cutoff_strategy,
-              table_meta=table_meta,
-          )
-          problems = problem_generator.generate(df, generate_thresholds=True)
-          assert len(problems) >= 450
+          problems = problem_generator.generate()
+          print(f'Generated {len(problems)} problems')
+          print(problems[96])
+          print(problems[96].create_target_values(data).head(5))
         shell: python

@@ -1,72 +1,26 @@
-import os
+import pandas as pd
+from tqdm import tqdm
 
-import pytest
-
-import trane
-from trane.datasets.load_functions import load_airbnb_reviews
-from trane.typing import infer_table_meta
-from trane.typing.column_schema import ColumnSchema
-from trane.typing.logical_types import Categorical
-
-from .utils import generate_and_verify_prediction_problem
+from trane.core.problem_generator import ProblemGenerator
+from trane.datasets.load_functions import load_airbnb
 
 
-@pytest.fixture
-def current_dir():
-    return os.path.dirname(__file__)
-
-
-def test_airbnb_reviews(sample):
-    df = load_airbnb_reviews()
-
-    entity_col = "location"
-    time_col = "date"
+def test_airbnb_reviews():
+    data, metadata = load_airbnb(nrows=1000)
+    assert data["id"].is_unique
     window_size = "1m"
-
-    meta = infer_table_meta(df, entity_col, time_col)
-    meta["location"] = ColumnSchema(
-        Categorical, semantic_tags={"category", "primary_key"}
-    )
-
-    cutoff_strategy = trane.CutoffStrategy(
-        entity_col=entity_col,
+    problem_generator = ProblemGenerator(
+        metadata=metadata,
         window_size=window_size,
     )
-    generate_and_verify_prediction_problem(
-        df=df,
-        meta=meta,
-        entity_col=entity_col,
-        time_col=time_col,
-        cutoff_strategy=cutoff_strategy,
-        sample=sample,
-        use_multiprocess=False,
-    )
-
-
-# Skipping test store as it took 3 hours for Github Actions to run
-"""
-def test_store(sample):
-    dataframes, relationships = load_store()
-
-    target_entity = "orderlines"
-    entity_col = "orderid"
-    time_col = "orderdate"
-    window_size = "1m"
-
-    df = denormalize(dataframes, relationships, target_entity)
-    meta = infer_table_meta(df, entity_col, time_col)
-
-    cutoff_strategy = trane.CutoffStrategy(
-        entity_col=entity_col,
-        window_size=window_size,
-    )
-    generate_and_verify_prediction_problem(
-        df=df,
-        meta=meta,
-        entity_col=entity_col,
-        time_col=time_col,
-        cutoff_strategy=cutoff_strategy,
-        sample=sample,
-        use_multiprocess=False,
-    )
-"""
+    problems = problem_generator.generate()
+    print(f"generated {len(problems)} problems from {data.shape} columns")
+    for p in tqdm(problems):
+        if p.has_parameters_set() is True:
+            labels = p.create_target_values(data)
+            if "target" not in labels.columns:
+                return None
+            if pd.api.types.is_bool_dtype(labels["target"].dtype):
+                assert p.get_problem_type() == "classification"
+            else:
+                assert p.get_problem_type() == "regression"

@@ -37,7 +37,7 @@ def test_find_threshold_by_fraction_of_data_to_keep(df):
     assert hash(op) == hash(("GreaterFilterOp", "col", original_threshold))
 
 
-def test_hash_no_threshold():
+def test_hash_with_no_threshold():
     assert hash(CountAggregationOp(None)) == hash(CountAggregationOp(None))
     assert hash(CountAggregationOp(None)) != hash(CountAggregationOp("col"))
     assert hash(CountAggregationOp(None)) != hash(EqFilterOp("col"))
@@ -77,3 +77,18 @@ def test_lt():
     assert GreaterFilterOp("col") <= GreaterFilterOp("col")
     assert MinAggregationOp("col") > AvgAggregationOp("col")
     assert MinAggregationOp("col") >= MinAggregationOp("col")
+
+
+def test_check_parameters():
+    # need a function to determine the required parameters
+    # need a function to determine if the parameters are set
+    assert GreaterFilterOp.required_parameters == {"threshold": float}
+    assert GreaterFilterOp("col").has_parameters_set() is False
+    greater_than_20 = GreaterFilterOp("col")
+    greater_than_20.set_parameters(threshold=20.0)
+    assert greater_than_20.has_parameters_set() is True
+
+    assert AllFilterOp.required_parameters is None
+    assert AllFilterOp("col").has_parameters_set() is True
+    with pytest.raises(NotImplementedError):
+        AllFilterOp("col").set_parameters()

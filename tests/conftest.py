@@ -3,8 +3,6 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from trane import CutoffStrategy
-
 
 def pytest_addoption(parser):
     parser.addoption("--sample", action="store", default=None)
@@ -55,18 +53,3 @@ def make_fake_meta():
         "is_fraud": ("Boolean", {}),
     }
     return meta
-
-
-@pytest.fixture()
-def make_cutoff_strategy():
-    entity_col = "id"
-    window_size = "2d"
-    minimum_data = "2023-01-01"
-    maximum_data = "2023-01-05"
-    cutoff_strategy = CutoffStrategy(
-        entity_col=entity_col,
-        window_size=window_size,
-        minimum_data=minimum_data,
-        maximum_data=maximum_data,
-    )
-    return cutoff_strategy

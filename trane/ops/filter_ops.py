@@ -25,10 +25,21 @@ class FilterOpBase(OpBase):
 
     """
 
+    restricted_ops = set()
+
+    def has_parameters_set(self):
+        if self.required_parameters is None:
+            return True
+        for parameter in self.required_parameters:
+            if getattr(self, parameter) is None:
+                return False
+        return True
+
 
 class AllFilterOp(FilterOpBase):
     input_output_types = [("None", "None")]
     description = ""
+    required_parameters = None
 
     def generate_description(self):
         return self.description
@@ -41,7 +52,8 @@ class AllFilterOp(FilterOpBase):
 
 class EqFilterOp(FilterOpBase):
     input_output_types = [("category", "category")]
-    description = " with <{}> equal to {}"
+    description = " with <{}> equal to <{}>"
+    required_parameters = {"threshold": str}
 
     def generate_description(self):
         return self.description.format(self.column_name, self.threshold)
@@ -55,7 +67,8 @@ class EqFilterOp(FilterOpBase):
 
 class NeqFilterOp(FilterOpBase):
     input_output_types = [("category", "category")]
-    description = " with <{}> not equal to {}"
+    description = " with <{}> not equal to <{}>"
+    required_parameters = {"threshold": str}
 
     def generate_description(self):
         return self.description.format(self.column_name, self.threshold)
@@ -69,7 +82,8 @@ class NeqFilterOp(FilterOpBase):
 
 class GreaterFilterOp(FilterOpBase):
     input_output_types = [("numeric", "Double")]
-    description = " with <{}> greater than {}"
+    description = " with <{}> greater than <{}>"
+    required_parameters = {"threshold": float}
 
     def generate_description(self):
         return self.description.format(self.column_name, self.threshold)
@@ -83,7 +97,8 @@ class GreaterFilterOp(FilterOpBase):
 
 class LessFilterOp(FilterOpBase):
     input_output_types = [("numeric", "Double")]
-    description = " with <{}> less than {}"
+    description = " with <{}> less than <{}>"
+    required_parameters = {"threshold": float}
 
     def generate_description(self):
         return self.description.format(self.column_name, self.threshold)

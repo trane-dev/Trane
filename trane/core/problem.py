@@ -1,0 +1,268 @@
+import composeml as cp
+import pandas as pd
+
+from trane.ops.aggregation_ops import AggregationOpBase, ExistsAggregationOp
+from trane.ops.filter_ops import FilterOpBase
+from trane.ops.threshold_functions import (
+    get_k_most_frequent,
+    recommend_numeric_thresholds,
+)
+from trane.ops.transformation_ops import TransformationOpBase
+from trane.parsing.denormalize import (
+    denormalize,
+)
+from trane.typing.ml_types import MLType, convert_op_type
+
+
+class Problem:
+    def __init__(
+        self,
+        metadata,
+        operations,
+        entity_column=None,
+        window_size=None,
+    ):
+        self.operations = operations
+        self.metadata = metadata
+        self.entity_column = entity_column
+        self.window_size = window_size
+
+    def __lt__(self, other):
+        return self.__str__() < (other.__str__())
+
+    def __le__(self, other):
+        return self.__str__() <= (other.__str__())
+
+    def __gt__(self, other):
+        return self.__str__() > (other.__str__())
+
+    def __ge__(self, other):
+        return self.__str__() >= (other.__str__())
+
+    def __eq__(self, other):
+        if isinstance(self, other.__class__):
+            if (
+                self.operations == other.operations
+                and self.metadata == other.metadata
+                and self.window_size == other.window_size
+            ):
+                return True
+            return False
+        return False
+
+    def has_parameters_set(self):
+        return self.operations[0].has_parameters_set()
+
+    def get_required_parameters(self):
+        return self.operations[0].required_parameters
+
+    def set_parameters(self, threshold):
+        return self.operations[0].set_parameters(threshold)
+
+    def get_problem_type(self):
+        if isinstance(self.operations[2], ExistsAggregationOp):
+            return "classification"
+        return "regression"
+
+    def get_normalized_dataframe(self, dataframes):
+        normalized_dataframe = None
+        if isinstance(dataframes, pd.DataFrame):
+            normalized_dataframe = dataframes
+        elif len(dataframes) == 1 and self.metadata.get_metadata_type() == "single":
+            normalized_dataframe = dataframes[list(dataframes.keys())[0]]
+        else:
+            multi_metadata = self.metadata.original_multi_table_metadata
+            normalized_dataframe, _ = denormalize(
+                dataframes=dataframes,
+                metadata=multi_metadata,
+                target_table=self.target_table,
+            )
+            normalized_dataframe = normalized_dataframe.sort_values(
+                by=[self.metadata.time_index],
+            )
+        return normalized_dataframe
+
+    def get_recommended_thresholds(self, dataframes):
+        # not an ideal threshold function
+        # TODO: Add better threshold generation
+
+        normalized_dataframe = self.get_normalized_dataframe(dataframes)
+        thresholds = []
+        for _, type_ in self.get_required_parameters().items():
+            if type_ in [int, float]:
+                filter_op = self.operations[0]
+                thresholds.extend(
+                    recommend_numeric_thresholds(
+                        normalized_dataframe,
+                        filter_op,
+                    ),
+                )
+            else:
+                column_name = self.operations[0].column_name
+                thresholds.extend(
+                    get_k_most_frequent(
+                        normalized_dataframe[column_name],
+                        k=3,
+                    ),
+                )
+        return thresholds
+
+    def create_target_values(self, dataframes):
+        # Won't this always be normalized?
+        normalized_dataframe = self.get_normalized_dataframe(dataframes)
+        if self.has_parameters_set() is False:
+            raise ValueError("Filter operation's parameters are not set")
+
+        target_dataframe_index = self.entity_column
+        if self.entity_column is None:
+            # create a fake index with all rows to generate predictions problems "Predict X"
+            normalized_dataframe["__identity__"] = 0
+            target_dataframe_index = "__identity__"
+
+        lt = calculate_label_times(
+            normalized_dataframe=normalized_dataframe,
+            target_dataframe_index=target_dataframe_index,
+            labeling_function=self._execute_operations_on_df,
+            time_index=self.metadata.time_index,
+            window_size=self.window_size,
+        )
+
+        if "__identity__" in normalized_dataframe.columns:
+            normalized_dataframe.drop(columns=["__identity__"], inplace=True)
+            lt.drop(columns=["__identity__"], inplace=True)
+        lt = lt.rename(columns={"_execute_operations_on_df": "target"})
+        return lt
+
+    def _execute_operations_on_df(self, df):
+        df = df.copy()
+        for operation in self.operations:
+            df = operation.label_function(df)
+        return df
+
+    def is_valid(self):
+        result, _ = _check_operations_valid(
+            operations=self.operations,
+            metadata=self.metadata,
+        )
+        if result:
+            return True
+        return False
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __str__(self):
+        description = "Predict"
+        if self.entity_column:
+            description = "For each <" + self.entity_column + "> predict"
+
+        agg_op = self.operations[2]
+        description += agg_op.generate_description()
+
+        transform_op = self.operations[1]
+        description += transform_op.generate_description()
+
+        filter_op = self.operations[0]
+        description += filter_op.generate_description()
+
+        if self.window_size:
+            description += " " + "in next {} days".format(
+                self.window_size,
+            )
+        return description
+
+
+def calculate_label_times(
+    normalized_dataframe,
+    target_dataframe_index,
+    labeling_function,
+    time_index,
+    window_size,
+    minimum_data=None,
+    maximum_data=None,
+    gap=None,
+    drop_empty=True,
+    verbose=False,
+    num_examples_per_instance=-1,
+):
+    _label_maker = cp.LabelMaker(
+        target_dataframe_index=target_dataframe_index,
+        time_index=time_index,
+        labeling_function=labeling_function,
+        window_size=window_size,
+    )
+    label_times = _label_maker.search(
+        df=normalized_dataframe,
+        num_examples_per_instance=num_examples_per_instance,
+        minimum_data=minimum_data,
+        maximum_data=maximum_data,
+        gap=gap,
+        drop_empty=drop_empty,
+        verbose=verbose,
+    )
+    return label_times
+
+
+def _check_operations_valid(
+    operations,
+    metadata,
+):
+    ml_types = metadata.ml_types
+    if not isinstance(operations[0], FilterOpBase):
+        raise ValueError
+    if not isinstance(operations[1], TransformationOpBase):
+        raise ValueError
+    if not isinstance(operations[2], AggregationOpBase):
+        raise ValueError
+    for op in operations:
+        input_output_types = op.input_output_types
+        for op_input_ml_type, op_output_type in input_output_types:
+            op_input_ml_type = convert_op_type(op_input_ml_type)
+            op_output_type = convert_op_type(op_output_type)
+
+            # operation applies to all columns
+            op_input_has_no_tags = op_input_ml_type.get_tags() == set()
+            if isinstance(op_input_ml_type, MLType) and op_input_has_no_tags:
+                if isinstance(op_output_type, MLType) and op_input_has_no_tags:
+                    # op doesn't modify the column's type
+                    pass
+                elif op.column_name is None:
+                    # TODO: fix CountAggregationOp modifies output type
+                    # TODO: Related to problem type generated?
+                    pass
+                else:
+                    # update the column's type (to indicate the operation has taken place)
+                    ml_types[op.column_name] = op_output_type
+                continue
+
+            # check the operation is valid for the column
+            column_ml_type = ml_types[op.column_name]
+            column_tags = ml_types[op.column_name].get_tags()
+
+            op_input_tags = op_input_ml_type.get_tags()
+            op_restricted_tags = op.restricted_tags
+            if not check_ml_type_valid(op_input_ml_type, column_ml_type):
+                return False, {}
+            if op_input_tags and len(column_tags.intersection(op_input_tags)) == 0:
+                return False, {}
+            if (
+                op_restricted_tags
+                and len(column_tags.intersection(op_restricted_tags)) > 0
+            ):
+                return False, {}
+
+            # update the column's type (to indicate the operation has taken place)
+            if isinstance(op_output_type, MLType):
+                ml_types[op.column_name] = op_output_type
+            else:
+                ml_types[op.column_name] = op_output_type()
+    return True, ml_types
+
+
+def check_ml_type_valid(op_input_ml_type, column_ml_type):
+    if isinstance(op_input_ml_type, MLType):
+        # if the op takes in anything, the column ml type doesn't matter
+        return True
+    if column_ml_type == op_input_ml_type:
+        return True
+    return False

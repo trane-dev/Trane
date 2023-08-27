@@ -5,15 +5,15 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from trane.typing.column_schema import ColumnSchema
+from trane.metadata.metadata import _str_to_ml_types
 from trane.typing.inference import (
-    _infer_series_schema,
-    infer_table_meta,
+    _infer_ml_type,
+    infer_ml_types,
 )
 from trane.typing.inference_functions import (
     pandas_modulo,
 )
-from trane.typing.logical_types import (
+from trane.typing.ml_types import (
     Boolean,
     Datetime,
     Double,
@@ -74,26 +74,24 @@ def test_boolean_inference(pandas_bools):
     for series in pandas_bools:
         for dtype in dtypes:
             series = series.astype(dtype)
-            column_schema = _infer_series_schema(series)
-            assert isinstance(column_schema, ColumnSchema)
-            assert column_schema.logical_type == Boolean
+            ml_type = _infer_ml_type(series)
+            assert isinstance(ml_type, Boolean)
             assert Boolean.inference_func(series) is True
 
 
 def test_unknown_inference():
     series = pd.Series(["123.3", "123.2", "123.2"], dtype="string")
-    column_schema = _infer_series_schema(series)
-    assert isinstance(column_schema, ColumnSchema)
-    assert column_schema.logical_type == Unknown
-    assert column_schema.logical_type.dtype == "string[pyarrow]"
+    ml_type = _infer_ml_type(series)
+    assert isinstance(ml_type, Unknown)
+    assert ml_type.dtype == "string[pyarrow]"
 
 
 def test_double_inference(pandas_doubles):
     dtypes = ["float32", "float64", "float64[pyarrow]", "float32[pyarrow]"]
     for series in pandas_doubles:
         for dtype in dtypes:
-            column_schema = _infer_series_schema(series.astype(dtype))
-            assert column_schema.logical_type == Double
+            ml_type = _infer_ml_type(series.astype(dtype))
+            assert isinstance(ml_type, Double)
             assert Double.inference_func(series.astype(dtype)) is True
 
 
@@ -101,8 +99,8 @@ def test_datetime_inference(pandas_datetimes):
     dtypes = ["object", "string", "datetime64[ns]"]
     for series in pandas_datetimes:
         for dtype in dtypes:
-            column_schema = _infer_series_schema(series.astype(dtype))
-            assert column_schema.logical_type == Datetime
+            ml_type = _infer_ml_type(series.astype(dtype))
+            assert isinstance(ml_type, Datetime)
             assert Datetime.inference_func(series.astype(dtype)) is True
 
 
@@ -119,12 +117,12 @@ def test_integer_inference(pandas_integers):
 
     for series in pandas_integers:
         for dtype in dtypes:
-            column_schema = _infer_series_schema(series.astype(dtype))
-            assert column_schema.logical_type == Integer
+            ml_type = _infer_ml_type(series.astype(dtype))
+            assert isinstance(ml_type, Integer)
             assert Integer.inference_func(series.astype(dtype)) is True
 
 
-def test_infer_table_meta():
+def test_infer_ml_types():
     df = pd.DataFrame(
         {
             "a": [1, 2, 3],
@@ -137,16 +135,16 @@ def test_infer_table_meta():
             ],
         },
     )
-    table_meta = infer_table_meta(df, entity_col="a", time_col="d")
-    for col, column_schema in table_meta.items():
+    metadata = infer_ml_types(df)
+    for col, ml_type in metadata.items():
         assert col in df.columns
-        assert isinstance(column_schema, ColumnSchema)
-    assert table_meta["a"].logical_type == Integer
-    assert table_meta["a"].semantic_tags == {"numeric", "primary_key"}
-    assert table_meta["b"].logical_type == Boolean
-    assert table_meta["c"].logical_type == Unknown
-    assert table_meta["d"].logical_type == Datetime
-    assert table_meta["d"].semantic_tags == {"time_index"}
+        assert str(ml_type).lower() in _str_to_ml_types()
+    assert isinstance(metadata["a"], Integer)
+    assert metadata["a"].get_tags() == {"numeric"}
+    assert isinstance(metadata["b"], Boolean)
+    assert isinstance(metadata["c"], Unknown)
+    assert isinstance(metadata["d"], Datetime)
+    assert metadata["d"].get_tags() == set()
 
 
 def test_pandas_modulo():

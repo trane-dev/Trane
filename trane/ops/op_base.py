@@ -1,5 +1,3 @@
-from typing import Union
-
 import pandas as pd
 
 from trane.ops.threshold_functions import sample_unique_values
@@ -16,26 +14,13 @@ class OpBase(object, metaclass=Meta):
     """
 
     description = None
-    threshold = None
-    restricted_semantic_tags = {"time_index", "foreign_key", "primary_key"}
+    restricted_tags = {"time_index", "foreign_key", "primary_key"}
     restricted_ops = set()
+    required_parameters = None
 
-    def __init__(self, column_name, input_type=None, output_type=None):
-        """
-        Initalization of all operations.
-        Subclasses shouldn't have their own init.
-
-        Parameters
-        ----------
-        column_name: the column this operation applies to
-        input_type: the ColumnSchema of the input column
-        output_type: the ColumnSchema of the output column
-
-        Returns
-        -------
-        None
-        """
+    def __init__(self, column_name, threshold=None):
         self.column_name = column_name
+        self.threshold = None
 
     def __call__(self, dataslice):
         return self.label_function(dataslice)
@@ -72,7 +57,7 @@ class OpBase(object, metaclass=Meta):
     def generate_description(self):
         return self.description
 
-    def set_parameters(self, threshold: Union[float, str]):
+    def set_parameters(self, **parameters):
         raise NotImplementedError
 
     def find_threshold_by_fraction_of_data_to_keep(

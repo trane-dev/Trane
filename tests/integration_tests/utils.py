@@ -46,6 +46,11 @@ transform_op_str_dict = {
     OrderByOp: " sorted by <{}>",
 }
 
+transform_op_str_dict = {
+    IdentityOp: "",
+    OrderByOp: " sorted by <{}>",
+}
+
 filter_op_str_dict = {
     GreaterFilterOp: "greater than",
     EqFilterOp: "equal to",

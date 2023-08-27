@@ -12,6 +12,7 @@ v0.6.0 (, 2023)
     * Add Order By Operation (OrderByOp, along with IdentityOp and TransformationOpBase) [#138][#138]
     * Add First and Last Aggregation Operations [#144][#144]
     * Enable operations to exclude other operations they can be applied with [#147][#147]
+    * Add new Problem and Problem Generator class for simplier API [#136][#136]
     * Cleaned up Readme with new Problem class example [#136][#136]
     * Add denormalize function with metadata and data only support [#136][#136]
 * Fixes

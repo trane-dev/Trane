@@ -18,11 +18,7 @@
 </p>
 <hr>
 
-<p align="center">
-<i>Automatically formulating machine learning tasks for temporal datasets</i>
-</p>
-
-Trane is a software package for automatically generating prediction problems and generating labels for supervised learning. Trane is a system designed to advance the automation of the machine learning problem solving pipeline.
+Trane is a software package designed to automatically generate problems for temporal datasets and produce labels for supervised learning. It aims to enhance the automation of the machine learning problem-solving process.
 
 # Install
 

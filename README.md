@@ -1,5 +1,5 @@
 <p align="center">
-<img width=30% src="https://dai.lids.mit.edu/wp-content/uploads/2018/06/Trane-logo-300x180.jpg" alt=“Trane_Logo” />
+<img width=30% src="https://github.com/trane-dev/Trane/blob/new_api/docs/image.jpeg" alt=“Trane_Logo” />
 </p>
 
 <p align="center">

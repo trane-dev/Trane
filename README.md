@@ -52,7 +52,7 @@ print(problems[210].create_target_values(data).head(5))
 ```text
 Generated 1008 problems
 Predict the majority <rating> in all related records in next 2d days
-   listing_id       time  target
+  listing_id       time  target
 0  720325039 2021-01-01       3
 1  720340530 2021-01-01       3
 2  720340983 2021-01-01       2

@@ -1,5 +1,5 @@
 <p align="center">
-<img width=30% src="https://github.com/trane-dev/Trane/blob/new_api/docs/image.jpeg" alt=“Trane_Logo” />
+<img width=30% src="https://github.com/trane-dev/Trane/blob/main/docs/image.jpeg" alt=“Trane_Logo” />
 </p>
 
 <p align="center">

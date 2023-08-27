@@ -49,15 +49,13 @@ problem_generator = trane.ProblemGenerator(
 )
 problems = problem_generator.generate()
 print(f'Generated {len(problems)} problems')
-```
-
-Here is an example of the labels that can be generated:
-```python
 print(problems[210])
 print(problems[210].create_target_values(data).head(5))
 ```
 
 ```text
+Generated 1008 problems
+For each <id> predict the majority <rating> in all related records with <rating> equal to <None> in next 2d days
           id       time  target
 0  720325039 2021-01-01       3
 1  720340530 2021-01-01       3

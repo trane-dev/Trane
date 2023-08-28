@@ -4,16 +4,16 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/trane-dev/Trane/actions/workflows/tests.yaml">
+    <a href="https://github.com/trane-dev/Trane/actions/workflows/tests.yaml" target="_blank">
       <img src="https://github.com/trane-dev/Trane/actions/workflows/tests.yaml/badge.svg" alt="Tests Status" />
     </a>
-    <a href="https://codecov.io/gh/trane-dev/Trane">
+    <a href="https://codecov.io/gh/trane-dev/Trane" target="_blank">
       <img src="https://codecov.io/gh/trane-dev/Trane/branch/main/graph/badge.svg?token=HafAlYGH8F" alt="Code Coverage" />
     </a>
-    <a href="https://badge.fury.io/py/Trane">
+    <a href="https://badge.fury.io/py/Trane" target="_blank">
         <img src="https://badge.fury.io/py/Trane.svg?maxAge=2592000" alt="PyPI Version" />
     </a>
-    <a href="https://pepy.tech/project/Trane">
+    <a href="https://pepy.tech/project/Trane" target="_blank">
         <img src="https://static.pepy.tech/badge/trane" alt="PyPI Downloads" />
     </a>
 </p>

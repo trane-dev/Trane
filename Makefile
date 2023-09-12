@@ -42,7 +42,7 @@ unit-tests:
 
 .PHONY: integration-tests
 integration-tests:
-	$(PYTEST) tests/integration_tests --sample 100
+	$(PYTEST) tests/integration_tests
 
 .PHONY: upgradepip
 upgradepip:
@@ -65,5 +65,5 @@ package: upgradepip upgradebuild upgradesetuptools
 
 .PHONY: checkdeps
 checkdeps:
-	$(eval allow_list='numpy|pandas|scikit|dateutil|scipy|composeml|matplotlib|tqdm')
+	$(eval allow_list='numpy|pandas|scikit|dateutil|scipy|matplotlib|tqdm')
 	pip freeze | grep -v "Trane.git" | grep -E $(allow_list) > $(OUTPUT_FILEPATH)

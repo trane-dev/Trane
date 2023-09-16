@@ -117,7 +117,13 @@ def calculate_target_values(
     records = []
     label_name = _get_function_name(labeling_function)
     for group_key, df_by_index in df.groupby(target_dataframe_index):
-        for dataslice, _ in generate_data_slices(df_by_index, window_size):
+        for dataslice, _ in generate_data_slices(
+            df_by_index,
+            window_size=window_size,
+            gap=gap,
+            min_data=minimum_data,
+            drop_empty=drop_empty,
+        ):
             record = labeling_function(dataslice)
             records.append(
                 {

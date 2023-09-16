@@ -42,20 +42,19 @@ def test_create_target_values(data):
     data["transaction_id"] = 1
     data.sort_values(by=["transaction_time"], inplace=True)
     target_values = calculate_target_values(
-        df=data,
+        df=data.copy(),
         target_dataframe_index="transaction_id",
         labeling_function=sum_amount,
         time_index="transaction_time",
         window_size=window_size,
     )
     label_times = calculate_target_values_cp(
-        df=data,
+        df=data.copy(),
         target_dataframe_index="transaction_id",
         labeling_function=sum_amount,
         time_index="transaction_time",
         window_size=window_size,
     )
-    breakpoint()
     for col in label_times:
         assert all(target_values[col] == label_times[col])
 

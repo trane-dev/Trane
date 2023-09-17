@@ -78,7 +78,7 @@ def test_set_time_index(single_metadata):
         single_metadata.set_time_index("card_type")
 
 
-def test_from_dataframe():
+def test_from_dataframe_single():
     data = pd.DataFrame(
         {
             "column_1": [1, 2, 3, 4, 5, 6],
@@ -99,6 +99,28 @@ def test_from_dataframe():
     assert metadata.ml_types["column_1"] == Integer()
     assert metadata.ml_types["column_2"] == Unknown()
     assert metadata.ml_types["column_3"] == Datetime()
+
+
+def test_from_dataframes_multi():
+    (
+        dataframes,
+        ml_types,
+        relationships,
+        primary_keys,
+        time_indices,
+    ) = generate_mock_data(
+        tables=["products", "logs"],
+    )
+    metadata = MultiTableMetadata.from_data(dataframes)
+    assert isinstance(metadata, MultiTableMetadata)
+    assert metadata.ml_types.keys() == ml_types.keys()
+    for table in metadata.ml_types:
+        assert metadata.ml_types[table].keys() == ml_types[table].keys()
+        for column in metadata.ml_types[table]:
+            if table == "products" and column == "card_type":
+                assert isinstance(metadata.ml_types[table][column], Unknown)
+                continue
+            assert str(metadata.ml_types[table][column]) == ml_types[table][column]
 
 
 def test_init_multi(multitable_metadata):

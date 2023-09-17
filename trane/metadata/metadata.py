@@ -88,7 +88,7 @@ class SingleTableMetadata(BaseMetadata):
 class MultiTableMetadata(BaseMetadata):
     def __init__(
         self,
-        ml_types: dict,
+        ml_types: dict = None,
         primary_keys=None,
         time_indices=None,
         relationships: list = None,
@@ -202,6 +202,13 @@ class MultiTableMetadata(BaseMetadata):
                 raise ValueError(
                     f"{child_key} not in ml_types[{child_table_name}]",
                 )
+
+    @staticmethod
+    def from_data(dataframes):
+        ml_types = {}
+        for table_name, df in dataframes.items():
+            ml_types[table_name] = infer_ml_types(df)
+        return MultiTableMetadata(ml_types)
 
 
 def check_ml_type(ml_type):

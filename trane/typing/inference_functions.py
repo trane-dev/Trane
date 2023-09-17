@@ -7,6 +7,7 @@ import pyarrow as pa
 from dateutil.parser import ParserError
 from importlib_resources import files
 from pandas.api import types as pdtypes
+from pandas.api.types import CategoricalDtype
 
 MAX_INT = sys.maxsize
 MIN_INT = -sys.maxsize - 1
@@ -22,7 +23,7 @@ NL_delimiters = r"[- \[\].,!\?;\n]"
 
 
 def categorical_func(series):
-    if pdtypes.is_categorical_dtype(series.dtype):
+    if isinstance(series.dtype, CategoricalDtype):
         return True
 
     if pdtypes.is_string_dtype(series.dtype) and not col_is_datetime(series):
@@ -121,8 +122,9 @@ boolean_inference_ints = []
 
 
 def boolean_nullable_func(series):
-    if pdtypes.is_bool_dtype(series.dtype) and not pdtypes.is_categorical_dtype(
+    if pdtypes.is_bool_dtype(series.dtype) and not isinstance(
         series.dtype,
+        CategoricalDtype,
     ):
         return True
     elif pdtypes.is_object_dtype(series.dtype):

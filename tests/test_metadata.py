@@ -200,6 +200,7 @@ def test_set_type_multi(multitable_metadata):
 
 
 def test_add_relationships(multitable_metadata):
+    multitable_metadata.reset_primary_key("products")
     relationships = multitable_metadata.relationships
     multitable_metadata.clear_relationships()
     assert multitable_metadata.relationships == []
@@ -207,6 +208,8 @@ def test_add_relationships(multitable_metadata):
     assert multitable_metadata.relationships == [
         ("products", "id", "logs", "product_id"),
     ]
+    assert "products" in multitable_metadata.primary_keys
+    assert multitable_metadata.primary_keys["products"] == "id"
 
 
 def test_add_relationships_new_table(multitable_metadata):

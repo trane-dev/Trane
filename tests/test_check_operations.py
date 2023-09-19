@@ -7,14 +7,17 @@ from trane.core.problem import (
     _check_operations_valid,
     check_ml_type_valid,
 )
+from trane.core.problem_generator import _generate_possible_operations
 from trane.core.utils import clean_date
 from trane.metadata import SingleTableMetadata
 from trane.ops import (
+    AggregationOpBase,
     AllFilterOp,
     AvgAggregationOp,
     CountAggregationOp,
     EqFilterOp,
     ExistsAggregationOp,
+    FilterOpBase,
     FirstAggregationOp,
     GreaterFilterOp,
     IdentityOp,
@@ -25,6 +28,7 @@ from trane.ops import (
     MinAggregationOp,
     NeqFilterOp,
     SumAggregationOp,
+    TransformationOpBase,
 )
 from trane.typing.ml_types import (
     Boolean,
@@ -224,61 +228,54 @@ def test_check_operations_cat(metadata):
     assert result is True
 
 
-# def test_foreign_key():
-#     metadata = {
-#         "id": ("Categorical", {"primary_key", "category"}),
-#         "amount": ("Integer", {"numeric"}),
-#         "department": ("Categorical", {"category"}),
-#         "user_id": ("Integer", {"numeric", "foreign_key"}),
-#     }
-#     # For each <orders.user_id> predict the total <user_id> in all related
-#     # records with <products.departments.department> equal to dairy eggs in next 2w days
-#     # [EqFilterOp, SumAggregationOp]
-#     operations = [
-#         EqFilterOp("department"),
-#         IdentityOp(None),
-#         SumAggregationOp("user_id"),
-#     ]
-#     result, modified_meta = _check_operations_valid(operations, table_meta)
-#     assert result is False
+def test_foreign_key(metadata):
+    operations = [
+        EqFilterOp("price"),
+        IdentityOp(None),
+        SumAggregationOp("card_type"),
+    ]
+    metadata.ml_types["card_type"].add_tags({"foreign_key"})
+    result, modified_meta = _check_operations_valid(operations, metadata)
+    assert result is False
 
 
-# def test_generate_possible_operations():
-#     table_meta = {
-#         "id": ("Categorical", {"primary_key", "category"}),
-#         "time": ("Datetime", {"time_index"}),
-#         "amount": ("Integer", {"numeric"}),
-#         "department": ("Categorical", {"category"}),
-#         "user_id": ("Integer", {"numeric", "foreign_key"}),
-#     }
-#     possible_operations = _generate_possible_operations(
-#         table_meta=table_meta,
-#     )
-#     for filter_op, transform_op, agg_op in possible_operations:
-#         assert isinstance(agg_op, AggregationOpBase)
-#         assert isinstance(transform_op, TransformationOpBase)
-#         assert isinstance(filter_op, FilterOpBase)
-#         if isinstance(agg_op, CountAggregationOp):
-#             assert agg_op.column_name is None
-#         if isinstance(filter_op, AllFilterOp):
-#             assert filter_op.column_name is None
-#         assert agg_op.column_name not in ["id", "time", "user_id"]
-#         assert filter_op.column_name not in ["id", "time", "user_id"]
-#         assert {
-#             filter_op.__class__.__name__,
-#             transform_op.__class__.__name__,
-#             agg_op.__class__.__name__,
-#         }.intersection(filter_op.restricted_ops) == set()
-#         assert {
-#             filter_op.__class__.__name__,
-#             transform_op.__class__.__name__,
-#             agg_op.__class__.__name__,
-#         }.intersection(transform_op.restricted_ops) == set()
-#         assert {
-#             filter_op.__class__.__name__,
-#             transform_op.__class__.__name__,
-#             agg_op.__class__.__name__,
-#         }.intersection(agg_op.restricted_ops) == set()
+def test_generate_possible_operations(metadata):
+    # ml_types: Dict[str, MLType],
+    # primary_key: str = None,
+    # time_index: str = None,
+    # aggregation_operations: List[AggregationOpBase] = None,
+    # filter_operations: List[FilterOpBase] = None,
+    # transformation_operations: List[TransformationOpBase] = None,
+    possible_operations = _generate_possible_operations(
+        ml_types=metadata.ml_types,
+        primary_key=metadata.primary_key,
+        time_index=metadata.time_index,
+    )
+    for filter_op, transform_op, agg_op in possible_operations:
+        assert isinstance(agg_op, AggregationOpBase)
+        assert isinstance(transform_op, TransformationOpBase)
+        assert isinstance(filter_op, FilterOpBase)
+        if isinstance(agg_op, CountAggregationOp):
+            assert agg_op.column_name is None
+        if isinstance(filter_op, AllFilterOp):
+            assert filter_op.column_name is None
+        assert agg_op.column_name not in ["id", "time", "user_id"]
+        assert filter_op.column_name not in ["id", "time", "user_id"]
+        assert {
+            filter_op.__class__.__name__,
+            transform_op.__class__.__name__,
+            agg_op.__class__.__name__,
+        }.intersection(filter_op.restricted_ops) == set()
+        assert {
+            filter_op.__class__.__name__,
+            transform_op.__class__.__name__,
+            agg_op.__class__.__name__,
+        }.intersection(transform_op.restricted_ops) == set()
+        # assert {
+        #     filter_op.__class__.__name__,
+        #     transform_op.__class__.__name__,
+        #     agg_op.__class__.__name__,
+        # }.intersection(agg_op.restricted_ops) == set()
 
 
 def test_clean_date():

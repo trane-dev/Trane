@@ -28,7 +28,7 @@ class ProblemGenerator:
     def __init__(
         self,
         metadata,
-        window_size,
+        window_size=None,
         target_table: str = None,
         entity_columns: List[str] = None,
     ):
@@ -146,7 +146,7 @@ def _generate_possible_operations(
             ):
                 # if the agg operation is about to apply to a column that has restricted semantic tags
                 continue
-            elif agg_op_input_type in ["None", None, MLType]:
+            elif agg_op_input_type in ["None", None, MLType, MLType()]:
                 agg_instance = agg_operation(None)
             else:
                 agg_instance = agg_operation(agg_col)
@@ -161,7 +161,7 @@ def _generate_possible_operations(
             ):
                 # if the agg operation is about to apply to a column that has restricted semantic tags
                 continue
-            elif transform_op_input_type in ["None", None, MLType]:
+            elif transform_op_input_type in ["None", None, MLType, MLType()]:
                 transform_instance = transform_operation(None)
             else:
                 transform_instance = transform_operation(transform_col)
@@ -176,7 +176,7 @@ def _generate_possible_operations(
             ):
                 # if the agg operation is about to apply to a column that has restricted semantic tags
                 continue
-            elif filter_op_input_type in ["None", None, MLType]:
+            elif filter_op_input_type in ["None", None, MLType, MLType()]:
                 filter_instance = filter_operation(None)
             else:
                 filter_instance = filter_operation(filter_col)
@@ -184,5 +184,10 @@ def _generate_possible_operations(
                 (filter_instance, transform_instance, agg_instance),
             )
     # TODO: why are duplicate problems being generated
-    possible_operations = list(set(possible_operations))
+    unique_instances = {}
+    for operation in possible_operations:
+        filter_instance, transform_instance, agg_instance = operation
+        if (filter_instance, agg_instance) not in unique_instances:
+            unique_instances[(filter_instance, agg_instance)] = operation
+    possible_operations = list(unique_instances.values())
     return possible_operations

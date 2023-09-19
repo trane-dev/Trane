@@ -53,7 +53,7 @@ def test_denormalize_two_tables():
     flat = flat.set_index("id").sort_values("id")
     assert flat["product_id"].tolist() == [1, 2, 3, 1, 2]
     assert flat["session_id"].tolist() == [1, 1, 2, 2, 2]
-    assert flat["products.price"].tolist() == [10, 20, 30, 10, 20]
+    assert flat["products.price"].tolist() == [10.5, 20.25, 30.01, 10.5, 20.25]
 
 
 def test_denormalize_two_tables_change():
@@ -125,7 +125,7 @@ def test_denormalize_three_tables():
     flat = flat.set_index("id").sort_values("id")
     assert flat["product_id"].tolist() == [1, 2, 3, 1, 2]
     assert flat["session_id"].tolist() == [1, 1, 2, 2, 2]
-    assert flat["products.price"].tolist() == [10, 20, 30, 10, 20]
+    assert flat["products.price"].tolist() == [10.5, 20.25, 30.01, 10.5, 20.25]
     assert flat["sessions.customer_id"].tolist() == [0, 0, 0, 0, 0]
 
 
@@ -162,7 +162,7 @@ def test_denormalize_four_tables():
     assert flat["id"].is_unique
     assert sorted(flat["id"].tolist()) == [1, 2, 3, 4, 5]
     flat = flat.set_index("id").sort_values("id")
-    assert flat["products.price"].tolist() == [10, 20, 30, 10, 20]
+    assert flat["products.price"].tolist() == [10.5, 20.25, 30.01, 10.5, 20.25]
     assert flat["sessions.customer_id"].tolist() == [0, 0, 0, 0, 0]
     assert flat["sessions.customers.age"].tolist() == [33, 33, 33, 33, 33]
     assert flat["sessions.customers.région_id"].tolist() == ["United States"] * 5

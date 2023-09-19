@@ -69,16 +69,16 @@ def test_set_primary_key(single_metadata):
         single_metadata.set_primary_key("column_4")
 
 
-def test_set_time_index(single_metadata):
-    single_metadata.reset_time_index()
+def test_reset_time_key(single_metadata):
+    single_metadata.reset_time_key()
     assert single_metadata.time_index is None
-    single_metadata.set_time_index("purchase_date")
+    single_metadata.set_time_key("purchase_date")
     match = "Time index must be of type Datetime"
     with pytest.raises(ValueError, match=match):
-        single_metadata.set_time_index("card_type")
+        single_metadata.set_time_key("card_type")
 
 
-def test_from_dataframe():
+def test_from_dataframe_single():
     data = pd.DataFrame(
         {
             "column_1": [1, 2, 3, 4, 5, 6],
@@ -99,6 +99,28 @@ def test_from_dataframe():
     assert metadata.ml_types["column_1"] == Integer()
     assert metadata.ml_types["column_2"] == Unknown()
     assert metadata.ml_types["column_3"] == Datetime()
+
+
+def test_from_dataframes_multi():
+    (
+        dataframes,
+        ml_types,
+        relationships,
+        primary_keys,
+        time_indices,
+    ) = generate_mock_data(
+        tables=["products", "logs"],
+    )
+    metadata = MultiTableMetadata.from_data(dataframes)
+    assert isinstance(metadata, MultiTableMetadata)
+    assert metadata.ml_types.keys() == ml_types.keys()
+    for table in metadata.ml_types:
+        assert metadata.ml_types[table].keys() == ml_types[table].keys()
+        for column in metadata.ml_types[table]:
+            if table == "products" and column == "card_type":
+                assert isinstance(metadata.ml_types[table][column], Unknown)
+                continue
+            assert str(metadata.ml_types[table][column]) == ml_types[table][column]
 
 
 def test_init_multi(multitable_metadata):
@@ -152,9 +174,9 @@ def test_set_time_index_multi(multitable_metadata):
         },
     )
     multitable_metadata.set_primary_key("products", "column_9")
-    multitable_metadata.set_time_index("products", "column_10")
+    multitable_metadata.set_time_key("products", "column_10")
     with pytest.raises(ValueError):
-        multitable_metadata.set_time_index("products", "column_9")
+        multitable_metadata.set_time_key("products", "column_9")
 
 
 def test_set_type_multi(multitable_metadata):
@@ -178,6 +200,7 @@ def test_set_type_multi(multitable_metadata):
 
 
 def test_add_relationships(multitable_metadata):
+    multitable_metadata.reset_primary_key("products")
     relationships = multitable_metadata.relationships
     multitable_metadata.clear_relationships()
     assert multitable_metadata.relationships == []
@@ -185,6 +208,8 @@ def test_add_relationships(multitable_metadata):
     assert multitable_metadata.relationships == [
         ("products", "id", "logs", "product_id"),
     ]
+    assert "products" in multitable_metadata.primary_keys
+    assert multitable_metadata.primary_keys["products"] == "id"
 
 
 def test_add_relationships_new_table(multitable_metadata):

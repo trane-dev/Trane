@@ -69,13 +69,13 @@ def test_set_primary_key(single_metadata):
         single_metadata.set_primary_key("column_4")
 
 
-def test_set_time_index(single_metadata):
-    single_metadata.reset_time_index()
+def test_reset_time_key(single_metadata):
+    single_metadata.reset_time_key()
     assert single_metadata.time_index is None
-    single_metadata.set_time_index("purchase_date")
+    single_metadata.set_time_key("purchase_date")
     match = "Time index must be of type Datetime"
     with pytest.raises(ValueError, match=match):
-        single_metadata.set_time_index("card_type")
+        single_metadata.set_time_key("card_type")
 
 
 def test_from_dataframe_single():
@@ -174,9 +174,9 @@ def test_set_time_index_multi(multitable_metadata):
         },
     )
     multitable_metadata.set_primary_key("products", "column_9")
-    multitable_metadata.set_time_index("products", "column_10")
+    multitable_metadata.set_time_key("products", "column_10")
     with pytest.raises(ValueError):
-        multitable_metadata.set_time_index("products", "column_9")
+        multitable_metadata.set_time_key("products", "column_9")
 
 
 def test_set_type_multi(multitable_metadata):

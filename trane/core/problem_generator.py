@@ -28,7 +28,7 @@ class ProblemGenerator:
     def __init__(
         self,
         metadata,
-        window_size,
+        window_size=None,
         target_table: str = None,
         entity_columns: List[str] = None,
     ):

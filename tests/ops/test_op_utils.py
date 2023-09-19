@@ -29,12 +29,12 @@ def test_get_aggregation_ops():
         assert issubclass(instance, AggregationOpBase)
     assert get_aggregation_ops() == [
         CountAggregationOp,
+        ExistsAggregationOp,
         SumAggregationOp,
         AvgAggregationOp,
         MaxAggregationOp,
         MinAggregationOp,
         MajorityAggregationOp,
-        ExistsAggregationOp,
         FirstAggregationOp,
         LastAggregationOp,
     ]

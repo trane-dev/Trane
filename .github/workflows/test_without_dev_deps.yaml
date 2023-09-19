@@ -38,6 +38,6 @@ jobs:
           )
           problems = problem_generator.generate()
           print(f'Generated {len(problems)} problems')
-          print(problems[40])
-          print(problems[40].create_target_values(data).head(5))
+          print(problems[39])
+          print(problems[39].create_target_values(data).head(5))
         shell: python

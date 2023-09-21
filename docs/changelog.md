@@ -5,7 +5,11 @@ Changelog
 v0.7.0 ()
 =========
 * Enhancements
+    * Add Airbnb Reviews dataset [#161][#161]
 * Fixes
+
+    [#161]: <https://github.com/trane-dev/Trane/pull/161>
+
 
 v0.6.0 (August 27, 2023)
 ========================

@@ -1,6 +1,6 @@
 
 <p align="center">
-<img width=30% src="https://github.com/trane-dev/Trane/blob/main/docs/trane-header.png" alt="Trane Logo" />
+<img width=50% src="https://github.com/trane-dev/Trane/blob/main/docs/trane-header.png" alt="Trane Logo" />
 </p>
 
 <p align="center">

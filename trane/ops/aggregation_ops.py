@@ -37,7 +37,7 @@ class CountAggregationOp(AggregationOpBase):
     """
     CountAggregation will not be given any columns.
     It will apply to the whole dataslice and return 1 number (integer).
-    Basically, its then number of rows in the dataslice.
+    Basically, it is then number of rows in the dataslice.
     So a customer's transactions (within the window_size).
     """
 
@@ -50,6 +50,18 @@ class CountAggregationOp(AggregationOpBase):
 
     def label_function(self, dataslice):
         return len(dataslice)
+
+
+class ExistsAggregationOp(AggregationOpBase):
+    input_output_types = [("None", "Boolean")]
+    description = " if there exists a record"
+    restricted_tags = {"time_index", "primary_key"}
+
+    def generate_description(self):
+        return self.description
+
+    def label_function(self, dataslice):
+        return len(dataslice) > 0
 
 
 class SumAggregationOp(AggregationOpBase):
@@ -123,18 +135,6 @@ class MajorityAggregationOp(AggregationOpBase):
             return float(modes[0])
         else:
             return str(modes[0])
-
-
-class ExistsAggregationOp(AggregationOpBase):
-    input_output_types = [("None", "Boolean")]
-    description = " if there exists a record"
-    restricted_tags = {"time_index", "primary_key"}
-
-    def generate_description(self):
-        return self.description
-
-    def label_function(self, dataslice):
-        return len(dataslice) > 0
 
 
 class FirstAggregationOp(AggregationOpBase):

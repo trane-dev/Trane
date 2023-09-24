@@ -13,12 +13,12 @@ repos:
       - id: absolufy-imports
         files: ^trane/
   - repo: https://github.com/asottile/add-trailing-comma
-    rev: v3.0.1
+    rev: v3.1.0
     hooks:
       - id: add-trailing-comma
         name: Add trailing comma
   - repo: https://github.com/python/black
-    rev: 23.7.0
+    rev: 23.9.1
     hooks:
       - id: black
         additional_dependencies: [".[jupyter]"]
@@ -26,7 +26,7 @@ repos:
         args:
           - --config=./pyproject.toml
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.285
+    rev: v0.0.290
     hooks:
       - id: ruff
         args:

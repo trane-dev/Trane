@@ -30,7 +30,7 @@ def generate_mock_data(tables):
                 "purchase_date": pd.to_datetime(
                     ["2018-01-01", "2018-01-02", "2018-01-03"],
                 ),
-                "price": [10, 20, 30],
+                "price": [10.5, 20.25, 30.01],
                 "first_purchase": [True, False, False],
                 "card_type": ["visa", "mastercard", "visa"],
             },

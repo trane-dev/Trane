@@ -139,7 +139,7 @@ class MultiTableMetadata(BaseMetadata):
         self.primary_keys[table] = column
         self.ml_types[table][column].tags.add("primary_key")
 
-    def reset_primary_key(self, table):
+    def obi(self, table):
         self.check_if_table_exists(table)
         if self.primary_keys:
             primary_key = self.primary_keys[table]

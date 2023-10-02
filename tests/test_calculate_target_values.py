@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -33,9 +34,6 @@ def sum_amount(dataslice):
 
 
 def test_create_target_values(data):
-    # Calculate the average time differences between each row
-    data["transaction_time"].diff().mean()
-
     # ensure each row is included in the target values
     # make sure each dataslice gets 1 row of data (and only 1 row)
     window_size = pd.Timedelta(days=5)
@@ -48,45 +46,13 @@ def test_create_target_values(data):
         time_index="transaction_time",
         window_size=window_size,
     )
-    label_times = calculate_target_values_cp(
-        df=data.copy(),
-        target_dataframe_index="transaction_id",
-        labeling_function=sum_amount,
-        time_index="transaction_time",
-        window_size=window_size,
+    assert target_values["transaction_id"].tolist() == [1, 1, 1]
+    assert target_values["cutoff_time"].tolist() == [
+        pd.Timestamp("2022-01-01 00:27:57"),
+        pd.Timestamp("2022-01-06 00:48:50"),
+        pd.Timestamp("2022-01-11 00:46:09"),
+    ]
+    assert np.allclose(
+        target_values["sum_amount"].tolist(),
+        [13837.71, 12990.74, 11213.85],
     )
-    for col in label_times:
-        assert all(target_values[col] == label_times[col])
-
-
-def calculate_target_values_cp(
-    df,
-    target_dataframe_index,
-    labeling_function,
-    time_index,
-    window_size,
-):
-    import composeml as cp
-
-    _label_maker = cp.LabelMaker(
-        target_dataframe_index=target_dataframe_index,
-        time_index=time_index,
-        labeling_function=labeling_function,
-        window_size=window_size,
-    )
-    label_times = _label_maker.search(
-        df=df,
-        num_examples_per_instance=-1,
-        minimum_data=None,
-        maximum_data=None,
-        gap=None,
-        drop_empty=True,
-        verbose=False,
-    )
-    label_times = pd.DataFrame(
-        label_times.values,
-        index=label_times.index,
-        columns=label_times.columns,
-    )
-    label_times = label_times.rename(columns={"time": "cutoff_time"})
-    return label_times

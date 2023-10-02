@@ -1,7 +1,6 @@
 from datetime import datetime
 
 import pandas as pd
-from pandas import CategoricalDtype
 
 
 def clean_date(date):
@@ -52,7 +51,10 @@ def generate_data_slices(df, window_size, gap=None, min_data=None, drop_empty=Tr
             window_end = iloc(df.index, window_size)
 
         else:
-            window_end = cutoff_time + window_size
+            if isinstance(window_size, str):
+                window_end = cutoff_time + pd.Timedelta(window_size)
+            else:
+                window_end = cutoff_time + window_size
             df_slice = df[:window_end]
 
             # Pandas includes both endpoints when slicing by time.
@@ -107,9 +109,11 @@ def calculate_target_values(
 ):
     assert labeling_function, "missing labeling function(s)"
 
+    #
     if df.index.name != time_index:
         df = df.set_index(time_index)
-    if isinstance(df[target_dataframe_index].dtype, CategoricalDtype):
+
+    if isinstance(df[target_dataframe_index].dtype, pd.CategoricalDtype):
         df[target_dataframe_index] = df[
             target_dataframe_index
         ].cat.remove_unused_categories()
@@ -117,7 +121,7 @@ def calculate_target_values(
     records = []
     label_name = _get_function_name(labeling_function)
     for group_key, df_by_index in df.groupby(target_dataframe_index):
-        for dataslice, _ in generate_data_slices(
+        for dataslice, metadata in generate_data_slices(
             df_by_index,
             window_size=window_size,
             gap=gap,
@@ -128,7 +132,7 @@ def calculate_target_values(
             records.append(
                 {
                     target_dataframe_index: group_key,
-                    "cutoff_time": df_by_index.first_valid_index(),
+                    "cutoff_time": dataslice.first_valid_index(),
                     label_name: record,
                 },
             )

@@ -94,7 +94,7 @@ def sample_unique_values(series, max_num_unique_values=10, random_state=None):
 def entropy_of_list(labels, base=None):
     if isinstance(labels, pd.Series):
         # check if pandas categorical dtype
-        if pd.api.types.is_categorical_dtype(labels):
+        if isinstance(labels.dtype, pd.CategoricalDtype):
             labels = labels.cat.codes
         else:
             labels, _ = pd.factorize(labels)

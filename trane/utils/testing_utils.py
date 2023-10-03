@@ -309,7 +309,3 @@ def random_dates(start, end, n):
     start_u = pd.Timestamp(start).value // 10**9
     end_u = pd.Timestamp(end).value // 10**9
     return pd.to_datetime(np.random.randint(start_u, end_u, n), unit="s")
-
-
-# Example usage
-print(random_dates("2021-01-01", "2021-12-31", 5))

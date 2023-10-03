@@ -4,6 +4,63 @@ import pandas as pd
 from pandas.tseries.offsets import DateOffset
 
 
+def set_dataframe_index(df, time_index):
+    if df.index.name != time_index:
+        df = df.set_index(time_index)
+    return df
+
+
+def determine_start_index(df, minimum_data):
+    if isinstance(minimum_data, int):
+        return minimum_data
+    elif isinstance(minimum_data, str):
+        return df.index.get_loc(pd.Timestamp(minimum_data))
+    return 0
+
+
+def determine_gap_size(gap):
+    if isinstance(gap, str):
+        return pd.Timedelta(gap)
+    return int(gap)
+
+
+def generate_data_slices(
+    df,
+    window_size,
+    gap=1,
+    min_data=None,
+    drop_empty=True,
+):
+    if min_data is None:
+        start_idx = 0
+    else:
+        start_idx = determine_start_index(df, min_data)
+
+    gap = determine_gap_size(gap)
+    end_idx = len(df) - 1
+
+    while start_idx < end_idx:
+        if isinstance(window_size, pd.Timedelta):
+            timestamp_at_start = df.index[start_idx]
+            slice_end_timestamp = timestamp_at_start + window_size
+            slice_end = df.index[df.index >= slice_end_timestamp].min()
+            if pd.isna(slice_end):
+                break
+            slice_end_idx = df.index.get_loc(slice_end)
+            dataslice = df.iloc[start_idx:slice_end_idx]
+            start_idx = slice_end_idx + gap  # start after the gap
+        else:
+            slice_end = start_idx + window_size
+            if slice_end > end_idx:
+                break
+            dataslice = df.iloc[start_idx:slice_end]
+            start_idx = slice_end + gap
+
+        # Make sure slice_end is exclusive
+        if not drop_empty or not dataslice.empty:
+            yield dataslice, {"start": start_idx, "end": slice_end}
+
+
 def calculate_target_values(
     df,
     target_dataframe_index,
@@ -12,30 +69,22 @@ def calculate_target_values(
     window_size,
     minimum_data=None,
     maximum_data=None,
-    gap=None,
+    gap=1,
     drop_empty=True,
     verbose=False,
     num_examples_per_instance=-1,
 ):
-    assert labeling_function, "missing labeling function(s)"
-
-    if df.index.name != time_index:
-        df = df.set_index(time_index)
-
-    if isinstance(df[target_dataframe_index].dtype, pd.CategoricalDtype):
-        df[target_dataframe_index] = df[
-            target_dataframe_index
-        ].cat.remove_unused_categories()
-
+    df = set_dataframe_index(df, time_index)
     records = []
-    label_name = _get_function_name(labeling_function)
+    label_name = labeling_function.__name__
+
     for group_key, df_by_index in df.groupby(target_dataframe_index):
         for dataslice, metadata in generate_data_slices(
             df_by_index,
-            window_size=window_size,
-            gap=gap,
-            min_data=minimum_data,
-            drop_empty=drop_empty,
+            window_size,
+            gap,
+            minimum_data,
+            drop_empty,
         ):
             record = labeling_function(dataslice)
             records.append(
@@ -45,90 +94,12 @@ def calculate_target_values(
                     label_name: record,
                 },
             )
+
+        if verbose:
+            print(f"Processed label for group {group_key}")
+
     records = pd.DataFrame.from_records(records, index=None)
     return records
-
-
-def generate_data_slices(
-    df,
-    window_size=None,
-    gap=None,
-    min_data=None,
-    drop_empty=True,
-):
-    window_size = window_size or len(df)
-    gap = to_offset(gap or window_size)
-
-    df = df.loc[df.index.notnull()]
-    assert (
-        df.index.is_monotonic_increasing
-    ), "Please sort your dataframe chronologically before calling search"
-
-    if df.empty:
-        return
-
-    threshold = min_data or df.index[0]
-    df, cutoff_time = cutoff_data(df=df, threshold=threshold)
-
-    if df.empty:
-        return
-
-    if isinstance(gap, int):
-        cutoff_time = df.index[0]
-
-    metadata = {"slice": 0, "min_data": cutoff_time}
-
-    def iloc(index, i):
-        if i < index.size:
-            return index[i]
-
-    while not df.empty and cutoff_time <= df.index[-1]:
-        if isinstance(window_size, int):
-            df_slice = df.iloc[:window_size]
-            window_end = iloc(df.index, window_size)
-
-        else:
-            if isinstance(window_size, str):
-                window_end = cutoff_time + pd.Timedelta(window_size)
-            else:
-                window_end = cutoff_time + window_size
-            df_slice = df[:window_end]
-
-            # Pandas includes both endpoints when slicing by time.
-            # This results in the right endpoint overlapping in consecutive data slices.
-            # Resolved by making the right endpoint exclusive.
-            # https://pandas.pydata.org/docs/user_guide/advanced.html#endpoints-are-inclusive
-
-            if not df_slice.empty:
-                is_overlap = df_slice.index == window_end
-
-                if df_slice.index.size > 1 and is_overlap.any():
-                    df_slice = df_slice[~is_overlap]
-
-        metadata["window"] = (cutoff_time, window_end)
-
-        if isinstance(gap, int):
-            gap_end = iloc(df.index, gap)
-            metadata["gap"] = (cutoff_time, gap_end)
-            df = df.iloc[gap:]
-
-            if not df.empty:
-                cutoff_time = df.index[0]
-
-        else:
-            gap_end = cutoff_time + gap
-            metadata["gap"] = (cutoff_time, gap_end)
-            cutoff_time += gap
-
-            if cutoff_time <= df.index[-1]:
-                df = df[cutoff_time:]
-
-        if df_slice.empty and drop_empty:
-            continue
-
-        metadata["slice"] += 1
-
-        yield df_slice, metadata
 
 
 def _get_function_name(function):
@@ -159,10 +130,13 @@ def can_be_type(type_, string):
         return False
 
 
-def cutoff_data(df, threshold):
-    """Cuts off data before the threshold. For example, if you have daily data points from
+def cutoff_data(df, threshold, type_="before"):
+    """Cuts off data before/after the threshold. For example, if you have daily data points from
         "2022-01-01" to "2022-01-05", and select a threshold of 2/2D/"2022-01-03", the data
-        will be cut off at "2022-01-03" (inclusive).
+        will be cut off at "2022-01-03" (inclusive), which means the data will be from
+        "2022-01-03" to "2022-01-05" (inclusive).
+
+        By default,
 
         If the threshold is greater than the last time in the index, the data will be empty.
 
@@ -197,7 +171,10 @@ def cutoff_data(df, threshold):
         cutoff_time = threshold
 
     if cutoff_time != df.index[0]:
-        df = df[df.index >= cutoff_time]
+        if type_ == "before":
+            df = df[df.index >= cutoff_time]
+        else:  # after
+            df = df[df.index <= cutoff_time]
         if df.empty:
             return df, None
     return df, cutoff_time

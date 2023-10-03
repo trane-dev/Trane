@@ -1,16 +1,11 @@
-from datetime import datetime
-
 import pandas as pd
 import pytest
 
 from trane.core.utils import (
-    clean_date,
-    cutoff_data,
     determine_gap_size,
     determine_start_index,
     generate_data_slices,
     set_dataframe_index,
-    to_offset,
 )
 from trane.metadata import SingleTableMetadata
 from trane.utils.testing_utils import (
@@ -81,10 +76,9 @@ def test_integer_window_size():
     # Slice 2: A B C | D E F | G H I J K L
     # Slice 3: A B C D E F | G H I | J K L
     # Slice 4: A B C D E F G H I | J K L |
-
-    # Legend:
     # |...| - Data window of size 3
     # Space between |...| - Gap of 0
+    # A gap of 0 means that the windows are contiguous, i.e., there is no spacing between the end of one window and the start of the next.
 
     df = pd.DataFrame(
         {
@@ -98,11 +92,20 @@ def test_integer_window_size():
         ["G", "H", "I"],
         ["J", "K", "L"],
     ]
-    for slice_data, expected_data in zip(slices, expected_slices):
-        slice_vals = slice_data[0]["data"].tolist()
-        assert (
-            slice_vals == expected_data
-        ), f"Expected {expected_data}, but got {slice_vals}"
+    check_data_slices(slices, expected_slices)
+    # Slice 1: | A B C | D E F G H I J K L
+    # Slice 2: A B C D | E F G | H I J K L
+    # Slice 3: A B C D E F G H | I J K | L
+    # |...| - Data window of size 3
+    # Space between |...| - Gap of 1
+    # A gap of 1 means that you skip one element in the data sequence when starting a new slice.
+    slices = list(generate_data_slices(df, gap=1, window_size=3))
+    expected_slices = [
+        ["A", "B", "C"],
+        ["E", "F", "G"],
+        ["I", "J", "K"],
+    ]
+    check_data_slices(slices, expected_slices)
 
 
 def test_timedelta_window_size():
@@ -113,8 +116,6 @@ def test_timedelta_window_size():
     # Slice 2: A B | C D | E F G H  (t2 to t3)
     # Slice 3: A B C D | E F | G H  (t4 to t5)
     # Slice 4: A B C D E F | G H |  (t6 to t7)
-
-    # Legend:
     # |...| - Data window of timedelta size
     # Space between |...| - Gap of 0 timedleta
 
@@ -130,20 +131,64 @@ def test_timedelta_window_size():
             gap=0,
         ),
     )
-
-    # Expected slices when window_size is 2 days and gap is 1 day
     expected_slices = [
         ["A", "B"],
         ["C", "D"],
         ["E", "F"],
         ["G", "H"],
     ]
+    check_data_slices(slices, expected_slices)
 
-    for slice_data, expected_data in zip(slices, expected_slices):
-        slice_vals = slice_data[0]["data"].tolist()
-        assert (
-            slice_vals == expected_data
-        ), f"Expected {expected_data}, but got {slice_vals}"
+    # Timestamps:  t0   t1   t2   t3   t4   t5   t6   t7
+    # Data:        A    B    C    D    E    F    G    H
+
+    # Slice 1: | A B | C D E F G H  (t0 to t1)
+    # Slice 2: A B C | D E | F G H  (t3 to t4)
+    # Slice 3: A B C D E F | G H |  (t6 to t7)
+    # |...| - Data window of timedelta size
+    # Space between |...| - Gap of 1 delta
+    slices = list(
+        generate_data_slices(
+            df,
+            window_size=pd.Timedelta(days=2),
+            gap=1,
+        ),
+    )
+    expected_slices = [
+        ["A", "B"],
+        ["D", "E"],
+        ["G", "H"],
+    ]
+    check_data_slices(slices, expected_slices)
+
+
+def test_gap_timedelta_window_size_timedelta():
+    # Timestamps:  t0   t1   t2   t3   t4   t5   t6   t7
+    # Data:        A    B    C    D    E    F    G    H
+    # Slice 1: | A | B C D E F G H  (t0 to t0)
+    # Slice 2: A B | C | D E F G H  (t3 to t3)
+    # Slice 3: A B C D | E | F G H  (t4 to t4)
+    # Slice 4: A B C D E F | G | H  (t5 to t5)
+
+    df = pd.DataFrame(
+        {"value": list("ABCDEFGH")},
+        index=pd.date_range(start="2022-01-01", end="2022-01-08", freq="D"),
+    )
+    slices = list(
+        generate_data_slices(
+            df,
+            window_size=pd.Timedelta(days=1),
+            gap=pd.Timedelta(days=1),
+        ),
+    )
+    expected_values = [
+        ["A"],
+        ["C"],
+        ["E"],
+        ["G"],
+    ]
+    for i, (dataslice, meta) in enumerate(slices):
+        assert dataslice["value"].tolist() == expected_values[i]
 
 
 def test_with_gap_larger_than_window_size():
@@ -159,108 +204,17 @@ def test_with_gap_larger_than_window_size():
     # We add the gap of 4, which brings us to index 5.
     # The second data slice should thus be ['F', 'G'] if we keep the window size of 2.
     df = pd.DataFrame({"data": list("ABCDEFGH")})
-
-    window_size = 2
-    gap = 4
-
-    slices = list(generate_data_slices(df, window_size=window_size, gap=gap))
-
+    slices = list(generate_data_slices(df, window_size=2, gap=3))
     expected_slices = [["A", "B"], ["F", "G"]]
+    check_data_slices(slices, expected_slices)
 
+
+def check_data_slices(slices, expected_slices):
     for slice_data, expected_data in zip(slices, expected_slices):
         slice_vals = slice_data[0]["data"].tolist()
         assert (
             slice_vals == expected_data
         ), f"Expected {expected_data}, but got {slice_vals}"
-
-
-def test_to_offset():
-    assert to_offset(5) == 5
-    assert to_offset("2d") == pd.Timedelta(2, unit="D")
-    assert to_offset(pd.Timedelta(3, unit="H")) == pd.Timedelta(3, unit="H")
-    assert to_offset(
-        pd.tseries.offsets.BusinessDay(2),
-    ) == pd.tseries.offsets.BusinessDay(2)
-
-
-def test_to_offset_invalid():
-    with pytest.raises(AssertionError):
-        to_offset(-1)
-    with pytest.raises(AssertionError):
-        to_offset("0d")
-    with pytest.raises(AssertionError):
-        to_offset(pd.Timedelta(-1, unit="H"))
-    with pytest.raises(AssertionError):
-        to_offset(pd.tseries.offsets.BusinessDay(-1))
-
-
-def test_clean_date():
-    assert clean_date("2019-01-01") == pd.Timestamp(
-        datetime.strptime("2019-01-01", "%Y-%m-%d"),
-    )
-    timestamp = pd.Timestamp(datetime.strptime("2019-01-01", "%Y-%m-%d"))
-    assert clean_date(timestamp) == timestamp
-
-
-def test_cutoff_data_int(cutoff_df):
-    threshold = 2
-    df_out, cutoff_time_out = cutoff_data(cutoff_df, threshold=threshold)
-
-    expected_df = pd.DataFrame(
-        {"A": [3, 4, 5]},
-        index=pd.date_range("2022-01-03", periods=3, freq="D"),
-    )
-    expected_df.index = pd.to_datetime(expected_df.index)
-    expected_cutoff_time = pd.Timestamp("2022-01-03")
-    pd.testing.assert_frame_equal(df_out, expected_df, check_freq=False)
-    assert cutoff_time_out == expected_cutoff_time
-
-
-def test_cutoff_data_str_offset(cutoff_df):
-    threshold = "2D"
-    df_out, cutoff_time_out = cutoff_data(cutoff_df, threshold=threshold)
-
-    expected_df = pd.DataFrame(
-        {"A": [3, 4, 5]},
-        index=pd.date_range("2022-01-03", periods=3, freq="D"),
-    )
-    expected_cutoff_time = pd.Timestamp("2022-01-03")
-    pd.testing.assert_frame_equal(df_out, expected_df, check_freq=False)
-    assert cutoff_time_out == expected_cutoff_time
-
-
-@pytest.mark.parametrize("threshold", ["2022-01-03", pd.Timestamp("2022-01-03")])
-def test_cutoff_data_str_timestamp(cutoff_df, threshold):
-    df_out, cutoff_time_out = cutoff_data(cutoff_df, threshold=threshold)
-    expected_df = pd.DataFrame(
-        {"A": [3, 4, 5]},
-        index=pd.date_range("2022-01-03", periods=3, freq="D"),
-    )
-    expected_cutoff_time = pd.Timestamp("2022-01-03")
-    pd.testing.assert_frame_equal(df_out, expected_df, check_freq=False)
-    assert cutoff_time_out == expected_cutoff_time
-
-
-def test_cutoff_invalid_threshold(cutoff_df):
-    threshold = "invalid"
-    with pytest.raises(ValueError):
-        cutoff_data(cutoff_df, threshold)
-
-
-def test_empty_data():
-    df = pd.DataFrame(
-        {"A": []},
-        index=pd.DatetimeIndex([], dtype="datetime64[ns]", freq=None),
-    )
-    threshold = 2
-    expected_df = pd.DataFrame(
-        {"A": []},
-        index=pd.DatetimeIndex([], dtype="datetime64[ns]", freq=None),
-    )
-    expected_cutoff_time = None
-    df_out, cutoff_time_out = cutoff_data(df, threshold)
-    pd.testing.assert_frame_equal(df_out, expected_df)
-    assert cutoff_time_out == expected_cutoff_time
 
 
 def sum_amount(dataslice):

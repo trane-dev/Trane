@@ -65,5 +65,5 @@ package: upgradepip upgradebuild upgradesetuptools
 
 .PHONY: checkdeps
 checkdeps:
-	$(eval allow_list='numpy|pandas|scikit|dateutil|scipy|matplotlib|tqdm')
+	$(eval allow_list='numpy|pandas|scipy|tqdm')
 	pip freeze | grep -v "Trane.git" | grep -E $(allow_list) > $(OUTPUT_FILEPATH)

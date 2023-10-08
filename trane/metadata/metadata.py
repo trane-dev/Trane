@@ -134,12 +134,15 @@ class MultiTableMetadata(BaseMetadata):
 
     def set_primary_key(self, table, column):
         self.check_if_table_exists(table)
-        if column not in self.ml_types[table]:
-            raise ValueError("Index does not exist in ml_types")
+        self.check_if_column_exists(table, column)
         self.primary_keys[table] = column
         self.ml_types[table][column].tags.add("primary_key")
 
     def reset_primary_key(self, table):
+        self.check_if_table_exists(table)
+        self.primary_keys.pop(table, None)
+
+    def obi(self, table):
         self.check_if_table_exists(table)
         if self.primary_keys:
             primary_key = self.primary_keys[table]
@@ -184,6 +187,10 @@ class MultiTableMetadata(BaseMetadata):
     def check_if_table_exists(self, table):
         if table not in self.ml_types:
             raise ValueError(f"Table: {table} does not exist")
+
+    def check_if_column_exists(self, table, column):
+        if column not in self.ml_types[table]:
+            raise ValueError(f"Column: {column} does not exist in Table: {table}")
 
     def remove_table(self, table):
         self.ml_types.pop(table, None)

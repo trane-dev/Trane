@@ -1,5 +1,3 @@
-import random
-
 import trane
 from trane.ops.aggregation_ops import (
     AggregationOpBase,
@@ -80,9 +78,6 @@ def generate_and_verify_prediction_problem(
         time_col=time_col,
     )
     problems = problem_generator.generate(df, generate_thresholds=True)
-    if sample:
-        random.seed(1)
-        problems = random.sample(problems, k=int(sample))
     unique_entity_ids = df[entity_col].nunique()
     for p in problems:
         assert p.entity_col == entity_col

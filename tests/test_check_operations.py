@@ -1,6 +1,3 @@
-from datetime import datetime
-
-import pandas as pd
 import pytest
 
 from trane.core.problem import (
@@ -8,7 +5,6 @@ from trane.core.problem import (
     check_ml_type_valid,
 )
 from trane.core.problem_generator import _generate_possible_operations
-from trane.core.utils import clean_date
 from trane.metadata import SingleTableMetadata
 from trane.ops import (
     AggregationOpBase,
@@ -276,11 +272,3 @@ def test_generate_possible_operations(metadata):
         #     transform_op.__class__.__name__,
         #     agg_op.__class__.__name__,
         # }.intersection(agg_op.restricted_ops) == set()
-
-
-def test_clean_date():
-    assert clean_date("2019-01-01") == pd.Timestamp(
-        datetime.strptime("2019-01-01", "%Y-%m-%d"),
-    )
-    timestamp = pd.Timestamp(datetime.strptime("2019-01-01", "%Y-%m-%d"))
-    assert clean_date(timestamp) == timestamp

@@ -1,6 +1,6 @@
-import composeml as cp
 import pandas as pd
 
+from trane.core.utils import calculate_target_values
 from trane.ops.aggregation_ops import AggregationOpBase, ExistsAggregationOp
 from trane.ops.filter_ops import FilterOpBase
 from trane.ops.threshold_functions import (
@@ -119,8 +119,8 @@ class Problem:
             normalized_dataframe["__identity__"] = 0
             target_dataframe_index = "__identity__"
 
-        lt = calculate_label_times(
-            normalized_dataframe=normalized_dataframe,
+        lt = calculate_target_values(
+            df=normalized_dataframe,
             target_dataframe_index=target_dataframe_index,
             labeling_function=self._execute_operations_on_df,
             time_index=self.metadata.time_index,
@@ -170,37 +170,6 @@ class Problem:
                 self.window_size,
             )
         return description
-
-
-def calculate_label_times(
-    normalized_dataframe,
-    target_dataframe_index,
-    labeling_function,
-    time_index,
-    window_size,
-    minimum_data=None,
-    maximum_data=None,
-    gap=None,
-    drop_empty=True,
-    verbose=False,
-    num_examples_per_instance=-1,
-):
-    _label_maker = cp.LabelMaker(
-        target_dataframe_index=target_dataframe_index,
-        time_index=time_index,
-        labeling_function=labeling_function,
-        window_size=window_size,
-    )
-    label_times = _label_maker.search(
-        df=normalized_dataframe,
-        num_examples_per_instance=num_examples_per_instance,
-        minimum_data=minimum_data,
-        maximum_data=maximum_data,
-        gap=gap,
-        drop_empty=drop_empty,
-        verbose=verbose,
-    )
-    return label_times
 
 
 def _check_operations_valid(

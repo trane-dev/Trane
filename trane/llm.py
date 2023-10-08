@@ -37,7 +37,7 @@ def llm(
     problems_formatted = format_problems(problems)
     prompt = (
         f"{instructions}\n"
-        f"## {prompt_context}"
+        f"## {prompt_context}\n"
         f"## The constraints of your response:\n"
         f"{constraints}\n"
         f"## The list of prediction problems:\n"

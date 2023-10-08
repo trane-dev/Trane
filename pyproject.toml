@@ -60,6 +60,10 @@ dev = [
     "pre-commit == 2.20.0",
     "toml >= 0.10.2",
 ]
+llm = [
+    "openai >= 0.28.1",
+    "tiktoken >= 0.5.1",
+]
 
 [tool.setuptools]
 include-package-data = true

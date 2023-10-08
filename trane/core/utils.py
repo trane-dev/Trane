@@ -9,14 +9,6 @@ def set_dataframe_index(df, time_index):
     return df
 
 
-def determine_start_index(df, minimum_data):
-    if isinstance(minimum_data, int):
-        return minimum_data
-    elif isinstance(minimum_data, str):
-        return df.index.get_loc(pd.Timestamp(minimum_data))
-    return 0
-
-
 def determine_gap_size(gap):
     if isinstance(gap, str):
         return pd.Timedelta(gap)
@@ -29,16 +21,13 @@ def generate_data_slices(
     df,
     window_size,
     gap=1,
-    min_data=None,
     drop_empty=True,
 ):
-    if min_data is None:
-        start_idx = 0
-    else:
-        start_idx = determine_start_index(df, min_data)
+    start_idx = 0
+    end_idx = len(df) - 1
 
     gap = determine_gap_size(gap)
-    end_idx = len(df) - 1
+    window_size = determine_gap_size(window_size)
 
     while start_idx < end_idx:
         if isinstance(window_size, pd.Timedelta):
@@ -50,7 +39,11 @@ def generate_data_slices(
             slice_end_idx = df.index.get_loc(slice_end)
             dataslice = df.iloc[start_idx:slice_end_idx]
             if isinstance(gap, pd.Timedelta):
-                start_idx = slice_end_timestamp + gap
+                start_idx_timestamp = slice_end_timestamp + gap
+                nearest_idx = df.index[df.index >= start_idx_timestamp].min()
+                if pd.isna(nearest_idx):
+                    break
+                start_idx = df.index.get_loc(nearest_idx)
             else:
                 start_idx = slice_end_idx + gap
         else:
@@ -71,23 +64,19 @@ def calculate_target_values(
     labeling_function,
     time_index,
     window_size,
-    minimum_data=None,
-    maximum_data=None,
     gap=1,
     drop_empty=True,
     verbose=False,
-    num_examples_per_instance=-1,
 ):
     df = set_dataframe_index(df, time_index)
     records = []
     label_name = labeling_function.__name__
 
-    for group_key, df_by_index in df.groupby(target_dataframe_index):
+    for group_key, df_by_index in df.groupby(target_dataframe_index, observed=True):
         for dataslice, metadata in generate_data_slices(
             df_by_index,
             window_size,
             gap,
-            minimum_data,
             drop_empty,
         ):
             record = labeling_function(dataslice)

@@ -3,7 +3,6 @@ import pytest
 
 from trane.core.utils import (
     determine_gap_size,
-    determine_start_index,
     generate_data_slices,
     set_dataframe_index,
 )
@@ -52,16 +51,6 @@ def test_set_dataframe_index():
 
     df = set_dataframe_index(df, "B")
     assert df.index.name == "B"
-
-
-def test_determine_start_index(cutoff_df):
-    minimum_data = 1
-    assert determine_start_index(cutoff_df, minimum_data) == 1
-
-    # first data point in data is 2022-01-01, so no data points before that
-    assert determine_start_index(cutoff_df, "2022-01-01") == 0
-    # 1 data point before 2022-01-02
-    assert determine_start_index(cutoff_df, "2022-01-02") == 1
 
 
 def test_determine_gap_size():

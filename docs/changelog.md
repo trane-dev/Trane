@@ -6,10 +6,13 @@ v0.7.0 ()
 =========
 * Enhancements
     * Add Airbnb Reviews dataset [#161][#161]
+    * Remove compose as a dependency [#162][#162]
+    * Remove scikit learn as a dependency [#164][#164]
 * Fixes
 
     [#161]: <https://github.com/trane-dev/Trane/pull/161>
-
+    [#162]: <https://github.com/trane-dev/Trane/pull/162>
+    [#164]: <https://github.com/trane-dev/Trane/pull/164>
 
 v0.6.0 (August 27, 2023)
 ========================

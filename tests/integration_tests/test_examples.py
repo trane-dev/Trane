@@ -15,12 +15,15 @@ def test_airbnb_reviews():
     )
     problems = problem_generator.generate()
     print(f"generated {len(problems)} problems from {data.shape} columns")
+    num_target_values_created = 0
     for p in tqdm(problems):
         if p.has_parameters_set() is True:
             labels = p.create_target_values(data)
+            num_target_values_created += 1
             if "target" not in labels.columns:
-                return None
+                continue
             if pd.api.types.is_bool_dtype(labels["target"].dtype):
                 assert p.get_problem_type() == "classification"
             else:
                 assert p.get_problem_type() == "regression"
+    print(f"created {num_target_values_created} target values")

@@ -37,6 +37,10 @@ def generate_data_slices(
             if pd.isna(slice_end):
                 break
             slice_end_idx = df.index.get_loc(slice_end)
+            if isinstance(df.index.get_loc(slice_end), slice):
+                # multiple matching indices, so we want the first one (for now)
+                # TODO: handle this better
+                slice_end_idx = slice_end_idx.start
             dataslice = df.iloc[start_idx:slice_end_idx]
             if isinstance(gap, pd.Timedelta):
                 start_idx_timestamp = slice_end_timestamp + gap

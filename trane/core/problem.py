@@ -97,8 +97,6 @@ class Problem:
                     problem_type=self.get_problem_type(),
                     filter_op=filter_op,
                 )
-                if recommended_threshold is None:
-                    breakpoint()
                 thresholds.append(recommended_threshold)
             else:
                 column_name = self.operations[0].column_name

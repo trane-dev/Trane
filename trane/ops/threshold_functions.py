@@ -47,27 +47,32 @@ def entropy_of_series(series, base=None):
     return stats.entropy(counts, base=base)
 
 
-def find_threshold_to_maximize_uncertainty(df, column_name, problem_type, filter_op):
+def find_threshold_to_maximize_uncertainty(
+    df,
+    column_name,
+    problem_type,
+    filter_op,
+    n_quantiles=100,
+):
     """
-    Find a threshold to split the data in the column_name of df to maximize uncertainty
-    with respect to the column_name.
+    Find a threshold to split the data in the column_name of df to maximize uncertainty.
 
     Parameters:
     - df: DataFrame containing the data.
     - column_name: Name of the column for which the threshold should be found.
     - problem_type: Type of the problem (regression, classification).
+    - n_quantiles: Number of quantiles to consider for thresholds.
 
     Returns:
     - Best threshold value to maximize uncertainty.
     """
-    unique_values = sorted(df[column_name].unique())
-    max_uncertainty = -float("inf")
+    # Use quantiles as potential thresholds
+    thresholds = df[column_name].quantile(np.linspace(0, 1, n_quantiles)).unique()
+    max_uncertainty = 0  # Starting from 0 as initial value
     best_threshold = None
     original_threshold = filter_op.threshold
 
-    for i in range(1, len(unique_values)):
-        threshold = (unique_values[i - 1] + unique_values[i]) / 2
-
+    for threshold in thresholds:
         filter_op.set_parameters(threshold=threshold)
         left_split = filter_op.label_function(df)
         right_split_indices = df.index.difference(left_split.index)
@@ -78,8 +83,13 @@ def find_threshold_to_maximize_uncertainty(df, column_name, problem_type, filter
             left_uncertainty = entropy_of_series(left_split[column_name])
             right_uncertainty = entropy_of_series(right_split[column_name])
         elif problem_type == "regression":
-            left_uncertainty = left_split[column_name].var()
-            right_uncertainty = right_split[column_name].var()
+            left_uncertainty = left_split[column_name].var(ddof=0)  # Using ddof=0
+            right_uncertainty = right_split[column_name].var(ddof=0)  # Using ddof=0
+
+        if pd.isna(left_uncertainty):
+            left_uncertainty = 0
+        if pd.isna(right_uncertainty):
+            right_uncertainty = 0
 
         # Compute weighted average of uncertainties
         current_uncertainty = (

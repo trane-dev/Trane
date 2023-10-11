@@ -110,7 +110,7 @@ def test_classification_threshold():
         "classification",
         filter_op=filter_op,
     )
-    assert np.isclose(result, 1.5, atol=1e-6)
+    assert np.isclose(result, 1.0404, atol=1e-6)
 
 
 def test_regression_threshold():
@@ -127,7 +127,7 @@ def test_regression_threshold():
         "regression",
         filter_op=filter_op,
     )
-    assert np.isclose(result, 2.5, atol=1e-6)
+    assert np.isclose(result, 5.0, atol=1e-6)
 
 
 def test_classification_threshold_imbalanced():
@@ -144,7 +144,7 @@ def test_classification_threshold_imbalanced():
         "classification",
         filter_op=filter_op,
     )
-    assert np.isclose(result, 1.5, atol=1e-6)
+    assert np.isclose(result, 1.0404, atol=1e-6)
 
 
 def test_regression_with_large_values():
@@ -161,4 +161,24 @@ def test_regression_with_large_values():
         "regression",
         filter_op=filter_op,
     )
-    assert np.isclose(result, 2500, atol=1e-6)
+    assert np.isclose(result, 5000.0, atol=1e-6)
+
+
+def test_regression():
+    df = pd.DataFrame(
+        {
+            "id": [1, 2, 3],
+            "purchase_date": ["2018-01-01", "2018-01-02", "2018-01-03"],
+            "price": [10.50, 20.25, 30.01],
+            "first_purchase": [True, False, False],
+            "card_type": ["visa", "mastercard", "visa"],
+        },
+    )
+    filter_op = GreaterFilterOp("price")
+    result = find_threshold_to_maximize_uncertainty(
+        df,
+        "price",
+        "regression",
+        filter_op=filter_op,
+    )
+    assert np.isclose(result, 30.01, atol=1e-6)

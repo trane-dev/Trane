@@ -52,7 +52,7 @@ def find_threshold_to_maximize_uncertainty(
     column_name,
     problem_type,
     filter_op,
-    n_quantiles=100,
+    n_quantiles=10,
 ):
     """
     Find a threshold to split the data in the column_name of df to maximize uncertainty.
@@ -72,8 +72,8 @@ def find_threshold_to_maximize_uncertainty(
     best_threshold = None
     original_threshold = filter_op.threshold
 
-    for threshold in thresholds:
-        filter_op.set_parameters(threshold=threshold)
+    for potential_threshold in thresholds:
+        filter_op.set_parameters(threshold=potential_threshold)
         left_split = filter_op.label_function(df)
         right_split_indices = df.index.difference(left_split.index)
         right_split = df.loc[right_split_indices]
@@ -83,8 +83,8 @@ def find_threshold_to_maximize_uncertainty(
             left_uncertainty = entropy_of_series(left_split[column_name])
             right_uncertainty = entropy_of_series(right_split[column_name])
         elif problem_type == "regression":
-            left_uncertainty = left_split[column_name].var(ddof=0)  # Using ddof=0
-            right_uncertainty = right_split[column_name].var(ddof=0)  # Using ddof=0
+            left_uncertainty = left_split[column_name].var()
+            right_uncertainty = right_split[column_name].var()
 
         if pd.isna(left_uncertainty):
             left_uncertainty = 0
@@ -98,7 +98,7 @@ def find_threshold_to_maximize_uncertainty(
 
         if current_uncertainty > max_uncertainty:
             max_uncertainty = current_uncertainty
-            best_threshold = threshold
+            best_threshold = potential_threshold
 
     filter_op.set_parameters(threshold=original_threshold)
     return best_threshold

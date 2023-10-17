@@ -82,10 +82,9 @@ class Problem:
             )
         return normalized_dataframe
 
-    def get_recommended_thresholds(self, dataframes):
+    def get_recommended_thresholds(self, dataframes, n_quantiles=10):
         # not an ideal threshold function
         # TODO: Add better threshold generation
-
         normalized_dataframe = self.get_normalized_dataframe(dataframes)
         thresholds = []
         for _, type_ in self.get_required_parameters().items():
@@ -96,6 +95,7 @@ class Problem:
                     column_name=filter_op.column_name,
                     problem_type=self.get_problem_type(),
                     filter_op=filter_op,
+                    n_quantiles=n_quantiles,
                 )
                 thresholds.append(recommended_threshold)
             else:

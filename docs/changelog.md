@@ -2,8 +2,8 @@
 
 Changelog
 ---------
-v0.7.0 ()
-=========
+v0.7.0 (October 21, 2023)
+=========================
 * Enhancements
     * Add Airbnb Reviews dataset [#161][#161]
     * Add LLM Function to determine relevant prediction problems [#167][#167]

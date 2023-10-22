@@ -2,17 +2,20 @@
 
 Changelog
 ---------
-v0.7.0 ()
-=========
+v0.7.0 (October 21, 2023)
+=========================
 * Enhancements
     * Add Airbnb Reviews dataset [#161][#161]
+    * Add LLM Function to determine relevant prediction problems [#167][#167]
+* Fixes
     * Remove compose as a dependency [#162][#162]
     * Remove scikit learn as a dependency [#164][#164]
-* Fixes
+    * Update threshold function to better calculate entropy [#167][#167]
 
     [#161]: <https://github.com/trane-dev/Trane/pull/161>
     [#162]: <https://github.com/trane-dev/Trane/pull/162>
     [#164]: <https://github.com/trane-dev/Trane/pull/164>
+    [#167]: <https://github.com/trane-dev/Trane/pull/167>
 
 v0.6.0 (August 27, 2023)
 ========================

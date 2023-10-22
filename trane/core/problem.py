@@ -59,6 +59,12 @@ class Problem:
     def set_parameters(self, threshold):
         return self.operations[0].set_parameters(threshold)
 
+    def is_classification(self):
+        return isinstance(self.operations[2], ExistsAggregationOp)
+
+    def is_regression(self):
+        return not isinstance(self.operations[2], ExistsAggregationOp)
+
     def get_problem_type(self):
         if isinstance(self.operations[2], ExistsAggregationOp):
             return "classification"

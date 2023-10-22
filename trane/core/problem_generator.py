@@ -37,7 +37,7 @@ class ProblemGenerator:
         self.target_table = target_table
         self.entity_columns = entity_columns
 
-    def generate(self):
+    def generate(self, verbose=True):
         # denormalize and create single metadata table
         if self.metadata.get_metadata_type() == "single":
             single_metadata = self.metadata
@@ -80,6 +80,20 @@ class ProblemGenerator:
                     problems.append(problem)
         # sort by string representation
         problems = sorted(problems, key=lambda p: str(p))
+        num_classification_problems = 0
+        num_regression_problems = 0
+        for problem in problems:
+            if problem.is_classification():
+                num_classification_problems += 1
+            else:
+                num_regression_problems += 1
+        if verbose:
+            print("=" * 50)
+            print(f"Generated {len(problems)} total problems")
+            print("-" * 50)
+            print(f"Classification problems: {num_classification_problems}")
+            print(f"Regression problems: {num_regression_problems}")
+            print("=" * 50)
         return problems
 
 

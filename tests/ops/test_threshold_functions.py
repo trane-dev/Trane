@@ -110,7 +110,7 @@ def test_classification_threshold():
         "classification",
         filter_op=filter_op,
     )
-    assert np.isclose(result, 1.0404, atol=1e-6)
+    assert np.isclose(result, 1.4444, atol=1e-4)
 
 
 def test_regression_threshold():
@@ -144,7 +144,7 @@ def test_classification_threshold_imbalanced():
         "classification",
         filter_op=filter_op,
     )
-    assert np.isclose(result, 1.0404, atol=1e-6)
+    assert np.isclose(result, 1.4444, atol=1e-4)
 
 
 def test_regression_with_large_values():

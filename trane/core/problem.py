@@ -4,8 +4,8 @@ from trane.core.utils import calculate_target_values
 from trane.ops.aggregation_ops import AggregationOpBase, ExistsAggregationOp
 from trane.ops.filter_ops import FilterOpBase
 from trane.ops.threshold_functions import (
+    find_threshold_to_maximize_uncertainty,
     get_k_most_frequent,
-    recommend_numeric_thresholds,
 )
 from trane.ops.transformation_ops import TransformationOpBase
 from trane.parsing.denormalize import (
@@ -59,6 +59,12 @@ class Problem:
     def set_parameters(self, threshold):
         return self.operations[0].set_parameters(threshold)
 
+    def is_classification(self):
+        return isinstance(self.operations[2], ExistsAggregationOp)
+
+    def is_regression(self):
+        return not isinstance(self.operations[2], ExistsAggregationOp)
+
     def get_problem_type(self):
         if isinstance(self.operations[2], ExistsAggregationOp):
             return "classification"
@@ -82,21 +88,22 @@ class Problem:
             )
         return normalized_dataframe
 
-    def get_recommended_thresholds(self, dataframes):
+    def get_recommended_thresholds(self, dataframes, n_quantiles=10):
         # not an ideal threshold function
         # TODO: Add better threshold generation
-
         normalized_dataframe = self.get_normalized_dataframe(dataframes)
         thresholds = []
         for _, type_ in self.get_required_parameters().items():
             if type_ in [int, float]:
                 filter_op = self.operations[0]
-                thresholds.extend(
-                    recommend_numeric_thresholds(
-                        normalized_dataframe,
-                        filter_op,
-                    ),
+                recommended_threshold = find_threshold_to_maximize_uncertainty(
+                    df=normalized_dataframe,
+                    column_name=filter_op.column_name,
+                    problem_type=self.get_problem_type(),
+                    filter_op=filter_op,
+                    n_quantiles=n_quantiles,
                 )
+                thresholds.append(recommended_threshold)
             else:
                 column_name = self.operations[0].column_name
                 thresholds.extend(

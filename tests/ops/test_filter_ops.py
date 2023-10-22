@@ -32,6 +32,7 @@ def test_all_filter_op_empty():
 
 def test_eq_filter_op(df):
     op = EqFilterOp("col")
+    assert op.generate_description() == " with <col> equal to <str>"
     op.set_parameters(threshold=3)
     output = op(df)
     assert output["col"].tolist() == [3]
@@ -48,6 +49,7 @@ def test_neq_filter_op(df):
 
 def test_less_filter_op(df):
     op = LessFilterOp("col")
+    assert op.generate_description() == " with <col> less than <float>"
     op.set_parameters(threshold=3)
     output = op(df)
     assert output["col"].tolist() == [1, 2]

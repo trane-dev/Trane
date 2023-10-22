@@ -35,6 +35,15 @@ class FilterOpBase(OpBase):
                 return False
         return True
 
+    def generate_description(self):
+        if self.required_parameters is None:
+            return self.description
+        else:
+            return self.description.format(
+                self.column_name,
+                self.threshold or self.required_parameters["threshold"].__name__,
+            )
+
 
 class AllFilterOp(FilterOpBase):
     input_output_types = [("None", "None")]
@@ -55,9 +64,6 @@ class EqFilterOp(FilterOpBase):
     description = " with <{}> equal to <{}>"
     required_parameters = {"threshold": str}
 
-    def generate_description(self):
-        return self.description.format(self.column_name, self.threshold)
-
     def set_parameters(self, threshold: float):
         self.threshold = threshold
 
@@ -69,9 +75,6 @@ class NeqFilterOp(FilterOpBase):
     input_output_types = [("category", "category")]
     description = " with <{}> not equal to <{}>"
     required_parameters = {"threshold": str}
-
-    def generate_description(self):
-        return self.description.format(self.column_name, self.threshold)
 
     def set_parameters(self, threshold: float):
         self.threshold = threshold
@@ -85,9 +88,6 @@ class GreaterFilterOp(FilterOpBase):
     description = " with <{}> greater than <{}>"
     required_parameters = {"threshold": float}
 
-    def generate_description(self):
-        return self.description.format(self.column_name, self.threshold)
-
     def set_parameters(self, threshold: float):
         self.threshold = threshold
 
@@ -99,9 +99,6 @@ class LessFilterOp(FilterOpBase):
     input_output_types = [("numeric", "Double")]
     description = " with <{}> less than <{}>"
     required_parameters = {"threshold": float}
-
-    def generate_description(self):
-        return self.description.format(self.column_name, self.threshold)
 
     def set_parameters(self, threshold: float):
         self.threshold = threshold

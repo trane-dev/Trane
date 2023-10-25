@@ -14,6 +14,8 @@ def determine_gap_size(gap):
         return pd.Timedelta(gap)
     elif isinstance(gap, int) or isinstance(gap, pd.Timedelta):
         return gap
+    elif not gap:
+        return 1
     return int(gap)
 
 

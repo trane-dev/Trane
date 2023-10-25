@@ -30,7 +30,7 @@ Install Trane using pip:
 python -m pip install trane
 ```
 
-## Usage 
+## Usage
 
 Here's a quick demonstration of Trane in action:
 
@@ -38,32 +38,63 @@ Here's a quick demonstration of Trane in action:
 import trane
 
 data, metadata = trane.load_airbnb()
-entity_columns = ["location"]
-window_size = "2d"
-
 problem_generator = trane.ProblemGenerator(
-    metadata=metadata,
-    window_size=window_size,
-    entity_columns=entity_columns
+  metadata=metadata,
+  entity_columns=["location"]
 )
 problems = problem_generator.generate()
 
-print(f'Generated {len(problems)} problems.')
-print(problems[108])
-print(problems[108].create_target_values(data).head(5))
+for problem in problems[:5]:
+    print(problem)
 ```
 
-Output:
-
+A few of the generated problems:
 ```
-Generated 168 problems.
-For each <location> predict the majority <rating> in all related records in the next 2 days.
-  location       time  target
-0   London 2021-01-01       5
-1   London 2021-01-03       4
-2   London 2021-01-05       5
-3   London 2021-01-07       4
-4   London 2021-01-09       5
+==================================================
+Generated 40 total problems
+--------------------------------------------------
+Classification problems: 5
+Regression problems: 35
+==================================================
+For each <location> predict if there exists a record
+For each <location> predict if there exists a record with <location> equal to <str>
+For each <location> predict if there exists a record with <location> not equal to <str>
+For each <location> predict if there exists a record with <rating> equal to <str>
+For each <location> predict if there exists a record with <rating> not equal to <str>
+```
+
+With Trane's LLM add-on (`pip install trane[llm]`), we can determine the relevant problems with OpenAI:
+```python
+from trane.llm import analyze
+
+instructions = "determine 5 most relevant problems about user's booking preferences. Do not include 'predict the first/last X' problems"
+context = "Airbnb data listings in major cities, including information about hosts, pricing, location, and room type, along with over 5 million historical reviews."
+relevant_problems = analyze(
+    problems=problems,
+    instructions=instructions,
+    context=context,
+    model="gpt-3.5-turbo-16k"
+)
+for problem in relevant_problems:
+    print(problem)
+    print(f'Reasoning: {problem.get_reasoning()}\n')
+```
+Output
+```text
+For each <location> predict if there exists a record
+Reasoning: This problem can help identify locations with missing data or locations that have not been booked at all.
+
+For each <location> predict the first <location> in all related records
+Reasoning: Predicting the first location in all related records can provide insights into the most frequently booked locations for each city.
+
+For each <location> predict the first <rating> in all related records
+Reasoning: Predicting the first rating in all related records can provide insights into the average satisfaction level of guests for each location.
+
+For each <location> predict the last <location> in all related records
+Reasoning: Predicting the last location in all related records can provide insights into the most recent bookings for each city.
+
+For each <location> predict the last <rating> in all related records
+Reasoning: Predicting the last rating in all related records can provide insights into the recent satisfaction level of guests for each location.
 ```
 
 ## Community

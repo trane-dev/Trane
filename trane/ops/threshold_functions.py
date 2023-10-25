@@ -3,6 +3,7 @@ import random
 import numpy as np
 import pandas as pd
 from pandas.api.types import (
+    is_integer_dtype,
     is_object_dtype,
     is_string_dtype,
 )
@@ -106,13 +107,15 @@ def find_threshold_to_maximize_uncertainty(
 
 def get_k_most_frequent(series, k=3):
     # get the top k most frequent values
+    dtype = series.dtype
     if (
-        is_object_dtype(series.dtype)
-        or isinstance(series.dtype, pd.CategoricalDtype)
-        or is_string_dtype(series.dtype)
+        is_object_dtype(dtype)
+        or isinstance(dtype, pd.CategoricalDtype)
+        or is_string_dtype(dtype)
+        or is_integer_dtype(dtype)
     ):
         return series.value_counts()[:k].index.tolist()
-    raise ValueError("Series must be categorical, string or object dtype")
+    raise ValueError("Series must be categorical, string, object or int dtype")
 
 
 def sample_unique_values(series, max_num_unique_values=10, random_state=None):

@@ -21,11 +21,13 @@ class Problem:
         operations,
         entity_column=None,
         window_size=None,
+        reasoning=None,
     ):
         self.operations = operations
         self.metadata = metadata
         self.entity_column = entity_column
         self.window_size = window_size
+        self.reasoning = reasoning
 
     def __lt__(self, other):
         return self.__str__() < (other.__str__())
@@ -57,7 +59,16 @@ class Problem:
         return self.operations[0].required_parameters
 
     def set_parameters(self, threshold):
-        return self.operations[0].set_parameters(threshold)
+        self.operations[0].set_parameters(threshold)
+
+    def set_reasoning(self, reasoning):
+        self.reasoning = reasoning
+
+    def get_reasoning(self):
+        return self.reasoning
+
+    def reset_reasoning(self):
+        self.reasoning = None
 
     def is_classification(self):
         return isinstance(self.operations[2], ExistsAggregationOp)
@@ -118,7 +129,9 @@ class Problem:
         # Won't this always be normalized?
         normalized_dataframe = self.get_normalized_dataframe(dataframes)
         if self.has_parameters_set() is False:
-            raise ValueError("Filter operation's parameters are not set")
+            print("Filter operation's parameters are not set, setting them now")
+            thresholds = self.get_recommended_thresholds(dataframes)
+            self.set_parameters(thresholds[-1])
 
         target_dataframe_index = self.entity_column
         if self.entity_column is None:

@@ -27,8 +27,8 @@ def test_get_k_most_frequent(dtype):
 @pytest.mark.parametrize(
     "dtype",
     [
-        ("int64"),
-        ("int64[pyarrow]"),
+        ("float64"),
+        ("float64[pyarrow]"),
     ],
 )
 def test_get_k_most_frequent_raises(dtype):

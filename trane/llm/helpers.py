@@ -1,4 +1,5 @@
 import json
+import re
 
 from IPython.display import Markdown, display
 
@@ -45,6 +46,7 @@ def analyze(
     instructions,
     context,
     model="gpt-3.5-turbo-16k",
+    jupyter=False,
 ):
     prompt_context = f" The context is: {context}"
     constraints = (
@@ -81,14 +83,20 @@ def analyze(
             problems_formatted,
         )
     response = openai_gpt(prompt, model)
-    display(Markdown(response))
+    if jupyter:
+        display(Markdown(response))
+    else:
+        print(response)
 
     relevant_ids = extract_problems_from_response(response, model)
-    print(relevant_ids)
     relevant_ids = list(set(relevant_ids))
     relevant_problems = []
     for id_ in relevant_ids:
         relevant_problems.append(problems[int(id_) - 1])
+
+    reasonsings = extract_reasonings_from_response(response)
+    for idx, reason in enumerate(reasonsings):
+        relevant_problems[idx].set_reasoning(reason)
     relevant_problems = sorted(relevant_problems, key=lambda p: str(p))
     return relevant_problems
 
@@ -106,6 +114,14 @@ def extract_problems_from_response(response, model):
     response = json.loads(response).values()
     response = list(flatten(response))
     return response
+
+
+def extract_reasonings_from_response(text):
+    reasonsings = []
+    matches = re.findall(r"Reasoning: (.+?)(?:\n\n|$)", text)
+    for match in matches:
+        reasonsings.append(match)
+    return reasonsings
 
 
 def format_problems(problems: list) -> str:

@@ -1,5 +1,7 @@
 from collections import defaultdict
 
+import pandas as pd
+
 from trane.typing.inference import infer_ml_types
 from trane.typing.ml_types import Datetime, MLType
 
@@ -40,6 +42,15 @@ class SingleTableMetadata(BaseMetadata):
         if time_index:
             self.set_time_key(time_index)
         self.original_multi_table_metadata = original_multi_table_metadata
+
+    def __repr__(self):
+        result = "SingleTableMetadata\n"
+        result += "primary key: " + str(self.primary_key) + "\n"
+        result += "time index: " + str(self.time_index) + "\n\n"
+        df = pd.DataFrame.from_dict(data=self.ml_types, orient="index")
+        df.columns = ["ML Type"]
+        result += df.to_string()
+        return result
 
     def set_primary_key(self, primary_key):
         if primary_key not in self.ml_types:

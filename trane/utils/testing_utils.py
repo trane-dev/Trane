@@ -9,12 +9,12 @@ from trane.metadata import MultiTableMetadata, SingleTableMetadata
 # v1 version
 def generate_mock_data(tables):
     """
-     C       Customers
+     C       customers
      |
     |||
-     S   P   Sessions, Products
+     S   P   sessions, products
      \\ //
-       L     Logs
+       L     logs
     """
     ml_types = {}
     dataframes = {}

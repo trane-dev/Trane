@@ -141,9 +141,7 @@ def boolean_nullable_func(series):
                 set(boolean_list) for boolean_list in boolean_inference_strings
             ]:
                 return True
-        except (
-            TypeError
-        ):  # Necessary to check for non-hashable values because of object dtype consideration
+        except TypeError:  # Necessary to check for non-hashable values because of object dtype consideration
             return False
     elif pdtypes.is_integer_dtype(series.dtype) and len(
         boolean_inference_ints,

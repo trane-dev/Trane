@@ -6,15 +6,16 @@ clean:
 	find . -name '*~' -delete
 	find . -name '.coverage.*' -delete
 
+LINT_CONFIG = trane/ tests/ --config=./pyproject.toml
 .PHONY: lint
 lint:
-	black trane/ tests/ --check --config=./pyproject.toml
-	ruff trane/ tests/ --config=./pyproject.toml
+	ruff check $(LINT_CONFIG)
+	ruff format --check $(LINT_CONFIG)
 
 .PHONY: lint-fix
 lint-fix:
-	black trane/ tests/ --config=./pyproject.toml
-	ruff trane/ tests/ --fix --config=./pyproject.toml
+	ruff check --fix $(LINT_CONFIG)
+	ruff format $(LINT_CONFIG)
 
 .PHONY: installdeps-dev
 installdeps-dev:

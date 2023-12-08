@@ -175,12 +175,12 @@ def test_check_operations_boolean(metadata):
 def test_check_operations_cat(metadata):
     # For each <id> predict the number of records with <card_type> equal to
     operations = [EqFilterOp("card_type"), IdentityOp(None), CountAggregationOp(None)]
-    result, modified_meta = _check_operations_valid(operations, metadata)
+    result, _ = _check_operations_valid(operations, metadata)
     assert result is True
 
     # For each <id> predict the number of records with <card_type> not equal to
     operations = [NeqFilterOp("card_type"), IdentityOp(None), CountAggregationOp(None)]
-    result, modified_meta = _check_operations_valid(operations, metadata)
+    result, _ = _check_operations_valid(operations, metadata)
     assert result is True
 
     # For each <id> predict the majority <card_type> in all related records with <card_type> equal to NY
@@ -189,7 +189,7 @@ def test_check_operations_cat(metadata):
         IdentityOp(None),
         MajorityAggregationOp("card_type"),
     ]
-    result, modified_meta = _check_operations_valid(operations, metadata)
+    result, _ = _check_operations_valid(operations, metadata)
     assert result is True
 
     # Not a valid operation
@@ -199,28 +199,28 @@ def test_check_operations_cat(metadata):
         IdentityOp(None),
         CountAggregationOp(None),
     ]
-    result, modified_meta = _check_operations_valid(operations, metadata)
+    result, _ = _check_operations_valid(operations, metadata)
     assert result is False
 
     # Not a valid operation
     # cannot do SumAggregation on categorical
     operations = [AllFilterOp(None), IdentityOp(None), SumAggregationOp("card_type")]
-    result, modified_meta = _check_operations_valid(operations, metadata)
+    result, _ = _check_operations_valid(operations, metadata)
     assert result is False
 
     # For each <id> predict if there exists a record in all related records with <card_type> equal to NY
     operations = [AllFilterOp(None), IdentityOp(None), ExistsAggregationOp("card_type")]
-    result, modified_meta = _check_operations_valid(operations, metadata)
+    result, _ = _check_operations_valid(operations, metadata)
     assert result is True
 
     # For each <id> predict the first <card_type> in all related records
     operations = [AllFilterOp(None), IdentityOp(None), FirstAggregationOp("card_type")]
-    result, modified_meta = _check_operations_valid(operations, metadata)
+    result, _ = _check_operations_valid(operations, metadata)
     assert result is True
 
     # For each <id> predict the last <card_type> in all related records
     operations = [AllFilterOp(None), IdentityOp(None), LastAggregationOp("card_type")]
-    result, modified_meta = _check_operations_valid(operations, metadata)
+    result, _ = _check_operations_valid(operations, metadata)
     assert result is True
 
 
@@ -231,7 +231,7 @@ def test_foreign_key(metadata):
         SumAggregationOp("card_type"),
     ]
     metadata.ml_types["card_type"].add_tags({"foreign_key"})
-    result, modified_meta = _check_operations_valid(operations, metadata)
+    result, _ = _check_operations_valid(operations, metadata)
     assert result is False
 
 

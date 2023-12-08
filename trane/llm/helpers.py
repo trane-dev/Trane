@@ -113,7 +113,7 @@ def extract_problems_from_response(response, model):
         "{{ Insert your response here }}"
     )
     response = openai_gpt(prompt, model)
-    if model == "gpt-3.5-turbo-1106":
+    if model in ["gpt-3.5-turbo-1106", "gpt-4-1106-preview"]:
         response = re.findall(r"\d+", response)
     else:
         response = json.loads(response).values()
@@ -172,9 +172,9 @@ def get_token_limit(model: str) -> int:
         "gpt-4-0613": 8192,
         "gpt-4-32k": 32768,
         "gpt-4-32k-0613": 32768,
-        "gpt-4-1106-preview	": 128000,
+        "gpt-4-1106-preview": 128000,
     }
-    return models.get(model)
+    return models.get(model.strip())
 
 
 def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613"):

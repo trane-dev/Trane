@@ -11,7 +11,7 @@ from trane.utils.testing_utils import generate_mock_data
 def test_problem_generator_single_table():
     tables = ["products"]
     target_table = "products"
-    dataframe, ml_types, _, primary_key, time_index = generate_mock_data(
+    dataframe, ml_types, _, _, time_index = generate_mock_data(
         tables=tables,
     )
     dataframe = dataframe[target_table]

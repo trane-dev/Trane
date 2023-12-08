@@ -2,13 +2,12 @@ import json
 import os
 import re
 
-from IPython.display import Markdown, display
-
 from trane.utils.library_utils import import_or_none
 
 openai = import_or_none("openai")
 tiktoken = import_or_none("tiktoken")
 anthropic = import_or_none("anthropic")
+ipython = import_or_none("IPython")
 
 
 system_context = (
@@ -86,7 +85,7 @@ def analyze(
         )
     response = openai_gpt(prompt, model)
     if jupyter:
-        display(Markdown(response))
+        ipython.display.display(ipython.display.Markdown(response))
     else:
         print(response)
 

@@ -45,15 +45,13 @@ def problems(metadata):
         ("gpt-4-1106-preview"),
     ],
 )
+@pytest.mark.skipif(
+    "OPENAI_API_KEY" not in os.environ,
+    reason="OPEN AI API KEY not found in environment variables",
+)
 def test_open_ai(problems, model):
-    assert (
-        "OPENAI_API_KEY" in os.environ
-    ), "OPENAI_API_KEY not found in environment variables"
-    assert os.environ["OPENAI_API_KEY"] != "", "OPENAI_API_KEY is empty"
-
     instructions = "determine 5 most relevant problems about products"
-    context = "a fake dataset of ec"
-
+    context = "a fake dataset of ecommerce data"
     relevant_problems = analyze(
         problems=problems,
         instructions=instructions,

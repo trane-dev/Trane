@@ -47,6 +47,8 @@ def calculate_target_values(
             window_size=window_size,
             gap=window_size,
         ):
+            if dataslice.empty:
+                continue
             record = labeling_function(dataslice)
             records.append(
                 {

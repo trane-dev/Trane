@@ -9,7 +9,7 @@ from trane.ops.filter_ops import AllFilterOp, GreaterFilterOp
 from trane.ops.transformation_ops import IdentityOp
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def data():
     num_rows = 100
     data = {

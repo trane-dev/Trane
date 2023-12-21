@@ -7,7 +7,7 @@ def set_dataframe_index(df, index):
     return df
 
 
-def generate_data_slices(df, window_size, gap):
+def generate_data_slices(df, window_size, gap, drop_empty=True):
     # valid for a specify group of id
     # so we need to groupby id (before this function)
     window_size = pd.to_timedelta(window_size)
@@ -24,7 +24,8 @@ def generate_data_slices(df, window_size, gap):
     ):
         # inclusive start_ts and inclusive end_ts
         end_ts = dataslice.index[-1] if not dataslice.empty else start_ts
-        yield dataslice, {"start": start_ts, "end": end_ts}
+        if drop_empty is True and not dataslice.empty:
+            yield dataslice, {"start": start_ts, "end": end_ts}
 
 
 def calculate_target_values(
@@ -46,9 +47,8 @@ def calculate_target_values(
             df=df_by_index,
             window_size=window_size,
             gap=window_size,
+            drop_empty=drop_empty,
         ):
-            if dataslice.empty:
-                continue
             record = labeling_function(dataslice)
             records.append(
                 {

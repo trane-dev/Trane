@@ -25,6 +25,8 @@ class Problem:
     ):
         self.operations = operations
         self.metadata = metadata
+        self.check_entity_column(entity_column)
+
         self.entity_column = entity_column
         self.window_size = window_size
         self.reasoning = reasoning
@@ -51,6 +53,15 @@ class Problem:
                 return True
             return False
         return False
+
+    def check_entity_column(self, entity_column):
+        if (
+            isinstance(entity_column, str)
+            and entity_column not in self.metadata.ml_types
+        ):
+            raise ValueError(
+                "entity_column {} not found in metadata".format(entity_column),
+            )
 
     def has_parameters_set(self):
         return self.operations[0].has_parameters_set()
@@ -125,7 +136,7 @@ class Problem:
                 )
         return thresholds
 
-    def create_target_values(self, dataframes):
+    def create_target_values(self, dataframes, verbose=False):
         # Won't this always be normalized?
         normalized_dataframe = self.get_normalized_dataframe(dataframes)
         if self.has_parameters_set() is False:
@@ -145,8 +156,8 @@ class Problem:
             labeling_function=self._execute_operations_on_df,
             time_index=self.metadata.time_index,
             window_size=self.window_size,
+            verbose=verbose,
         )
-
         if "__identity__" in normalized_dataframe.columns:
             normalized_dataframe.drop(columns=["__identity__"], inplace=True)
             lt.drop(columns=["__identity__"], inplace=True)

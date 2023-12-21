@@ -94,7 +94,7 @@ def analyze(
     relevant_problems = []
     for id_ in relevant_ids:
         relevant_problems.append(problems[int(id_) - 1])
-
+    print(relevant_ids)
     reasonsings = extract_reasonings_from_response(response)
     for idx, reason in enumerate(reasonsings):
         relevant_problems[idx].set_reasoning(reason)
@@ -107,6 +107,7 @@ def extract_problems_from_response(response, model):
         f"Extract the IDs in the following text."
         f"## The constraints of your response:\n"
         f" Return your response as JSON only.\n"
+        f" Return the IDs in same order as they appear in the text.\n"
         f"## The text:\n"
         f"{response}\n"
         "{{ Insert your response here }}"

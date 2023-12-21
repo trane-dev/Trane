@@ -60,7 +60,7 @@ class ProblemGenerator:
         problems = []
         valid_entity_columns = self.entity_columns
         if self.entity_columns is None:
-            # TODO: add logic to check entity_columns
+            # TODO: add logic to check entity_column
             valid_entity_columns = get_valid_entity_columns(single_metadata)
             # Force create with no entity column to generate problems "Predict X"
             valid_entity_columns.append(None)
@@ -98,11 +98,11 @@ class ProblemGenerator:
 
 
 def get_valid_entity_columns(metadata):
-    entity_columns = []
+    entity_column = []
     for col, ml_type in metadata.ml_types.items():
         if isinstance(ml_type, Categorical) or isinstance(ml_type, Integer):
-            entity_columns.append(col)
-    return entity_columns
+            entity_column.append(col)
+    return entity_column
 
 
 def _generate_possible_operations(

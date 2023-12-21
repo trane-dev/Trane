@@ -32,7 +32,7 @@ def metadata():
 def problems(metadata):
     problem_generator = ProblemGenerator(
         metadata=metadata,
-        entity_columns=["product_id"],
+        entity_column=["product_id"],
         target_table="products",
     )
     problems = problem_generator.generate()

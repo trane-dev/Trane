@@ -37,6 +37,8 @@ def test_problem_generator_single_table():
     for p in problems:
         if p.has_parameters_set() is True:
             labels = p.create_target_values(dataframe)
+            if labels.empty:
+                raise ValueError("labels should not be empty")
             check_problem_type(labels, p.get_problem_type())
         else:
             thresholds = p.get_recommended_thresholds(dataframe)

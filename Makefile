@@ -39,11 +39,7 @@ tests:
 
 .PHONY: unit-tests
 unit-tests:
-	$(PYTEST) tests/ --ignore=tests/integration_tests $(COVERAGE)
-
-.PHONY: integration-tests
-integration-tests:
-	$(PYTEST) tests/integration_tests
+	$(PYTEST) tests/ $(COVERAGE)
 
 .PHONY: upgradepip
 upgradepip:

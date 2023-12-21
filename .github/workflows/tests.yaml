@@ -16,10 +16,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.11"]
-        type-of-tests: ["unit", "integration"]
-        exclude:
-          - python-version: "3.8"
-            type-of-tests: "integration"
+        type-of-tests: ["unit"]
     steps:
       - uses: actions/checkout@v3
       - name: Set up python ${{ matrix.python-version }}
@@ -40,7 +37,6 @@ jobs:
         if: (steps.cache.outputs.cache-hit == 'true') && ( github.event.pull_request.title != 'Automated Latest Dependency Updates')
         run:  python -m pip install --no-dependencies .
       - name: Run unit tests
-        if: ${{ matrix.type-of-tests != 'integration' }}
         run:  |
           make clean
           make unit-tests

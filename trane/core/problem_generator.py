@@ -98,11 +98,11 @@ class ProblemGenerator:
 
 
 def get_valid_entity_columns(metadata):
-    entity_column = []
+    entity_columns = []
     for col, ml_type in metadata.ml_types.items():
         if isinstance(ml_type, Categorical) or isinstance(ml_type, Integer):
-            entity_column.append(col)
-    return entity_column
+            entity_columns.append(col)
+    return entity_columns
 
 
 def _generate_possible_operations(

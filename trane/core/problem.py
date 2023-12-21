@@ -25,7 +25,6 @@ class Problem:
     ):
         self.operations = operations
         self.metadata = metadata
-        self.check_entity_column(entity_column)
 
         self.entity_column = entity_column
         self.window_size = window_size
@@ -53,15 +52,6 @@ class Problem:
                 return True
             return False
         return False
-
-    def check_entity_column(self, entity_column):
-        if (
-            isinstance(entity_column, str)
-            and entity_column not in self.metadata.ml_types
-        ):
-            raise ValueError(
-                "entity_column {} not found in metadata".format(entity_column),
-            )
 
     def has_parameters_set(self):
         return self.operations[0].has_parameters_set()

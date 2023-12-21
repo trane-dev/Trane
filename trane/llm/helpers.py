@@ -94,7 +94,6 @@ def analyze(
     relevant_problems = []
     for id_ in relevant_ids:
         relevant_problems.append(problems[int(id_) - 1])
-    print(relevant_ids)
     reasonsings = extract_reasonings_from_response(response)
     for idx, reason in enumerate(reasonsings):
         relevant_problems[idx].set_reasoning(reason)

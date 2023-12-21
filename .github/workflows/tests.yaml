@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.11"]
+        python-version: ["3.8", "3.12"]
         type-of-tests: ["unit"]
     steps:
       - uses: actions/checkout@v3
@@ -41,7 +41,7 @@ jobs:
           make clean
           make unit-tests
       - name: Upload code coverage report
-        if: ${{ matrix.type-of-tests == 'unit' && matrix.python-version == '3.11' }}
+        if: ${{ matrix.type-of-tests == 'unit' && matrix.python-version == '3.12' }}
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

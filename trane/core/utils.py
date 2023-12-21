@@ -3,7 +3,7 @@ import pandas as pd
 
 def set_dataframe_index(df, index):
     if df.index.name != index:
-        df = df.set_index(index, inplace=False)
+        df.set_index(index, inplace=False)
     return df
 
 
@@ -37,7 +37,11 @@ def calculate_target_values(
     drop_empty=True,
     verbose=False,
 ):
+    print(df.dtypes)
+    print(df.index)
+    print(time_index)
     df = set_dataframe_index(df, time_index)
+    print(df.index)
     records = []
     label_name = labeling_function.__name__
 

@@ -60,7 +60,7 @@ class ProblemGenerator:
         problems = []
         valid_entity_columns = self.entity_columns
         if self.entity_columns is None:
-            # TODO: add logic to check entity_columns
+            # TODO: add logic to check entity_column
             valid_entity_columns = get_valid_entity_columns(single_metadata)
             # Force create with no entity column to generate problems "Predict X"
             valid_entity_columns.append(None)

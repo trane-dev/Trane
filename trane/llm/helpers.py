@@ -1,12 +1,13 @@
 import json
+import os
 import re
-
-from IPython.display import Markdown, display
 
 from trane.utils.library_utils import import_or_none
 
 openai = import_or_none("openai")
 tiktoken = import_or_none("tiktoken")
+anthropic = import_or_none("anthropic")
+ipython = import_or_none("IPython")
 
 
 system_context = (
@@ -84,7 +85,7 @@ def analyze(
         )
     response = openai_gpt(prompt, model)
     if jupyter:
-        display(Markdown(response))
+        ipython.display.display(ipython.display.Markdown(response))
     else:
         print(response)
 
@@ -93,7 +94,6 @@ def analyze(
     relevant_problems = []
     for id_ in relevant_ids:
         relevant_problems.append(problems[int(id_) - 1])
-
     reasonsings = extract_reasonings_from_response(response)
     for idx, reason in enumerate(reasonsings):
         relevant_problems[idx].set_reasoning(reason)
@@ -106,12 +106,16 @@ def extract_problems_from_response(response, model):
         f"Extract the IDs in the following text."
         f"## The constraints of your response:\n"
         f" Return your response as JSON only.\n"
+        f" Return the IDs in same order as they appear in the text.\n"
         f"## The text:\n"
         f"{response}\n"
         "{{ Insert your response here }}"
     )
     response = openai_gpt(prompt, model)
-    response = json.loads(response).values()
+    if model in ["gpt-3.5-turbo-1106", "gpt-4-1106-preview"]:
+        response = re.findall(r"\d+", response)
+    else:
+        response = json.loads(response).values()
     response = list(flatten(response))
     return response
 
@@ -142,26 +146,34 @@ def flatten(container):
 
 
 def openai_gpt(prompt: str, model: str, temperature: float = 0.7) -> str:
+    client = openai.OpenAI(
+        api_key=os.environ.get("OPENAI_API_KEY"),
+    )
     messages = [
         {"role": "system", "content": system_context},
         {"role": "user", "content": prompt},
     ]
-    response = openai.ChatCompletion.create(
-        model=model,
+    chat_completion = client.chat.completions.create(
         messages=messages,
+        model=model,
         temperature=temperature,
     )
-    return response["choices"][0]["message"]["content"].strip()
+    return chat_completion.choices[0].message.content
 
 
 def get_token_limit(model: str) -> int:
     models = {
-        "gpt-3.5-turbo": 4000,
-        "gpt-3.5-turbo-16k": 16000,
-        "gpt-4": 8000,
-        "gpt-4-32k": 32000,
+        "gpt-3.5-turbo": 4096,
+        "gpt-3.5-turbo-16k": 16385,
+        "gpt-3.5-turbo-1106": 16385,
+        "gpt-3.5-turbo-16k-0613": 16385,
+        "gpt-4": 8192,
+        "gpt-4-0613": 8192,
+        "gpt-4-32k": 32768,
+        "gpt-4-32k-0613": 32768,
+        "gpt-4-1106-preview": 128000,
     }
-    return models.get(model)
+    return models.get(model.strip())
 
 
 def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613"):
@@ -169,12 +181,12 @@ def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613"):
     try:
         encoding = tiktoken.encoding_for_model(model)
     except KeyError:
+        print("Warning: model not found. Using cl100k_base encoding.")
         encoding = tiktoken.get_encoding("cl100k_base")
     if model in {
         "gpt-3.5-turbo-0613",
         "gpt-3.5-turbo-16k-0613",
         "gpt-4-0314",
-        "gpt-4-32k-0314",
         "gpt-4-0613",
         "gpt-4-32k-0613",
     }:
@@ -186,8 +198,14 @@ def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613"):
         )
         tokens_per_name = -1  # if there's a name, the role is omitted
     elif "gpt-3.5-turbo" in model:
+        print(
+            "Warning: gpt-3.5-turbo may update over time. Returning num tokens assuming gpt-3.5-turbo-0613.",
+        )
         return num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613")
     elif "gpt-4" in model:
+        print(
+            "Warning: gpt-4 may update over time. Returning num tokens assuming gpt-4-0613.",
+        )
         return num_tokens_from_messages(messages, model="gpt-4-0613")
     else:
         raise NotImplementedError(

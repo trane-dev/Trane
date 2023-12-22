@@ -8,9 +8,9 @@ from trane.utils.testing_utils import generate_mock_data
 
 def test_denormalize_two_tables():
     """
-      Products
+      products
      /
-    Logs
+    logs
     """
     (
         dataframes,
@@ -58,9 +58,9 @@ def test_denormalize_two_tables():
 
 def test_denormalize_two_tables_change():
     """
-      Products
+      products
      /
-    Logs
+    logs
     """
     (
         dataframes,
@@ -88,9 +88,9 @@ def test_denormalize_two_tables_change():
 
 def test_denormalize_three_tables():
     """
-    S   P   Sessions, Products
+    S   P   sessions, products
      \\ /   .
-      L     Logs
+      L     logs
     """
     (
         dataframes,
@@ -131,12 +131,12 @@ def test_denormalize_three_tables():
 
 def test_denormalize_four_tables():
     """
-     C       Customers
+     C       customers
      |
     |||
-     S   P   Sessions, Products
+     S   P   sessions, products
      \\ //
-       L     Logs
+       L     logs
     """
     (
         dataframes,
@@ -172,13 +172,13 @@ def test_denormalize_four_tables():
 
 def test_denormalize_change_target():
     """
-     C       Customers
+     C       customers
      |
     |||
-      S   P   Sessions, Products
+      S   P   sessions, products
      ||| |||
        ||
-        L     Logs
+        L     logs
     """
     (
         dataframes,

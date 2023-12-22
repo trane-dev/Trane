@@ -25,6 +25,7 @@ class Problem:
     ):
         self.operations = operations
         self.metadata = metadata
+
         self.entity_column = entity_column
         self.window_size = window_size
         self.reasoning = reasoning
@@ -125,11 +126,12 @@ class Problem:
                 )
         return thresholds
 
-    def create_target_values(self, dataframes):
+    def create_target_values(self, dataframes, verbose=False):
         # Won't this always be normalized?
         normalized_dataframe = self.get_normalized_dataframe(dataframes)
         if self.has_parameters_set() is False:
-            print("Filter operation's parameters are not set, setting them now")
+            if verbose:
+                print("Filter operation's parameters are not set, setting them now")
             thresholds = self.get_recommended_thresholds(dataframes)
             self.set_parameters(thresholds[-1])
 
@@ -145,8 +147,8 @@ class Problem:
             labeling_function=self._execute_operations_on_df,
             time_index=self.metadata.time_index,
             window_size=self.window_size,
+            verbose=verbose,
         )
-
         if "__identity__" in normalized_dataframe.columns:
             normalized_dataframe.drop(columns=["__identity__"], inplace=True)
             lt.drop(columns=["__identity__"], inplace=True)

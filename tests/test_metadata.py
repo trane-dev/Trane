@@ -105,9 +105,9 @@ def test_from_dataframes_multi():
     (
         dataframes,
         ml_types,
-        relationships,
-        primary_keys,
-        time_indices,
+        _,
+        _,
+        _,
     ) = generate_mock_data(
         tables=["products", "logs"],
     )

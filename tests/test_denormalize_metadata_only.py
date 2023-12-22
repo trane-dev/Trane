@@ -30,7 +30,7 @@ def test_denormalize_two_tables():
         relationships=relationships,
         time_indices=time_indices,
     )
-    dataframes, normalized_metadata = denormalize(
+    _, normalized_metadata = denormalize(
         metadata=multi_metadata,
         target_table="logs",
     )
@@ -58,7 +58,7 @@ def test_denormalize_two_tables_change_target():
         relationships=relationships,
         time_indices=time_indices,
     )
-    dataframes, normalized_metadata = denormalize(
+    _, normalized_metadata = denormalize(
         metadata=multi_metadata,
         target_table="products",
     )
@@ -69,9 +69,9 @@ def test_denormalize_two_tables_change_target():
 
 def test_denormalize_three_tables():
     """
-    S   P   Sessions, Products
+    S   P   sessions, products
      \\ /   .
-      L     Log
+      L     log
     """
     _, ml_types, relationships, primary_keys, time_indices = generate_mock_data(
         tables=["products", "logs", "sessions"],
@@ -82,7 +82,7 @@ def test_denormalize_three_tables():
         time_indices=time_indices,
         relationships=relationships,
     )
-    dataframes, normalized_metadata = denormalize(
+    _, normalized_metadata = denormalize(
         metadata=multi_metadata,
         target_table="logs",
     )
@@ -102,14 +102,14 @@ def test_denormalize_three_tables():
 
 def test_denormalize_four_tables(four_table_metadata):
     """
-     C       Customers
+     C       customers
      |
     |||
-     S   P   Sessions, Products
+     S   P   sessions, products
      \\ //
-       L     Log
+       L     log
     """
-    dataframes, normalized_metadata = denormalize(
+    _, normalized_metadata = denormalize(
         metadata=four_table_metadata,
         target_table="logs",
     )
@@ -131,15 +131,15 @@ def test_denormalize_four_tables(four_table_metadata):
 
 def test_denormalize_change_target(four_table_metadata):
     """
-     C       Customers
+     C       customers
      |
     |||
-     S   P   Sessions, Products
+     S   P   sessions, products
      \\ //
-       L     Log
+       L     log
     """
 
-    dataframes, normalized_metadata = denormalize(
+    _, normalized_metadata = denormalize(
         metadata=four_table_metadata,
         target_table="sessions",
     )

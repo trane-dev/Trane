@@ -11,7 +11,7 @@ from trane.utils.testing_utils import generate_mock_data
 def test_problem_generator_single_table():
     tables = ["products"]
     target_table = "products"
-    dataframe, ml_types, _, primary_key, time_index = generate_mock_data(
+    dataframe, ml_types, _, _, time_index = generate_mock_data(
         tables=tables,
     )
     dataframe = dataframe[target_table]
@@ -37,6 +37,8 @@ def test_problem_generator_single_table():
     for p in problems:
         if p.has_parameters_set() is True:
             labels = p.create_target_values(dataframe)
+            if labels.empty:
+                raise ValueError("labels should not be empty")
             check_problem_type(labels, p.get_problem_type())
         else:
             thresholds = p.get_recommended_thresholds(dataframe)

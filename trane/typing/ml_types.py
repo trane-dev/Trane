@@ -80,6 +80,10 @@ class MLType(object, metaclass=MLTypeMetaClass):
     def is_datetime(self):
         False
 
+    @property
+    def is_categorical(self):
+        return False
+
 
 class Boolean(MLType):
     dtype = "boolean[pyarrow]"
@@ -100,6 +104,10 @@ class Categorical(MLType):
     @staticmethod
     def inference_func(series):
         return categorical_func(series)
+
+    @property
+    def is_categorical(self):
+        return True
 
 
 class Datetime(MLType):

@@ -147,7 +147,7 @@ def child_relationships(parent_table, relationships):
 def reorder_relationships(target_table, relationships):
     reordered_relationships = []
     for relationship in relationships:
-        parent_table_name, parent_key, child_table_name, child_key = relationship
+        _, _, child_table_name, _ = relationship
         if child_table_name == target_table:
             reordered_relationships.append(relationship)
         else:

@@ -2,6 +2,17 @@
 
 Changelog
 ---------
+v0.8.0 (December X, X)
+=========================
+* Enhancements
+    * Update LLM helper to support updated GPT-4 models [#174][#174]
+    * Update ruff to latest and remove black as a development dependency [#174][#174]
+    * Add Python 3.11 markers and CI testing [#174][#174]
+* Fixes
+    *
+
+    [#174]: <https://github.com/trane-dev/Trane/pull/174>
+
 v0.7.0 (October 21, 2023)
 =========================
 * Enhancements

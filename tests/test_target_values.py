@@ -48,8 +48,7 @@ def test_greater_than(data, metadata):
         entity_column="building_id",
         window_size="2d",
     )
-    labels = problem.create_target_values(data)
-    print(labels)
+    problem.create_target_values(data)
 
 
 def test_exists(data, metadata):
@@ -60,5 +59,4 @@ def test_exists(data, metadata):
         entity_column="building_id",
         window_size="2d",
     )
-    labels = problem.create_target_values(data)
-    print(labels)
+    problem.create_target_values(data)

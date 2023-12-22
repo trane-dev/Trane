@@ -130,7 +130,8 @@ class Problem:
         # Won't this always be normalized?
         normalized_dataframe = self.get_normalized_dataframe(dataframes)
         if self.has_parameters_set() is False:
-            print("Filter operation's parameters are not set, setting them now")
+            if verbose:
+                print("Filter operation's parameters are not set, setting them now")
             thresholds = self.get_recommended_thresholds(dataframes)
             self.set_parameters(thresholds[-1])
 

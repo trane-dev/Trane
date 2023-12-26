@@ -1,1 +1,1 @@
-from trane.metadata.metadata import *
+from trane.metadata.metadata import SingleTableMetadata, MultiTableMetadata

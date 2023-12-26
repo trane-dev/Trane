@@ -238,6 +238,40 @@ def test_add_relationships_new_table(multitable_metadata):
         )
 
 
+def test_sample_data_single():
+    dataframe, ml_types, _, primary_key, time_index = generate_mock_data(
+        tables=["products"],
+    )
+    dataframe = dataframe["products"]
+    primary_key = "key does not exist"
+    match = "does not exist in sample data's columns"
+    with pytest.raises(ValueError, match=match):
+        SingleTableMetadata(
+            ml_types=ml_types,
+            primary_key=primary_key,
+            time_index=time_index,
+            sample_data=dataframe,
+        )
+
+
+def test_sample_data_multi():
+    dataframes, ml_types, relationships, primary_keys, time_indices = (
+        generate_mock_data(
+            tables=["products", "logs"],
+        )
+    )
+    primary_keys["products"] = "key does not exist"
+    match = "does not exist in sample data's table"
+    with pytest.raises(ValueError, match=match):
+        MultiTableMetadata(
+            ml_types=ml_types,
+            primary_keys=primary_keys,
+            time_indices=time_indices,
+            relationships=relationships,
+            sample_data=dataframes,
+        )
+
+
 def verify_ml_types(metadata, expected_ml_types):
     if metadata.get_metadata_type() == "single":
         for key in expected_ml_types:

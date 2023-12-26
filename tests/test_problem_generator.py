@@ -81,6 +81,8 @@ def test_problem_generator_multi(tables, target_table):
     num_columns = len(problems[0].metadata.ml_types.keys())
     print(f"generated {len(problems)} problems from {num_columns} columns")
     for p in tqdm(problems):
+        string_repr = p.__repr__()
+        assert "2 days" in string_repr
         if p.has_parameters_set() is True:
             labels = p.create_target_values(dataframes)
             check_problem_type(labels, p.get_problem_type())

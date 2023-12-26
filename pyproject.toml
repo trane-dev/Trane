@@ -38,7 +38,8 @@ dependencies = [
     "scipy >= 1.10.0",
     "tqdm >= 4.65.0",
     "importlib_resources >= 6.0.0",
-    "pyarrow >= 11.0.0"
+    "pyarrow >= 14.0.1",
+    "humanize >= 4.9.0"
 ]
 
 [project.urls]

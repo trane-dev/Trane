@@ -3,4 +3,4 @@ pandas==2.0.0
 scipy==1.10.0
 tqdm==4.65.0
 importlib_resources==6.0.0
-pyarrow==11.0.0
+pyarrow==14.0.1

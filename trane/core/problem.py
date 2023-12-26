@@ -1,3 +1,4 @@
+import humanize
 import pandas as pd
 
 from trane.core.utils import calculate_target_values
@@ -188,8 +189,10 @@ class Problem:
         description += filter_op.generate_description()
 
         if self.window_size:
-            description += " " + "in next {} days".format(
-                self.window_size,
+            window_size = pd.to_timedelta(self.window_size)
+            human_readble = humanize.naturaldelta(window_size)
+            description += " " + "in next {}".format(
+                human_readble,
             )
         return description
 

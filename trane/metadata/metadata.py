@@ -33,8 +33,10 @@ class SingleTableMetadata(BaseMetadata):
         primary_key: str = None,
         time_index: str = None,
         original_multi_table_metadata=None,
+        sample_data: pd.DataFrame = None,
     ):
         self.ml_types = _parse_ml_types(ml_types, type_=self.get_metadata_type())
+        self.sample_data = sample_data
         self.primary_key = None
         if primary_key:
             self.set_primary_key(primary_key)
@@ -53,7 +55,14 @@ class SingleTableMetadata(BaseMetadata):
         return result
 
     def set_primary_key(self, primary_key):
-        if primary_key not in self.ml_types:
+        if (
+            self.sample_data is not None
+            and primary_key not in self.sample_data.columns.tolist()
+        ):
+            raise ValueError(
+                f"Index {primary_key} does not exist in sample data's columns",
+            )
+        elif primary_key not in self.ml_types:
             raise ValueError("Index does not exist in ml_types")
         elif (
             self.primary_key
@@ -109,11 +118,13 @@ class MultiTableMetadata(BaseMetadata):
     def __init__(
         self,
         ml_types: dict = None,
-        primary_keys=None,
-        time_indices=None,
+        primary_keys: dict = None,
+        time_indices: dict = None,
         relationships: list = None,
+        sample_data: pd.DataFrame = None,
     ):
         self.ml_types = _parse_ml_types(ml_types, type_=self.get_metadata_type())
+        self.sample_data = sample_data
         self.primary_keys = {}
         if primary_keys:
             self.set_primary_keys(primary_keys)
@@ -200,7 +211,14 @@ class MultiTableMetadata(BaseMetadata):
             raise ValueError(f"Table: {table} does not exist")
 
     def check_if_column_exists(self, table, column):
-        if column not in self.ml_types[table]:
+        if (
+            self.sample_data is not None
+            and column not in self.sample_data[table].columns
+        ):
+            raise ValueError(
+                f"Column: {column} does not exist in sample data's table: {table}",
+            )
+        elif column not in self.ml_types[table]:
             raise ValueError(f"Column: {column} does not exist in Table: {table}")
 
     def remove_table(self, table):

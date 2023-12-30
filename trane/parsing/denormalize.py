@@ -47,6 +47,7 @@ def denormalize_dataframes(
     ml_types: Dict[str, Dict[str, str]],
     target_table: str,
 ) -> pd.DataFrame:
+    keys_to_ml_type = {}
     merged_dataframes = {}
     for relationship in relationships:
         parent_table_name, parent_key, child_table_name, child_key = relationship
@@ -58,6 +59,8 @@ def denormalize_dataframes(
             raise ValueError(
                 f"{child_key} not in table: {child_table_name}",
             )
+        keys_to_ml_type[parent_key] = ml_types.get(parent_table_name).get(parent_key)
+        keys_to_ml_type[child_key] = ml_types.get(child_table_name).get(child_key)
     check_target_table(target_table, relationships, list(dataframes.keys()))
     relationship_order = child_relationships(target_table, relationships)
     if len(relationship_order) == 0:
@@ -110,7 +113,12 @@ def denormalize_dataframes(
     # TODO: set primary key to be the index
     # TODO: pass information to table meta (primary key, foreign keys)? maybe? technically relationships has this info
     valid_columns = list(merged_dataframes[target_table].columns)
-    col_to_ml_type = {col: column_to_ml_type[col] for col in valid_columns}
+    col_to_ml_type = {}
+    for col in valid_columns:
+        if col in column_to_ml_type:
+            col_to_ml_type[col] = column_to_ml_type[col]
+        else:
+            col_to_ml_type[col] = keys_to_ml_type[col]
     return merged_dataframes, col_to_ml_type
 
 

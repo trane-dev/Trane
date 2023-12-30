@@ -164,13 +164,6 @@ class MultiTableMetadata(BaseMetadata):
         self.check_if_table_exists(table)
         self.primary_keys.pop(table, None)
 
-    def obi(self, table):
-        self.check_if_table_exists(table)
-        if self.primary_keys:
-            primary_key = self.primary_keys[table]
-            self.ml_types[table][primary_key].remove_tag("primary_key")
-        self.primary_keys.pop(table)
-
     def add_table(self, table, ml_types):
         if table in self.ml_types:
             raise ValueError("Table already exists")

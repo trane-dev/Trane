@@ -127,7 +127,13 @@ class Problem:
                 )
         return thresholds
 
-    def create_target_values(self, dataframes, verbose=False):
+    def create_target_values(
+        self,
+        dataframes,
+        verbose=False,
+        nrows=None,
+        instance_ids=None,
+    ):
         # Won't this always be normalized?
         normalized_dataframe = self.get_normalized_dataframe(dataframes)
         if self.has_parameters_set() is False:
@@ -141,6 +147,12 @@ class Problem:
             # create a fake index with all rows to generate predictions problems "Predict X"
             normalized_dataframe["__identity__"] = 0
             target_dataframe_index = "__identity__"
+        if instance_ids and len(instance_ids) > 0:
+            if verbose:
+                print("Only selecting given instance IDs")
+            normalized_dataframe = normalized_dataframe[
+                normalized_dataframe[self.entity_column].isin(instance_ids)
+            ]
 
         lt = calculate_target_values(
             df=normalized_dataframe,
@@ -149,6 +161,7 @@ class Problem:
             time_index=self.metadata.time_index,
             window_size=self.window_size,
             verbose=verbose,
+            nrows=nrows,
         )
         if "__identity__" in normalized_dataframe.columns:
             normalized_dataframe.drop(columns=["__identity__"], inplace=True)

@@ -2,8 +2,8 @@
 
 Changelog
 ---------
-v0.8.0 (December X, X)
-=========================
+v0.8.0 (January 2, 2024)
+========================
 * Enhancements
     * Update LLM helper to support updated GPT-4 models [#174][#174]
     * Update ruff to latest and remove black as a development dependency [#174][#174]

@@ -1,13 +1,15 @@
 import pandas as pd
 
 
-def set_dataframe_index(df, index):
+def set_dataframe_index(df, index, verbose=False):
     if df.index.name != index:
+        if verbose:
+            print(f"setting dataframe to index: {index}")
         df = df.set_index(index, inplace=False)
     return df
 
 
-def generate_data_slices(df, window_size, gap, drop_empty=True):
+def generate_data_slices(df, window_size, gap, drop_empty=True, verbose=False):
     # valid for a specify group of id
     # so we need to groupby id (before this function)
     window_size = pd.to_timedelta(window_size)
@@ -36,11 +38,17 @@ def calculate_target_values(
     window_size,
     drop_empty=True,
     verbose=False,
+    nrows=None,
 ):
-    df = set_dataframe_index(df, time_index)
+    df = set_dataframe_index(df, time_index, verbose=verbose)
+    if str(df.index.dtype) == "timestamp[ns][pyarrow]":
+        df.index = df.index.astype("datetime64[ns]")
+    if nrows and nrows > 0 and nrows < len(df):
+        if verbose:
+            print("sampling {nrows} rows")
+        df = df.sample(n=nrows)
     records = []
     label_name = labeling_function.__name__
-
     for group_key, df_by_index in df.groupby(target_dataframe_index, observed=True):
         # TODO: support gap
         for dataslice, _ in generate_data_slices(
@@ -48,6 +56,7 @@ def calculate_target_values(
             window_size=window_size,
             gap=window_size,
             drop_empty=drop_empty,
+            verbose=verbose,
         ):
             record = labeling_function(dataslice)
             records.append(

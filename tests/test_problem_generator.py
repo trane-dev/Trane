@@ -36,7 +36,7 @@ def test_problem_generator_single_table():
     # 3. Generate target values for each problem
     for p in problems:
         if p.has_parameters_set() is True:
-            labels = p.create_target_values(dataframe)
+            labels = p.create_target_values(dataframe, verbose=False)
             if labels.empty:
                 raise ValueError("labels should not be empty")
             check_problem_type(labels, p.get_problem_type())
@@ -44,7 +44,7 @@ def test_problem_generator_single_table():
             thresholds = p.get_recommended_thresholds(dataframe)
             for threshold in thresholds:
                 p.set_parameters(threshold)
-                labels = p.create_target_values(dataframe)
+                labels = p.create_target_values(dataframe, verbose=False)
                 check_problem_type(labels, p.get_problem_type())
 
 
@@ -84,13 +84,13 @@ def test_problem_generator_multi(tables, target_table):
         string_repr = p.__repr__()
         assert "2 days" in string_repr
         if p.has_parameters_set() is True:
-            labels = p.create_target_values(dataframes)
+            labels = p.create_target_values(dataframes, verbose=False)
             check_problem_type(labels, p.get_problem_type())
         else:
             thresholds = p.get_recommended_thresholds(dataframes)
             for threshold in thresholds:
                 p.set_parameters(threshold)
-                labels = p.create_target_values(dataframes)
+                labels = p.create_target_values(dataframes, verbose=False)
                 check_problem_type(labels, p.get_problem_type())
 
 

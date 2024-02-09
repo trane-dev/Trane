@@ -1,6 +1,6 @@
 # Install
 
-Trane is available for Python 3.7, 3.8, 3.9 and 3.10. It can be installed from PyPi or from source.
+Trane is available for Python 3.9, 3.10, 3.11 and 3.12. It can be installed from PyPi or from source.
 
 To install Trane, run the following command:
 

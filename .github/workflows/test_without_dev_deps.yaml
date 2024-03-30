@@ -41,3 +41,6 @@ jobs:
           print(problems[39])
           print(problems[0].create_target_values(data).head(5))
         shell: python
+      - name: Build llm add-on
+        run: |
+          python -m pip install unpacked_sdist/[llm]

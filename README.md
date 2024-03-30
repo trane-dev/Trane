@@ -63,7 +63,7 @@ For each <location> predict if there exists a record with <rating> equal to <str
 For each <location> predict if there exists a record with <rating> not equal to <str>
 ```
 
-With Trane's LLM add-on (`pip install trane[llm]`), we can determine the relevant problems with OpenAI:
+With Trane's LLM add-on (`pip install "trane[llm]"`), we can determine the relevant problems with OpenAI:
 ```python
 from trane.llm import analyze
 

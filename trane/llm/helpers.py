@@ -6,7 +6,6 @@ from trane.utils.library_utils import import_or_none
 
 openai = import_or_none("openai")
 tiktoken = import_or_none("tiktoken")
-anthropic = import_or_none("anthropic")
 ipython = import_or_none("IPython")
 
 

@@ -1,8 +1,8 @@
 exclude: ^LICENSE/|\.(html|csv|svg|md)$
-default_stages: [pre-commit, commit, pre-push]
+default_stages: [pre-commit, pre-commit, pre-push]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
@@ -18,7 +18,7 @@ repos:
       - id: add-trailing-comma
         name: Add trailing comma
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.6.8
+    rev: v0.6.9
     hooks:
       - id: ruff
         types_or: [ python, pyi, jupyter ]

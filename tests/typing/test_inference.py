@@ -70,7 +70,7 @@ def pandas_datetimes():
 
 
 def test_boolean_inference(pandas_bools):
-    dtypes = ["bool", "boolean", "boolean[pyarrow]", "bool_", "bool8", "object"]
+    dtypes = ["bool", "boolean", "boolean[pyarrow]", "bool_", "object"]
     for series in pandas_bools:
         for dtype in dtypes:
             series = series.astype(dtype)

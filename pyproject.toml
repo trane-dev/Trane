@@ -29,7 +29,7 @@ maintainers = [
     {name="MIT Data to AI Lab", email="dai-lab-trane@mit.edu"}
 ]
 keywords = ["trane", "data science", "machine learning"]
-license = {text = "MIT License"}
+license = "MIT License"
 requires-python = ">=3.9,<4"
 dependencies = [
     "numpy >= 1.24.2",

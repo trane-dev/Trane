@@ -2,6 +2,17 @@ name: Publish on PyPI
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      candidate:
+        description: 'Release candidate.'
+        required: true
+        type: boolean
+        default: true
+      test_pypi:
+        description: 'Test PyPi.'
+        type: boolean
+        default: false
 jobs:
   pypi:
     name: PyPI Release
@@ -40,3 +51,30 @@ jobs:
           make package
       - name: Publish a Python distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: ${{ inputs.test_pypi && 'https://test.pypi.org/legacy/' || 'https://upload.pypi.org/legacy/' }}
+          
+      - name: Bump version to next candidate
+        if: ${{ inputs.candidate && !inputs.test_pypi }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          make bumpversion-candidate
+          
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GH_ACCESS_TOKEN }}
+          commit-message: bumpversion-candidate
+          title: Automated Bump Version Candidate
+          body: "This is an auto-generated PR that bumps the version to the next candidate."
+          branch: bumpversion-candidate-update
+          branch-suffix: short-commit-hash
+          base: main
+          
+      - name: Enable Pull Request Automerge
+        if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
+        run: gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" --squash --auto
+        env:
+          GH_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
